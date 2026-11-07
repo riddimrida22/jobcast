@@ -32,6 +32,7 @@
       --ai:#2f4f73; --robo:#c06a33; --row-head:#f1f5f9;
       --track:#e6ebf1; --input:#ffffff; --hair:#e7ecf1;
       --amber:#c98a2e; --road:#c7d0da; --metal-b:#5f6c7d; --metal-c:#d2dae4; --mouth:#243040;
+      --sand:#d7a94e; --sand-d:#b9872f; --wood-a:#a07a4c; --wood-b:#6e5130; --glass:rgba(150,185,210,.16); --eye:#19d3e0;
     }
     [data-theme="dark"] {
       --bg-a:#0e1620; --bg-b:#16212f; --card:#1b2734; --line:#4a5f78;
@@ -41,6 +42,7 @@
       --ai:#5d8ac4; --robo:#e08a57; --row-head:#222f3e;
       --track:#2a3a4d; --input:#131c27; --hair:#2a3a4d; color-scheme:dark;
       --amber:#e0a94a; --road:#36495f; --metal-b:#6a7889; --metal-c:#c6cfdb; --mouth:#0c141e;
+      --sand:#e4b85e; --sand-d:#c98f32; --wood-a:#b0885a; --wood-b:#7c5c38; --glass:rgba(150,185,210,.12); --eye:#4fe3ee;
     }
     * { box-sizing:border-box; }
     body { margin:0; color:var(--ink); min-height:100vh;
@@ -78,8 +80,8 @@
 
     label { display:block; font-size:12.5px; font-weight:600; color:var(--muted);
             text-transform:uppercase; letter-spacing:.04em; margin:14px 0 5px; }
-    input, select { width:100%; padding:7px 11px; border:1px solid var(--line); border-radius:8px;
-                    font:inherit; font-size:16px; background:var(--input); color:var(--ink); }
+    input, select { width:100%; padding:6px 10px; border:1px solid var(--line); border-radius:8px;
+                    font:inherit; font-size:13.5px; background:var(--input); color:var(--ink); }
     input:focus, select:focus { outline:2px solid var(--primary-soft); border-color:var(--primary); }
     /* visible keyboard focus for a11y (does not show on mouse click) */
     a:focus-visible, button:focus-visible, [role="button"]:focus-visible, [tabindex]:focus-visible,
@@ -220,36 +222,52 @@
     .gob-legend .sw { width:11px; height:11px; border-radius:3px; box-shadow:0 1px 2px rgba(20,30,45,.25); }
     .gob-legend .sw.red{background:var(--red)} .gob-legend .sw.amber{background:var(--amber)} .gob-legend .sw.green{background:var(--green)}
     .gob-legend .lab { font-size:10px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--ink); }
-    .gob-stage { position:relative; height:168px; }
-    .gob .road { position:absolute; left:0; right:0; height:62px; }
-    .gob .road.ai { top:8px; } .gob .road.rb { top:94px; }
-    .gob .road::after { content:""; position:absolute; left:4px; right:4px; bottom:10px; height:3px; border-radius:3px;
+    .gob-stage { position:relative; height:186px; }
+    .gob .road { position:absolute; left:0; right:0; height:72px; }
+    .gob .road.ai { top:6px; } .gob .road.rb { top:100px; }
+    .gob .road::after { content:""; position:absolute; left:4px; right:4px; bottom:9px; height:3px; border-radius:3px;
         background:repeating-linear-gradient(90deg,var(--road) 0 18px,transparent 18px 34px); }
-    .gob .lane-tag { position:absolute; left:2px; top:-4px; font-size:10px; font-weight:800; letter-spacing:.6px;
+    .gob .lane-tag { position:absolute; left:40px; top:-3px; font-size:10px; font-weight:800; letter-spacing:.6px;
         text-transform:uppercase; color:var(--muted); }
-    .gob .jobs { position:absolute; top:16px; left:190px; display:flex; align-items:center; gap:12px; }
-    .gob .chip { font-size:12.5px; font-weight:700; color:#fff; padding:5px 10px; border-radius:8px; white-space:nowrap;
-        box-shadow:0 2px 6px rgba(20,30,45,.2); position:relative; }
-    .gob .chip.red{background:var(--red)} .gob .chip.amber{background:var(--amber)} .gob .chip.green{background:var(--green)}
-    .gob .safe { position:absolute; top:16px; left:734px; display:flex; align-items:center; gap:12px; }
-    .gob .wall { position:absolute; left:var(--wall); top:0; width:34px; height:168px; border-radius:8px; z-index:6;
+    .gob .jobs { position:absolute; top:8px; left:210px; display:flex; align-items:flex-end; gap:34px; }
+    .gob .fig { display:inline-flex; flex-direction:column; align-items:center; position:relative; }
+    .gob .fig .emo { font-size:34px; line-height:1; filter:drop-shadow(0 2px 2px rgba(20,30,45,.25)); }
+    .gob .fig .pad { width:30px; height:6px; border-radius:50%; background:rgba(20,30,45,.22); filter:blur(1.2px); margin-top:-3px; }
+    .gob .fig .cap { font-size:10px; font-weight:800; margin-top:3px; white-space:nowrap; }
+    .gob .fig.red .cap{color:var(--red)} .gob .fig.amber .cap{color:var(--amber)} .gob .fig.green .cap{color:var(--green)}
+    .gob .safe { position:absolute; top:8px; left:742px; display:flex; align-items:flex-end; gap:30px; }
+    .gob .hg { position:absolute; left:3px; top:50%; width:28px; height:44px; margin-top:-22px; z-index:3; }
+    .gob .hg .wcap { position:absolute; left:-2px; width:32px; height:4px; border-radius:2px; background:linear-gradient(var(--wood-a),var(--wood-b)); box-shadow:0 1px 1px rgba(0,0,0,.3); }
+    .gob .hg .wcap.t{top:0} .gob .hg .wcap.b{bottom:0}
+    .gob .hg .post { position:absolute; top:3px; bottom:3px; width:2px; background:var(--wood-b); opacity:.7; }
+    .gob .hg .post.l{left:1px} .gob .hg .post.r{right:1px}
+    .gob .hg .glass { position:absolute; left:3px; right:3px; top:4px; bottom:4px; background:var(--glass); clip-path:polygon(0 0,100% 0,54% 50%,100% 100%,0 100%,46% 50%); }
+    .gob .hg .sand-t { position:absolute; left:3px; right:3px; top:4px; height:15px; overflow:hidden; }
+    .gob .hg .sand-t::after { content:""; position:absolute; left:0; right:0; bottom:0; height:15px; background:var(--sand); clip-path:polygon(0 0,100% 0,52% 100%,48% 100%); animation:hgTop var(--loop) linear infinite; transform-origin:bottom; }
+    .gob .hg .sand-b { position:absolute; left:3px; right:3px; bottom:4px; height:15px; overflow:hidden; }
+    .gob .hg .sand-b::after { content:""; position:absolute; left:0; right:0; bottom:0; height:0; background:var(--sand); clip-path:polygon(50% 0,100% 100%,0 100%); animation:hgBot var(--loop) linear infinite; }
+    .gob .hg .stream { position:absolute; left:50%; top:18px; width:1.6px; height:8px; margin-left:-.8px; background:var(--sand-d); animation:hgStream var(--loop) linear infinite; }
+    @keyframes hgTop{0%{transform:scaleY(1)}90%,100%{transform:scaleY(0)}}
+    @keyframes hgBot{0%{height:0}90%,100%{height:15px}}
+    @keyframes hgStream{0%,86%{opacity:.9}92%,100%{opacity:0}}
+    .gob .wall { position:absolute; left:var(--wall); top:0; width:34px; height:186px; border-radius:8px; z-index:6;
         background:linear-gradient(180deg,var(--primary),var(--primary-dark)); border:1.5px solid var(--primary-dark);
         box-shadow:0 8px 20px rgba(20,30,45,.3); display:flex; align-items:center; justify-content:center;
-        transform:translateY(-214px); animation:gobWall var(--loop) cubic-bezier(.2,1.25,.4,1) infinite; }
+        transform:translateY(-232px); animation:gobWall var(--loop) cubic-bezier(.2,1.25,.4,1) infinite; }
     .gob .wall .brk { writing-mode:vertical-rl; text-orientation:upright; font-weight:900; font-size:15px;
         letter-spacing:4px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); }
-    @keyframes gobWall { 0%,60%{transform:translateY(-214px)} 66%{transform:translateY(5px)} 70%{transform:translateY(-5px)}
-        74%,96%{transform:translateY(0)} 100%{transform:translateY(-214px)} }
+    @keyframes gobWall { 0%,60%{transform:translateY(-232px)} 66%{transform:translateY(5px)} 70%{transform:translateY(-5px)}
+        74%,96%{transform:translateY(0)} 100%{transform:translateY(-232px)} }
     .gob .pred { position:absolute; top:50%; left:8px; z-index:4; animation:gobAdvance var(--loop) linear infinite; }
     .gob .road.rb .pred { animation:gobAdvanceRb var(--loop) linear infinite; }
-    @keyframes gobAdvance { 0%{transform:translate(0,-50%)} 12%{transform:translate(120px,-50%)} 24%{transform:translate(262px,-50%)}
+    @keyframes gobAdvance { 0%{transform:translate(44px,-50%)} 12%{transform:translate(120px,-50%)} 24%{transform:translate(262px,-50%)}
         36%{transform:translate(384px,-50%)} 50%{transform:translate(486px,-50%)} 62%{transform:translate(566px,-50%)}
         70%{transform:translate(var(--predEnd),-50%)} 73%{transform:translate(610px,-50%)} 78%{transform:translate(624px,-50%)}
-        96%{transform:translate(624px,-50%)} 100%{transform:translate(0,-50%)} }
-    @keyframes gobAdvanceRb { 0%{transform:translate(0,-50%)} 12%{transform:translate(104px,-50%)} 24%{transform:translate(236px,-50%)}
+        96%{transform:translate(624px,-50%)} 100%{transform:translate(44px,-50%)} }
+    @keyframes gobAdvanceRb { 0%{transform:translate(44px,-50%)} 12%{transform:translate(104px,-50%)} 24%{transform:translate(236px,-50%)}
         36%{transform:translate(360px,-50%)} 50%{transform:translate(470px,-50%)} 62%{transform:translate(560px,-50%)}
         70%{transform:translate(var(--predEnd),-50%)} 73%{transform:translate(610px,-50%)} 78%{transform:translate(624px,-50%)}
-        96%{transform:translate(624px,-50%)} 100%{transform:translate(0,-50%)} }
+        96%{transform:translate(624px,-50%)} 100%{transform:translate(44px,-50%)} }
     .ai-g{width:50px;height:50px;position:relative;filter:drop-shadow(0 0 8px rgba(243,163,95,.6))}
     .ai-g .jaw{position:absolute;left:0;width:50px;height:25px;background:linear-gradient(180deg,var(--primary),var(--primary-dark));overflow:hidden}
     .ai-g .top{top:0;border-radius:50px 50px 0 0;transform-origin:50% 100%;animation:gobChompT .4s ease-in-out infinite}
@@ -260,52 +278,37 @@
     .ai-g .ai{position:absolute;top:6px;left:8px;font-size:10px;font-weight:900;color:var(--accent);z-index:3;letter-spacing:.5px;animation:gobChompT .4s ease-in-out infinite}
     @keyframes gobChompT{0%,100%{transform:rotate(-33deg)}50%{transform:rotate(0)}}
     @keyframes gobChompB{0%,100%{transform:rotate(33deg)}50%{transform:rotate(0)}}
-    .rb-g{width:52px;height:46px;position:relative;filter:drop-shadow(0 3px 5px rgba(20,30,45,.4))}
-    .rb-g .ant{position:absolute;top:-10px;left:23px;width:2px;height:10px;background:var(--metal-b)}
-    .rb-g .ant::after{content:"";position:absolute;top:-6px;left:-2.5px;width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 7px var(--red)}
-    .rb-g .mouth{position:absolute;left:3px;right:1px;top:3px;bottom:3px;border-radius:9px;background:var(--mouth)}
-    .rb-g .jaw{position:absolute;left:3px;width:48px;height:20px;overflow:hidden;background:linear-gradient(180deg,var(--metal-c),var(--metal-b));border:1.5px solid var(--metal-b)}
-    .rb-g .top{top:0;border-radius:9px 11px 3px 3px;transform-origin:50% 100%;animation:gobRbT .46s ease-in-out infinite}
-    .rb-g .bot{bottom:0;border-radius:3px 3px 11px 9px;transform-origin:50% 0;animation:gobRbB .46s ease-in-out infinite}
-    .rb-g .eye{position:absolute;top:8px;left:13px;width:8px;height:8px;border-radius:2px;z-index:4;background:var(--red);box-shadow:0 0 8px var(--red);animation:gobRbT .46s ease-in-out infinite}
-    .rb-g .rivet{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--metal-b);z-index:5}
-    .rb-g .top .teeth{position:absolute;left:4px;right:2px;bottom:0;height:6px;z-index:2;background:var(--metal-c);
-        clip-path:polygon(0 0,100% 0,100% 40%,91% 100%,82% 40%,73% 100%,64% 40%,55% 100%,46% 40%,37% 100%,28% 40%,19% 100%,10% 40%,0 40%)}
-    @keyframes gobRbT{0%,100%{transform:rotate(-17deg)}50%{transform:rotate(0)}}
-    @keyframes gobRbB{0%,100%{transform:rotate(17deg)}50%{transform:rotate(0)}}
+    .rb2{width:56px;height:48px;position:relative;filter:drop-shadow(0 3px 5px rgba(20,30,45,.4))}
+    .rb2 .ant{position:absolute;top:-12px;left:15px;width:2px;height:12px;background:var(--metal-b)}
+    .rb2 .ant::after{content:"";position:absolute;top:-6px;left:-2.5px;width:7px;height:7px;border-radius:50%;background:#ffd34d;box-shadow:0 0 7px #ffd34d;animation:rbBlink 1.3s steps(1) infinite}
+    .rb2 .mouth{position:absolute;left:12px;right:1px;top:17px;height:21px;background:var(--mouth);border-radius:3px 7px 9px 3px;z-index:1}
+    .rb2 .head{position:absolute;top:0;left:0;width:56px;height:25px;border-radius:13px 15px 5px 5px;background:linear-gradient(160deg,var(--metal-c),var(--metal-b));border:1.5px solid var(--metal-b);z-index:3}
+    .rb2 .eye{position:absolute;top:8px;width:9px;height:9px;border-radius:50%;background:var(--eye);box-shadow:0 0 7px var(--eye);z-index:4}
+    .rb2 .eye.l{left:16px}.rb2 .eye.r{left:33px}
+    .rb2 .uteeth{position:absolute;left:15px;right:3px;bottom:0;height:5px;background:var(--metal-c);z-index:4;
+        clip-path:polygon(0 0,8% 100%,16% 0,24% 100%,32% 0,40% 100%,48% 0,56% 100%,64% 0,72% 100%,80% 0,88% 100%,96% 0,100% 0,100% 0)}
+    .rb2 .jaw{position:absolute;left:11px;top:24px;width:45px;height:15px;border-radius:3px 6px 11px 9px;
+        background:linear-gradient(180deg,var(--metal-c),var(--metal-b));border:1.5px solid var(--metal-b);
+        transform-origin:3px 3px;animation:rbChomp .44s ease-in-out infinite;z-index:3}
+    .rb2 .jaw .lteeth{position:absolute;left:4px;right:3px;top:-0.5px;height:5px;background:var(--metal-c);
+        clip-path:polygon(0 100%,8% 0,16% 100%,24% 0,32% 100%,40% 0,48% 100%,56% 0,64% 100%,72% 0,80% 100%,88% 0,96% 100%,100% 100%)}
+    @keyframes rbChomp{0%,100%{transform:rotate(0)}50%{transform:rotate(23deg)}}
+    @keyframes rbBlink{0%,60%{opacity:1}65%,100%{opacity:.25}}
     .gob .eatc{transform-origin:center}
     .gob .e1{animation:gobEat1 var(--loop) linear infinite}
     .gob .e2{animation:gobEat2 var(--loop) linear infinite}
-    .gob .e3{animation:gobEat3 var(--loop) linear infinite}
-    .gob .e4{animation:gobEat4 var(--loop) linear infinite}
     .gob .e5{animation:gobEat5 var(--loop) linear infinite}
-    .gob .e6{animation:gobEat6 var(--loop) linear infinite}
-    @keyframes gobEat1{0%,11%{opacity:1;transform:scale(1)}13%{opacity:.65;transform:scale(1.2) rotate(-5deg)}15%{opacity:0;transform:scale(.15)}99.9%{opacity:0;transform:scale(.15)}100%{opacity:1;transform:scale(1)}}
-    @keyframes gobEat2{0%,20%{opacity:1;transform:scale(1)}22%{opacity:.65;transform:scale(1.2) rotate(-5deg)}24%{opacity:0;transform:scale(.15)}99.9%{opacity:0;transform:scale(.15)}100%{opacity:1;transform:scale(1)}}
-    @keyframes gobEat3{0%,29%{opacity:1;transform:scale(1)}31%{opacity:.65;transform:scale(1.2) rotate(-5deg)}33%{opacity:0;transform:scale(.15)}99.9%{opacity:0;transform:scale(.15)}100%{opacity:1;transform:scale(1)}}
-    @keyframes gobEat4{0%,38%{opacity:1;transform:scale(1)}40%{opacity:.65;transform:scale(1.2) rotate(-5deg)}42%{opacity:0;transform:scale(.15)}99.9%{opacity:0;transform:scale(.15)}100%{opacity:1;transform:scale(1)}}
-    @keyframes gobEat5{0%,50%{opacity:1;transform:scale(1)}52.5%{opacity:.65;transform:scale(1.2) rotate(-5deg)}55%{opacity:0;transform:scale(.15)}99.9%{opacity:0;transform:scale(.15)}100%{opacity:1;transform:scale(1)}}
-    @keyframes gobEat6{0%,61%{opacity:1;transform:scale(1)}63.5%{opacity:.65;transform:scale(1.2) rotate(-5deg)}66%{opacity:0;transform:scale(.15)}99.9%{opacity:0;transform:scale(.15)}100%{opacity:1;transform:scale(1)}}
-    /* one red job acts early and crosses to safety (turning green) instead of being eaten */
-    .gob .escape{position:relative;z-index:7}
-    .gob .ai-esc{animation:gobEscapeAi var(--loop) ease-in-out infinite}
-    .gob .rb-esc{animation:gobEscapeRb var(--loop) ease-in-out infinite}
-    @keyframes gobEscapeAi{
-      0%,24%{transform:translate(0,0) scale(1);background-color:var(--red);box-shadow:0 2px 6px rgba(20,30,45,.2)}
-      29%{transform:translate(20px,-24px) scale(1.08);background-color:var(--red)}
-      39%{transform:translate(150px,-26px) scale(1.08);background-color:var(--amber)}
-      49%{transform:translate(262px,-10px) scale(1.04);background-color:var(--green)}
-      55%,96%{transform:translate(300px,0) scale(1);background-color:var(--green);box-shadow:0 0 0 3px rgba(20,123,116,.4)}
-      100%{transform:translate(0,0) scale(1);background-color:var(--red)}
-    }
-    @keyframes gobEscapeRb{
-      0%,24%{transform:translate(0,0) scale(1);background-color:var(--red);box-shadow:0 2px 6px rgba(20,30,45,.2)}
-      29%{transform:translate(20px,-42px) scale(1.08);background-color:var(--red)}
-      39%{transform:translate(205px,-44px) scale(1.08);background-color:var(--amber)}
-      49%{transform:translate(325px,-16px) scale(1.04);background-color:var(--green)}
-      55%,96%{transform:translate(363px,0) scale(1);background-color:var(--green);box-shadow:0 0 0 3px rgba(20,123,116,.4)}
-      100%{transform:translate(0,0) scale(1);background-color:var(--red)}
-    }
+    @keyframes gobEat1{0%,14%{opacity:1;transform:scale(1)}16%{opacity:.6;transform:scale(1.2) rotate(-6deg)}18%{opacity:0;transform:scale(.1)}99.9%{opacity:0;transform:scale(.1)}100%{opacity:1;transform:scale(1)}}
+    @keyframes gobEat2{0%,25%{opacity:1;transform:scale(1)}27%{opacity:.6;transform:scale(1.2) rotate(-6deg)}29%{opacity:0;transform:scale(.1)}99.9%{opacity:0;transform:scale(.1)}100%{opacity:1;transform:scale(1)}}
+    @keyframes gobEat5{0%,51%{opacity:1;transform:scale(1)}53%{opacity:.6;transform:scale(1.2) rotate(-6deg)}55%{opacity:0;transform:scale(.1)}99.9%{opacity:0;transform:scale(.1)}100%{opacity:1;transform:scale(1)}}
+    /* one red worker acts early and crosses to safety (caption turns green) instead of being eaten */
+    .gob .escape{z-index:7}
+    .gob .ai-esc{animation:gobEscAi var(--loop) ease-in-out infinite}
+    .gob .rb-esc{animation:gobEscRb var(--loop) ease-in-out infinite}
+    .gob .ai-esc .cap,.gob .rb-esc .cap{animation:gobEscCap var(--loop) ease-in-out infinite}
+    @keyframes gobEscCap{0%,30%{color:var(--red)}48%,100%{color:var(--green)}}
+    @keyframes gobEscAi{0%,30%{transform:translate(0,0)}36%{transform:translate(30px,-30px) scale(1.06)}45%{transform:translate(230px,-30px) scale(1.06)}54%{transform:translate(360px,-10px)}60%,96%{transform:translate(410px,0)}100%{transform:translate(0,0)}}
+    @keyframes gobEscRb{0%,30%{transform:translate(0,0)}36%{transform:translate(30px,-34px) scale(1.06)}45%{transform:translate(250px,-34px) scale(1.06)}54%{transform:translate(380px,-12px)}60%,96%{transform:translate(430px,0)}100%{transform:translate(0,0)}}
     .gob-actnow{--loop:11s;display:inline-flex;align-items:center;gap:6px;margin:10px auto 0;font-size:13px;font-weight:800;
         text-transform:uppercase;letter-spacing:.7px;color:var(--red);background:rgba(176,66,43,.1);
         border:1px solid rgba(176,66,43,.32);border-radius:999px;padding:6px 15px;
@@ -313,9 +316,9 @@
     [data-theme="dark"] .gob-actnow{background:rgba(224,117,89,.14);border-color:rgba(224,117,89,.32);color:#f2ab91}
     @keyframes gobActFlash{0%,60%{opacity:.22;transform:scale(.95)}66%{opacity:1;transform:scale(1.16)}72%{opacity:1;transform:scale(1)}86%{opacity:1}94%{opacity:.5}100%{opacity:.22;transform:scale(.95)}}
     @media (prefers-reduced-motion:reduce) {
-      .gob .pred,.ai-g .top,.ai-g .bot,.ai-g .eye,.ai-g .ai,.rb-g .top,.rb-g .bot,.rb-g .eye,.gob .wall,.gob-actnow,.gob .eatc,.gob .escape { animation:none !important; }
+      .gob .pred,.ai-g .top,.ai-g .bot,.ai-g .eye,.ai-g .ai,.rb2 .jaw,.rb2 .eye,.rb2 .ant::after,.gob .wall,.gob-actnow,.gob .eatc,.gob .escape,.gob .ai-esc .cap,.gob .rb-esc .cap,.gob .hg .sand-t::after,.gob .hg .sand-b::after,.gob .hg .stream { animation:none !important; }
       .gob .wall { transform:translateY(0); } .gob .pred { left:8px; } .gob-actnow { opacity:1; }
-      .gob .escape { background-color:var(--green); box-shadow:0 0 0 3px rgba(20,123,116,.4); }
+      .gob .escape { transform:translate(0,0); } .gob .ai-esc .cap,.gob .rb-esc .cap { color:var(--green); }
     }
     .score-foot { display:flex; flex-wrap:wrap; gap:8px 22px; align-items:center; justify-content:center;
                   max-width:760px; margin:26px auto 0; padding-top:16px; border-top:1px solid var(--line);
