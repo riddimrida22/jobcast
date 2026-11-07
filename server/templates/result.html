@@ -47,8 +47,8 @@
 
 {% if r.key_drivers %}
 <div class="card">
-  <h2 style="margin-top:0">What is driving your result</h2>
-  <p class="muted">The factors that move your result the most, most decisive first.</p>
+  <h2 style="margin-top:0">What is driving my result</h2>
+  <p class="muted">The factors that move my result the most, most decisive first.</p>
   <table>
     <tbody>
       {% for d in r.key_drivers %}
@@ -79,11 +79,11 @@
 
 {% if not seo and r.wages.available %}
 <div class="card">
-  <h2 style="margin-top:0">Your pay trajectory</h2>
+  <h2 style="margin-top:0">My pay trajectory</h2>
   <p>Real change over five years: <strong>{{ r.wages.real_change_pct }}%</strong>
      <span class="muted">(nominal {{ r.wages.nominal_change_pct }}%)</span></p>
   {% if r.wages.pay_vs_median_pct is not none %}
-  <p class="muted">You are {{ r.wages.pay_vs_median_pct }}% versus the median for this role in your area.</p>{% endif %}
+  <p class="muted">I am {{ r.wages.pay_vs_median_pct }}% versus the median for this role in my area.</p>{% endif %}
   {% if r.wages.signal %}<p>{{ r.wages.signal }}</p>{% endif %}
 </div>
 {% endif %}
@@ -107,7 +107,7 @@
 {% if not seo %}
 <div class="card">
   <h2 style="margin-top:0">Try a scenario</h2>
-  <p class="muted">See how your result changes if one thing were different.</p>
+  <p class="muted">See how my result changes if one thing were different.</p>
   <div id="whatif-buttons">
     <button type="button" class="secondary" data-ov='{"age": {{ (profile.age - 20) if profile.age else 25 }}}'>If I were 20 years younger</button>
     <button type="button" class="secondary" data-ov='{"union_status": "yes"}'>If I had union coverage</button>

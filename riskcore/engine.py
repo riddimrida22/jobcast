@@ -169,11 +169,11 @@ class Engine:
         if profile.age is not None:
             remaining_years = max(0, self.weights.get("retirement_age", 65) - profile.age)
             if band["id"] == "near_term_high" and remaining_years > 0:
-                overlap = "This change is likely within your remaining working years."
+                overlap = "This change is likely within my remaining working years."
             elif band["id"] == "largely_unaffected":
-                overlap = "This role is unlikely to be automated within your working life."
+                overlap = "This role is unlikely to be automated within my working life."
             else:
-                overlap = "Partial change is plausible within your working years; plan ahead."
+                overlap = "Partial change is plausible within my working years; worth planning ahead."
         return {"band": {"id": band["id"], "label": band["label"]},
                 "local_demand_trend": trend,
                 "union_protected": profile.union_status == "yes",
@@ -204,13 +204,13 @@ class Engine:
                 out["available"] = True
                 occ_trend = occ.get("wage_trend_5yr_real_pct")
                 if out["real_change_pct"] < 0:
-                    out["signal"] = ("Your pay has fallen in real terms over five years, "
+                    out["signal"] = ("My pay has fallen in real terms over five years, "
                                      "an early sign of pressure on this role.")
                 elif occ_trend is not None and out["real_change_pct"] < occ_trend:
-                    out["signal"] = ("Your real pay is rising but trailing your occupation, "
+                    out["signal"] = ("My real pay is rising but trailing my occupation, "
                                      "worth watching.")
                 else:
-                    out["signal"] = "Your real pay is keeping pace with or beating your occupation."
+                    out["signal"] = "My real pay is keeping pace with or beating my occupation."
         return out
 
     def _key_drivers(self, occ, axes, decomposition, timeline, wages, profile) -> List[Dict[str, Any]]:
@@ -234,7 +234,7 @@ class Engine:
         if trend == "declining":
             drivers.append({"factor": "local_demand", "label": "Local demand is declining",
                             "direction": "raises", "weight": 70,
-                            "detail": "Falling demand for this role in your area pulls the timeline sooner."})
+                            "detail": "Falling demand for this role in my area pulls the timeline sooner."})
         elif trend == "growing":
             drivers.append({"factor": "local_demand", "label": "Local demand is growing",
                             "direction": "lowers", "weight": 40,
@@ -243,7 +243,7 @@ class Engine:
         # Wage trajectory and ROI-to-automate.
         if wages.get("available") and wages.get("real_change_pct") is not None \
                 and wages["real_change_pct"] < 0:
-            drivers.append({"factor": "wage_trajectory", "label": "Your real pay is falling",
+            drivers.append({"factor": "wage_trajectory", "label": "My real pay is falling",
                             "direction": "raises", "weight": 55,
                             "detail": "Declining real wages are an early sign of pressure on the role."})
         if wages.get("pay_vs_median_pct") is not None and wages["pay_vs_median_pct"] > 20 \
@@ -260,7 +260,7 @@ class Engine:
         if profile.experience_years is not None and profile.experience_years >= 15:
             drivers.append({"factor": "seniority", "label": "Senior experience level",
                             "direction": "lowers", "weight": 35,
-                            "detail": "Experience shifts your work toward less-exposed oversight tasks."})
+                            "detail": "Experience shifts my work toward less-exposed oversight tasks."})
 
         drivers.sort(key=lambda d: d["weight"], reverse=True)
         return drivers[:5]

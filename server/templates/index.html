@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="hero">
-  <h1 style="font-size:26px;margin:4px 0 4px">Will AI or robots replace your job?</h1>
-  <p class="lead" style="font-size:15px;margin:0 0 8px">An honest, sourced read on how exposed your
+  <h1 style="font-size:26px;margin:4px 0 4px">Will AI or robots replace my job?</h1>
+  <p class="lead" style="font-size:15px;margin:0 0 8px">An honest, sourced read on how exposed my
   work is, and when change is likely.</p>
 </div>
 
@@ -35,11 +35,9 @@
   </div>
 
   <div>
-    <label for="zip">Location</label>
-    <select id="zip" name="zip">
-      <option value="">United States (national)</option>
-      {% for m in metros %}<option value="{{ m.code }}">{{ m.name }}</option>{% endfor %}
-    </select>
+    <label for="zip">ZIP code</label>
+    <input id="zip" name="zip" type="text" inputmode="numeric" pattern="[0-9]{5}" maxlength="5"
+           placeholder="e.g. 10001 (optional)" autocomplete="postal-code">
   </div>
   <div>
     <label for="age">Age</label>

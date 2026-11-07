@@ -11,7 +11,7 @@ import argparse
 import os
 from typing import Dict, Any, List
 
-from . import onet, bls_cpi, oews_files, exposure
+from . import onet, bls_cpi, oews_files, zip_metro, exposure
 from .common import download_to_cache, write_snapshot
 
 ELOUNDOU_URL = "https://raw.githubusercontent.com/openai/GPTs-are-GPTs/main/data/occ_level.csv"
@@ -74,6 +74,11 @@ def build(base_year: int = 2025, limit: int = 0) -> Dict[str, Any]:
         metro_wages, metro_names = oews_files.build_metro_wages()
         print(f"metro wages: {len(metro_names)} metros, {len(metro_wages)} occupations")
 
+    zip_map = {}
+    if metro_names and zip_metro.available():
+        zip_map = zip_metro.build_zip_map(set(metro_names.keys()))
+        print(f"zip -> metro: {len(zip_map)} ZIPs mapped")
+
     # Adjacency from Related Occupations, each with its exposure so the engine can filter.
     def adj_for(code: str) -> List[Dict[str, Any]]:
         out = []
@@ -109,7 +114,7 @@ def build(base_year: int = 2025, limit: int = 0) -> Dict[str, Any]:
         "development_notice": notice,
         "cpi": cpi,
         "metros": {"US": "United States (national)", **metro_names},
-        "zip_to_metro": {"default": "US", "map": {c: c for c in metro_names}},
+        "zip_to_metro": {"default": "US", "map": {**{c: c for c in metro_names}, **zip_map}},
         "metro_wages": metro_wages,
         "families": families,
         "occupations": occ_list,
