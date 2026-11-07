@@ -1,0 +1,24 @@
+{
+  "appId": "pc.aquatechpc.jobbreak",
+  "appName": "JobBreak",
+  "webDir": "www",
+  "backgroundColor": "#0b1a2e",
+  "server": {
+    "url": "https://jobcast-demo.onrender.com",
+    "cleartext": false
+  },
+  "ios": {
+    "backgroundColor": "#0b1a2e",
+    "contentInset": "always"
+  },
+  "android": {
+    "backgroundColor": "#0b1a2e"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "backgroundColor": "#0b1a2e",
+      "launchShowDuration": 800,
+      "showSpinner": false
+    }
+  }
+}
