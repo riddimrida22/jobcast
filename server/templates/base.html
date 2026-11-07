@@ -97,6 +97,28 @@
     .form-grid label { margin:9px 0 4px; }
     .form-grid .full { grid-column:1 / -1; }
     .chips { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 4px; }
+
+    /* wide home with scrolling side panels */
+    .wide .wrap { max-width:1260px; }
+    .home-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(430px,560px) minmax(0,1fr); gap:18px; align-items:start; }
+    .side { position:sticky; top:86px; }
+    .side-title { font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px; }
+    .side-title.risk { color:var(--red); } .side-title.safe { color:var(--green); }
+    .ticker { height:520px; overflow:hidden; -webkit-mask-image:linear-gradient(180deg,transparent,#000 7%,#000 93%,transparent);
+              mask-image:linear-gradient(180deg,transparent,#000 7%,#000 93%,transparent); }
+    .ticker:hover .ticker-inner { animation-play-state:paused; }
+    .ticker-inner { display:flex; flex-direction:column; gap:8px; animation:tickerUp 48s linear infinite; }
+    .ticker.rev .ticker-inner { animation-name:tickerDown; }
+    @keyframes tickerUp { from { transform:translateY(0); } to { transform:translateY(-50%); } }
+    @keyframes tickerDown { from { transform:translateY(-50%); } to { transform:translateY(0); } }
+    .jobcard { display:flex; justify-content:space-between; align-items:center; gap:10px; text-decoration:none;
+               background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 12px;
+               font-size:13px; color:var(--ink); box-shadow:0 2px 8px rgba(31,63,96,.05); }
+    .jobcard:hover { border-color:var(--primary); }
+    .jc-t { line-height:1.25; }
+    .jc-score { font-weight:700; border-radius:7px; padding:2px 8px; font-size:12.5px; flex:0 0 auto; }
+    .jc-score.exp { background:#f7e1dc; color:var(--red); } .jc-score.safe { background:#e3f3ec; color:var(--green); }
+    @media (max-width:980px) { .home-layout { grid-template-columns:1fr; } .side { display:none; } }
     .chip { font-size:12.5px; font-weight:600; color:var(--primary); background:var(--primary-soft);
             border-radius:999px; padding:6px 13px; }
     [data-theme="dark"] .chip { color:#bcd2ee; }
@@ -175,7 +197,7 @@
     footer { color:var(--muted); font-size:12px; border-top:1px solid var(--line); margin-top:40px; padding-top:16px; }
   </style>
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
   {% if not licensed %}
   <div class="dev-banner">Development data. Illustrative values, not published figures. Not for public use.</div>
   {% elif noindex %}

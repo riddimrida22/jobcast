@@ -1,5 +1,15 @@
 {% extends "base.html" %}
+{% block body_class %}wide{% endblock %}
 {% block content %}
+<div class="home-layout">
+  <aside class="side">
+    <div class="side-title risk">Most at risk</div>
+    <div class="ticker"><div class="ticker-inner">
+      {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.base }}</span></a>{% endfor %}
+      {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.base }}</span></a>{% endfor %}
+    </div></div>
+  </aside>
+  <div class="center">
 <div class="hero">
   <h1 style="font-size:26px;margin:4px 0 4px">Will AI or robots replace my job?</h1>
   <p class="lead" style="font-size:15px;margin:0 0 8px">An honest, sourced read on how exposed my
@@ -98,6 +108,15 @@
   </div>
 </form>
 <p class="muted" style="margin-top:8px;font-size:12px">No gender, race, or other protected characteristics in the score; pay is read only as a banded trajectory. Sourced from O*NET, BLS OEWS (393 metros), and peer-reviewed exposure research. <a href="/jobs">Browse all jobs</a>.</p>
+  </div>
+  <aside class="side">
+    <div class="side-title safe">Most resilient</div>
+    <div class="ticker rev"><div class="ticker-inner">
+      {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}
+      {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}
+    </div></div>
+  </aside>
+</div>
 
 <script>
 // Field -> Job cascade + search-as-you-type. Picking a field populates the job list with

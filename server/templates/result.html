@@ -42,12 +42,27 @@
   </div>
 
   <p class="muted" style="text-align:center;margin:14px 0 2px">When the change is likely</p>
-  <div class="horizon">
-    {% set bid = r.timeline.band.id %}
-    <div class="hz {{ 'active z2' if bid == 'near_term_high' else '' }}">Near-term</div>
-    <div class="hz {{ 'active z1' if bid == 'partial_5_10yr' else '' }}">5 to 10 years</div>
-    <div class="hz {{ 'active z0' if bid == 'largely_unaffected' else '' }}">Later / stable</div>
-  </div>
+  {% set bid = r.timeline.band.id %}
+  {% set ry = r.timeline.remaining_working_years %}
+  {% if bid == 'near_term_high' %}{% set zx0, zx1, zc, zlab = 30, 125, '#b0422b', 'change likely' %}
+  {% elif bid == 'partial_5_10yr' %}{% set zx0, zx1, zc, zlab = 125, 220, '#c88a2e', 'partial change' %}
+  {% else %}{% set zx0, zx1, zc, zlab = 315, 410, '#147b74', 'unlikely soon' %}{% endif %}
+  <svg viewBox="0 0 440 94" style="width:100%;max-width:470px;display:block;margin:6px auto 0">
+    <rect x="{{ zx0 }}" y="34" width="{{ zx1 - zx0 }}" height="20" rx="6" fill="{{ zc }}" opacity="0.9"></rect>
+    <text x="{{ (zx0 + zx1) / 2 }}" y="28" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)">{{ zlab }}</text>
+    <line x1="30" y1="62" x2="410" y2="62" stroke="var(--line)" stroke-width="2"></line>
+    {% for yr in [0, 5, 10, 15, 20] %}
+    {% set x = 30 + (yr / 20) * 380 %}
+    <line x1="{{ x }}" y1="58" x2="{{ x }}" y2="66" stroke="var(--muted)" stroke-width="1"></line>
+    <text x="{{ x }}" y="82" text-anchor="middle" font-size="11" fill="var(--muted)">{{ yr }}{{ '+' if yr == 20 else '' }}y</text>
+    {% endfor %}
+    {% if ry is not none %}
+    {% set mx = 30 + ([ry, 20]|min / 20) * 380 %}
+    <line x1="{{ mx }}" y1="24" x2="{{ mx }}" y2="68" stroke="var(--primary)" stroke-width="2" stroke-dasharray="3 3"></line>
+    <circle cx="{{ mx }}" cy="62" r="4" fill="var(--primary)"></circle>
+    <text x="{{ mx }}" y="18" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--primary)">~{{ ry }}y to retire</text>
+    {% endif %}
+  </svg>
   <p style="text-align:center;margin:6px 0 0">
     <span class="band {{ bid }}">{{ r.timeline.band.label }}</span>
     <span class="muted">local demand {{ r.timeline.local_demand_trend }}</span>

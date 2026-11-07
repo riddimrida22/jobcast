@@ -115,11 +115,21 @@ def create_app() -> Flask:
         return [{"soc": o["soc"], "title": o["title"]}
                 for o in engine.snapshot.all_occupations()]
 
+    def _rankings(n=20):
+        scored = []
+        for o in engine.snapshot.all_occupations():
+            base = round(max(o.get("ai") or 0, o.get("robo") or 0) * 100)
+            scored.append({"soc": o["soc"], "title": o["title"], "base": base})
+        most = sorted(scored, key=lambda x: -x["base"])[:n]
+        least = sorted(scored, key=lambda x: x["base"])[:n]
+        return most, least
+
     @app.get("/")
     def index():
+        most, least = _rankings()
         return render_template("index.html", version=VERSION, licensed=engine.snapshot.licensed,
                                occupations=_occupations(), families=engine.snapshot.families(),
-                               metros=engine.snapshot.metros_list(),
+                               most_exposed=most, least_exposed=least,
                                notice=engine.snapshot.data.get("development_notice"))
 
     @app.post("/assess")
@@ -127,9 +137,10 @@ def create_app() -> Flask:
         profile = profile_from(request.form)
         result = engine.assess(profile)
         if not result.get("ok"):
+            most, least = _rankings()
             return render_template("index.html", version=VERSION, error=result,
                                    occupations=_occupations(), families=engine.snapshot.families(),
-                                   metros=engine.snapshot.metros_list(),
+                                   most_exposed=most, least_exposed=least,
                                    licensed=engine.snapshot.licensed,
                                    notice=engine.snapshot.data.get("development_notice")), 404
         return render_template("result.html", r=result, profile=profile,
