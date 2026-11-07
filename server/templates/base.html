@@ -193,33 +193,35 @@
     .tick-clock { width:15px; height:15px; flex:0 0 auto; }
     .tick-clock circle { fill:none; stroke:var(--red); stroke-width:2; }
     .tick-clock line { stroke:var(--red); stroke-width:2; stroke-linecap:round; transform-origin:12px 12px; }
-    .tick-clock .tc-min { animation:tick 1s steps(12) infinite; }
-    .tick-clock .tc-hr { animation:tick 7s steps(12) infinite; }
+    .tick-clock .tc-min { animation:tick 9s steps(12) infinite; }
+    .tick-clock .tc-hr { animation:tick 48s steps(12) infinite; }
     @keyframes tick { to { transform:rotate(360deg); } }
     [data-theme="dark"] .tick-clock circle, [data-theme="dark"] .tick-clock line { stroke:#f2ab91; }
     @media (prefers-reduced-motion:reduce) { .tick-clock .tc-min, .tick-clock .tc-hr { animation:none; } }
-    /* hero "AI gobbler": a ticking clock leads to a mouth that almost eats JOB, then loops */
-    .gob-scene { display:inline-flex; align-items:center; gap:9px; margin:0 auto 6px; }
-    .gob-clock { width:21px; height:21px; }
-    .gob-arrow { color:var(--muted); font-weight:700; font-size:16px; }
-    .gob-job { position:relative; display:inline-flex; align-items:center; gap:5px; padding-right:38px; }
+    /* hero "AI gobbler": a big ticking clock, then a chomping mouth crosses a gap and
+       almost eats JOB before the loop resets - will it get your job, or not? */
+    .gob-scene { display:inline-flex; align-items:center; gap:14px; margin:0 auto 6px; }
+    .gob-clock { width:30px; height:30px; }
+    .gob-track { position:relative; width:230px; height:44px; display:flex; align-items:center; justify-content:flex-end; }
+    .gob-job { display:inline-flex; align-items:center; gap:5px; }
     .gob-ltr { width:30px; height:40px; border-radius:7px; background:var(--primary); color:#fff;
-               display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:22px;
-               transform-origin:center; }
-    .gob-ltr.g1 { animation:gobEatJ 5.5s linear infinite; }
-    .gob-ltr.g2 { animation:gobEatO 5.5s linear infinite; }
-    .gob-ltr.g3 { animation:gobDipB 5.5s linear infinite; }
-    .gob-mouth { position:absolute; left:-30px; top:50%; width:34px; height:34px; transform:translateY(-50%);
-                 animation:gobGlide 5.5s linear infinite; }
-    @keyframes gobGlide { 0%{left:-30px;opacity:1} 58%{left:70px;opacity:1} 80%{left:70px;opacity:1}
-                          86%{left:70px;opacity:0} 100%{left:-30px;opacity:0} }
-    @keyframes gobEatJ { 0%,16%{opacity:1;transform:none} 24%,88%{opacity:0;transform:scale(.2) rotate(-25deg)}
-                         95%,100%{opacity:1;transform:none} }
-    @keyframes gobEatO { 0%,36%{opacity:1;transform:none} 44%,88%{opacity:0;transform:scale(.2) rotate(-25deg)}
-                         95%,100%{opacity:1;transform:none} }
-    @keyframes gobDipB { 0%,56%{opacity:1;transform:none} 76%{opacity:.25;transform:scale(.7) rotate(-14deg)}
-                         85%{opacity:.55} 95%,100%{opacity:1;transform:none} }
-    @media (prefers-reduced-motion:reduce) { .gob-ltr, .gob-mouth { animation:none !important; } .gob-mouth { opacity:0; } }
+               display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:22px; transform-origin:center; }
+    .gob-ltr.g1 { animation:gobEatJ 6.8s ease-in infinite; }
+    .gob-ltr.g2 { animation:gobEatO 6.8s ease-in infinite; }
+    .gob-ltr.g3 { animation:gobDipB 6.8s ease-in infinite; }
+    .gob-pac { position:absolute; left:4px; top:50%; width:34px; height:34px; margin-top:-17px; animation:gobGlide 6.8s ease-in infinite; }
+    .gp-top, .gp-bot { position:absolute; left:0; width:34px; height:17px; background:#e0824f; }
+    .gp-top { top:0; border-radius:34px 34px 0 0; transform-origin:50% 100%; animation:chompT .42s ease-in-out infinite; }
+    .gp-bot { bottom:0; border-radius:0 0 34px 34px; transform-origin:50% 0%; animation:chompB .42s ease-in-out infinite; }
+    .gp-eye { position:absolute; top:7px; left:16px; width:3.4px; height:3.4px; border-radius:50%; background:#0a1626; z-index:2; }
+    @keyframes chompT { 0%,100%{transform:rotate(0)} 50%{transform:rotate(-38deg)} }
+    @keyframes chompB { 0%,100%{transform:rotate(0)} 50%{transform:rotate(38deg)} }
+    @keyframes gobGlide { 0%{left:4px;opacity:1} 44%{left:104px} 56%{left:140px} 70%{left:176px}
+                          80%{left:176px;opacity:1} 90%{left:176px;opacity:0} 100%{left:4px;opacity:0} }
+    @keyframes gobEatJ { 0%,44%{opacity:1;transform:none} 50%,88%{opacity:0;transform:scale(.2) rotate(-22deg)} 94%,100%{opacity:1;transform:none} }
+    @keyframes gobEatO { 0%,56%{opacity:1;transform:none} 62%,88%{opacity:0;transform:scale(.2) rotate(-22deg)} 94%,100%{opacity:1;transform:none} }
+    @keyframes gobDipB { 0%,70%{opacity:1;transform:none} 80%{opacity:.22;transform:scale(.68) rotate(-12deg)} 87%{opacity:.5} 94%,100%{opacity:1;transform:none} }
+    @media (prefers-reduced-motion:reduce) { .gob-pac, .gp-top, .gp-bot, .gob-ltr { animation:none !important; } .gob-pac { opacity:0; } }
     .score-foot { display:flex; flex-wrap:wrap; gap:8px 22px; align-items:center; justify-content:center;
                   max-width:760px; margin:26px auto 0; padding-top:16px; border-top:1px solid var(--line);
                   font-size:12px; color:var(--muted); }
