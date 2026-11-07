@@ -14,7 +14,7 @@
   '55':'#5a6a4a' } %}
 {% set disc_legend = [('#6cb4e0','Trades & manual'),('#2f4f73','Business & office'),('#5a6fc0','Tech & science'),('#159e8c','Healthcare'),('#7a5aa0','Legal'),('#c08a3a','Education & social'),('#c0607a','Arts & media'),('#d07a3a','Service')] %}
 <div class="slogan-banner">
-  <span class="urgent-tag"><span class="urgent-dot"></span>The clock is already running</span>
+  <span class="urgent-tag"><span class="urgent-dot"></span><span class="urgent-label">The clock is already running</span></span>
   <span class="slogan-main">AI is coming for your job, sooner than you think.</span>
   <span class="accent">See your timeline now, and break free first with JobBreak.</span></div>
 
@@ -184,6 +184,31 @@
 </div>
 
 <script>
+// Audience-targeted hero: the slogan shifts to match the field the person picks,
+// so trades, knowledge work, healthcare etc. each get a message that speaks to them.
+(function () {
+  var field = document.getElementById('field');
+  var lab = document.querySelector('.urgent-label');
+  var main = document.querySelector('.slogan-main');
+  var cta = document.querySelector('.slogan-banner .accent');
+  if (!field || !lab || !main || !cta) return;
+  var HERO = {
+    know:   { tag: 'AI is already in the building', main: 'AI already does part of your job. The only question is how much.', cta: 'See your exposure and your real timeline, with JobBreak.' },
+    trade:  { tag: 'Automation is on the move', main: 'Robots on the line, self-driving on the road.', cta: 'See your real timeline, and the work automation cannot touch, with JobBreak.' },
+    health: { tag: 'AI is in the clinic', main: 'AI reads the scans and drafts the notes now.', cta: 'See what it means for your role, and where you stay essential, with JobBreak.' },
+    teach:  { tag: 'AI tutors have arrived', main: 'AI can plan the lesson, grade the test, tutor the student.', cta: 'See how it reshapes your role, and your human edge, with JobBreak.' },
+    arts:   { tag: 'Generative AI is flooding in', main: 'AI floods your field with instant content.', cta: 'See your exposure, and where human taste still wins, with JobBreak.' },
+    def:    { tag: 'The clock is already running', main: 'AI is coming for your job, sooner than you think.', cta: 'See your timeline now, and break free first with JobBreak.' }
+  };
+  var GROUP = { '11':'know','13':'know','15':'know','23':'know','43':'know','19':'know',
+    '47':'trade','49':'trade','51':'trade','53':'trade','45':'trade','37':'trade','33':'trade',
+    '29':'health','31':'health','25':'teach','27':'arts' };
+  field.addEventListener('change', function () {
+    var h = HERO[GROUP[field.value] || 'def'] || HERO.def;
+    lab.textContent = h.tag; main.textContent = h.main; cta.textContent = h.cta;
+  });
+})();
+
 // Field -> Job cascade + search-as-you-type. Picking a field populates the job list with
 // that field's jobs; typing filters. With JavaScript off, the grouped <select> still works.
 (function () {

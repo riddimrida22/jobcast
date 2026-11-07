@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#112741"/>
+  <text x="50%" y="52%" text-anchor="middle" dominant-baseline="central"
+        font-family="Poppins, 'Trebuchet MS', sans-serif" font-weight="800" font-size="210"
+        letter-spacing="-6"><tspan fill="#ffffff">J</tspan><tspan fill="#f3a35f">B</tspan></text>
+</svg>

@@ -124,7 +124,7 @@ def create_app() -> Flask:
     def _gate():
         if not demo_user:
             return None
-        if request.endpoint in ("login", "static"):
+        if request.endpoint in ("login", "static", "manifest", "service_worker"):
             return None
         if session.get("jb_authed"):
             return None
@@ -315,6 +315,37 @@ def create_app() -> Flask:
         except Exception:
             pass
         return jsonify({"ok": True})
+
+    # ---- PWA (installable web app; also the base for the Capacitor native wrap) ----
+    @app.get("/manifest.webmanifest")
+    def manifest():
+        from flask import Response
+        data = {
+            "name": "JobBreak", "short_name": "JobBreak",
+            "description": "An honest, sourced read on whether AI or robots are likely to take your job, and when.",
+            "start_url": "/", "scope": "/", "display": "standalone",
+            "background_color": "#0b1a2e", "theme_color": "#112741",
+            "icons": [{"src": "/static/icon.svg", "sizes": "any",
+                       "type": "image/svg+xml", "purpose": "any maskable"}],
+        }
+        return Response(json.dumps(data), mimetype="application/manifest+json")
+
+    @app.get("/sw.js")
+    def service_worker():
+        from flask import Response
+        sw = (
+            "const CACHE='jobbreak-v1';"
+            "self.addEventListener('install',e=>self.skipWaiting());"
+            "self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));"
+            "self.addEventListener('fetch',e=>{"
+            "const u=new URL(e.request.url);"
+            "if(e.request.method!=='GET'||u.origin!==location.origin||!u.pathname.startsWith('/static/'))return;"
+            "e.respondWith(caches.open(CACHE).then(c=>c.match(e.request).then(r=>"
+            "r||fetch(e.request).then(resp=>{if(resp.ok)c.put(e.request,resp.clone());return resp;}))));"
+            "});"
+        )
+        return Response(sw, mimetype="application/javascript",
+                        headers={"Service-Worker-Allowed": "/"})
 
     @app.get("/methodology")
     def methodology():
