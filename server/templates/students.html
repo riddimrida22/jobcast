@@ -61,7 +61,7 @@
       <span class="ring" style="--p:{{ c.resilience }}"><b>{{ c.resilience }}</b><small>safe</small></span>
       <span class="sc-stats">
         <span class="sc-stat"><b>${{ "{:,.0f}".format(c.median_wage) }}</b><span>median pay</span></span>
-        <span class="sc-stat"><b>{{ c.school }}</b><span>in school</span></span>
+        <span class="sc-stat"><b>{{ c.school }}</b><span>school needed</span></span>
         {% if c.growth is not none %}<span class="sc-stat"><b class="{{ 'up' if c.growth > 0 else ('down' if c.growth < 0 else '') }}">{{ '+' if c.growth > 0 else '' }}{{ c.growth }}%</b><span>jobs by 2030</span></span>{% endif %}
       </span>
     </div>
