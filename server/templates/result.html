@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ r.occupation.title }} - AI and robot exposure | JobBreak{% endblock %}
-{% block description %}How exposed is {{ r.occupation.title }} to AI and robots, and when. Sourced ranges, not verdicts.{% endblock %}
+{% block description %}{{ r.occupation.title }}: automation exposure {{ r.base_exposure }} of 100, with a sourced timeline and what to do. See how your job compares on JobBreak.{% endblock %}
 {% block content %}
 {% set check %}<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>{% endset %}
 
@@ -21,6 +21,31 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   <span>Built on O*NET tasks, BLS pay and projections, and peer-reviewed AI-exposure research. Sources shown.
     {% if r.snapshot and r.snapshot.id %}Data snapshot {{ r.snapshot.id }}. {% endif %}<a href="/methodology">How it works</a></span>
 </div>
+
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px">
+  <button type="button" id="share-btn" class="secondary" style="margin:0;display:inline-flex;align-items:center;gap:7px">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/>
+      <circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Share my result</button>
+  <span id="share-note" class="muted" style="font-size:12px"></span>
+</div>
+<script>
+  (function () {
+    var b = document.getElementById('share-btn'); if (!b) return;
+    var url = {{ (request.host_url ~ 'jobs/' ~ r.occupation.soc) | tojson }};
+    var text = {{ ('My work (' ~ r.occupation.title ~ ') is ' ~ r.base_exposure ~ ' of 100 exposed to AI and robots. What is yours?') | tojson }};
+    var note = document.getElementById('share-note');
+    b.addEventListener('click', function () {
+      if (navigator.share) {
+        navigator.share({ title: 'JobBreak', text: text, url: url }).catch(function () {});
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(text + ' ' + url).then(
+          function () { note.textContent = 'Link copied to clipboard.'; },
+          function () { note.textContent = url; });
+      } else { note.textContent = url; }
+    });
+  })();
+</script>
 
 <div class="tabs" role="tablist">
   <button class="tab active" data-panel="p-overview">Overview</button>
