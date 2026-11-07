@@ -10,6 +10,7 @@
   <meta name="twitter:image" content="{{ ogcard }}">
 {% endblock %}
 {% block content %}
+{% if seo %}<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":{{ ("Will AI or robots replace " ~ r.occupation.title ~ "?") | tojson }},"acceptedAnswer":{"@type":"Answer","text":{{ (r.occupation.title ~ " scores " ~ r.base_exposure ~ " of 100 for automation exposure, from O*NET task data and peer-reviewed AI-exposure research - higher means more of the role's tasks are automatable. JobBreak shows the full sourced breakdown and a timeline.") | tojson }}}}]}</script>{% endif %}
 {% set check %}<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>{% endset %}
 
 <p class="muted">{{ r.occupation.family }} &middot; {{ r.location.metro }}</p>

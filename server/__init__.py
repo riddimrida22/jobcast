@@ -395,6 +395,36 @@ def create_app() -> Flask:
             pass
         return jsonify({"ok": True})
 
+    # ---- SEO: robots + sitemap. Every occupation is its own landing page, so the
+    # sitemap lists them all - that is the organic search engine for the site. ----
+    def _canonical_base():
+        return (os.environ.get("JOBCAST_BASE_URL") or request.host_url).rstrip("/")
+
+    @app.get("/robots.txt")
+    def robots_txt():
+        from flask import Response
+        body = ("User-agent: *\n"
+                "Allow: /\n"
+                "Disallow: /login\n"
+                "Disallow: /billing\n"
+                "Disallow: /tasks\n"
+                "Sitemap: %s/sitemap.xml\n" % _canonical_base())
+        return Response(body, mimetype="text/plain")
+
+    @app.get("/sitemap.xml")
+    def sitemap_xml():
+        from flask import Response
+        base = _canonical_base()
+        paths = ["/", "/students", "/jobs", "/methodology", "/privacy", "/terms"]
+        paths += ["/jobs/" + o["soc"] for o in engine.snapshot.all_occupations()]
+        items = "".join(
+            "<url><loc>%s%s</loc><changefreq>monthly</changefreq></url>" % (base, p)
+            for p in paths)
+        xml = ('<?xml version="1.0" encoding="UTF-8"?>'
+               '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+               + items + '</urlset>')
+        return Response(xml, mimetype="application/xml")
+
     # ---- PWA (installable web app; also the base for the Capacitor native wrap) ----
     @app.get("/manifest.webmanifest")
     def manifest():
