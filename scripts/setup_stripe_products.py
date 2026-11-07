@@ -1,7 +1,10 @@
-"""Create the JobBreak subscription products and prices in your Stripe account, then print
-the env var lines to set. Run ONCE with your TEST secret key, keep the output:
+"""Create the JobBreak subscription product and prices in your Stripe account, then print
+the env var lines to set. Run ONCE per environment (test, then live), keep the output:
 
+    # test:
     JOBCAST_STRIPE_SECRET_KEY=sk_test_xxx python scripts/setup_stripe_products.py
+    # live (when you are ready to take real money):
+    JOBCAST_STRIPE_SECRET_KEY=sk_live_xxx python scripts/setup_stripe_products.py
 
 Amounts are in USD cents. Edit PLANS below if you change the pricing. Re-running creates
 new products/prices (Stripe has no safe "upsert"), so run it once per environment."""
@@ -16,16 +19,15 @@ except ImportError:
 
 key = os.environ.get("JOBCAST_STRIPE_SECRET_KEY")
 if not key:
-    sys.exit("Set JOBCAST_STRIPE_SECRET_KEY to your TEST key (sk_test_...) and re-run.")
-if key.startswith("sk_live_"):
-    sys.exit("That is a LIVE key. Use your TEST key (sk_test_...) to set up and test first.")
+    sys.exit("Set JOBCAST_STRIPE_SECRET_KEY to your sk_test_... or sk_live_... key and re-run.")
+mode = "LIVE" if key.startswith("sk_live_") else "TEST"
+print("Running in %s mode.\n" % mode)
 stripe.api_key = key
 
 # tier, display name, monthly cents, yearly cents
+# The single "JobBreak Monitor" plan maps to tier2 in the app ($3.99/mo, $29/yr).
 PLANS = [
-    ("tier1", "Starter", 500, 5000),
-    ("tier2", "Pro", 1200, 12000),
-    ("tier3", "Career Shield", 2900, 29000),
+    ("tier2", "Monitor", 399, 2900),
 ]
 
 env_lines = []
