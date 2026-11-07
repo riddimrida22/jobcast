@@ -151,9 +151,11 @@
     <p style="margin:0;font-weight:700;color:var(--accent);font-size:17px">Use AI to outpace AI.</p>
   </div>
   <p class="muted" style="margin-top:0">Strategies to protect your livelihood, most important first.</p>
-  <div style="margin:2px 0 12px">
+  <div style="margin:2px 0 12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px">
     <button type="button" id="ai-plan-btn" class="secondary" style="margin:0" data-title="{{ r.occupation.title }}">Personalise this plan with AI</button>
-    <span id="ai-plan-status" class="muted" style="font-size:12px;margin-left:10px"></span>
+    <button type="button" id="deck-show-btn" class="secondary" style="margin:0;display:inline-flex;align-items:center;gap:6px">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Play as slideshow</button>
+    <span id="ai-plan-status" class="muted" style="font-size:12px"></span>
   </div>
   <!-- icon symbols for the plan deck -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -173,6 +175,17 @@
   {% endfor %}
   </div>
   <script id="init-strats" type="application/json">{{ r.strategies | tojson }}</script>
+
+  <!-- fullscreen slideshow of the plan -->
+  <div id="sshow" class="sshow" hidden aria-modal="true" role="dialog" aria-label="Plan slideshow">
+    <button type="button" class="ss-close" id="ss-close" aria-label="Close slideshow">&times;</button>
+    <div class="ss-count" id="ss-count"></div>
+    <button type="button" class="ss-arrow prev" id="ss-prev" aria-label="Previous step">&#8249;</button>
+    <div class="ss-stage" id="ss-stage"></div>
+    <button type="button" class="ss-arrow next" id="ss-next" aria-label="Next step">&#8250;</button>
+    <div class="ss-dots" id="ss-dots"></div>
+  </div>
+
   <h3 style="margin:26px 0 2px;font-size:17px">Unlock your survival plan</h3>
   <p class="muted" style="margin-top:2px">Free shows where you stand. Paid plans turn it into a personalised action plan, written for your exact profile.</p>
   <div class="plans">
@@ -391,7 +404,9 @@
       '<div class="htrack"><div class="rail">' + rail + '</div><div class="labs">' + labs + '</div></div>' +
       '</div>';
   }
+  var currentSteps = [];
   function renderDeck(steps) {
+    currentSteps = steps;
     list.className = 'deck';
     list.innerHTML = steps.map(card).join('');
   }
@@ -427,6 +442,40 @@
     if (tier === 'free') return;  // free is the read; no AI call
     cta.addEventListener('click', function () { generate(tier, cta); });
   });
+
+  // ---- Plan slideshow ----
+  var showEl = document.getElementById('sshow'), stage = document.getElementById('ss-stage'),
+      dotsEl = document.getElementById('ss-dots'), countEl = document.getElementById('ss-count'),
+      prevB = document.getElementById('ss-prev'), nextB = document.getElementById('ss-next'),
+      closeB = document.getElementById('ss-close'), showBtn = document.getElementById('deck-show-btn');
+  if (showEl && stage && showBtn) {
+    var sidx = 0, stimer = null;
+    function renderSlide() {
+      stage.innerHTML = card(currentSteps[sidx], sidx);
+      countEl.textContent = (sidx + 1) + ' / ' + currentSteps.length;
+      prevB.disabled = sidx === 0; nextB.disabled = sidx === currentSteps.length - 1;
+      var d = ''; for (var i = 0; i < currentSteps.length; i++) d += '<i class="' + (i === sidx ? 'on' : '') + '" data-i="' + i + '"></i>';
+      dotsEl.innerHTML = d;
+    }
+    function schedule() { clearTimeout(stimer); if (currentSteps.length > 1) stimer = setTimeout(function () { go(sidx >= currentSteps.length - 1 ? 0 : sidx + 1); }, 6000); }
+    function go(i) { sidx = Math.max(0, Math.min(currentSteps.length - 1, i)); renderSlide(); schedule(); }
+    function openShow() { if (!currentSteps.length) return; sidx = 0; showEl.hidden = false; document.body.style.overflow = 'hidden'; renderSlide(); schedule(); }
+    function closeShow() { showEl.hidden = true; clearTimeout(stimer); document.body.style.overflow = ''; }
+    showBtn.addEventListener('click', openShow);
+    prevB.addEventListener('click', function () { go(sidx - 1); });
+    nextB.addEventListener('click', function () { go(sidx + 1); });
+    closeB.addEventListener('click', closeShow);
+    dotsEl.addEventListener('click', function (e) { var t = e.target.getAttribute('data-i'); if (t !== null) go(+t); });
+    showEl.addEventListener('click', function (e) { if (e.target === showEl) closeShow(); });
+    stage.addEventListener('mouseenter', function () { clearTimeout(stimer); });
+    stage.addEventListener('mouseleave', schedule);
+    document.addEventListener('keydown', function (e) {
+      if (showEl.hidden) return;
+      if (e.key === 'Escape') closeShow();
+      else if (e.key === 'ArrowRight') go(sidx + 1);
+      else if (e.key === 'ArrowLeft') go(sidx - 1);
+    });
+  }
 })();
 </script>
 

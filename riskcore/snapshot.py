@@ -102,12 +102,46 @@ class Snapshot:
         return [{"soc": soc, "title": self._occ_by_soc[soc]["title"]} for soc, _ in ranked]
 
     # ---- metro / geography ----------------------------------------------
-    def metro_for_zip(self, zip_code: Optional[str]) -> str:
+    def metro_for_zip(self, value: Optional[str]) -> str:
+        """Back-compat name; accepts a ZIP or a 'City, ST' string."""
+        return self.metro_for_location(value)
+
+    def metro_for_location(self, value: Optional[str]) -> str:
+        """Resolve a metro from either a 5-digit ZIP or a 'City, ST' / 'City ST' string.
+        Falls back to the national row when nothing matches."""
         xwalk = self.data.get("zip_to_metro", {})
         default = xwalk.get("default", "US")
-        if not zip_code:
+        if not value:
             return default
-        return xwalk.get("map", {}).get(str(zip_code).strip(), default)
+        s = str(value).strip()
+        if not s:
+            return default
+        # ZIP code: 5 digits
+        digits = "".join(ch for ch in s if ch.isdigit())
+        if s.replace("-", "").isdigit() and len(digits) >= 5:
+            return xwalk.get("map", {}).get(digits[:5], default)
+        # "City, ST" or "City ST": trailing 2-letter state + a city
+        parts = s.replace(",", " ").split()
+        if len(parts) >= 2 and len(parts[-1]) == 2 and parts[-1].isalpha():
+            state = parts[-1].upper()
+            city = " ".join(parts[:-1]).strip().lower()
+            fallback = None
+            for code, name in self.data.get("metros", {}).items():
+                if code == "US" or "," not in name:
+                    continue
+                cities, _, states = name.rpartition(",")
+                st_tokens = [t.strip().upper() for t in states.strip().split("-")]
+                if state not in st_tokens:
+                    continue
+                cl = cities.lower()
+                if city and city in cl:
+                    first = cl.split("-")[0].strip()
+                    if first.startswith(city) or city.startswith(first):
+                        return code
+                    fallback = fallback or code
+            if fallback:
+                return fallback
+        return default
 
     def metro_name(self, metro_id: str) -> str:
         return self.data.get("metros", {}).get(metro_id, metro_id)
