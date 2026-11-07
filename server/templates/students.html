@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Future-proof careers for students | Jobcast{% endblock %}
+{% block description %}Choosing a career? See which paths are most resilient to AI and robots, with pay and the schooling they take.{% endblock %}
+{% block content %}
+<h1 style="margin-bottom:2px">Future careers worth aiming for</h1>
+<p class="lead" style="margin-top:0">Choosing a path or a major? These rank the most resilient, well-paid
+careers - low automation exposure, solid pay, and a positive wage trend - from the same real data.</p>
+
+<form class="card filter-grid" method="get" action="/students">
+  <div>
+    <label for="field">Interest or field</label>
+    <select id="field" name="field" onchange="this.form.submit()">
+      <option value="">Any field</option>
+      {% for f in families %}<option value="{{ f.code }}"{{ ' selected' if sel_field == f.code else '' }}>{{ f.name }}</option>{% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="education">Schooling I will do</label>
+    <select id="education" name="education" onchange="this.form.submit()">
+      <option value="">Any</option>
+      <option value="2"{{ ' selected' if sel_zone == '2' else '' }}>High school</option>
+      <option value="3"{{ ' selected' if sel_zone == '3' else '' }}>Some college or training</option>
+      <option value="4"{{ ' selected' if sel_zone == '4' else '' }}>Up to a bachelor's</option>
+      <option value="5"{{ ' selected' if sel_zone == '5' else '' }}>Up to graduate</option>
+    </select>
+  </div>
+  <div>
+    <label for="priority">What matters most</label>
+    <select id="priority" name="priority" onchange="this.form.submit()">
+      <option value="balanced"{{ ' selected' if sel_priority == 'balanced' else '' }}>Balanced</option>
+      <option value="safe"{{ ' selected' if sel_priority == 'safe' else '' }}>Lowest automation risk</option>
+      <option value="pay"{{ ' selected' if sel_priority == 'pay' else '' }}>Highest pay</option>
+    </select>
+  </div>
+</form>
+
+{% if careers %}
+<div class="career-grid">
+  {% for c in careers %}
+  <a class="career-card" href="/jobs/{{ c.soc }}">
+    <div class="cc-top"><span class="cc-title">{{ c.title }}</span><span class="jc-score safe">{{ c.resilience }}</span></div>
+    <div class="muted" style="font-size:12px">{{ c.family }}</div>
+    <div class="cc-meta">
+      <span>${{ "{:,.0f}".format(c.median_wage) }} median</span>
+      <span>{{ c.edu }}</span>
+      {% if c.trend > 0 %}<span style="color:var(--green)">pay rising</span>{% endif %}
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<p class="muted" style="margin-top:16px">No careers match those filters yet. Try widening the field or schooling.</p>
+{% endif %}
+
+<p class="muted" style="margin-top:16px">The green number is <strong>resilience</strong> (100 minus automation
+exposure - higher is safer). Careers are ranked on resilience, pay, and 5-year real wage trend. This is a
+guide, not a guarantee; each links to its full read. See <a href="/methodology">How it works</a>.</p>
+{% endblock %}

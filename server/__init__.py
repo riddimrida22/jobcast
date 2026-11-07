@@ -114,6 +114,21 @@ def create_app() -> Flask:
         result = engine.mitigation_plan(profile_from(source), tier_from_request())
         return jsonify(result)
 
+    @app.post("/v1/advice")
+    def api_advice():
+        body = request.get_json(silent=True) or request.form
+        profile = profile_from(body)
+        assessment = engine.assess(profile)
+        if not assessment.get("ok"):
+            return jsonify({"ok": False, "error": "occupation_not_found"}), 404
+        tier = (body.get("tier") or "tier2") if hasattr(body, "get") else "tier2"
+        from . import advice as advice_mod
+        ai = advice_mod.generate_plan(assessment, asdict(profile), tier=tier)
+        if ai:
+            return jsonify({"ok": True, "source": "ai", "strategies": ai})
+        n = advice_mod.TIER_N.get(tier, 3)
+        return jsonify({"ok": True, "source": "rules", "strategies": assessment.get("strategies", [])[:n]})
+
     # ---- HTML pages -----------------------------------------------------
     def _occupations():
         return [{"soc": o["soc"], "title": o["title"]}
@@ -180,6 +195,17 @@ def create_app() -> Flask:
                             "message": "Could not read that file. Try a .txt or .docx, or fill the form manually."}), 422
         parsed = resume_parser.parse_resume(text, engine.snapshot)
         return jsonify({"ok": True, **parsed})
+
+    @app.get("/students")
+    def students():
+        fam = request.args.get("field") or None
+        z = request.args.get("education")
+        max_zone = int(z) if z and z.isdigit() else None
+        priority = request.args.get("priority", "balanced")
+        careers = engine.future_careers(family=fam, max_zone=max_zone, priority=priority)
+        return render_template("students.html", version=VERSION, licensed=engine.snapshot.licensed,
+                               careers=careers, families=engine.snapshot.families(),
+                               sel_field=fam, sel_zone=z, sel_priority=priority)
 
     @app.get("/methodology")
     def methodology():

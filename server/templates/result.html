@@ -77,14 +77,20 @@
 {% if r.strategies %}
 <div id="p-strategy" class="panel card">
   <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><h2 style="margin:0">What to do about it</h2></div>
-  <p class="muted" style="margin-top:0">Strategies to protect your livelihood, most important first.
-  A paid plan expands each into a personalised, step-by-step version.</p>
+  <p style="margin:0 0 4px;font-weight:700;color:var(--accent);font-size:17px">Rise above the automation wave.</p>
+  <p class="muted" style="margin-top:0">Strategies to protect your livelihood, most important first.</p>
+  <div style="margin:2px 0 12px">
+    <button type="button" id="ai-plan-btn" class="secondary" style="margin:0" data-title="{{ r.occupation.title }}">Personalise this plan with AI</button>
+    <span id="ai-plan-status" class="muted" style="font-size:12px;margin-left:10px"></span>
+  </div>
+  <div id="strat-list">
   {% for st in r.strategies %}
   <div class="strat">
     <div class="strat-num">{{ loop.index }}</div>
     <div class="strat-t"><strong>{{ st.title }}</strong><div class="muted">{{ st.detail }}</div></div>
   </div>
   {% endfor %}
+  </div>
   <div class="tier-row">
     <div class="tier"><div class="tier-name">Free</div><div class="tier-sub">Your single top strategy</div></div>
     <div class="tier feat"><div class="tier-name">Tier 1</div><div class="tier-sub">The highest-impact move, in depth</div></div>
@@ -198,6 +204,37 @@
       });
     });
   })();
+</script>
+
+<script>
+(function () {
+  var btn = document.getElementById('ai-plan-btn'); if (!btn) return;
+  var status = document.getElementById('ai-plan-status'), list = document.getElementById('strat-list');
+  function getProfile() {
+    var el = document.getElementById('profile-data');
+    if (el) { try { return JSON.parse(el.textContent); } catch (e) {} }
+    return { title: btn.getAttribute('data-title') };
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  btn.addEventListener('click', function () {
+    status.textContent = 'Writing your plan...'; btn.disabled = true;
+    var prof = getProfile(); prof.tier = 'tier2';
+    fetch('/v1/advice', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(prof) })
+      .then(function (r) { return r.json(); }).then(function (d) {
+        btn.disabled = false;
+        if (!d.ok || !d.strategies || !d.strategies.length) { status.textContent = 'Could not generate a plan.'; return; }
+        list.innerHTML = '';
+        d.strategies.forEach(function (st, i) {
+          var row = document.createElement('div'); row.className = 'strat';
+          row.innerHTML = '<div class="strat-num">' + (i + 1) + '</div><div class="strat-t"><strong>' +
+            esc(st.title) + '</strong><div class="muted">' + esc(st.detail) + '</div></div>';
+          list.appendChild(row);
+        });
+        status.textContent = d.source === 'ai' ? 'Personalised by AI from your result.'
+          : 'Standard plan shown; add an Anthropic API key to enable AI personalisation.';
+      }).catch(function () { btn.disabled = false; status.textContent = 'Could not generate a plan.'; });
+  });
+})();
 </script>
 
 {% if not seo %}

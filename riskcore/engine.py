@@ -111,6 +111,41 @@ class Engine:
         return {"ok": True, "tier": tier_id, "options_count": n, "options": options,
                 "note": "Options derived from adjacency data; advice is explanatory, not a score."}
 
+    def future_careers(self, family: Optional[str] = None, max_zone: Optional[int] = None,
+                       priority: str = "balanced", n: int = 15) -> List[Dict[str, Any]]:
+        """Rank occupations by future fit for someone choosing a career: low automation
+        exposure, good pay, and a positive real-wage trend, within an optional field and
+        an education ceiling (O*NET job zone). Transparent, data-only ranking."""
+        edu = {1: "Minimal prep", 2: "High school", 3: "Some college or training",
+               4: "Bachelor's degree", 5: "Graduate degree"}
+        out = []
+        for o in self.snapshot.all_occupations():
+            wage = o.get("median_wage_national")
+            if wage is None:
+                continue
+            soc = o["soc"]
+            if family and self.snapshot.family_code(soc) != family:
+                continue
+            zone = o.get("job_zone")
+            if max_zone and zone and zone > max_zone:
+                continue
+            base = max(o.get("ai") or 0, o.get("robo") or 0) * 100
+            trend = o.get("wage_trend_5yr_real_pct") or 0
+            safe = 100 - base
+            paynorm = min(wage, 200000) / 2000.0          # 0..100
+            if priority == "safe":
+                fit = safe * 0.70 + paynorm * 0.20 + trend * 1.0
+            elif priority == "pay":
+                fit = safe * 0.30 + paynorm * 0.60 + trend * 1.0
+            else:
+                fit = safe * 0.50 + paynorm * 0.40 + trend * 1.2
+            out.append({"soc": soc, "title": o["title"], "base_exposure": round(base),
+                        "resilience": round(safe), "median_wage": wage, "job_zone": zone,
+                        "edu": edu.get(zone, "Varies"), "trend": round(trend, 1), "fit": round(fit, 1),
+                        "family": self.snapshot.family_name(self.snapshot.family_code(soc))})
+        out.sort(key=lambda x: -x["fit"])
+        return out[:n]
+
     # ---- scoring internals ----------------------------------------------
     def _score_axes(self, occ: Dict[str, Any], profile: Profile):
         tasks = occ.get("tasks", [])

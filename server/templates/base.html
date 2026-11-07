@@ -134,6 +134,18 @@
     [data-theme="dark"] .band.partial_5_10yr { background:rgba(200,138,46,.24); color:#ebb86e; }
     [data-theme="dark"] .band.near_term_high { background:rgba(224,117,89,.24); color:#f2ab91; }
     [data-theme="dark"] .g-num { fill:#f0f5fb; } [data-theme="dark"] .g-track { stroke:#2a3a4d; }
+
+    /* future-careers grid */
+    .career-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px; margin-top:16px; }
+    .career-card { display:block; text-decoration:none; color:var(--ink); background:var(--card);
+                   border:1px solid var(--line); border-radius:12px; padding:14px;
+                   box-shadow:0 3px 12px rgba(31,63,96,.05); }
+    .career-card:hover { border-color:var(--primary); }
+    .cc-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .cc-title { font-weight:600; line-height:1.25; }
+    .cc-meta { display:flex; flex-wrap:wrap; gap:4px 12px; margin-top:8px; font-size:12.5px; color:var(--muted); }
+    .filter-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px 16px; }
+    @media (max-width:620px) { .filter-grid { grid-template-columns:1fr; } }
     .chip { font-size:12.5px; font-weight:600; color:var(--primary); background:var(--primary-soft);
             border-radius:999px; padding:6px 13px; }
     [data-theme="dark"] .chip { color:#bcd2ee; }
@@ -243,7 +255,7 @@
   <header class="site"><div class="wrap">
     <a class="brand" href="/">Job<span>cast</span></a>
     <nav>
-      <a href="/">Check a job</a><a href="/methodology">How it works</a>
+      <a href="/">Check a job</a><a href="/students">Future careers</a><a href="/methodology">How it works</a>
       <button id="theme-toggle" type="button" aria-label="Toggle dark mode"
         style="margin:0 0 0 20px;padding:5px 12px;font-size:13px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);box-shadow:none;border-radius:999px;">Dark</button>
     </nav>
