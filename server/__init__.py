@@ -16,10 +16,14 @@ SIGNUP_FILE = Path(__file__).resolve().parents[1] / "data" / "signups.jsonl"
 # Reuse a generated plan for similar profiles so we do not re-run the (paid, slow) research
 # every time. The research is mostly occupation- and location-specific, so the signature keys
 # on what materially shapes the plan: occupation, metro, tier, and a coarse age band - not the
-# person's exact skills/experience. In-memory and best-effort (resets on redeploy).
-_PLAN_CACHE = {}                       # signature -> {"result": {...}, "ts": float}
+# person's exact skills/experience. Shared across gunicorn workers via an atomic JSON file
+# (best-effort; resets on redeploy since the instance disk is ephemeral).
+import tempfile  # noqa: E402
+
+_PLAN_CACHE = {}                       # in-process layer; signature -> {"result": {...}, "ts": float}
 _PLAN_CACHE_TTL = 60 * 60 * 24 * 30    # 30 days
 _PLAN_CACHE_MAX = 500
+_PLAN_CACHE_FILE = Path(tempfile.gettempdir()) / "jobcast_plan_cache.json"
 
 
 def _plan_signature(assessment, profile, tier):
@@ -28,6 +32,40 @@ def _plan_signature(assessment, profile, tier):
     age = getattr(profile, "age", None)
     age_band = (age // 10) if isinstance(age, int) else "na"
     return f"{soc}|{metro}|{tier}|{age_band}"
+
+
+def _cache_file_load():
+    try:
+        return json.loads(_PLAN_CACHE_FILE.read_text("utf-8"))
+    except Exception:
+        return {}
+
+
+def _cache_get(sig):
+    hit = _PLAN_CACHE.get(sig)
+    if hit is None:
+        hit = _cache_file_load().get(sig)
+        if hit:
+            _PLAN_CACHE[sig] = hit
+    if hit and (time.time() - hit.get("ts", 0)) < _PLAN_CACHE_TTL:
+        return hit
+    return None
+
+
+def _cache_put(sig, result):
+    entry = {"result": result, "ts": time.time()}
+    _PLAN_CACHE[sig] = entry
+    try:
+        data = _cache_file_load()
+        data[sig] = entry
+        if len(data) > _PLAN_CACHE_MAX:
+            for k in sorted(data, key=lambda k: data[k].get("ts", 0))[:len(data) - _PLAN_CACHE_MAX]:
+                data.pop(k, None)
+        tmp = _PLAN_CACHE_FILE.with_suffix(".tmp")
+        tmp.write_text(json.dumps(data), encoding="utf-8")
+        tmp.replace(_PLAN_CACHE_FILE)
+    except Exception:
+        pass
 
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 
@@ -147,18 +185,15 @@ def create_app() -> Flask:
 
         # Reuse a cached plan for a similar profile when we have a fresh one.
         sig = _plan_signature(assessment, profile, tier)
-        hit = _PLAN_CACHE.get(sig)
-        if hit and (time.time() - hit["ts"]) < _PLAN_CACHE_TTL:
+        hit = _cache_get(sig)
+        if hit:
             return jsonify({**hit["result"], "cached": True})
 
         ai = advice_mod.generate_plan(assessment, asdict(profile), tier=tier)
         if ai and ai.get("steps"):
             result = {"ok": True, "source": "ai", "strategies": ai["steps"],
                       "sources": ai.get("sources", [])}
-            if len(_PLAN_CACHE) >= _PLAN_CACHE_MAX:   # evict oldest
-                oldest = min(_PLAN_CACHE, key=lambda k: _PLAN_CACHE[k]["ts"])
-                _PLAN_CACHE.pop(oldest, None)
-            _PLAN_CACHE[sig] = {"result": result, "ts": time.time()}
+            _cache_put(sig, result)
             return jsonify({**result, "cached": False})
         n = advice_mod.TIER_N.get(tier, 3)
         return jsonify({"ok": True, "source": "rules",

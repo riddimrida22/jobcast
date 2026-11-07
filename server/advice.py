@@ -127,19 +127,29 @@ def _parse_steps(text: str, n: int) -> List[Dict[str, str]]:
     return out[:n]
 
 
-def _collect(msg) -> (str, List[Dict[str, str]]):
-    """Final text plus a de-duplicated list of {title, url} web-search citations."""
+def _collect(msg):
+    """Final text plus a de-duplicated list of {title, url} real web-search results.
+    Captures both inline citations and the retrieved web_search_tool_result items (the
+    model's JSON-only output usually has no inline citation spans)."""
     text, seen, sources = "", set(), []
+
+    def add(url, title):
+        if url and url not in seen:
+            seen.add(url)
+            sources.append({"title": (title or url)[:120], "url": url})
+
     for block in msg.content:
         t = getattr(block, "text", None)
         if t:
             text += t
         for cit in (getattr(block, "citations", None) or []):
-            url = getattr(cit, "url", None)
-            if url and url not in seen:
-                seen.add(url)
-                sources.append({"title": getattr(cit, "title", "") or url, "url": url})
-    return text, sources
+            add(getattr(cit, "url", None), getattr(cit, "title", ""))
+        if getattr(block, "type", "") == "web_search_tool_result":
+            content = getattr(block, "content", None) or []
+            if isinstance(content, list):
+                for item in content:
+                    add(getattr(item, "url", None), getattr(item, "title", ""))
+    return text, sources[:10]
 
 
 def generate_plan(assessment: Dict[str, Any], profile: Dict[str, Any],
