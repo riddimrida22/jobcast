@@ -175,6 +175,7 @@
   {% endfor %}
   </div>
   <script id="init-strats" type="application/json">{{ r.strategies | tojson }}</script>
+  <div id="deck-sources" class="deck-sources"></div>
 
   <!-- fullscreen slideshow of the plan -->
   <div id="sshow" class="sshow" hidden aria-modal="true" role="dialog" aria-label="Plan slideshow">
@@ -395,11 +396,17 @@
       rail += '<span class="dot ' + (d === hi ? 'on' : '') + '"></span>' + (d < 3 ? '<span class="seg"></span>' : '');
       labs += '<span class="' + (d === hi ? 'on' : '') + '">' + HL[d] + '</span>';
     }
+    var ev = '';
+    if (st.evidence) {
+      ev = '<div class="deck-ev"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.3 1 2.1h6c0-.8.4-1.5 1-2.1A6 6 0 0 0 12 3z"/></svg>' +
+        '<span>' + esc(st.evidence) + (st.source ? ' <b class="deck-src">' + esc(st.source) + '</b>' : '') + '</span></div>';
+    }
     return '<div class="deck-card">' +
       '<div class="deck-top"><span class="deck-num">' + (i + 1) + '</span><span class="deck-hz">' + esc(HZ[hi]) + '</span></div>' +
       '<svg class="deck-ic"><use href="#ic-' + icon + '"></use></svg>' +
       '<div class="deck-head">' + esc(head) + '</div>' +
       '<div class="deck-act">' + esc(act) + '</div>' +
+      ev +
       '<div class="deck-meters">' + bars(imp, 'impact') + bars(eff, 'effort') + '</div>' +
       '<div class="htrack"><div class="rail">' + rail + '</div><div class="labs">' + labs + '</div></div>' +
       '</div>';
@@ -431,9 +438,20 @@
         if (busyEl) busyEl.disabled = false;
         if (!d.ok || !d.strategies || !d.strategies.length) { status.textContent = 'Could not generate a plan.'; return; }
         renderDeck(d.strategies);
-        status.textContent = d.source === 'ai'
-          ? 'Your ' + label + ' plan, built from your result.'
-          : 'Starter preview shown. Upgrade to a paid plan for an AI-written plan.';
+        var srcEl = document.getElementById('deck-sources');
+        if (srcEl) {
+          if (d.sources && d.sources.length) {
+            srcEl.innerHTML = '<strong>Researched sources:</strong> ' + d.sources.slice(0, 8).map(function (s) {
+              return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.title || s.url) + '</a>';
+            }).join(' &middot; ');
+          } else { srcEl.innerHTML = ''; }
+        }
+        if (d.source === 'ai') {
+          status.textContent = 'Your ' + label + ' plan, researched for your profile.'
+            + (d.cached ? ' (reused from a matching profile)' : '');
+        } else {
+          status.textContent = 'Starter preview shown. Upgrade to a paid plan for an AI-researched plan.';
+        }
       }).catch(function () { if (busyEl) busyEl.disabled = false; status.textContent = 'Could not generate a plan.'; });
   }
   if (btn) btn.addEventListener('click', function () { generate('tier2', btn); });

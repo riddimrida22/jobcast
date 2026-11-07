@@ -13,6 +13,22 @@ from pathlib import Path
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 SIGNUP_FILE = Path(__file__).resolve().parents[1] / "data" / "signups.jsonl"
 
+# Reuse a generated plan for similar profiles so we do not re-run the (paid, slow) research
+# every time. The research is mostly occupation- and location-specific, so the signature keys
+# on what materially shapes the plan: occupation, metro, tier, and a coarse age band - not the
+# person's exact skills/experience. In-memory and best-effort (resets on redeploy).
+_PLAN_CACHE = {}                       # signature -> {"result": {...}, "ts": float}
+_PLAN_CACHE_TTL = 60 * 60 * 24 * 30    # 30 days
+_PLAN_CACHE_MAX = 500
+
+
+def _plan_signature(assessment, profile, tier):
+    soc = assessment.get("occupation", {}).get("soc", "?")
+    metro = assessment.get("location", {}).get("metro_id", "US")
+    age = getattr(profile, "age", None)
+    age_band = (age // 10) if isinstance(age, int) else "na"
+    return f"{soc}|{metro}|{tier}|{age_band}"
+
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -128,11 +144,25 @@ def create_app() -> Flask:
             return jsonify({"ok": False, "error": "occupation_not_found"}), 404
         tier = (body.get("tier") or "tier2") if hasattr(body, "get") else "tier2"
         from . import advice as advice_mod
+
+        # Reuse a cached plan for a similar profile when we have a fresh one.
+        sig = _plan_signature(assessment, profile, tier)
+        hit = _PLAN_CACHE.get(sig)
+        if hit and (time.time() - hit["ts"]) < _PLAN_CACHE_TTL:
+            return jsonify({**hit["result"], "cached": True})
+
         ai = advice_mod.generate_plan(assessment, asdict(profile), tier=tier)
-        if ai:
-            return jsonify({"ok": True, "source": "ai", "strategies": ai})
+        if ai and ai.get("steps"):
+            result = {"ok": True, "source": "ai", "strategies": ai["steps"],
+                      "sources": ai.get("sources", [])}
+            if len(_PLAN_CACHE) >= _PLAN_CACHE_MAX:   # evict oldest
+                oldest = min(_PLAN_CACHE, key=lambda k: _PLAN_CACHE[k]["ts"])
+                _PLAN_CACHE.pop(oldest, None)
+            _PLAN_CACHE[sig] = {"result": result, "ts": time.time()}
+            return jsonify({**result, "cached": False})
         n = advice_mod.TIER_N.get(tier, 3)
-        return jsonify({"ok": True, "source": "rules", "strategies": assessment.get("strategies", [])[:n]})
+        return jsonify({"ok": True, "source": "rules",
+                        "strategies": assessment.get("strategies", [])[:n], "sources": []})
 
     # ---- HTML pages -----------------------------------------------------
     def _occupations():
