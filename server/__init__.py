@@ -477,6 +477,16 @@ def create_app() -> Flask:
         if not admin_key or request.args.get("key") != admin_key:
             from flask import abort
             abort(404)
+        # One-off deliverability test: ?test=you@example.com sends a single email and
+        # returns the result, so the live Resend pipeline can be verified without a shell.
+        test_to = (request.args.get("test") or "").strip()
+        if test_to:
+            from . import emailer
+            ok, info = emailer.send(
+                test_to, "JobBreak test alert",
+                "Your JobBreak outlook alerts are working. This is a one-time test; no action needed.",
+                "<p>Your <b>JobBreak</b> outlook alerts are working. This is a one-time test; no action needed.</p>")
+            return jsonify({"ok": ok, "test_sent_to": test_to, "info": (info or "")[:120]})
         from . import alerts
         dry = request.args.get("dry") == "1"
         summary = alerts.run_check(engine, dry_run=dry)
