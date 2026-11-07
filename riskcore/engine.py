@@ -130,7 +130,10 @@ class Engine:
             if family and self.snapshot.family_code(soc) != family:
                 continue
             zone = o.get("job_zone")
-            if max_zone and zone and zone > max_zone:
+            # When a schooling ceiling is set, drop anything above it AND anything whose
+            # required schooling we can't confirm (zone missing) - otherwise catch-all
+            # occupations with no job zone slip past the filter.
+            if max_zone and (zone is None or zone > max_zone):
                 continue
             base = max(o.get("ai") or 0, o.get("robo") or 0) * 100
             safe = 100 - base
