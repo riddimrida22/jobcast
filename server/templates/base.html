@@ -6,50 +6,84 @@
   <title>{% block title %}Jobcast{% endblock %}</title>
   <meta name="description" content="{% block description %}An honest, sourced read on whether AI or robots are likely to replace your job, and when.{% endblock %}">
   {% if noindex %}<meta name="robots" content="noindex, nofollow">{% endif %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { --ink:#1b1f24; --muted:#5b6670; --line:#e2e6ea; --bg:#f7f8fa;
-            --ai:#2f6fb0; --robo:#b05a2f; --ok:#2e7d52; --warn:#b03a3a; }
-    * { box-sizing: border-box; }
-    body { margin:0; font:16px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-           color:var(--ink); background:var(--bg); }
-    .wrap { max-width:760px; margin:0 auto; padding:24px 20px 64px; }
-    header.site { border-bottom:1px solid var(--line); background:#fff; }
-    header.site .wrap { padding:16px 20px; display:flex; justify-content:space-between; align-items:baseline; }
-    .brand { font-weight:700; font-size:20px; text-decoration:none; color:var(--ink); }
-    .brand span { color:var(--ai); }
-    nav a { color:var(--muted); text-decoration:none; margin-left:16px; font-size:14px; }
-    .dev-banner { background:#fff6e5; border-bottom:1px solid #f0d9a8; color:#7a5b16;
-                  font-size:13px; text-align:center; padding:6px 12px; }
-    h1 { font-size:26px; margin:8px 0 4px; }
-    h2 { font-size:18px; margin:28px 0 8px; }
-    .lead { color:var(--muted); margin-top:0; }
-    .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin:16px 0; }
-    label { display:block; font-size:13px; color:var(--muted); margin:12px 0 4px; }
-    input, select { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font-size:15px; }
-    .row { display:flex; gap:14px; } .row > div { flex:1; }
+    :root {
+      --bg-a:#eef2f6; --bg-b:#d4dde6; --card:#fbfcfd; --line:#b8c3cf;
+      --ink:#1e2d3f; --muted:#5f6f83; --primary:#2f4f73; --primary-dark:#1f3f60;
+      --primary-soft:#dbe6f2; --accent:#f3a35f; --accent-soft:#fde8d2;
+      --shell:#112741; --shell-dark:#0b1a2e; --green:#147b74; --red:#b0422b;
+      --ai:#2f4f73; --robo:#c06a33; --row-head:#f1f5f9;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); min-height:100vh;
+           font-family:"Poppins","Trebuchet MS","Gill Sans",sans-serif;
+           background:radial-gradient(1200px 700px at 20% -10%, var(--bg-b), var(--bg-a)) fixed; }
+    a { color:var(--primary); }
+    .wrap { max-width:820px; margin:0 auto; padding:26px 20px 72px; }
+
+    header.site { background:linear-gradient(180deg,var(--shell),var(--shell-dark)); color:#fff;
+                  box-shadow:0 2px 14px rgba(11,26,46,.28); position:sticky; top:0; z-index:20; }
+    header.site .wrap { padding:15px 20px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; }
+    .brand { font-weight:700; font-size:22px; letter-spacing:.2px; text-decoration:none; color:#fff; }
+    .brand span { color:var(--accent); }
+    nav a { color:#c4d2e4; text-decoration:none; margin-left:20px; font-size:14px; font-weight:500; }
+    nav a:hover { color:#fff; }
+
+    .dev-banner { background:var(--accent-soft); border-bottom:1px solid #f0cfa6; color:#7a4f16;
+                  font-size:13px; font-weight:500; text-align:center; padding:7px 12px; }
+
+    h1 { font-size:30px; font-weight:700; margin:10px 0 6px; letter-spacing:-.4px; line-height:1.15; }
+    h2 { font-size:19px; font-weight:600; margin:0 0 10px; }
+    .lead { color:var(--muted); margin-top:0; font-size:16px; }
+
+    .card { background:var(--card); border:1px solid var(--line); border-radius:14px;
+            padding:22px 24px; margin:18px 0; box-shadow:0 6px 20px rgba(31,63,96,.07); }
+
+    label { display:block; font-size:12.5px; font-weight:600; color:var(--muted);
+            text-transform:uppercase; letter-spacing:.04em; margin:14px 0 5px; }
+    input, select { width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:9px;
+                    font:inherit; font-size:15px; background:#fff; color:var(--ink); }
+    input:focus, select:focus { outline:2px solid var(--primary-soft); border-color:var(--primary); }
+    .row { display:flex; gap:16px; } .row > div { flex:1; }
     .combo { position:relative; }
-    .combo-list { position:absolute; left:0; right:0; z-index:5; background:#fff;
-                  border:1px solid var(--line); border-top:0; border-radius:0 0 8px 8px;
-                  max-height:260px; overflow:auto; box-shadow:0 6px 18px rgba(0,0,0,.08); }
-    .combo-item { padding:9px 12px; cursor:pointer; font-size:15px; }
-    .combo-item:hover { background:var(--bg); }
-    button { margin-top:18px; background:var(--ai); color:#fff; border:0; border-radius:8px;
-             padding:12px 18px; font-size:16px; cursor:pointer; }
-    button.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); }
-    .bar { height:12px; border-radius:6px; background:var(--line); overflow:hidden; margin:4px 0 2px; }
-    .bar > span { display:block; height:100%; }
-    .bar.ai > span { background:var(--ai); } .bar.robo > span { background:var(--robo); }
-    .score { font-weight:700; } .muted { color:var(--muted); font-size:13px; }
-    .band { display:inline-block; padding:3px 10px; border-radius:999px; font-size:13px; font-weight:600; }
-    .band.largely_unaffected { background:#e6f4ec; color:var(--ok); }
-    .band.partial_5_10yr { background:#fff1db; color:#8a5a12; }
-    .band.near_term_high { background:#fbe7e7; color:var(--warn); }
+    .combo-list { position:absolute; left:0; right:0; z-index:5; background:#fff; border:1px solid var(--line);
+                  border-top:0; border-radius:0 0 10px 10px; max-height:280px; overflow:auto;
+                  box-shadow:0 10px 26px rgba(31,63,96,.16); }
+    .combo-item { padding:10px 13px; cursor:pointer; font-size:15px; }
+    .combo-item:hover { background:var(--primary-soft); }
+
+    button { margin-top:20px; border:1px solid var(--primary-dark); border-radius:11px;
+             padding:12px 22px; font:inherit; font-size:16px; font-weight:600; color:#fff; cursor:pointer;
+             background:linear-gradient(180deg,var(--primary),var(--primary-dark));
+             box-shadow:0 2px 6px rgba(19,37,59,.18); transition:transform .12s ease, box-shadow .15s ease, filter .15s ease; }
+    button:hover { filter:brightness(1.05); box-shadow:0 6px 16px rgba(19,37,59,.26); }
+    button:active { transform:translateY(1px); }
+    button.secondary { background:#fff; color:var(--primary); border:1px solid var(--line);
+                       box-shadow:none; margin:6px 8px 0 0; padding:9px 16px; font-size:14px; }
+    button.secondary:hover { background:var(--primary-soft); filter:none; }
+
+    .bar { height:14px; border-radius:8px; background:#e6ebf1; overflow:hidden; margin:6px 0 4px; }
+    .bar > span { display:block; height:100%; border-radius:8px; }
+    .bar.ai > span { background:linear-gradient(90deg,#3a5f88,var(--ai)); }
+    .bar.robo > span { background:linear-gradient(90deg,#d08650,var(--robo)); }
+    .score { font-weight:700; font-size:20px; color:var(--ink); } .muted { color:var(--muted); font-size:13px; }
+
+    .band { display:inline-block; padding:4px 13px; border-radius:999px; font-size:13px; font-weight:600; }
+    .band.largely_unaffected { background:#e3f3ec; color:var(--green); }
+    .band.partial_5_10yr { background:var(--accent-soft); color:#8a5512; }
+    .band.near_term_high { background:#f7e1dc; color:var(--red); }
+
     table { width:100%; border-collapse:collapse; font-size:14px; }
-    th, td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); }
-    .tag { font-size:12px; padding:2px 7px; border-radius:999px; }
-    .tag.exposed { background:#fbe7e7; color:var(--warn); } .tag.protected { background:#e6f4ec; color:var(--ok); }
-    ul.sources { font-size:13px; color:var(--muted); padding-left:18px; }
-    footer { color:var(--muted); font-size:12px; border-top:1px solid var(--line); margin-top:36px; padding-top:14px; }
+    th { text-align:left; padding:9px 10px; font-size:12px; text-transform:uppercase; letter-spacing:.04em;
+         color:var(--muted); background:var(--row-head); border-bottom:1px solid var(--line); }
+    th:first-child { border-radius:8px 0 0 0; } th:last-child { border-radius:0 8px 0 0; }
+    td { text-align:left; padding:10px; border-bottom:1px solid #e7ecf1; }
+    .tag { font-size:12px; font-weight:600; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+    .tag.exposed { background:#f7e1dc; color:var(--red); } .tag.protected { background:#e3f3ec; color:var(--green); }
+    ul.sources { font-size:13px; color:var(--muted); padding-left:18px; line-height:1.7; }
+    footer { color:var(--muted); font-size:12px; border-top:1px solid var(--line); margin-top:40px; padding-top:16px; }
   </style>
 </head>
 <body>
@@ -66,7 +100,7 @@
     {% block content %}{% endblock %}
     <footer>
       Jobcast {{ version }}. Results are probability ranges, not verdicts.
-      Sources shown on the <a href="/methodology">How it works</a> page.
+      Sources on the <a href="/methodology">How it works</a> page.
     </footer>
   </div>
 </body>
