@@ -77,7 +77,7 @@ def create_checkout_session(tier, period, success_url, cancel_url, email=None):
 
 def retrieve_session(session_id):
     try:
-        return _client().checkout.Session.retrieve(session_id)
+        return _client().checkout.Session.retrieve(session_id, expand=["line_items"])
     except Exception as e:
         print(f"[payments] session retrieve failed: {e}", file=sys.stderr, flush=True)
         return None
@@ -91,13 +91,39 @@ def _get(obj, key):
     return getattr(obj, key, None)
 
 
+def _tier_for_price(pid):
+    if not pid:
+        return None
+    for (tier, _period), env in PRICE_ENV.items():
+        if os.environ.get(env) == pid:
+            return tier
+    return None
+
+
 def tier_from_session(session):
-    """The advice tier a *completed* checkout grants, or None."""
+    """The advice tier a completed checkout grants, or None. Robust to subscription mode
+    (which signals completion via status == 'complete') and to missing metadata (falls back
+    to the purchased price)."""
+    if not session:
+        return None
+    status = _get(session, "status")
+    pstatus = _get(session, "payment_status")
     md = _get(session, "metadata") or {}
     tier = md.get("tier") if hasattr(md, "get") else None
-    if tier in TIER_RANK and tier != "free":
-        if _get(session, "payment_status") in ("paid", "no_payment_required"):
-            return tier
+    if not tier:
+        try:
+            items = _get(_get(session, "line_items"), "data") or []
+            for it in items:
+                tier = _tier_for_price(_get(_get(it, "price"), "id"))
+                if tier:
+                    break
+        except Exception:
+            pass
+    print(f"[payments] success session tier={tier} status={status} payment_status={pstatus}",
+          file=sys.stderr, flush=True)
+    done = (status == "complete") or (pstatus in ("paid", "no_payment_required"))
+    if done and tier in TIER_RANK and tier != "free":
+        return tier
     return None
 
 
