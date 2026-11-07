@@ -1,6 +1,5 @@
 node_modules/
-# Native platform projects are regenerated with `npx cap add ios|android`
-ios/
 android/
-.DS_Store
-*.log
+ios/
+*.keystore
+.gradle/

@@ -1,0 +1,9 @@
+.git
+.gitignore
+mobile
+**/node_modules
+**/__pycache__
+*.pyc
+*.db
+data/signups.jsonl
+data/subscriptions.jsonl
