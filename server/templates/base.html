@@ -269,12 +269,14 @@
         70%{transform:translate(var(--predEnd),-50%)} 73%{transform:translate(610px,-50%)} 78%{transform:translate(624px,-50%)}
         96%{transform:translate(624px,-50%)} 100%{transform:translate(44px,-50%)} }
     .ai-g{width:48px;height:48px;position:relative;filter:drop-shadow(0 2px 3px rgba(20,30,45,.35))}
-    .ai-g .jaw{position:absolute;left:0;width:48px;height:24px;background:linear-gradient(180deg,#ef9d5c,#da7338);overflow:hidden}
-    .ai-g .top{top:0;border-radius:48px 48px 0 0;transform-origin:50% 100%;animation:gobChompT .42s ease-in-out infinite}
-    .ai-g .bot{bottom:0;border-radius:0 0 48px 48px;transform-origin:50% 0;animation:gobChompB .42s ease-in-out infinite}
-    .ai-g .eye{position:absolute;top:9px;left:21px;width:4.5px;height:4.5px;border-radius:50%;background:#1a2230;z-index:3}
-    @keyframes gobChompT{0%,100%{transform:rotate(-33deg)}50%{transform:rotate(0)}}
-    @keyframes gobChompB{0%,100%{transform:rotate(33deg)}50%{transform:rotate(0)}}
+    .ai-g .body{position:absolute;top:0;left:0;width:48px;height:48px;border-radius:50%;
+        background:radial-gradient(circle at 38% 33%, #ffe06b, #f5b301 62%, #e59a00);
+        clip-path:polygon(100% 22%,50% 50%,100% 78%,100% 100%,0 100%,0 0,100% 0);
+        animation:pacChomp .38s ease-in-out infinite}
+    .ai-g .eye{position:absolute;top:8px;left:22px;width:4.5px;height:4.5px;border-radius:50%;background:#20303f;z-index:3}
+    @keyframes pacChomp{
+        0%,100%{clip-path:polygon(100% 22%,50% 50%,100% 78%,100% 100%,0 100%,0 0,100% 0)}
+        50%{clip-path:polygon(100% 49%,50% 50%,100% 51%,100% 100%,0 100%,0 0,100% 0)}}
     .rb2{width:60px;height:50px;position:relative;filter:drop-shadow(0 4px 5px rgba(20,30,45,.42))}
     .rb2 .ant{position:absolute;top:-13px;left:17px;width:2px;height:13px;background:var(--metal-b)}
     .rb2 .ant::after{content:"";position:absolute;top:-7px;left:-3px;width:8px;height:8px;border-radius:50%;background:#ff5b45;box-shadow:0 0 9px #ff5b45;animation:rbBlink 1.2s steps(1) infinite}
@@ -318,7 +320,7 @@
     [data-theme="dark"] .gob-actnow{background:rgba(224,117,89,.14);border-color:rgba(224,117,89,.32);color:#f2ab91}
     @keyframes gobActFlash{0%,60%{opacity:.22;transform:scale(.95)}66%{opacity:1;transform:scale(1.16)}72%{opacity:1;transform:scale(1)}86%{opacity:1}94%{opacity:.5}100%{opacity:.22;transform:scale(.95)}}
     @media (prefers-reduced-motion:reduce) {
-      .gob .pred,.ai-g .top,.ai-g .bot,.ai-g .eye,.ai-g .ai,.rb2 .jaw,.rb2 .eye,.rb2 .ant::after,.gob .wall,.gob-actnow,.gob .eatc,.gob .escape,.gob .ai-esc .cap,.gob .rb-esc .cap,.gob .hg .sand-t::after,.gob .hg .sand-b::after,.gob .hg .stream { animation:none !important; }
+      .gob .pred,.ai-g .body,.rb2 .jaw,.rb2 .eye,.rb2 .ant::after,.gob .wall,.gob-actnow,.gob .eatc,.gob .escape,.gob .ai-esc .cap,.gob .rb-esc .cap,.gob .hg .sand-t::after,.gob .hg .sand-b::after,.gob .hg .stream { animation:none !important; }
       .gob .wall { transform:translateY(0); } .gob .pred { left:8px; } .gob-actnow { opacity:1; }
       .gob .escape { transform:translate(0,0); } .gob .ai-esc .cap,.gob .rb-esc .cap { color:var(--green); }
     }
