@@ -118,6 +118,9 @@ class Engine:
         an education ceiling (O*NET job zone). Transparent, data-only ranking."""
         edu = {1: "Minimal prep", 2: "High school", 3: "Some college or training",
                4: "Bachelor's degree", 5: "Graduate degree"}
+        # These are "careers worth aiming for" lists on a page about AI resilience, so a job
+        # more exposed than this never belongs on them, however fast it is growing.
+        SAFE_FLOOR = 50
         out = []
         for o in self.snapshot.all_occupations():
             wage = o.get("median_wage_national")
@@ -130,17 +133,25 @@ class Engine:
             if max_zone and zone and zone > max_zone:
                 continue
             base = max(o.get("ai") or 0, o.get("robo") or 0) * 100
+            safe = 100 - base
+            if safe < SAFE_FLOOR:
+                continue
             growth = o.get("projection_pct")              # BLS 2020-2030 projected % change
             if growth is None:
                 growth = o.get("wage_trend_5yr_real_pct") or 0
-            safe = 100 - base
+            # Growth only tilts the ranking; it never leads it. Some occupations show huge
+            # projected growth off a depressed 2020 base (e.g. pandemic-hit roles), so clamp
+            # to a sane band and normalise to 0..100 before weighting. The card still shows
+            # the real, unclamped figure.
+            g = max(-20.0, min(15.0, growth))
+            gnorm = (g + 20.0) / 35.0 * 100.0             # 0..100 within the clamped band
             paynorm = min(wage, 200000) / 2000.0          # 0..100
             if priority == "safe":
-                fit = safe * 0.60 + paynorm * 0.20 + growth * 1.5
+                fit = safe * 0.65 + paynorm * 0.20 + gnorm * 0.15
             elif priority == "pay":
-                fit = safe * 0.25 + paynorm * 0.55 + growth * 1.5
+                fit = safe * 0.30 + paynorm * 0.55 + gnorm * 0.15
             else:
-                fit = safe * 0.45 + paynorm * 0.35 + growth * 2.0
+                fit = safe * 0.50 + paynorm * 0.30 + gnorm * 0.20
             out.append({"soc": soc, "title": o["title"], "base_exposure": round(base),
                         "resilience": round(safe), "median_wage": wage, "job_zone": zone,
                         "edu": edu.get(zone, "Varies"), "growth": round(growth, 1), "fit": round(fit, 1),

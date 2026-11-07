@@ -326,6 +326,19 @@ def create_app() -> Flask:
         max_zone = int(z) if z and z.isdigit() else None
         priority = request.args.get("priority", "balanced")
         careers = engine.future_careers(family=fam, max_zone=max_zone, priority=priority)
+        # Decorative, data-driven: a glyph per SOC major group, and a short "time in school"
+        # hint per O*NET job zone. Both derive from fields already on each career.
+        fam_emoji = {"11": "\U0001F4BC", "13": "\U0001F4CA", "15": "\U0001F4BB", "17": "\U0001F3D7",
+                     "19": "\U0001F52C", "21": "\U0001F91D", "23": "⚖", "25": "\U0001F393",
+                     "27": "\U0001F3A8", "29": "\U0001FA7A", "31": "\U0001F9D1", "33": "\U0001F6E1",
+                     "35": "\U0001F373", "37": "\U0001F9F9", "39": "\U0001F487", "41": "\U0001F6D2",
+                     "43": "\U0001F5C2", "45": "\U0001F33E", "47": "\U0001F477", "49": "\U0001F527",
+                     "51": "\U0001F3ED", "53": "\U0001F69A"}
+        school = {1: "Little to none", 2: "High school", 3: "1-2 yrs after HS",
+                  4: "~4 yr degree", 5: "Grad school"}
+        for c in careers:
+            c["emoji"] = fam_emoji.get((c["soc"] or "")[:2], "\U0001F9ED")
+            c["school"] = school.get(c.get("job_zone"), "Varies")
         return render_template("students.html", version=VERSION, licensed=engine.snapshot.licensed,
                                careers=careers, families=engine.snapshot.families(),
                                sel_field=fam, sel_zone=z, sel_priority=priority)

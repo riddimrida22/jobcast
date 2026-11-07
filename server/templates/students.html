@@ -1,58 +1,106 @@
 {% extends "base.html" %}
 {% block title %}Future-proof careers for students | JobBreak{% endblock %}
-{% block description %}Choosing a career? See which paths are most resilient to AI and robots, with pay and the schooling they take.{% endblock %}
+{% block description %}Choosing a career or major? See which paths AI and robots can't easily automate, with pay and years of school, ranked from real government data.{% endblock %}
 {% block content %}
-<h1 style="margin-bottom:2px">Future careers worth aiming for</h1>
-<p class="lead" style="margin-top:0">Choosing a path or a major? These rank the most resilient, well-paid
-careers - low automation exposure, solid pay, and a positive wage trend - from the same real data.</p>
 
-<form class="card filter-grid" method="get" action="/students">
-  <div>
-    <label for="field">Interest or field</label>
-    <select id="field" name="field" onchange="this.form.submit()">
-      <option value="">Any field</option>
-      {% for f in families %}<option value="{{ f.code }}"{{ ' selected' if sel_field == f.code else '' }}>{{ f.name }}</option>{% endfor %}
-    </select>
+<section class="stu-hero">
+  <span class="stu-eyebrow">Free | No sign-up | Real data</span>
+  <h1>Pick a career the robots can't take</h1>
+  <p class="stu-lead">Choosing a major or a first job? These are the paths that pay well <em>and</em> are
+  hard for AI and machines to automate. Ranked from the same government data the pros use, not vibes.</p>
+  <div class="stu-trust">
+    <span><b>900+</b> jobs scored</span>
+    <span><b>O*NET + BLS</b> data</span>
+    <span><b>Updated</b> yearly</span>
   </div>
-  <div>
-    <label for="education">Schooling I will do</label>
-    <select id="education" name="education" onchange="this.form.submit()">
-      <option value="">Any</option>
-      <option value="2"{{ ' selected' if sel_zone == '2' else '' }}>High school</option>
-      <option value="3"{{ ' selected' if sel_zone == '3' else '' }}>Some college or training</option>
-      <option value="4"{{ ' selected' if sel_zone == '4' else '' }}>Up to a bachelor's</option>
-      <option value="5"{{ ' selected' if sel_zone == '5' else '' }}>Up to graduate</option>
-    </select>
+</section>
+
+<form class="stu-filter" method="get" action="/students">
+  <div class="sf-row">
+    <div class="sf-field">
+      <label for="field">I'm into</label>
+      <select id="field" name="field" onchange="this.form.submit()">
+        <option value="">Anything</option>
+        {% for f in families %}<option value="{{ f.code }}"{{ ' selected' if sel_field == f.code else '' }}>{{ f.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="sf-field">
+      <label for="education">I'll study</label>
+      <select id="education" name="education" onchange="this.form.submit()">
+        <option value="">Any length</option>
+        <option value="2"{{ ' selected' if sel_zone == '2' else '' }}>Just high school</option>
+        <option value="3"{{ ' selected' if sel_zone == '3' else '' }}>A year or two after</option>
+        <option value="4"{{ ' selected' if sel_zone == '4' else '' }}>Up to a 4-year degree</option>
+        <option value="5"{{ ' selected' if sel_zone == '5' else '' }}>Grad school is fine</option>
+      </select>
+    </div>
   </div>
-  <div>
-    <label for="priority">What matters most</label>
-    <select id="priority" name="priority" onchange="this.form.submit()">
-      <option value="balanced"{{ ' selected' if sel_priority == 'balanced' else '' }}>Balanced</option>
-      <option value="safe"{{ ' selected' if sel_priority == 'safe' else '' }}>Lowest automation risk</option>
-      <option value="pay"{{ ' selected' if sel_priority == 'pay' else '' }}>Highest pay</option>
-    </select>
+  <div class="sf-rank">
+    <span class="sf-rank-label">Rank by</span>
+    <div class="seg">
+      <label class="{{ 'on' if sel_priority == 'balanced' else '' }}"><input type="radio" name="priority" value="balanced" onchange="this.form.submit()"{{ ' checked' if sel_priority == 'balanced' else '' }}>Best all-round</label>
+      <label class="{{ 'on' if sel_priority == 'safe' else '' }}"><input type="radio" name="priority" value="safe" onchange="this.form.submit()"{{ ' checked' if sel_priority == 'safe' else '' }}>Safest from AI</label>
+      <label class="{{ 'on' if sel_priority == 'pay' else '' }}"><input type="radio" name="priority" value="pay" onchange="this.form.submit()"{{ ' checked' if sel_priority == 'pay' else '' }}>Best paid</label>
+    </div>
   </div>
 </form>
 
 {% if careers %}
-<div class="career-grid">
+<div class="stu-grid">
   {% for c in careers %}
-  <a class="career-card" href="/jobs/{{ c.soc }}">
-    <div class="cc-top"><span class="cc-title">{{ c.title }}</span><span class="jc-score safe">{{ c.resilience }}</span></div>
-    <div class="muted" style="font-size:12px">{{ c.family }}</div>
-    <div class="cc-meta">
-      <span>${{ "{:,.0f}".format(c.median_wage) }} median</span>
-      <span>{{ c.edu }}</span>
-      {% if c.growth is not none %}<span style="color:{{ 'var(--green)' if c.growth >= 7 else 'var(--muted)' }}">{{ '+' if c.growth > 0 else '' }}{{ c.growth }}% by 2030</span>{% endif %}
+  <a class="stu-card{{ ' top' if loop.index <= 3 else '' }}" href="/jobs/{{ c.soc }}">
+    {% if loop.index <= 3 %}<span class="sc-rank">{{ ['\U0001F947','\U0001F948','\U0001F949'][loop.index0] }} Top pick</span>{% endif %}
+    <div class="sc-head">
+      <span class="sc-emoji">{{ c.emoji }}</span>
+      <span class="sc-titles">
+        <span class="sc-title">{{ c.title }}</span>
+        <span class="sc-fam">{{ c.family }}</span>
+      </span>
+    </div>
+    <div class="sc-body">
+      <span class="ring" style="--p:{{ c.resilience }}"><b>{{ c.resilience }}</b><small>safe</small></span>
+      <span class="sc-stats">
+        <span class="sc-stat"><b>${{ "{:,.0f}".format(c.median_wage) }}</b><span>median pay</span></span>
+        <span class="sc-stat"><b>{{ c.school }}</b><span>in school</span></span>
+        {% if c.growth is not none %}<span class="sc-stat"><b class="{{ 'up' if c.growth > 0 else ('down' if c.growth < 0 else '') }}">{{ '+' if c.growth > 0 else '' }}{{ c.growth }}%</b><span>jobs by 2030</span></span>{% endif %}
+      </span>
     </div>
   </a>
   {% endfor %}
 </div>
 {% else %}
-<p class="muted" style="margin-top:16px">No careers match those filters yet. Try widening the field or schooling.</p>
+<p class="muted" style="margin-top:18px">Nothing matches those picks yet. Try widening the field or the schooling.</p>
 {% endif %}
 
-<p class="muted" style="margin-top:16px">The green number is <strong>resilience</strong> (100 minus automation
-exposure - higher is safer). Careers are ranked on resilience, pay, and 5-year real wage trend. This is a
-guide, not a guarantee; each links to its full read. See <a href="/methodology">How it works</a>.</p>
+<section class="share-band">
+  <div class="sb-copy">
+    <strong>Found your path?</strong>
+    <span>Screenshot it for the group chat, or send the link. It's free and there's no sign-up.</span>
+  </div>
+  <div class="sb-btns">
+    <button type="button" id="stuShare">Share</button>
+    <button type="button" id="stuCopy">Copy link</button>
+  </div>
+</section>
+
+<p class="stu-note">The ring is each career's <strong>safe score</strong> - 100 minus how exposed its tasks are
+to AI and robots, so higher is safer. Picks are ranked on that score, pay, and how much the job is projected
+to grow. It's a guide, not a promise; tap any card for the full breakdown and sources. See
+<a href="/methodology">How it works</a>.</p>
+
+<script>
+(function () {
+  var url = window.location.origin + "/students";
+  var share = document.getElementById("stuShare");
+  var copy = document.getElementById("stuCopy");
+  var data = { title: "JobBreak - careers AI can't take", text: "Careers that pay well and are hard to automate:", url: url };
+  if (share) share.addEventListener("click", function () {
+    if (navigator.share) { navigator.share(data).catch(function () {}); }
+    else if (navigator.clipboard) { navigator.clipboard.writeText(url); share.textContent = "Link copied"; }
+  });
+  if (copy) copy.addEventListener("click", function () {
+    if (navigator.clipboard) { navigator.clipboard.writeText(url); copy.textContent = "Copied"; setTimeout(function () { copy.textContent = "Copy link"; }, 1600); }
+  });
+})();
+</script>
 {% endblock %}
