@@ -189,6 +189,15 @@
                              70% { box-shadow:0 0 0 7px rgba(199,58,42,0); }
                              100% { box-shadow:0 0 0 0 rgba(199,58,42,0); } }
     @media (prefers-reduced-motion:reduce) { .urgent-dot { animation:none; } }
+    /* fast-ticking clock in the urgency tag */
+    .tick-clock { width:15px; height:15px; flex:0 0 auto; }
+    .tick-clock circle { fill:none; stroke:var(--red); stroke-width:2; }
+    .tick-clock line { stroke:var(--red); stroke-width:2; stroke-linecap:round; transform-origin:12px 12px; }
+    .tick-clock .tc-min { animation:tick 1s steps(12) infinite; }
+    .tick-clock .tc-hr { animation:tick 7s steps(12) infinite; }
+    @keyframes tick { to { transform:rotate(360deg); } }
+    [data-theme="dark"] .tick-clock circle, [data-theme="dark"] .tick-clock line { stroke:#f2ab91; }
+    @media (prefers-reduced-motion:reduce) { .tick-clock .tc-min, .tick-clock .tc-hr { animation:none; } }
     .score-foot { display:flex; flex-wrap:wrap; gap:8px 22px; align-items:center; justify-content:center;
                   max-width:760px; margin:26px auto 0; padding-top:16px; border-top:1px solid var(--line);
                   font-size:12px; color:var(--muted); }
@@ -505,6 +514,14 @@
     .tag.exposed { background:#f7e1dc; color:var(--red); } .tag.protected { background:#e3f3ec; color:var(--green); }
     ul.sources { font-size:13px; color:var(--muted); padding-left:18px; line-height:1.7; }
     footer { color:var(--muted); font-size:12px; border-top:1px solid var(--line); margin-top:40px; padding-top:16px; }
+    footer a { color:var(--primary); }
+    .legal { max-width:740px; margin:10px auto 0; line-height:1.6; }
+    .legal h1 { font-size:26px; margin:0 0 4px; }
+    .legal h2 { font-size:17px; margin:22px 0 6px; }
+    .legal p, .legal li { font-size:14.5px; color:var(--ink); }
+    .legal ul { padding-left:20px; }
+    .legal li { margin-bottom:6px; }
+    .legal a { color:var(--primary); }
   </style>
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -576,7 +593,8 @@
     </script>
     <footer>
       JobBreak {{ version }}. Results are probability ranges, not verdicts.
-      Sources on the <a href="/methodology">How it works</a> page.
+      Sources on the <a href="/methodology">How it works</a> page.<br>
+      <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; JobBreak is informational only, not career or financial advice.
     </footer>
   </div>
 </body>

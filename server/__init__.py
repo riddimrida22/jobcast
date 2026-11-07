@@ -100,6 +100,7 @@ def profile_from(source) -> Profile:
         union_status=(source.get("union_status") or "").strip() or None,
         pay_current=_num(source.get("pay_current")),
         pay_5yr_ago=_num(source.get("pay_5yr_ago")),
+        graduation_year=_num(source.get("graduation_year")),
     )
 
 
@@ -124,7 +125,8 @@ def create_app() -> Flask:
     def _gate():
         if not demo_user:
             return None
-        if request.endpoint in ("login", "static", "manifest", "service_worker", "stripe_webhook"):
+        if request.endpoint in ("login", "static", "manifest", "service_worker", "stripe_webhook",
+                                "privacy", "terms"):
             return None
         if session.get("jb_authed"):
             return None
@@ -442,6 +444,14 @@ def create_app() -> Flask:
                 "tier": md.get("tier") if hasattr(md, "get") else None,
                 "ts": int(time.time())})
         return jsonify({"received": True})
+
+    @app.get("/privacy")
+    def privacy():
+        return render_template("privacy.html", version=VERSION, licensed=engine.snapshot.licensed)
+
+    @app.get("/terms")
+    def terms():
+        return render_template("terms.html", version=VERSION, licensed=engine.snapshot.licensed)
 
     @app.get("/methodology")
     def methodology():

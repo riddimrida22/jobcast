@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy - JobBreak{% endblock %}
+{% block og_media %}<meta name="twitter:card" content="summary">{% endblock %}
+{% block content %}
+<div class="legal">
+  <h1>Privacy Policy</h1>
+  <p class="muted">Last updated 7 November 2026.</p>
+
+  <p>JobBreak ("we", "us") is operated by Aquatech Engineering P.C. This policy explains what we
+  collect, why, and your choices. We keep data collection to the minimum needed to give you a result.</p>
+
+  <h2>What we collect</h2>
+  <ul>
+    <li><strong>What you enter</strong> to get an assessment: job title, general location (ZIP or city
+      and state), and optional details such as age band, years of experience, education, union status,
+      pay band, and skills. We do not ask for your name, and we do not collect race, gender, or other
+      protected characteristics.</li>
+    <li><strong>Your resume (optional):</strong> if you upload one to auto-fill the form, it is read in
+      memory to extract a job title and skills, then discarded. We do not store your resume.</li>
+    <li><strong>Email address (optional):</strong> only if you ask us to notify you when your outlook
+      changes, or if you subscribe.</li>
+    <li><strong>Payment information:</strong> subscriptions are processed by Stripe. Your card details go
+      directly to Stripe and are never seen or stored by us.</li>
+    <li><strong>Basic technical data:</strong> a session cookie to keep you signed in and to remember an
+      active subscription, plus standard server logs.</li>
+  </ul>
+
+  <h2>How we use it</h2>
+  <ul>
+    <li>To produce your automation-exposure assessment and, on paid plans, your AI-researched plan.</li>
+    <li>To email you outlook alerts, only if you opted in.</li>
+    <li>To process and manage subscriptions.</li>
+  </ul>
+
+  <h2>Who we share it with</h2>
+  <p>We do not sell your data. We share only with the service providers needed to run JobBreak:
+  <strong>Stripe</strong> (payments), <strong>Anthropic</strong> (to generate the AI-written plan on paid
+  plans), and our hosting provider. Each processes data only to provide its service.</p>
+
+  <h2>Retention</h2>
+  <p>Form inputs are used to generate your result and are not kept in a personal profile. Resumes are not
+  stored. An email address you give us is kept until you unsubscribe or ask us to delete it. Subscription
+  records are kept as required for billing and tax.</p>
+
+  <h2>Your choices</h2>
+  <p>You can unsubscribe from emails at any time, and you can ask us to delete your email and any
+  subscription record by contacting us. We use no third-party advertising trackers.</p>
+
+  <h2>Children</h2>
+  <p>JobBreak is intended for adults and is not directed to children under 16.</p>
+
+  <h2>Changes and contact</h2>
+  <p>We may update this policy; the date above shows the last change. Questions or requests:
+  <a href="mailto:privacy@jobbreak.app">privacy@jobbreak.app</a>.</p>
+
+  <p class="muted"><a href="/">Back to JobBreak</a> &middot; <a href="/terms">Terms of Service</a></p>
+</div>
+{% endblock %}

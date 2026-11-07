@@ -17,6 +17,7 @@ class Profile:
     union_status: Optional[str] = None  # "yes" | "no" | None
     pay_current: Optional[float] = None
     pay_5yr_ago: Optional[float] = None
+    graduation_year: Optional[int] = None
 
     def with_overrides(self, overrides: Dict[str, Any]) -> "Profile":
         """Return a copy with some fields replaced. Used for what-if scenarios.

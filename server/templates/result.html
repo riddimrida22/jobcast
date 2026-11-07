@@ -277,7 +277,8 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     <div class="ss-dots" id="ss-dots"></div>
   </div>
 
-  <h3 style="margin:26px 0 2px;font-size:17px">Keep the monitor on</h3>
+  <div id="sub-options" hidden>
+  <h3 style="margin:18px 0 2px;font-size:17px">Keep the monitor on</h3>
   <p class="muted" style="margin-top:2px">Free shows where you stand today. JobBreak Monitor writes your full AI-researched plan and keeps watching, so you know the moment your outlook shifts.</p>
 
   <div class="period-toggle" role="group" aria-label="Billing period">
@@ -321,6 +322,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
 
   </div>
   <p class="plan-foot">{% if stripe_enabled %}Secure checkout by Stripe. Cancel anytime.{% else %}Preview pricing, for layout only. Click any paid plan to generate your plan live at that level.{% endif %}</p>
+  </div>
 </div>
 {% endif %}
 
@@ -583,7 +585,15 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     if (BILL.stripe && !entitled(tier)) { startCheckout(tier, cta); }
     else { generate(tier, cta); }
   }
-  if (btn) btn.addEventListener('click', function () { choosePlan('tier2', btn); });
+  // "Personalise this plan with AI": entitled users generate; everyone else sees the
+  // subscription options, which sit right under this button and stay hidden until asked for.
+  var subOpts = document.getElementById('sub-options');
+  if (subOpts && btn && btn.parentNode) { btn.parentNode.insertAdjacentElement('afterend', subOpts); }
+  if (btn) btn.addEventListener('click', function () {
+    if (entitled('tier2')) { generate('tier2', btn); return; }
+    if (subOpts) { subOpts.hidden = false; subOpts.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    else { generate('tier2', btn); }
+  });
   document.querySelectorAll('.plan-cta[data-tier]').forEach(function (cta) {
     var tier = cta.getAttribute('data-tier');
     if (tier === 'free') return;  // free is the read; no AI call

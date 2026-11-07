@@ -14,7 +14,7 @@
   '55':'#5a6a4a' } %}
 {% set disc_legend = [('#6cb4e0','Trades & manual'),('#2f4f73','Business & office'),('#5a6fc0','Tech & science'),('#159e8c','Healthcare'),('#7a5aa0','Legal'),('#c08a3a','Education & social'),('#c0607a','Arts & media'),('#d07a3a','Service')] %}
 <div class="slogan-banner">
-  <span class="urgent-tag"><span class="urgent-dot"></span><span class="urgent-label">The clock is already running</span></span>
+  <span class="urgent-tag"><svg class="tick-clock" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line class="tc-min" x1="12" y1="12" x2="12" y2="5.5"/><line class="tc-hr" x1="12" y1="12" x2="15.5" y2="12"/></svg><span class="urgent-label">The clock is already ticking</span></span>
   <span class="slogan-main">AI is coming for your job, sooner than you think.</span>
   <span class="accent">See your timeline now, and break free first with JobBreak.</span></div>
 
@@ -94,7 +94,15 @@
     <select id="education" name="education">
       <option value="">Prefer not to say</option>
       <option>High school</option><option>Some college</option>
-      <option>Associate</option><option>Bachelor</option><option>Graduate</option>
+      <option>Associate</option><option>Bachelor</option>
+      <option>Master's</option><option>Doctorate (PhD)</option>
+    </select>
+  </div>
+  <div>
+    <label for="graduation_year">Year completed <span class="muted" style="text-transform:none;font-weight:400;letter-spacing:0">(highest degree)</span></label>
+    <select id="graduation_year" name="graduation_year" disabled>
+      <option value="">Choose a degree level first</option>
+      {% for y in range(2026, 1964, -1) %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
     </select>
   </div>
   <div>
@@ -134,7 +142,9 @@
       <option value="25000">Under $30,000</option><option value="37000">$30,000 to $44,999</option>
       <option value="52000">$45,000 to $59,999</option><option value="70000">$60,000 to $79,999</option>
       <option value="95000">$80,000 to $109,999</option><option value="130000">$110,000 to $149,999</option>
-      <option value="175000">$150,000 to $199,999</option><option value="225000">$200,000 or more</option>
+      <option value="175000">$150,000 to $199,999</option><option value="250000">$200,000 to $299,999</option>
+      <option value="390000">$300,000 to $499,999</option><option value="750000">$500,000 to $999,999</option>
+      <option value="1500000">$1,000,000 or more</option>
     </select>
   </div>
 
@@ -145,7 +155,9 @@
       <option value="25000">Under $30,000</option><option value="37000">$30,000 to $44,999</option>
       <option value="52000">$45,000 to $59,999</option><option value="70000">$60,000 to $79,999</option>
       <option value="95000">$80,000 to $109,999</option><option value="130000">$110,000 to $149,999</option>
-      <option value="175000">$150,000 to $199,999</option><option value="225000">$200,000 or more</option>
+      <option value="175000">$150,000 to $199,999</option><option value="250000">$200,000 to $299,999</option>
+      <option value="390000">$300,000 to $499,999</option><option value="750000">$500,000 to $999,999</option>
+      <option value="1500000">$1,000,000 or more</option>
     </select>
   </div>
   <div class="full">
@@ -203,6 +215,20 @@
 </section>
 
 <script>
+// Graduation year: enabled once a degree level is chosen, optional after that.
+(function () {
+  var edu = document.getElementById('education');
+  var gy = document.getElementById('graduation_year');
+  if (!edu || !gy) return;
+  function sync() {
+    var has = !!edu.value;
+    gy.disabled = !has;
+    gy.options[0].textContent = has ? 'Prefer not to say' : 'Choose a degree level first';
+    if (!has) gy.value = '';
+  }
+  edu.addEventListener('change', sync); sync();
+})();
+
 // Audience-targeted hero: the slogan shifts to match the field the person picks,
 // so trades, knowledge work, healthcare etc. each get a message that speaks to them.
 (function () {
@@ -217,7 +243,7 @@
     health: { tag: 'AI is in the clinic', main: 'AI reads the scans and drafts the notes now.', cta: 'See what it means for your role, and where you stay essential, with JobBreak.' },
     teach:  { tag: 'AI tutors have arrived', main: 'AI can plan the lesson, grade the test, tutor the student.', cta: 'See how it reshapes your role, and your human edge, with JobBreak.' },
     arts:   { tag: 'Generative AI is flooding in', main: 'AI floods your field with instant content.', cta: 'See your exposure, and where human taste still wins, with JobBreak.' },
-    def:    { tag: 'The clock is already running', main: 'AI is coming for your job, sooner than you think.', cta: 'See your timeline now, and break free first with JobBreak.' }
+    def:    { tag: 'The clock is already ticking', main: 'AI is coming for your job, sooner than you think.', cta: 'See your timeline now, and break free first with JobBreak.' }
   };
   var GROUP = { '11':'know','13':'know','15':'know','23':'know','43':'know','19':'know',
     '47':'trade','49':'trade','51':'trade','53':'trade','45':'trade','37':'trade','33':'trade',
