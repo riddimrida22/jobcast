@@ -4,14 +4,20 @@
 {% block content %}
 
 <p class="muted">{{ r.occupation.family }} &middot; {{ r.location.metro }}</p>
-<h1>{{ r.occupation.title }}</h1>
-<p class="lead">How exposed this work is to automation, shown as ranges with the reasoning and sources.</p>
+<h1 style="margin-bottom:2px">{{ r.occupation.title }}</h1>
+<p class="lead" style="margin-top:0">How exposed this work is to automation, shown as ranges with the reasoning and sources.</p>
 
-<div class="card">
-  <div class="sect-title">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-2.3"/></svg>
-    <h2 style="margin:0">Exposure</h2>
-  </div>
+<div class="tabs" role="tablist">
+  <button class="tab active" data-panel="p-overview">Overview</button>
+  <button class="tab" data-panel="p-tasks">My tasks</button>
+  {% if r.key_drivers %}<button class="tab" data-panel="p-drivers">What drives it</button>{% endif %}
+  {% if not seo %}<button class="tab" data-panel="p-pay">Pay &amp; place</button>{% endif %}
+  {% if r.adjacent_lower_risk %}<button class="tab" data-panel="p-paths">Safer paths</button>{% endif %}
+  <button class="tab" data-panel="p-scored">How it's scored</button>
+</div>
+
+<!-- OVERVIEW -->
+<div id="p-overview" class="panel active card">
   <div class="gauges">
     <div class="gauge">
       <svg viewBox="0 0 120 120" role="img" aria-label="AI exposure {{ r.exposure.ai_software }} of 100">
@@ -35,94 +41,135 @@
     </div>
   </div>
 
-  <p style="margin-top:18px;text-align:center">
-    Timeline: <span class="band {{ r.timeline.band.id }}">{{ r.timeline.band.label }}</span>
-    <span class="muted">(local demand: {{ r.timeline.local_demand_trend }})</span>
+  <p class="muted" style="text-align:center;margin:14px 0 2px">When the change is likely</p>
+  <div class="horizon">
+    {% set bid = r.timeline.band.id %}
+    <div class="hz {{ 'active z2' if bid == 'near_term_high' else '' }}">Near-term</div>
+    <div class="hz {{ 'active z1' if bid == 'partial_5_10yr' else '' }}">5 to 10 years</div>
+    <div class="hz {{ 'active z0' if bid == 'largely_unaffected' else '' }}">Later / stable</div>
+  </div>
+  <p style="text-align:center;margin:6px 0 0">
+    <span class="band {{ bid }}">{{ r.timeline.band.label }}</span>
+    <span class="muted">local demand {{ r.timeline.local_demand_trend }}</span>
   </p>
-  {% if r.timeline.union_note %}<p class="muted" style="text-align:center">{{ r.timeline.union_note }}</p>{% endif %}
-  {% if r.timeline.overlap_note %}<p style="text-align:center">{{ r.timeline.overlap_note }}
-    {% if r.timeline.remaining_working_years is not none %}
-    <span class="muted">(about {{ r.timeline.remaining_working_years }} working years left)</span>{% endif %}</p>{% endif %}
+  {% if r.timeline.overlap_note %}<p style="text-align:center;margin:8px 0 0">{{ r.timeline.overlap_note }}
+    {% if r.timeline.remaining_working_years is not none %}<span class="muted">(about {{ r.timeline.remaining_working_years }} working years left)</span>{% endif %}</p>{% endif %}
+  {% if r.timeline.union_note %}<p class="muted" style="text-align:center;margin:4px 0 0">{{ r.timeline.union_note }}</p>{% endif %}
 </div>
 
+<!-- TASKS -->
+<div id="p-tasks" class="panel card">
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg><h2 style="margin:0">Which of my tasks are exposed</h2></div>
+  {% for t in r.tasks %}
+  {% set mx = t.ai if t.ai >= t.robo else t.robo %}
+  <div class="hrow">
+    <div class="hlabel">{{ t.name }}</div>
+    <div class="htrack"><div class="hfill {{ 'exp' if t.exposed else 'prot' }}" style="width:{{ mx }}%"></div></div>
+    <div class="hval">{{ mx }}</div>
+  </div>
+  {% endfor %}
+  <p class="muted" style="margin-top:12px">Longer, orange bars are more automatable; short green bars are resistant.</p>
+</div>
+
+<!-- DRIVERS -->
 {% if r.key_drivers %}
-<div class="card">
-  <h2 style="margin-top:0">What is driving my result</h2>
-  <p class="muted">The factors that move my result the most, most decisive first.</p>
-  <table>
-    <tbody>
-      {% for d in r.key_drivers %}
-      <tr>
-        <td><span class="tag {{ 'exposed' if d.direction == 'raises' else 'protected' }}">{{ 'raises risk' if d.direction == 'raises' else 'lowers risk' }}</span></td>
-        <td><strong>{{ d.label }}</strong><br><span class="muted">{{ d.detail }}</span></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div id="p-drivers" class="panel card">
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M3 12h7M14 12h7M12 5l-3 7 3 7"/></svg><h2 style="margin:0">What is driving my result</h2></div>
+  <div class="muted" style="display:grid;grid-template-columns:1fr 14px 1fr;font-size:12px;margin-bottom:6px">
+    <div style="text-align:right;padding-right:12px">lowers risk</div><div></div><div style="padding-left:12px">raises risk</div>
+  </div>
+  {% for d in r.key_drivers %}
+  <div class="driver" title="{{ d.detail }}">
+    <div class="d-left">{% if d.direction == 'lowers' %}<span>{{ d.label }}</span>
+      <span class="d-bar lower" style="width:{{ d.weight }}px"></span>{% endif %}</div>
+    <div class="d-axis"></div>
+    <div class="d-right">{% if d.direction == 'raises' %}<span class="d-bar raise" style="width:{{ d.weight }}px"></span>
+      <span>{{ d.label }}</span>{% endif %}</div>
+  </div>
+  {% endfor %}
 </div>
 {% endif %}
 
-<div class="card">
-  <h2 style="margin-top:0">Which tasks are exposed</h2>
-  <table>
-    <thead><tr><th>Task</th><th>AI</th><th>Robotics</th><th></th></tr></thead>
-    <tbody>
-      {% for t in r.tasks %}
-      <tr>
-        <td>{{ t.name }}</td><td>{{ t.ai }}</td><td>{{ t.robo }}</td>
-        <td><span class="tag {{ 'exposed' if t.exposed else 'protected' }}">{{ 'exposed' if t.exposed else 'protected' }}</span></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
-{% if not seo and r.wages.available %}
-<div class="card">
-  <h2 style="margin-top:0">My pay trajectory</h2>
-  <p>Real change over five years: <strong>{{ r.wages.real_change_pct }}%</strong>
-     <span class="muted">(nominal {{ r.wages.nominal_change_pct }}%)</span></p>
-  {% if r.wages.pay_vs_median_pct is not none %}
-  <p class="muted">I am {{ r.wages.pay_vs_median_pct }}% versus the median for this role in my area.</p>{% endif %}
-  {% if r.wages.signal %}<p>{{ r.wages.signal }}</p>{% endif %}
-</div>
-{% endif %}
-
-{% if r.adjacent_lower_risk %}
-<div class="card">
-  <h2 style="margin-top:0">Lower-risk adjacent roles</h2>
-  <table>
-    <thead><tr><th>Role</th><th>AI</th><th>Robotics</th></tr></thead>
-    <tbody>
-      {% for a in r.adjacent_lower_risk %}
-      <tr><td>{{ a.title }}</td><td>{{ a.ai_software }}</td><td>{{ a.physical_robotics }}</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <p class="muted" style="margin-top:12px">A full, ranked mitigation plan is part of the paid tiers
-     (Tier 1: 1 option, Tier 2: 3 options).</p>
-</div>
-{% endif %}
-
+<!-- PAY & PLACE -->
 {% if not seo %}
-<div class="card">
-  <h2 style="margin-top:0">Try a scenario</h2>
-  <p class="muted">See how my result changes if one thing were different.</p>
+<div id="p-pay" class="panel card">
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><h2 style="margin:0">Pay and local market</h2></div>
+  {% if r.wages.occupation_median_wage %}
+  <p>Median pay for this role in {{ r.location.metro }}: <strong>${{ "{:,.0f}".format(r.wages.occupation_median_wage) }}</strong>
+     <span class="muted">(local demand {{ r.timeline.local_demand_trend }})</span></p>
+  {% endif %}
+  {% if r.wages.available %}
+  <p>My real pay change over five years: <strong>{{ r.wages.real_change_pct }}%</strong>
+     <span class="muted">(nominal {{ r.wages.nominal_change_pct }}%)</span></p>
+  {% if r.wages.pay_vs_median_pct is not none %}<p class="muted">I am {{ r.wages.pay_vs_median_pct }}% versus the local median.</p>{% endif %}
+  {% if r.wages.signal %}<p>{{ r.wages.signal }}</p>{% endif %}
+  {% else %}
+  <p class="muted">Add your current pay and pay five years ago on the home page to see your wage trajectory.</p>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- SAFER PATHS -->
+{% if r.adjacent_lower_risk %}
+<div id="p-paths" class="panel card">
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8"/></svg><h2 style="margin:0">Lower-risk adjacent roles</h2></div>
+  {% for a in r.adjacent_lower_risk %}
+  <div class="hrow">
+    <div class="hlabel">{{ a.title }}</div>
+    <div class="htrack"><div class="hfill prot" style="width:{{ a.max_exposure }}%"></div></div>
+    <div class="hval">{{ a.max_exposure }}</div>
+  </div>
+  {% endfor %}
+  {% if not seo %}
+  <p class="muted" style="margin:14px 0 6px">Try a scenario:</p>
   <div id="whatif-buttons">
     <button type="button" class="secondary" data-ov='{"age": {{ (profile.age - 20) if profile.age else 25 }}}'>If I were 20 years younger</button>
     <button type="button" class="secondary" data-ov='{"union_status": "yes"}'>If I had union coverage</button>
-    {% if r.adjacent_lower_risk %}
     <button type="button" class="secondary" data-ov='{"title": "{{ r.adjacent_lower_risk[0].title }}"}'>If I moved to {{ r.adjacent_lower_risk[0].title }}</button>
-    {% endif %}
   </div>
-  <div id="whatif-out" class="muted" style="margin-top:12px"></div>
+  <div id="whatif-out" class="muted" style="margin-top:10px"></div>
+  {% endif %}
+  <p class="muted" style="margin-top:10px">A full, ranked mitigation plan is part of the paid tiers.</p>
+</div>
+{% endif %}
+
+<!-- HOW IT'S SCORED -->
+<div id="p-scored" class="panel card">
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><h2 style="margin:0">How this score is calculated</h2></div>
+  <ol class="ol-steps">
+    <li>Map <strong>{{ r.occupation.title }}</strong> to its standard O*NET task list ({{ r.tasks|length }} core tasks).</li>
+    <li>Score each task for AI/software exposure (Eloundou et al. 2023) and physical/robotics exposure (an O*NET work-context proxy), each 0 to 100.</li>
+    <li>The two axis scores are the task averages: AI <strong>{{ r.exposure.ai_software }}</strong>, robotics <strong>{{ r.exposure.physical_robotics }}</strong>.</li>
+    <li>The timeline comes from the higher axis ({{ r.base_exposure }}), shifted for local demand ({{ r.timeline.local_demand_trend }}){% if r.timeline.union_protected %}, union coverage{% endif %}, and seniority. It is read against your remaining working years.</li>
+    <li>Ranges are about &plusmn;{{ r.exposure_range.half_width }} points. A backtest against real BLS employment change shows the risk ranking holds in aggregate, but individual outcomes are predicted weakly, so results are ranges, never a flat verdict.</li>
+  </ol>
+  <p class="muted">Sources: {% for s in r.sources %}{{ s.name }}{% if not loop.last %}, {% endif %}{% endfor %}.
+     Snapshot {{ r.snapshot.id }}. Full method and backtest on <a href="/methodology">How it works</a>.</p>
 </div>
 
+<p style="margin-top:16px"><a href="/">Check another job</a></p>
+
+<script>
+  (function () {
+    document.querySelectorAll('.tab').forEach(function (t) {
+      t.addEventListener('click', function () {
+        var id = t.getAttribute('data-panel');
+        document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('active'); });
+        document.querySelectorAll('.panel').forEach(function (x) { x.classList.remove('active'); });
+        t.classList.add('active'); document.getElementById(id).classList.add('active');
+      });
+    });
+  })();
+</script>
+
+{% if not seo %}
 <script id="profile-data" type="application/json">{{ profile_json | safe }}</script>
 <script>
 (function () {
-  var profile = JSON.parse(document.getElementById('profile-data').textContent);
+  var data = document.getElementById('profile-data');
   var out = document.getElementById('whatif-out');
+  if (!data || !out) return;
+  var profile = JSON.parse(data.textContent);
   document.querySelectorAll('#whatif-buttons button').forEach(function (b) {
     b.addEventListener('click', function () {
       var overrides = JSON.parse(b.getAttribute('data-ov'));
@@ -133,9 +180,8 @@
         .then(function (d) {
           if (!d.ok) { out.textContent = 'That scenario is not available for this job.'; return; }
           var dl = d.deltas;
-          out.innerHTML = 'AI exposure change: <strong>' + dl.ai_software + '</strong>, ' +
-            'robotics change: <strong>' + dl.physical_robotics + '</strong>. ' +
-            'Timeline: ' + dl.timeline_band_from + ' to ' + dl.timeline_band_to + '.';
+          out.innerHTML = 'AI exposure change: <strong>' + dl.ai_software + '</strong>, robotics change: <strong>' +
+            dl.physical_robotics + '</strong>. Timeline: ' + dl.timeline_band_from + ' to ' + dl.timeline_band_to + '.';
         })
         .catch(function () { out.textContent = 'Could not run the scenario.'; });
     });
@@ -143,15 +189,4 @@
 })();
 </script>
 {% endif %}
-
-<div class="card">
-  <h2 style="margin-top:0">Sources</h2>
-  <ul class="sources">
-    {% for s in r.sources %}<li>{{ s.name }} ({{ s.version }}) - {{ s.use }}</li>{% endfor %}
-  </ul>
-  <p class="muted">Snapshot {{ r.snapshot.id }}, {{ r.snapshot.date }}.
-     {% if not r.snapshot.licensed %}Development data, not published figures.{% endif %}</p>
-</div>
-
-<p><a href="/">Check another job</a></p>
 {% endblock %}

@@ -104,6 +104,61 @@
     .sect-title svg { width:20px; height:20px; stroke:var(--primary); fill:none; stroke-width:1.9;
                       stroke-linecap:round; stroke-linejoin:round; flex:0 0 auto; }
 
+    /* horizontal bar-chart rows (tasks, adjacency) */
+    .hrow { display:grid; grid-template-columns:1fr 150px 40px; gap:12px; align-items:center;
+            padding:9px 0; border-bottom:1px solid var(--hair); font-size:14px; }
+    .hrow:last-child { border-bottom:0; }
+    .hlabel { line-height:1.3; }
+    .htrack { height:12px; border-radius:7px; background:var(--track); overflow:hidden; }
+    .hfill { height:100%; border-radius:7px; }
+    .hfill.exp { background:linear-gradient(90deg,#d6815a,var(--red)); }
+    .hfill.prot { background:linear-gradient(90deg,#43b393,var(--green)); }
+    .hval { text-align:right; font-weight:700; font-variant-numeric:tabular-nums; }
+
+    /* diverging driver chart */
+    .driver { display:grid; grid-template-columns:1fr 14px 1fr; align-items:center; gap:0;
+              padding:7px 0; border-bottom:1px solid var(--hair); }
+    .driver:last-child { border-bottom:0; }
+    .d-left, .d-right { font-size:13.5px; }
+    .d-left { text-align:right; padding-right:12px; } .d-right { padding-left:12px; }
+    .d-bar { height:16px; border-radius:6px; display:inline-block; vertical-align:middle; }
+    .d-bar.raise { background:linear-gradient(90deg,#e6a98e,var(--red)); }
+    .d-bar.lower { background:linear-gradient(270deg,#6ec4a6,var(--green)); }
+    .d-axis { background:var(--line); height:30px; width:2px; margin:0 auto; }
+
+    /* timeline horizon strip */
+    .horizon { display:flex; border-radius:9px; overflow:hidden; margin:14px 0 6px; height:38px;
+               border:1px solid var(--line); }
+    .hz { flex:1; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600;
+          color:var(--muted); background:var(--subtle,#fafcfd); position:relative; }
+    [data-theme="dark"] .hz { background:#151e29; }
+    .hz.on-largely_unaffected, .hz.on-partial_5_10yr, .hz.on-near_term_high { color:#fff; }
+    .hz.active.z0 { background:var(--green); color:#fff; }
+    .hz.active.z1 { background:#c88a2e; color:#fff; }
+    .hz.active.z2 { background:var(--red); color:#fff; }
+    .hz + .hz { border-left:1px solid var(--line); }
+
+    /* result tabs */
+    .tabs { display:flex; gap:2px; flex-wrap:wrap; margin:16px 0 0; border-bottom:2px solid var(--line); }
+    .tab { padding:9px 15px; font-size:13.5px; font-weight:600; color:var(--muted); cursor:pointer;
+           background:none; border:0; border-bottom:2px solid transparent; margin:0 0 -2px; border-radius:0;
+           box-shadow:none; transition:color .12s; }
+    .tab:hover { color:var(--ink); filter:none; box-shadow:none; }
+    .tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+    .panel { display:none; } .panel.active { display:block; }
+    .ol-steps { margin:0; padding-left:20px; line-height:1.7; } .ol-steps li { margin-bottom:5px; }
+
+    /* pipeline flow diagram */
+    .flow { display:flex; flex-wrap:wrap; align-items:stretch; gap:7px; margin:8px 0 4px; }
+    .flow-step { flex:1 1 120px; background:var(--primary-soft); border-radius:11px; padding:13px 10px;
+                 text-align:center; font-size:12.5px; font-weight:600; color:var(--primary);
+                 display:flex; flex-direction:column; align-items:center; gap:7px; }
+    [data-theme="dark"] .flow-step { color:#cfe0f5; }
+    .flow-step svg { width:24px; height:24px; stroke:var(--primary); fill:none; stroke-width:1.7;
+                     stroke-linecap:round; stroke-linejoin:round; }
+    [data-theme="dark"] .flow-step svg { stroke:#cfe0f5; }
+    .flow-arrow { align-self:center; color:var(--muted); font-weight:700; }
+
     .band { display:inline-block; padding:4px 13px; border-radius:999px; font-size:13px; font-weight:600; }
     .band.largely_unaffected { background:#e3f3ec; color:var(--green); }
     .band.partial_5_10yr { background:var(--accent-soft); color:#8a5512; }
