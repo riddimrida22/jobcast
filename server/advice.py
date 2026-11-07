@@ -58,7 +58,8 @@ def generate_plan(assessment: Dict[str, Any], profile: Dict[str, Any],
     except Exception:
         return None
     n = TIER_N.get(tier, 3)
-    model = "claude-opus-4-8" if tier == "tier2" else "claude-haiku-5-5"
+    # Lower-cost models for now: Sonnet for the paid tier, Haiku below it.
+    model = "claude-sonnet-5-5" if tier == "tier2" else "claude-haiku-5-5"
     try:
         client = anthropic.Anthropic(api_key=api_key)
         msg = client.messages.create(
