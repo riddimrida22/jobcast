@@ -1,0 +1,65 @@
+{# Student-targeted hero: a graduate races past AI-proof career power-ups to a trophy,
+   leaving a bumbling robot behind. Positive and game-like, scoped to .race so it never
+   collides with the worker-page gobbler animation. #}
+<style>
+  .race-wrap { margin:0 auto; overflow:hidden; }
+  .race { --W:940px; --loop:9s; position:relative; width:var(--W); height:118px; margin:0 auto;
+          transform-origin:top center; }
+  .race-stage { position:absolute; inset:0; animation:raceFade var(--loop) ease-in-out infinite; }
+  .race-track { position:absolute; left:3%; right:3%; top:86px; height:4px; border-radius:3px;
+                background:repeating-linear-gradient(90deg,var(--road) 0 20px,transparent 20px 36px); }
+  .race-banner { position:absolute; top:4px; left:0; right:0; text-align:center; font-weight:800;
+                 font-size:19px; color:var(--ink); animation:raceBanner var(--loop) ease-in-out infinite; }
+  .race-banner .hot { color:var(--accent); }
+  .race-goal { position:absolute; top:36px; left:88%; font-size:11px; font-weight:700; letter-spacing:.5px;
+               text-transform:uppercase; color:var(--muted); }
+  .pu { position:absolute; top:44px; font-size:30px; filter:drop-shadow(0 3px 4px rgba(0,0,0,.25));
+        animation:racePop var(--loop) ease-in-out infinite; }
+  .pu1 { left:30%; } .pu2 { left:48%; animation-delay:1.3s; } .pu3 { left:66%; animation-delay:2.6s; }
+  .race-trophy { position:absolute; top:46px; left:89%; font-size:40px; transform-origin:center bottom;
+                 animation:raceTrophy var(--loop) ease-in-out infinite; }
+  .race-bot { position:absolute; top:52px; left:-6%; font-size:33px; z-index:2;
+              animation:raceBot var(--loop) cubic-bezier(.4,0,.5,1) infinite, raceWobble .5s ease-in-out infinite; }
+  .race-grad { position:absolute; top:48px; left:2%; font-size:40px; z-index:3;
+               animation:raceGrad var(--loop) cubic-bezier(.3,0,.5,1) infinite, raceBob .42s ease-in-out infinite; }
+  @keyframes raceGrad { 0%,8%{left:2%} 80%,100%{left:83%} }
+  @keyframes raceBot  { 0%,8%{left:-6%} 80%,100%{left:62%} }
+  @keyframes raceBob  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+  @keyframes raceWobble { 0%,100%{transform:rotate(-7deg)} 50%{transform:rotate(7deg)} }
+  @keyframes raceFade { 0%,4%{opacity:0} 9%,92%{opacity:1} 100%{opacity:0} }
+  @keyframes raceBanner { 0%,5%{opacity:0;transform:translateY(-7px)} 13%,90%{opacity:1;transform:none} 100%{opacity:0} }
+  @keyframes racePop {
+    0%,30%{transform:translateY(0) scale(1); filter:drop-shadow(0 3px 4px rgba(0,0,0,.25)); }
+    38%{transform:translateY(-10px) scale(1.4); filter:drop-shadow(0 0 7px rgba(243,163,95,.95)) brightness(1.15); }
+    48%,100%{transform:translateY(0) scale(1); filter:drop-shadow(0 3px 4px rgba(0,0,0,.25)); }
+  }
+  @keyframes raceTrophy {
+    0%,68%{transform:scale(1) rotate(0); filter:none; }
+    80%{transform:scale(1.4) rotate(-8deg); filter:drop-shadow(0 0 10px rgba(243,163,95,.95)); }
+    88%{transform:scale(1.2) rotate(4deg); }
+    100%{transform:scale(1) rotate(0); }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    .race-stage,.race-grad,.race-bot,.pu,.race-trophy,.race-banner { animation:none !important; }
+    .race-grad { left:83%; } .race-bot { left:62%; } .race-banner { opacity:1; }
+  }
+</style>
+<div class="race-wrap" aria-hidden="true">
+ <div class="race">
+  <div class="race-stage">
+    <div class="race-banner"><b>Beat the bots to <span class="hot">your future</span></b></div>
+    <div class="race-track"></div>
+    <span class="race-goal">Your future</span>
+    <span class="pu pu1">🩺</span>
+    <span class="pu pu2">🔧</span>
+    <span class="pu pu3">🎨</span>
+    <span class="race-trophy">🏆</span>
+    <span class="race-bot">🤖</span>
+    <span class="race-grad">🎓</span>
+  </div>
+ </div>
+</div>
+<script>(function(){var w=document.querySelector('.race-wrap');if(!w)return;var g=w.querySelector('.race');var DH=118;
+function fit(){var avail=(w.parentElement?w.parentElement.clientWidth:w.clientWidth)||940;var s=Math.min(1,avail/940);
+g.style.transform='scale('+s+')';w.style.width=(940*s)+'px';w.style.height=(DH*s)+'px';}
+if(window.ResizeObserver){new ResizeObserver(fit).observe(w.parentElement||w);}addEventListener('resize',fit);fit();})();</script>
