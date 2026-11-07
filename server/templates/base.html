@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}JobBreak{% endblock %}</title>
-  <meta name="description" content="{% block description %}An honest, sourced read on whether AI or robots are likely to take your job, and when.{% endblock %}">
+  <meta name="description" content="{% block description %}A clear, sourced read on whether AI or robots are likely to take your job, and when.{% endblock %}">
   {% if noindex %}<meta name="robots" content="noindex, nofollow">{% endif %}
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="JobBreak">
@@ -31,6 +31,7 @@
       --shell:#112741; --shell-dark:#0b1a2e; --green:#147b74; --red:#b0422b;
       --ai:#2f4f73; --robo:#c06a33; --row-head:#f1f5f9;
       --track:#e6ebf1; --input:#ffffff; --hair:#e7ecf1;
+      --amber:#c98a2e; --road:#c7d0da; --metal-b:#5f6c7d; --metal-c:#d2dae4; --mouth:#243040;
     }
     [data-theme="dark"] {
       --bg-a:#0e1620; --bg-b:#16212f; --card:#1b2734; --line:#4a5f78;
@@ -39,6 +40,7 @@
       --shell:#0a1320; --shell-dark:#060d16; --green:#3fb6a8; --red:#e07559;
       --ai:#5d8ac4; --robo:#e08a57; --row-head:#222f3e;
       --track:#2a3a4d; --input:#131c27; --hair:#2a3a4d; color-scheme:dark;
+      --amber:#e0a94a; --road:#36495f; --metal-b:#6a7889; --metal-c:#c6cfdb; --mouth:#0c141e;
     }
     * { box-sizing:border-box; }
     body { margin:0; color:var(--ink); min-height:100vh;
@@ -58,9 +60,10 @@
     /* on phones the full 90deg swing dangles into the wrapped nav row; use a gentle dangle */
     @keyframes swingSmall { 0%,8%,100% { transform:rotate(0deg); } 54% { transform:rotate(20deg); } }
     @media (prefers-reduced-motion:reduce) { .brand .brk { animation:none; transform:rotate(0deg); } }
-    nav a { color:#c4d2e4; text-decoration:none; margin-left:20px; font-size:14px; font-weight:500; }
-    nav a:hover { color:#fff; }
-    nav a.nav-home { display:inline-flex; align-items:center; gap:6px; margin-left:0; font-weight:600; }
+    nav a { color:#cdd9ea; text-decoration:none; margin-left:4px; font-size:14px; font-weight:600;
+            padding:7px 13px; border-radius:999px; transition:background .15s ease, color .15s ease; }
+    nav a:hover { color:#fff; background:rgba(255,255,255,.12); }
+    nav a.nav-home { display:inline-flex; align-items:center; gap:6px; margin-left:0; }
     nav a.nav-home svg { width:17px; height:17px; }
 
     .dev-banner { background:var(--accent-soft); border-bottom:1px solid #f0cfa6; color:#7a4f16;
@@ -174,17 +177,25 @@
     .score-explain { display:flex; flex-wrap:wrap; gap:10px 26px; align-items:center; justify-content:center;
                      background:var(--card); border:1px solid var(--line); border-radius:12px; padding:11px 18px;
                      margin-bottom:16px; font-size:13px; box-shadow:0 3px 12px rgba(31,63,96,.05); }
-    .slogan-banner { text-align:center; margin:4px auto 18px; max-width:780px; display:flex;
-                     flex-direction:column; align-items:center; gap:6px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+               clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    .slogan-banner { text-align:center; margin:-18px auto 14px; max-width:960px; display:flex;
+                     flex-direction:column; align-items:center; gap:5px; }
     .slogan-banner .slogan-main { font-size:22px; font-weight:800; color:var(--ink); line-height:1.3; }
     .slogan-banner .accent { color:var(--accent); font-size:20px; font-weight:800; line-height:1.3; }
-    .slogan-ticker { width:100%; max-width:860px; overflow:hidden;
-      -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);
-      mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent); }
-    .st-track { display:inline-flex; white-space:nowrap; animation:stScroll 32s linear infinite; }
+    .slogan-ticker { width:100%; max-width:980px; overflow:hidden; margin-bottom:22px;
+      border-top:1px solid var(--hair); border-bottom:1px solid var(--hair); padding:6px 0;
+      -webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
+      mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent); }
+    .st-track { display:inline-flex; white-space:nowrap; animation:stScroll 62s linear infinite; }
     .slogan-ticker:hover .st-track { animation-play-state:paused; }
-    .st-item { font-size:18px; font-weight:800; color:var(--ink); }
-    .st-sep { color:var(--accent); padding:0 16px; font-weight:800; }
+    .mk-item { display:inline-flex; align-items:center; gap:6px; margin:0 15px; text-decoration:none; }
+    .mk-sym { font-weight:700; font-size:13.5px; color:var(--ink); letter-spacing:.2px; }
+    .mk-val { font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace; font-weight:700; font-size:13.5px; }
+    .mk-arr { font-size:10px; margin-left:-2px; }
+    .mk-val.up, .mk-arr.up { color:var(--red); }
+    .mk-val.dn, .mk-arr.dn { color:var(--green); }
+    .mk-item:hover .mk-sym { text-decoration:underline; }
     @keyframes stScroll { from { transform:translateX(0); } to { transform:translateX(-50%); } }
     @media (prefers-reduced-motion:reduce) { .st-track { animation:none; } }
     .urgent-tag { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:700;
@@ -198,68 +209,119 @@
                              70% { box-shadow:0 0 0 7px rgba(199,58,42,0); }
                              100% { box-shadow:0 0 0 0 rgba(199,58,42,0); } }
     @media (prefers-reduced-motion:reduce) { .urgent-dot { animation:none; } }
-    /* fast-ticking clock in the urgency tag */
-    .tick-clock { width:15px; height:15px; flex:0 0 auto; }
-    .tick-clock circle { fill:none; stroke:var(--red); stroke-width:2; }
-    .tick-clock line { stroke:var(--red); stroke-width:2; stroke-linecap:round; transform-origin:12px 12px; }
-    .tick-clock .tc-min { animation:tick 9s steps(12) infinite; }
-    .tick-clock .tc-hr { animation:tick 48s steps(12) infinite; }
-    @keyframes tick { to { transform:rotate(360deg); } }
-    [data-theme="dark"] .tick-clock circle, [data-theme="dark"] .tick-clock line { stroke:#f2ab91; }
-    @media (prefers-reduced-motion:reduce) { .tick-clock .tc-min, .tick-clock .tc-hr { animation:none; } }
-    /* hero: an hourglass drains as the AI "gobbler" races the road toward your JOB, then
-       the JobBreak wall drops in and blocks it just in time, and "Act now" flashes. */
-    .gob-scene { display:inline-flex; align-items:center; gap:13px; margin:0 auto 6px; }
-    .gob-hour { position:relative; width:22px; height:32px; flex:0 0 auto; }
-    .gh-glass { position:absolute; inset:0; border:2px solid var(--red); border-radius:3px;
-                clip-path:polygon(0 0,100% 0,56% 50%,100% 100%,0 100%,44% 50%); }
-    .gh-top { position:absolute; left:4px; width:14px; background:var(--red);
-              clip-path:polygon(0 0,100% 0,50% 100%); top:3px; height:11px; animation:ghDrain 7s ease-in infinite; }
-    .gh-bot { position:absolute; left:4px; width:14px; background:var(--red);
-              clip-path:polygon(50% 0,100% 100%,0 100%); bottom:3px; height:0; animation:ghFill 7s ease-in infinite; }
-    .gh-stream { position:absolute; left:50%; top:13px; width:1.6px; height:7px; margin-left:-.8px;
-                 background:var(--red); animation:ghStream 7s linear infinite; }
-    [data-theme="dark"] .gh-glass { border-color:#f2ab91; }
-    [data-theme="dark"] .gh-top, [data-theme="dark"] .gh-bot, [data-theme="dark"] .gh-stream { background:#f2ab91; }
-    @keyframes ghDrain { 0%{height:11px;top:3px} 80%,100%{height:0;top:14px} }
-    @keyframes ghFill { 0%{height:0} 80%,100%{height:11px} }
-    @keyframes ghStream { 0%,76%{opacity:1} 82%,100%{opacity:0} }
-    .gob-road { position:relative; width:258px; height:46px; display:flex; align-items:center; justify-content:flex-end; }
-    .gob-road::after { content:''; position:absolute; left:0; right:0; bottom:5px; height:2px;
-        background:repeating-linear-gradient(90deg, var(--line) 0 9px, transparent 9px 18px); opacity:.7; }
-    .gob-job { display:inline-flex; align-items:center; gap:5px; position:relative; z-index:1; }
-    .gob-ltr { width:30px; height:40px; border-radius:7px; background:var(--primary); color:#fff;
-               display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:22px; }
-    .gob-pac { position:absolute; left:4px; top:50%; width:34px; height:34px; margin-top:-19px; z-index:2;
-               animation:gobGlide 7s ease-in infinite; }
-    .gp-top, .gp-bot { position:absolute; left:0; width:34px; height:17px; background:#e0824f; }
-    .gp-top { top:0; border-radius:34px 34px 0 0; transform-origin:50% 100%; animation:chompT .42s ease-in-out infinite; }
-    .gp-bot { bottom:0; border-radius:0 0 34px 34px; transform-origin:50% 0%; animation:chompB .42s ease-in-out infinite; }
-    .gp-eye { position:absolute; top:7px; left:16px; width:3.4px; height:3.4px; border-radius:50%; background:#0a1626; z-index:2; }
-    @keyframes chompT { 0%,100%{transform:rotate(0)} 50%{transform:rotate(-38deg)} }
-    @keyframes chompB { 0%,100%{transform:rotate(0)} 50%{transform:rotate(38deg)} }
-    .gob-wall { position:absolute; left:146px; top:3px; width:13px; height:40px; border-radius:4px; z-index:3;
-                background:linear-gradient(180deg, var(--accent), var(--primary));
-                transform:translateY(-54px); opacity:0; animation:wallDrop 7s ease-in-out infinite; }
-    .gw-tag { position:absolute; top:-15px; left:50%; transform:translateX(-50%); font-size:9.5px; font-weight:800;
-              background:var(--primary); color:#fff; padding:1px 6px; border-radius:5px; white-space:nowrap;
-              box-shadow:0 2px 6px rgba(0,0,0,.35); }
-    @keyframes gobGlide { 0%{left:4px;opacity:1} 50%{left:110px} 55%{left:101px} 60%{left:110px}
-                          82%{left:110px;opacity:1} 90%{left:110px;opacity:0} 100%{left:4px;opacity:0} }
-    @keyframes wallDrop { 0%,47%{transform:translateY(-54px);opacity:0} 53%{transform:translateY(0);opacity:1}
-                          82%{transform:translateY(0);opacity:1} 88%{transform:translateY(-54px);opacity:0}
-                          100%{transform:translateY(-54px);opacity:0} }
-    .urgent-tag { animation:actFlash 7s ease-in-out infinite; }
-    @keyframes actFlash { 0%,50%{transform:scale(1);filter:none} 55%{transform:scale(1.16);filter:brightness(1.4)}
-                          60%{transform:scale(1)} 66%{transform:scale(1.16);filter:brightness(1.4)} 71%{transform:scale(1)}
-                          76%{transform:scale(1.12);filter:brightness(1.3)} 82%,100%{transform:scale(1);filter:none} }
-    @media (prefers-reduced-motion:reduce) { .gob-pac,.gp-top,.gp-bot,.gob-wall,.urgent-tag,.gh-top,.gh-bot,.gh-stream { animation:none !important; }
-                          .gob-pac { opacity:0; } .gob-wall { opacity:1; transform:none; } }
+    /* hero: an AI gobbler and a robot gobbler race down the road eating the most-exposed
+       jobs; the JobBreak wall drops in and stops them at the safe jobs, "Act now" flashes. */
+    .gob-wrap { margin:0 auto; overflow:hidden; }
+    .gob { --W:940px; --wall:694px; --predEnd:630px; --loop:11s;
+           width:var(--W); position:relative; transform-origin:top left; }
+    .gob-legend { display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:8px;
+                  flex-wrap:wrap; font-size:11px; font-weight:700; color:var(--muted); }
+    .gob-legend .lg { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+    .gob-legend .sw { width:11px; height:11px; border-radius:3px; box-shadow:0 1px 2px rgba(20,30,45,.25); }
+    .gob-legend .sw.red{background:var(--red)} .gob-legend .sw.amber{background:var(--amber)} .gob-legend .sw.green{background:var(--green)}
+    .gob-legend .lab { font-size:10px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--ink); }
+    .gob-stage { position:relative; height:168px; }
+    .gob .road { position:absolute; left:0; right:0; height:62px; }
+    .gob .road.ai { top:8px; } .gob .road.rb { top:94px; }
+    .gob .road::after { content:""; position:absolute; left:4px; right:4px; bottom:10px; height:3px; border-radius:3px;
+        background:repeating-linear-gradient(90deg,var(--road) 0 18px,transparent 18px 34px); }
+    .gob .lane-tag { position:absolute; left:2px; top:-4px; font-size:10px; font-weight:800; letter-spacing:.6px;
+        text-transform:uppercase; color:var(--muted); }
+    .gob .jobs { position:absolute; top:16px; left:190px; display:flex; align-items:center; gap:12px; }
+    .gob .chip { font-size:12.5px; font-weight:700; color:#fff; padding:5px 10px; border-radius:8px; white-space:nowrap;
+        box-shadow:0 2px 6px rgba(20,30,45,.2); position:relative; }
+    .gob .chip.red{background:var(--red)} .gob .chip.amber{background:var(--amber)} .gob .chip.green{background:var(--green)}
+    .gob .safe { position:absolute; top:16px; left:734px; display:flex; align-items:center; gap:12px; }
+    .gob .wall { position:absolute; left:var(--wall); top:0; width:34px; height:168px; border-radius:8px; z-index:6;
+        background:linear-gradient(180deg,var(--primary),var(--primary-dark)); border:1.5px solid var(--primary-dark);
+        box-shadow:0 8px 20px rgba(20,30,45,.3); display:flex; align-items:center; justify-content:center;
+        transform:translateY(-214px); animation:gobWall var(--loop) cubic-bezier(.2,1.25,.4,1) infinite; }
+    .gob .wall .brk { writing-mode:vertical-rl; text-orientation:upright; font-weight:900; font-size:15px;
+        letter-spacing:4px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); }
+    @keyframes gobWall { 0%,60%{transform:translateY(-214px)} 66%{transform:translateY(5px)} 70%{transform:translateY(-5px)}
+        74%,96%{transform:translateY(0)} 100%{transform:translateY(-214px)} }
+    .gob .pred { position:absolute; top:50%; left:8px; z-index:4; animation:gobAdvance var(--loop) linear infinite; }
+    .gob .road.rb .pred { animation:gobAdvanceRb var(--loop) linear infinite; }
+    @keyframes gobAdvance { 0%{transform:translate(0,-50%)} 12%{transform:translate(120px,-50%)} 24%{transform:translate(262px,-50%)}
+        36%{transform:translate(384px,-50%)} 50%{transform:translate(486px,-50%)} 62%{transform:translate(566px,-50%)}
+        70%{transform:translate(var(--predEnd),-50%)} 73%{transform:translate(610px,-50%)} 78%{transform:translate(624px,-50%)}
+        96%{transform:translate(624px,-50%)} 100%{transform:translate(0,-50%)} }
+    @keyframes gobAdvanceRb { 0%{transform:translate(0,-50%)} 12%{transform:translate(104px,-50%)} 24%{transform:translate(236px,-50%)}
+        36%{transform:translate(360px,-50%)} 50%{transform:translate(470px,-50%)} 62%{transform:translate(560px,-50%)}
+        70%{transform:translate(var(--predEnd),-50%)} 73%{transform:translate(610px,-50%)} 78%{transform:translate(624px,-50%)}
+        96%{transform:translate(624px,-50%)} 100%{transform:translate(0,-50%)} }
+    .ai-g{width:50px;height:50px;position:relative;filter:drop-shadow(0 0 8px rgba(243,163,95,.6))}
+    .ai-g .jaw{position:absolute;left:0;width:50px;height:25px;background:linear-gradient(180deg,var(--primary),var(--primary-dark));overflow:hidden}
+    .ai-g .top{top:0;border-radius:50px 50px 0 0;transform-origin:50% 100%;animation:gobChompT .4s ease-in-out infinite}
+    .ai-g .bot{bottom:0;border-radius:0 0 50px 50px;transform-origin:50% 0;animation:gobChompB .4s ease-in-out infinite}
+    .ai-g .grid{position:absolute;inset:0;border-radius:50%;z-index:-1;opacity:.5;
+        background:repeating-linear-gradient(90deg,transparent 0 6px,rgba(255,255,255,.2) 6px 7px),repeating-linear-gradient(0deg,transparent 0 6px,rgba(255,255,255,.2) 6px 7px)}
+    .ai-g .eye{position:absolute;top:9px;left:23px;width:5px;height:5px;border-radius:50%;background:#fff;z-index:3;animation:gobChompT .4s ease-in-out infinite}
+    .ai-g .ai{position:absolute;top:6px;left:8px;font-size:10px;font-weight:900;color:var(--accent);z-index:3;letter-spacing:.5px;animation:gobChompT .4s ease-in-out infinite}
+    @keyframes gobChompT{0%,100%{transform:rotate(-33deg)}50%{transform:rotate(0)}}
+    @keyframes gobChompB{0%,100%{transform:rotate(33deg)}50%{transform:rotate(0)}}
+    .rb-g{width:52px;height:46px;position:relative;filter:drop-shadow(0 3px 5px rgba(20,30,45,.4))}
+    .rb-g .ant{position:absolute;top:-10px;left:23px;width:2px;height:10px;background:var(--metal-b)}
+    .rb-g .ant::after{content:"";position:absolute;top:-6px;left:-2.5px;width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 7px var(--red)}
+    .rb-g .mouth{position:absolute;left:3px;right:1px;top:3px;bottom:3px;border-radius:9px;background:var(--mouth)}
+    .rb-g .jaw{position:absolute;left:3px;width:48px;height:20px;overflow:hidden;background:linear-gradient(180deg,var(--metal-c),var(--metal-b));border:1.5px solid var(--metal-b)}
+    .rb-g .top{top:0;border-radius:9px 11px 3px 3px;transform-origin:50% 100%;animation:gobRbT .46s ease-in-out infinite}
+    .rb-g .bot{bottom:0;border-radius:3px 3px 11px 9px;transform-origin:50% 0;animation:gobRbB .46s ease-in-out infinite}
+    .rb-g .eye{position:absolute;top:8px;left:13px;width:8px;height:8px;border-radius:2px;z-index:4;background:var(--red);box-shadow:0 0 8px var(--red);animation:gobRbT .46s ease-in-out infinite}
+    .rb-g .rivet{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--metal-b);z-index:5}
+    .rb-g .top .teeth{position:absolute;left:4px;right:2px;bottom:0;height:6px;z-index:2;background:var(--metal-c);
+        clip-path:polygon(0 0,100% 0,100% 40%,91% 100%,82% 40%,73% 100%,64% 40%,55% 100%,46% 40%,37% 100%,28% 40%,19% 100%,10% 40%,0 40%)}
+    @keyframes gobRbT{0%,100%{transform:rotate(-17deg)}50%{transform:rotate(0)}}
+    @keyframes gobRbB{0%,100%{transform:rotate(17deg)}50%{transform:rotate(0)}}
+    .gob .eatc{transform-origin:center}
+    .gob .e1{animation:gobEat1 var(--loop) linear infinite}
+    .gob .e2{animation:gobEat2 var(--loop) linear infinite}
+    .gob .e3{animation:gobEat3 var(--loop) linear infinite}
+    .gob .e4{animation:gobEat4 var(--loop) linear infinite}
+    .gob .e5{animation:gobEat5 var(--loop) linear infinite}
+    .gob .e6{animation:gobEat6 var(--loop) linear infinite}
+    @keyframes gobEat1{0%,11%{opacity:1;transform:scale(1)}13%{opacity:.65;transform:scale(1.2) rotate(-5deg)}15%{opacity:0;transform:scale(.15)}99.9%{opacity:0;transform:scale(.15)}100%{opacity:1;transform:scale(1)}}
+    @keyframes gobEat2{0%,20%{opacity:1;transform:scale(1)}22%{opacity:.65;transform:scale(1.2) rotate(-5deg)}24%{opacity:0;transform:scale(.15)}99.9%{opacity:0;transform:scale(.15)}100%{opacity:1;transform:scale(1)}}
+    @keyframes gobEat3{0%,29%{opacity:1;transform:scale(1)}31%{opacity:.65;transform:scale(1.2) rotate(-5deg)}33%{opacity:0;transform:scale(.15)}99.9%{opacity:0;transform:scale(.15)}100%{opacity:1;transform:scale(1)}}
+    @keyframes gobEat4{0%,38%{opacity:1;transform:scale(1)}40%{opacity:.65;transform:scale(1.2) rotate(-5deg)}42%{opacity:0;transform:scale(.15)}99.9%{opacity:0;transform:scale(.15)}100%{opacity:1;transform:scale(1)}}
+    @keyframes gobEat5{0%,50%{opacity:1;transform:scale(1)}52.5%{opacity:.65;transform:scale(1.2) rotate(-5deg)}55%{opacity:0;transform:scale(.15)}99.9%{opacity:0;transform:scale(.15)}100%{opacity:1;transform:scale(1)}}
+    @keyframes gobEat6{0%,61%{opacity:1;transform:scale(1)}63.5%{opacity:.65;transform:scale(1.2) rotate(-5deg)}66%{opacity:0;transform:scale(.15)}99.9%{opacity:0;transform:scale(.15)}100%{opacity:1;transform:scale(1)}}
+    /* one red job acts early and crosses to safety (turning green) instead of being eaten */
+    .gob .escape{position:relative;z-index:7}
+    .gob .ai-esc{animation:gobEscapeAi var(--loop) ease-in-out infinite}
+    .gob .rb-esc{animation:gobEscapeRb var(--loop) ease-in-out infinite}
+    @keyframes gobEscapeAi{
+      0%,24%{transform:translate(0,0) scale(1);background-color:var(--red);box-shadow:0 2px 6px rgba(20,30,45,.2)}
+      29%{transform:translate(20px,-24px) scale(1.08);background-color:var(--red)}
+      39%{transform:translate(150px,-26px) scale(1.08);background-color:var(--amber)}
+      49%{transform:translate(262px,-10px) scale(1.04);background-color:var(--green)}
+      55%,96%{transform:translate(300px,0) scale(1);background-color:var(--green);box-shadow:0 0 0 3px rgba(20,123,116,.4)}
+      100%{transform:translate(0,0) scale(1);background-color:var(--red)}
+    }
+    @keyframes gobEscapeRb{
+      0%,24%{transform:translate(0,0) scale(1);background-color:var(--red);box-shadow:0 2px 6px rgba(20,30,45,.2)}
+      29%{transform:translate(20px,-42px) scale(1.08);background-color:var(--red)}
+      39%{transform:translate(205px,-44px) scale(1.08);background-color:var(--amber)}
+      49%{transform:translate(325px,-16px) scale(1.04);background-color:var(--green)}
+      55%,96%{transform:translate(363px,0) scale(1);background-color:var(--green);box-shadow:0 0 0 3px rgba(20,123,116,.4)}
+      100%{transform:translate(0,0) scale(1);background-color:var(--red)}
+    }
+    .gob-actnow{--loop:11s;display:inline-flex;align-items:center;gap:6px;margin:10px auto 0;font-size:13px;font-weight:800;
+        text-transform:uppercase;letter-spacing:.7px;color:var(--red);background:rgba(176,66,43,.1);
+        border:1px solid rgba(176,66,43,.32);border-radius:999px;padding:6px 15px;
+        animation:gobActFlash var(--loop) ease-in-out infinite}
+    [data-theme="dark"] .gob-actnow{background:rgba(224,117,89,.14);border-color:rgba(224,117,89,.32);color:#f2ab91}
+    @keyframes gobActFlash{0%,60%{opacity:.22;transform:scale(.95)}66%{opacity:1;transform:scale(1.16)}72%{opacity:1;transform:scale(1)}86%{opacity:1}94%{opacity:.5}100%{opacity:.22;transform:scale(.95)}}
+    @media (prefers-reduced-motion:reduce) {
+      .gob .pred,.ai-g .top,.ai-g .bot,.ai-g .eye,.ai-g .ai,.rb-g .top,.rb-g .bot,.rb-g .eye,.gob .wall,.gob-actnow,.gob .eatc,.gob .escape { animation:none !important; }
+      .gob .wall { transform:translateY(0); } .gob .pred { left:8px; } .gob-actnow { opacity:1; }
+      .gob .escape { background-color:var(--green); box-shadow:0 0 0 3px rgba(20,123,116,.4); }
+    }
     .score-foot { display:flex; flex-wrap:wrap; gap:8px 22px; align-items:center; justify-content:center;
                   max-width:760px; margin:26px auto 0; padding-top:16px; border-top:1px solid var(--line);
                   font-size:12px; color:var(--muted); }
     .score-foot a { color:var(--primary); }
-    /* honest-answers FAQ (native collapsibles) */
+    /* straight-answers FAQ (native collapsibles) */
     .faq { max-width:760px; margin:34px auto 0; }
     .faq h2 { text-align:center; font-size:18px; margin:0 0 14px; }
     .faq details { border:1px solid var(--line); border-radius:11px; background:var(--card); margin-bottom:10px;
@@ -593,7 +655,7 @@
       <a href="/" class="nav-home" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path
         d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg><span>Home</span></a>
-      <a href="/">Check a job</a><a href="/students">Future careers</a><a href="/methodology">How it works</a>
+      <a href="/">For Workers</a><a href="/students">For Students</a><a href="/methodology">How it works</a>
       <button id="theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch theme">
         <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/>

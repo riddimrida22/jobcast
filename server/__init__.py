@@ -351,7 +351,7 @@ def create_app() -> Flask:
         from flask import Response
         data = {
             "name": "JobBreak", "short_name": "JobBreak",
-            "description": "An honest, sourced read on whether AI or robots are likely to take your job, and when.",
+            "description": "A clear, sourced read on whether AI or robots are likely to take your job, and when.",
             "start_url": "/", "scope": "/", "display": "standalone",
             "background_color": "#0b1a2e", "theme_color": "#112741",
             "icons": [{"src": "/static/icon.svg", "sizes": "any",

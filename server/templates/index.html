@@ -14,21 +14,53 @@
   '55':'#5a6a4a' } %}
 {% set disc_legend = [('#6cb4e0','Trades & manual'),('#2f4f73','Business & office'),('#5a6fc0','Tech & science'),('#159e8c','Healthcare'),('#7a5aa0','Legal'),('#c08a3a','Education & social'),('#c0607a','Arts & media'),('#d07a3a','Service')] %}
 <div class="slogan-banner">
-  <div class="slogan-ticker"><div class="st-track">
-    {% set slg = ['AI is coming for your job, sooner than you think.','Don\'t get gobbled. See your timeline.','Know your number before your boss does.','The sand is running out on the old way of working.','Break free first, with JobBreak.'] %}
-    {% for pass in [1, 2] %}{% for s in slg %}<span class="st-item">{{ s }}</span><span class="st-sep">&bull;</span>{% endfor %}{% endfor %}
+  <div class="slogan-ticker market"><div class="st-track">
+    {% for pass in [1, 2] %}{% for o in most_exposed[:14] %}<a class="mk-item" href="/jobs/{{ o.soc }}"><span class="mk-sym">{{ o.title }}</span><span class="mk-val up">{{ o.base }}</span><span class="mk-arr up">&#9650;</span></a>{% endfor %}{% for o in least_exposed[:10] %}<a class="mk-item" href="/jobs/{{ o.soc }}"><span class="mk-sym">{{ o.title }}</span><span class="mk-val dn">{{ o.base }}</span><span class="mk-arr dn">&#9660;</span></a>{% endfor %}{% endfor %}
   </div></div>
-  <div class="gob-scene" aria-hidden="true">
-    <span class="gob-hour"><span class="gh-glass"></span><span class="gh-top"></span><span class="gh-bot"></span><span class="gh-stream"></span></span>
-    <span class="gob-road">
-      <span class="gob-pac"><span class="gp-top"></span><span class="gp-bot"></span><span class="gp-eye"></span></span>
-      <span class="gob-wall"><span class="gw-tag">JobBreak</span></span>
-      <span class="gob-job">
-        <span class="gob-ltr">J</span><span class="gob-ltr">O</span><span class="gob-ltr">B</span>
-      </span>
-    </span>
+  <div class="gob-wrap" aria-hidden="true">
+   <div class="gob">
+    <div class="gob-legend">
+      <span class="lab">Risk of automation:</span>
+      <span class="lg"><span class="sw red"></span>Most exposed</span>
+      <span class="lg"><span class="sw amber"></span>Moderate</span>
+      <span class="lg"><span class="sw green"></span>Safer for now</span>
+    </div>
+    <div class="gob-stage">
+      <div class="road ai">
+        <span class="lane-tag">AI &rarr; desk jobs</span>
+        <div class="jobs ai">
+          <span class="chip red eatc e1">Data entry</span>
+          <span class="chip red eatc e2">Telemarketer</span>
+          <span class="chip red eatc e3">Bookkeeper</span>
+          <span class="chip red escape ai-esc">Paralegal</span>
+          <span class="chip amber eatc e5">Copywriter</span>
+          <span class="chip amber eatc e6">Analyst</span>
+        </div>
+        <div class="pred ai"><span class="ai-g"><span class="grid"></span><span class="ai">AI</span><span class="eye"></span><span class="jaw top"></span><span class="jaw bot"></span></span></div>
+      </div>
+      <div class="road rb">
+        <span class="lane-tag">Robots &rarr; manual jobs</span>
+        <div class="jobs rb">
+          <span class="chip red eatc e1">Cashier</span>
+          <span class="chip red eatc e2">Warehouse</span>
+          <span class="chip red eatc e3">Packer</span>
+          <span class="chip red escape rb-esc">Assembler</span>
+          <span class="chip amber eatc e5">Driver</span>
+          <span class="chip amber eatc e6">Welder</span>
+        </div>
+        <div class="pred rb"><span class="rb-g"><span class="ant"></span><span class="mouth"></span><span class="eye"></span><span class="jaw top"><span class="teeth"></span></span><span class="jaw bot"></span><span class="rivet" style="top:6px;right:3px"></span><span class="rivet" style="bottom:6px;right:3px"></span></span></div>
+      </div>
+      <div class="wall"><span class="brk">JOBBREAK</span></div>
+      <div class="safe" style="top:22px"><span class="chip green">Therapist</span></div>
+      <div class="safe" style="top:108px"><span class="chip green">Plumber</span></div>
+    </div>
+   </div>
   </div>
-  <span class="urgent-tag"><span class="urgent-label">Act now to beat the AI gobbler</span></span></div>
+  <div class="gob-actnow">&#9888; Act now &mdash; even red-zone jobs can reach safety</div></div>
+<script>(function(){var w=document.querySelector('.gob-wrap');if(!w)return;var g=w.querySelector('.gob');var DH=198;
+function fit(){var avail=(w.parentElement?w.parentElement.clientWidth:w.clientWidth)||940;var s=Math.min(1,avail/940);
+g.style.transform='scale('+s+')';w.style.width=(940*s)+'px';w.style.height=(DH*s)+'px';}
+if(window.ResizeObserver){new ResizeObserver(fit).observe(w.parentElement||w);}addEventListener('resize',fit);fit();})();</script>
 
 <div class="home-layout">
   <aside class="side">
@@ -39,11 +71,7 @@
     </div></div>
   </aside>
   <div class="center">
-<div class="hero">
-  <h1 style="font-size:26px;margin:4px 0 4px">Will AI or robots take my job?</h1>
-  <p class="lead" style="font-size:15px;margin:0 0 8px">An honest, sourced read on how exposed my
-  work is, and when change is likely.</p>
-</div>
+<h1 class="sr-only">Will AI or robots take my job?</h1>
 
 {% if error %}
 <div class="card" style="border-color:#f0c0c0;background:#fdf3f3">
@@ -219,7 +247,7 @@
 </div>
 
 <section class="faq">
-  <h2>Honest answers</h2>
+  <h2>Straight answers</h2>
   <details><summary>Is this just fear-mongering?</summary>
     <p>No. We show ranges and a timeline from published research, never a flat "your job is gone." The point is
     to help you act early, while you still have options, not to scare you.</p></details>
