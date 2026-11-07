@@ -13,12 +13,8 @@
   '33':'#6cb4e0','37':'#6cb4e0','45':'#6cb4e0','47':'#6cb4e0','49':'#6cb4e0','51':'#6cb4e0','53':'#6cb4e0',
   '55':'#5a6a4a' } %}
 {% set disc_legend = [('#6cb4e0','Trades & manual'),('#2f4f73','Business & office'),('#5a6fc0','Tech & science'),('#159e8c','Healthcare'),('#7a5aa0','Legal'),('#c08a3a','Education & social'),('#c0607a','Arts & media'),('#d07a3a','Service')] %}
-<div class="score-explain">
-  <div><strong>The score is exposure, not a probability.</strong> It is how automatable a job's tasks are
-  (0 to 100), from O*NET tasks scored on AI (Eloundou 2023) and robotics. The <em>when</em> is a separate
-  timeline. <a href="/methodology">How it works</a></div>
-  <div class="scale"><span>0 low</span><div class="scale-bar"></div><span>100 high</span></div>
-</div>
+<div class="slogan-banner">AI is coming to break your job.
+  <span class="accent">Break free first, with JobBreak.</span></div>
 
 <div class="home-layout">
   <aside class="side">
@@ -31,8 +27,6 @@
   <div class="center">
 <div class="hero">
   <h1 style="font-size:26px;margin:4px 0 4px">Will AI or robots replace my job?</h1>
-  <p style="font-size:16px;font-weight:700;margin:2px 0 6px;color:var(--ink)">AI is coming to break your job.
-  <span style="color:var(--accent)">Break free first, with JobBreak.</span></p>
   <p class="lead" style="font-size:15px;margin:0 0 8px">An honest, sourced read on how exposed my
   work is, and when change is likely.</p>
 </div>
@@ -178,6 +172,13 @@
   {% for c, lbl in disc_legend %}
   <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:11px;height:11px;border-radius:3px;background:{{ c }};display:inline-block"></span>{{ lbl }}</span>
   {% endfor %}
+</div>
+
+<div class="score-foot">
+  <span><strong>How the score works:</strong> it is exposure, not a probability: how automatable a job's
+  tasks are (0 to 100), from O*NET tasks scored on AI (Eloundou 2023) and robotics. The <em>when</em> is a
+  separate timeline. <a href="/methodology">How it works</a></span>
+  <div class="scale"><span>0 low</span><div class="scale-bar"></div><span>100 high</span></div>
 </div>
 
 <script>

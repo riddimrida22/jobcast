@@ -35,16 +35,12 @@
     header.site { background:linear-gradient(180deg,var(--shell),var(--shell-dark)); color:#fff;
                   box-shadow:0 2px 14px rgba(11,26,46,.28); position:sticky; top:0; z-index:20; }
     header.site .wrap { padding:15px 20px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; }
-    .brand { font-weight:700; font-size:22px; letter-spacing:.2px; text-decoration:none; color:#fff; overflow:visible; }
-    .brand .brk { display:inline-block; transform-origin:top left; color:var(--accent);
-                  animation:breakoff 1s cubic-bezier(.5,1.8,.4,.9) .5s both; }
-    .brand .brk-i { display:inline-block; transform-origin:top left; animation:swing 2.8s ease-in-out 1.6s infinite; }
-    @keyframes breakoff { 0% { transform:rotate(0) translate(0,0); } 100% { transform:rotate(18deg) translate(1px,1px); } }
-    @keyframes swing { 0%,100% { transform:rotate(-3.5deg); } 50% { transform:rotate(3.5deg); } }
-    @media (prefers-reduced-motion:reduce) {
-      .brand .brk { animation:none; transform:rotate(13deg) translate(1px,1px); }
-      .brand .brk-i { animation:none; }
-    }
+    .brand { font-weight:700; font-size:22px; letter-spacing:.2px; text-decoration:none; color:#fff; overflow:visible; white-space:nowrap; }
+    /* "Break" hinges at the bottom-left (bottom of Job's b) and swings from aligned down to 90 and back. */
+    .brand .brk { display:inline-block; transform-origin:left bottom; color:var(--accent);
+                  animation:swing 3s ease-in-out infinite; }
+    @keyframes swing { 0%,8%,100% { transform:rotate(0deg); } 54% { transform:rotate(90deg); } }
+    @media (prefers-reduced-motion:reduce) { .brand .brk { animation:none; transform:rotate(0deg); } }
     nav a { color:#c4d2e4; text-decoration:none; margin-left:20px; font-size:14px; font-weight:500; }
     nav a:hover { color:#fff; }
 
@@ -130,6 +126,13 @@
     .score-explain { display:flex; flex-wrap:wrap; gap:10px 26px; align-items:center; justify-content:center;
                      background:var(--card); border:1px solid var(--line); border-radius:12px; padding:11px 18px;
                      margin-bottom:16px; font-size:13px; box-shadow:0 3px 12px rgba(31,63,96,.05); }
+    .slogan-banner { text-align:center; font-size:20px; font-weight:800; color:var(--ink);
+                     line-height:1.35; margin:4px auto 18px; max-width:760px; }
+    .slogan-banner .accent { color:var(--accent); }
+    .score-foot { display:flex; flex-wrap:wrap; gap:8px 22px; align-items:center; justify-content:center;
+                  max-width:760px; margin:26px auto 0; padding-top:16px; border-top:1px solid var(--line);
+                  font-size:12px; color:var(--muted); }
+    .score-foot a { color:var(--primary); }
     .scale { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:12px; }
     .scale-bar { width:170px; height:10px; border-radius:6px; position:relative;
                  background:linear-gradient(90deg,var(--green),#c88a2e,var(--red)); }
@@ -317,6 +320,14 @@
     .htrack .labs span.on { color:var(--accent); font-weight:800; }
     @media (max-width:860px) { .plans { grid-template-columns:repeat(2,1fr); } }
     @media (max-width:520px) { .plans { grid-template-columns:1fr; } }
+    /* Mobile header + form */
+    @media (max-width:560px) {
+      header.site .wrap { flex-wrap:wrap; row-gap:4px; padding:12px 18px; }
+      nav { width:100%; display:flex; flex-wrap:wrap; align-items:center; margin-top:2px; }
+      nav a { margin-left:0; margin-right:16px; font-size:13.5px; }
+      nav #theme-toggle { margin-left:auto !important; }
+      .form-grid { grid-template-columns:1fr; padding:18px; }
+    }
     /* skills chip input */
     .skill-box { display:flex; flex-wrap:wrap; gap:6px; align-items:center; border:1px solid var(--line);
                  border-radius:9px; padding:5px 8px; background:var(--input); min-height:44px; }
@@ -360,7 +371,7 @@
   <div class="dev-banner">Private preview. Not a public release.</div>
   {% endif %}
   <header class="site"><div class="wrap">
-    <a class="brand" href="/" aria-label="JobBreak home">Job<span class="brk"><span class="brk-i">Break</span></span></a>
+    <a class="brand" href="/" aria-label="JobBreak home">Job<span class="brk">Break</span></a>
     <nav>
       <a href="/">Check a job</a><a href="/students">Future careers</a><a href="/methodology">How it works</a>
       <button id="theme-toggle" type="button" aria-label="Toggle dark mode"
