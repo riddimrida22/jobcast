@@ -2,3 +2,4 @@
 # library; pandas/numpy/scipy/openpyxl are ingestion/calibration tools, not runtime deps.
 Flask>=3.0
 gunicorn>=21.2
+pypdf>=4.0

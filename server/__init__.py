@@ -12,6 +12,7 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from riskcore import Profile, load_default_engine  # noqa: E402
+from . import resume as resume_parser  # noqa: E402
 
 VERSION = "0.1.0-dev"
 
@@ -45,6 +46,7 @@ def profile_from(source) -> Profile:
 
 def create_app() -> Flask:
     app = Flask(__name__)
+    app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024  # 6 MB resume cap
     engine = load_default_engine()
 
     # Restricted-demo gate (env-controlled, off by default):
@@ -163,6 +165,21 @@ def create_app() -> Flask:
         result = engine.assess(Profile(title=occ["title"]))
         return render_template("result.html", r=result, profile=Profile(title=occ["title"]),
                                version=VERSION, licensed=engine.snapshot.licensed, seo=True)
+
+    @app.post("/resume")
+    def parse_resume_route():
+        f = request.files.get("file")
+        if f is None or not f.filename:
+            return jsonify({"ok": False, "error": "no_file"}), 400
+        data = f.read()
+        if not data:
+            return jsonify({"ok": False, "error": "empty"}), 400
+        text = resume_parser.extract_text(f.filename, data)
+        if not text or not text.strip():
+            return jsonify({"ok": False, "error": "no_text",
+                            "message": "Could not read that file. Try a .txt or .docx, or fill the form manually."}), 422
+        parsed = resume_parser.parse_resume(text, engine.snapshot)
+        return jsonify({"ok": True, **parsed})
 
     @app.get("/methodology")
     def methodology():

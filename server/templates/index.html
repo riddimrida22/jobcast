@@ -43,6 +43,13 @@
 {% endif %}
 
 <form class="card form-grid" method="post" action="/assess">
+  <div class="full" style="margin-bottom:4px">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <button type="button" id="resume-btn" class="secondary" style="margin:0">Upload resume to auto-fill</button>
+      <span id="resume-status" class="muted" style="font-size:12px">PDF, Word, or text. Read in your browser session, never stored.</span>
+      <input type="file" id="resume-file" accept=".pdf,.docx,.txt" style="display:none">
+    </div>
+  </div>
   <div>
     <label for="field">Field</label>
     <select id="field" aria-label="General field">
@@ -273,6 +280,42 @@
   });
   input.addEventListener('blur', function () { if (input.value.trim()) add(input.value); });
   box.addEventListener('click', function () { input.focus(); });
+  window.jobcastSetSkills = function (arr) { (arr || []).forEach(function (s) { add(String(s)); }); };
+})();
+
+// Resume upload -> auto-fill. The file is read in memory on the server and never stored.
+(function () {
+  var btn = document.getElementById('resume-btn');
+  var file = document.getElementById('resume-file');
+  var status = document.getElementById('resume-status');
+  if (!btn || !file) return;
+  function setSel(id, val) {
+    var s = document.getElementById(id); if (!s) return;
+    for (var i = 0; i < s.options.length; i++) {
+      if (s.options[i].value === val || s.options[i].text === val) { s.selectedIndex = i; return; }
+    }
+  }
+  function setJob(title) {
+    var search = document.getElementById('title-search'), sel = document.getElementById('title');
+    if (search) search.value = title; if (sel) sel.value = title;
+  }
+  btn.addEventListener('click', function () { file.click(); });
+  file.addEventListener('change', function () {
+    if (!file.files.length) return;
+    status.textContent = 'Reading your resume...';
+    var fd = new FormData(); fd.append('file', file.files[0]);
+    fetch('/resume', { method: 'POST', body: fd }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.ok) { status.textContent = d.message || 'Could not read that file.'; return; }
+      var filled = [];
+      if (d.title) { setJob(d.title); filled.push('job'); }
+      if (d.skills && d.skills.length && window.jobcastSetSkills) { window.jobcastSetSkills(d.skills); filled.push('skills'); }
+      if (d.experience_band) { setSel('experience_years', d.experience_band); filled.push('experience'); }
+      if (d.education) { setSel('education', d.education); filled.push('degree'); }
+      if (d.education_field) { setSel('education_field', d.education_field); filled.push('field of study'); }
+      status.textContent = filled.length ? ('Auto-filled: ' + filled.join(', ') + '. Review and edit before you submit.')
+                                         : 'Read your resume, but nothing matched our occupations. Fill the form manually.';
+    }).catch(function () { status.textContent = 'Upload failed. Try again or fill the form manually.'; });
+  });
 })();
 </script>
 {% endblock %}

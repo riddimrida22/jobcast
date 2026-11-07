@@ -126,6 +126,14 @@
     .scale-bar { width:170px; height:10px; border-radius:6px; position:relative;
                  background:linear-gradient(90deg,var(--green),#c88a2e,var(--red)); }
     .scale-bar span { position:absolute; top:-3px; width:2px; height:16px; background:var(--ink); opacity:.4; }
+
+    /* dark-mode: sharpen the pastel pills (scores, tags, bands) */
+    [data-theme="dark"] .jc-score.exp, [data-theme="dark"] .tag.exposed { background:rgba(224,117,89,.22); color:#f2ab91; }
+    [data-theme="dark"] .jc-score.safe, [data-theme="dark"] .tag.protected { background:rgba(63,182,168,.22); color:#80e3cb; }
+    [data-theme="dark"] .band.largely_unaffected { background:rgba(63,182,168,.22); color:#80e3cb; }
+    [data-theme="dark"] .band.partial_5_10yr { background:rgba(200,138,46,.24); color:#ebb86e; }
+    [data-theme="dark"] .band.near_term_high { background:rgba(224,117,89,.24); color:#f2ab91; }
+    [data-theme="dark"] .g-num { fill:#f0f5fb; } [data-theme="dark"] .g-track { stroke:#2a3a4d; }
     .chip { font-size:12.5px; font-weight:600; color:var(--primary); background:var(--primary-soft);
             border-radius:999px; padding:6px 13px; }
     [data-theme="dark"] .chip { color:#bcd2ee; }
