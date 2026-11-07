@@ -48,7 +48,7 @@ def test_assess_page_renders_result(client):
     r = client.post("/assess", data={"title": "Registered Nurses", "zip": "10001"})
     assert r.status_code == 200
     assert b"Registered Nurses" in r.data
-    assert b"What is driving your result" in r.data
+    assert b"What is driving my result" in r.data
 
 
 def test_browse_and_occupation_pages(client):
