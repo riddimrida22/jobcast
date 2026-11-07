@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ r.occupation.title }} - AI and robot exposure | Jobcast{% endblock %}
+{% block title %}{{ r.occupation.title }} - AI and robot exposure | JobBreak{% endblock %}
 {% block description %}How exposed is {{ r.occupation.title }} to AI and robots, and when. Sourced ranges, not verdicts.{% endblock %}
 {% block content %}
 {% set check %}<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>{% endset %}
@@ -113,42 +113,38 @@
       <g class="human">
         <g class="body-bob">
           <!-- tail, flowing back -->
-          <g class="flow" style="transform-origin:208px 40px">
-            <path style="fill:#0c1119" d="M210 36 C197 39 190 50 185 63 C192 57 196 59 199 55 C198 61 203 58 205 53 C206 47 209 45 211 44 Z"></path>
+          <g class="flow" style="transform-origin:211px 36px">
+            <path style="fill:#0c1119" d="M212 33 C200 36 193 47 188 61 C195 55 199 57 202 52 C201 59 207 55 209 50 C210 44 212 40 214 41 Z"></path>
           </g>
-          <!-- hind legs (drive back) -->
-          <g class="limb-b" style="transform-origin:212px 50px"><line x1="212" y1="49" x2="205" y2="67" style="stroke:#0c1119;stroke-width:4"></line></g>
-          <g class="limb-a" style="transform-origin:223px 51px"><line x1="223" y1="50" x2="229" y2="67" style="stroke:#0c1119;stroke-width:4"></line></g>
-          <!-- front legs (reach forward) -->
-          <g class="limb-b" style="transform-origin:256px 51px"><line x1="256" y1="50" x2="250" y2="67" style="stroke:#0c1119;stroke-width:4"></line></g>
-          <g class="limb-a" style="transform-origin:267px 51px"><line x1="267" y1="50" x2="274" y2="66" style="stroke:#0c1119;stroke-width:4"></line></g>
-          <!-- hindquarter + barrel + shoulder (muscular) -->
-          <ellipse cx="217" cy="43" rx="15" ry="13" style="fill:#0c1119"></ellipse>
-          <ellipse cx="241" cy="45" rx="24" ry="12" style="fill:#0c1119"></ellipse>
-          <ellipse cx="262" cy="43" rx="12" ry="12" style="fill:#0c1119"></ellipse>
-          <!-- arched neck + head -->
-          <path d="M267 36 Q282 19 287 26" style="fill:none;stroke:#0c1119;stroke-width:12;stroke-linecap:round"></path>
-          <polygon points="284,18 298,26 294,38 283,31" style="fill:#0c1119"></polygon>
-          <polygon points="284,19 287,11 290,20" style="fill:#0c1119"></polygon>
-          <!-- mane, flowing -->
-          <g class="flow" style="transform-origin:270px 34px">
-            <path style="fill:#0c1119" d="M270 33 Q261 23 253 25 Q260 27 256 31 Q263 30 268 37 Z"></path>
+          <!-- hind legs (knee-bent, gather/extend) -->
+          <g class="leg-h" style="transform-origin:214px 46px"><polyline points="214,46 210,57 206,69" style="fill:none;stroke:#0c1119;stroke-width:4;stroke-linecap:round;stroke-linejoin:round"></polyline></g>
+          <g class="leg-h2" style="transform-origin:221px 47px"><polyline points="221,47 224,58 227,69" style="fill:none;stroke:#0c1119;stroke-width:4;stroke-linecap:round;stroke-linejoin:round"></polyline></g>
+          <!-- front legs (knee-bent, reach) -->
+          <g class="leg-f2" style="transform-origin:262px 49px"><polyline points="262,49 264,59 261,69" style="fill:none;stroke:#0c1119;stroke-width:4;stroke-linecap:round;stroke-linejoin:round"></polyline></g>
+          <g class="leg-f" style="transform-origin:258px 49px"><polyline points="258,49 261,59 266,69" style="fill:none;stroke:#0c1119;stroke-width:4;stroke-linecap:round;stroke-linejoin:round"></polyline></g>
+          <!-- body silhouette: croup, back, neck, head, chest, belly, hindquarter -->
+          <path style="fill:#0c1119" d="M214 33 C228 31 244 32 256 34 C262 29 272 24 280 20 C283 18 285 17 287 18 C289 19 290 23 291 26 L298 31 L292 33 C288 33 284 32 281 30 C277 33 271 38 267 44 C264 48 262 50 259 51 C247 54 234 54 226 51 C219 49 212 47 209 42 C206 37 207 33 214 33 Z"></path>
+          <!-- ears -->
+          <polygon points="283,19 286,11 289,20" style="fill:#0c1119"></polygon>
+          <!-- mane, flowing back over the crest -->
+          <g class="flow" style="transform-origin:262px 33px">
+            <path style="fill:#0c1119" d="M260 33 C251 24 244 25 249 29 C243 29 247 34 253 34 C249 37 255 39 261 38 Z"></path>
           </g>
           <!-- AI motif: shoulder core, circuitry, eye, poll beacon -->
-          <circle cx="262" cy="43" r="7.5" style="fill:var(--accent);opacity:.25"></circle>
-          <circle class="aicore" cx="262" cy="43" r="3" style="fill:var(--accent)"></circle>
-          <path d="M254 43 h-8 M241 40 v-5 M232 45 h-6" style="fill:none;stroke:var(--accent);stroke-width:1.3;opacity:.65"></path>
-          <circle cx="290" cy="27" r="1.7" style="fill:var(--accent)"></circle>
-          <line x1="286" y1="12" x2="286" y2="6" style="stroke:var(--accent);stroke-width:2"></line>
-          <circle class="aicore" cx="286" cy="4.5" r="2.4" style="fill:var(--accent)"></circle>
-          <!-- rider (jockey, leaning forward) -->
-          <line x1="243" y1="37" x2="251" y2="22" stroke-width="3"></line>
-          <circle class="head" cx="253" cy="16" r="5.3"></circle>
-          <line x1="250" y1="23" x2="271" y2="31" stroke-width="2.8"></line>
-          <line x1="243" y1="37" x2="238" y2="50" stroke-width="3"></line>
-          <line x1="243" y1="37" x2="248" y2="50" stroke-width="2.8"></line>
-          <!-- reins -->
-          <line x1="271" y1="31" x2="291" y2="30" style="stroke:var(--accent);stroke-width:1.6"></line>
+          <circle cx="258" cy="43" r="7.5" style="fill:var(--accent);opacity:.25"></circle>
+          <circle class="aicore" cx="258" cy="43" r="3" style="fill:var(--accent)"></circle>
+          <path d="M250 43 h-8 M238 40 v-5 M230 45 h-6" style="fill:none;stroke:var(--accent);stroke-width:1.3;opacity:.65"></path>
+          <circle cx="292" cy="27" r="1.7" style="fill:var(--accent)"></circle>
+          <line x1="287" y1="13" x2="287" y2="7" style="stroke:var(--accent);stroke-width:2"></line>
+          <circle class="aicore" cx="287" cy="5.5" r="2.4" style="fill:var(--accent)"></circle>
+          <!-- rider (jockey, leaning forward over the withers) -->
+          <line x1="247" y1="36" x2="256" y2="21" stroke-width="3"></line>
+          <circle class="head" cx="258" cy="15" r="5.3"></circle>
+          <line x1="255" y1="22" x2="275" y2="30" stroke-width="2.8"></line>
+          <line x1="247" y1="37" x2="243" y2="51" stroke-width="3"></line>
+          <line x1="247" y1="37" x2="252" y2="51" stroke-width="2.8"></line>
+          <!-- reins to the bit -->
+          <line x1="275" y1="30" x2="294" y2="31" style="stroke:var(--accent);stroke-width:1.6"></line>
         </g>
       </g>
     </svg>
@@ -159,14 +155,24 @@
     <button type="button" id="ai-plan-btn" class="secondary" style="margin:0" data-title="{{ r.occupation.title }}">Personalise this plan with AI</button>
     <span id="ai-plan-status" class="muted" style="font-size:12px;margin-left:10px"></span>
   </div>
-  <div id="strat-list">
+  <!-- icon symbols for the plan deck -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <symbol id="ic-skill" viewBox="0 0 24 24"><path d="M3 8l9-4 9 4-9 4-9-4z"/><path d="M7 10.5V15c0 1.2 2.2 2.2 5 2.2s5-1 5-2.2v-4.5"/></symbol>
+    <symbol id="ic-pivot" viewBox="0 0 24 24"><path d="M5 12h9"/><path d="M11 8l4 4-4 4"/><path d="M5 12V7a2 2 0 0 1 2-2h4"/></symbol>
+    <symbol id="ic-buffer" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.2-3 7.2-7 9-4-1.8-7-4.8-7-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="ic-network" viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.3"/><circle cx="18" cy="8" r="2.3"/><circle cx="10" cy="17" r="2.3"/><path d="M8.2 7.6l7.6 1M8.3 9l1.4 6"/></symbol>
+    <symbol id="ic-credential" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M9 13l-2 7 5-3 5 3-2-7"/></symbol>
+    <symbol id="ic-automate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3M6.5 6.5l2 2M15.5 15.5l2 2M17.5 6.5l-2 2M6.5 17.5l2-2"/></symbol>
+  </defs></svg>
+  <div id="strat-list" class="deck">
   {% for st in r.strategies %}
-  <div class="strat">
-    <div class="strat-num">{{ loop.index }}</div>
-    <div class="strat-t"><strong>{{ st.title }}</strong><div class="muted">{{ st.detail }}</div></div>
-  </div>
+    <div class="deck-card">
+      <div class="deck-top"><span class="deck-num">{{ loop.index }}</span></div>
+      <div class="deck-head">{{ st.title }}</div><div class="deck-act">{{ st.detail }}</div>
+    </div>
   {% endfor %}
   </div>
+  <script id="init-strats" type="application/json">{{ r.strategies | tojson }}</script>
   <h3 style="margin:26px 0 2px;font-size:17px">Unlock your survival plan</h3>
   <p class="muted" style="margin-top:2px">Free shows where you stand. Paid plans turn it into a personalised action plan, written for your exact profile.</p>
   <div class="plans">
@@ -187,6 +193,7 @@
     <div class="plan">
       <div class="plan-name">Starter</div>
       <div class="plan-price">$5<span>/mo</span></div>
+      <div class="plan-year"><strong>$50</strong>/yr billed yearly<span class="save">2 months free</span></div>
       <div class="plan-tag">Your single highest-impact move, written for you.</div>
       <ul>
         <li>{{ check }}Everything in Free</li>
@@ -201,6 +208,7 @@
       <div class="plan-badge">Most popular</div>
       <div class="plan-name">Pro</div>
       <div class="plan-price">$12<span>/mo</span></div>
+      <div class="plan-year"><strong>$120</strong>/yr billed yearly<span class="save">Save $24</span></div>
       <div class="plan-tag">Your full top-3 plan on an advanced AI model.</div>
       <ul>
         <li>{{ check }}Everything in Starter</li>
@@ -216,6 +224,7 @@
       <div class="plan-badge">Best value</div>
       <div class="plan-name">Career Shield</div>
       <div class="plan-price">$29<span>/mo</span></div>
+      <div class="plan-year"><strong>$290</strong>/yr billed yearly<span class="save">Save $58</span></div>
       <div class="plan-tag">The deepest plan on our most capable AI.</div>
       <ul>
         <li>{{ check }}Everything in Pro</li>
@@ -343,12 +352,59 @@
   var status = document.getElementById('ai-plan-status'), list = document.getElementById('strat-list');
   if (!status || !list) return;
   var TITLES = { free: 'Starter', tier1: 'Starter', tier2: 'Pro', tier3: 'Career Shield' };
+  var HZ = ['Now', '0-6 months', '6-18 months', '1-3 years'];
+  var HL = ['Now', '6 mo', '18 mo', '1-3 yr'];
+  var LVL = { High: 3, Medium: 2, Low: 1 };
+  var ICONS = { skill:1, pivot:1, buffer:1, network:1, credential:1, automate:1 };
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function guessIcon(t) {
+    t = (t || '').toLowerCase();
+    if (/certif|credential|licen|degree|qualif/.test(t)) return 'credential';
+    if (/network|mentor|connect|relationship|referr/.test(t)) return 'network';
+    if (/save|buffer|expense|emergency|income|financ|cushion|diversif/.test(t)) return 'buffer';
+    if (/pivot|move|transition|switch|adjacent|shift toward|role/.test(t)) return 'pivot';
+    if (/\bai\b|tool|automat|software|prompt|digital/.test(t)) return 'automate';
+    return 'skill';
+  }
+  function bars(n, cls) {
+    var s = ''; for (var k = 0; k < 3; k++) s += '<i class="' + (k < n ? 'on' : '') + '"></i>';
+    return '<span class="meter ' + cls + '">' + cls + '<span class="bars">' + s + '</span></span>';
+  }
+  function card(st, i) {
+    var head = st.headline || st.title || ('Step ' + (i + 1));
+    var act = st.action || st.detail || '';
+    var hi = HZ.indexOf(st.horizon); if (hi < 0) hi = Math.min(i, 3);
+    var icon = (st.icon && ICONS[st.icon]) ? st.icon : guessIcon(head + ' ' + act);
+    var imp = LVL[st.impact] || (i === 0 ? 3 : 2);
+    var eff = LVL[st.effort] || 2;
+    var rail = '', labs = '';
+    for (var d = 0; d < 4; d++) {
+      rail += '<span class="dot ' + (d === hi ? 'on' : '') + '"></span>' + (d < 3 ? '<span class="seg"></span>' : '');
+      labs += '<span class="' + (d === hi ? 'on' : '') + '">' + HL[d] + '</span>';
+    }
+    return '<div class="deck-card">' +
+      '<div class="deck-top"><span class="deck-num">' + (i + 1) + '</span><span class="deck-hz">' + esc(HZ[hi]) + '</span></div>' +
+      '<svg class="deck-ic"><use href="#ic-' + icon + '"></use></svg>' +
+      '<div class="deck-head">' + esc(head) + '</div>' +
+      '<div class="deck-act">' + esc(act) + '</div>' +
+      '<div class="deck-meters">' + bars(imp, 'impact') + bars(eff, 'effort') + '</div>' +
+      '<div class="htrack"><div class="rail">' + rail + '</div><div class="labs">' + labs + '</div></div>' +
+      '</div>';
+  }
+  function renderDeck(steps) {
+    list.className = 'deck';
+    list.innerHTML = steps.map(card).join('');
+  }
+  // Render the server-provided strategies as a rich deck on load.
+  try {
+    var init = JSON.parse(document.getElementById('init-strats').textContent);
+    if (init && init.length) renderDeck(init);
+  } catch (e) {}
   function getProfile() {
     var el = document.getElementById('profile-data');
     if (el) { try { return JSON.parse(el.textContent); } catch (e) {} }
     return { title: (btn ? btn.getAttribute('data-title') : '') };
   }
-  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function generate(tier, busyEl) {
     var label = TITLES[tier] || 'your';
     status.textContent = 'Writing your ' + label + ' plan...';
@@ -359,15 +415,9 @@
       .then(function (r) { return r.json(); }).then(function (d) {
         if (busyEl) busyEl.disabled = false;
         if (!d.ok || !d.strategies || !d.strategies.length) { status.textContent = 'Could not generate a plan.'; return; }
-        list.innerHTML = '';
-        d.strategies.forEach(function (st, i) {
-          var row = document.createElement('div'); row.className = 'strat';
-          row.innerHTML = '<div class="strat-num">' + (i + 1) + '</div><div class="strat-t"><strong>' +
-            esc(st.title) + '</strong><div class="muted">' + esc(st.detail) + '</div></div>';
-          list.appendChild(row);
-        });
+        renderDeck(d.strategies);
         status.textContent = d.source === 'ai'
-          ? 'Your ' + label + ' plan, written by AI from your result.'
+          ? 'Your ' + label + ' plan, built from your result.'
           : 'Starter preview shown. Upgrade to a paid plan for an AI-written plan.';
       }).catch(function () { if (busyEl) busyEl.disabled = false; status.textContent = 'Could not generate a plan.'; });
   }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Jobcast{% endblock %}</title>
+  <title>{% block title %}JobBreak{% endblock %}</title>
   <meta name="description" content="{% block description %}An honest, sourced read on whether AI or robots are likely to replace your job, and when.{% endblock %}">
   {% if noindex %}<meta name="robots" content="noindex, nofollow">{% endif %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,8 +35,16 @@
     header.site { background:linear-gradient(180deg,var(--shell),var(--shell-dark)); color:#fff;
                   box-shadow:0 2px 14px rgba(11,26,46,.28); position:sticky; top:0; z-index:20; }
     header.site .wrap { padding:15px 20px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; }
-    .brand { font-weight:700; font-size:22px; letter-spacing:.2px; text-decoration:none; color:#fff; }
-    .brand span { color:var(--accent); }
+    .brand { font-weight:700; font-size:22px; letter-spacing:.2px; text-decoration:none; color:#fff; overflow:visible; }
+    .brand .brk { display:inline-block; transform-origin:top left; color:var(--accent);
+                  animation:breakoff 1s cubic-bezier(.5,1.8,.4,.9) .5s both; }
+    .brand .brk-i { display:inline-block; transform-origin:top left; animation:swing 2.8s ease-in-out 1.6s infinite; }
+    @keyframes breakoff { 0% { transform:rotate(0) translate(0,0); } 100% { transform:rotate(18deg) translate(1px,1px); } }
+    @keyframes swing { 0%,100% { transform:rotate(-3.5deg); } 50% { transform:rotate(3.5deg); } }
+    @media (prefers-reduced-motion:reduce) {
+      .brand .brk { animation:none; transform:rotate(13deg) translate(1px,1px); }
+      .brand .brk-i { animation:none; }
+    }
     nav a { color:#c4d2e4; text-decoration:none; margin-left:20px; font-size:14px; font-weight:500; }
     nav a:hover { color:#fff; }
 
@@ -231,11 +239,18 @@
     @keyframes aiglow { 0%,100% { opacity:.5; } 50% { opacity:1; } }
     .runners .flow { transform-box:view-box; animation:maneflow .42s ease-in-out infinite; }
     @keyframes maneflow { 0%,100% { transform:rotate(3deg); } 50% { transform:rotate(-6deg); } }
+    .runners .leg-f, .runners .leg-f2, .runners .leg-h, .runners .leg-h2 { transform-box:view-box; }
+    .runners .leg-f  { animation:gallFront .4s ease-in-out infinite; }
+    .runners .leg-f2 { animation:gallFront .4s ease-in-out infinite; animation-delay:-.07s; }
+    .runners .leg-h  { animation:gallHind .4s ease-in-out infinite; }
+    .runners .leg-h2 { animation:gallHind .4s ease-in-out infinite; animation-delay:-.07s; }
+    @keyframes gallFront { 0%,100% { transform:rotate(20deg); } 50% { transform:rotate(-34deg); } }
+    @keyframes gallHind  { 0%,100% { transform:rotate(-22deg); } 50% { transform:rotate(32deg); } }
     @keyframes swingA { 0%,100% { transform:rotate(26deg); } 50% { transform:rotate(-26deg); } }
     @keyframes swingB { 0%,100% { transform:rotate(-26deg); } 50% { transform:rotate(26deg); } }
     @keyframes armA  { 0%,100% { transform:rotate(-32deg); } 50% { transform:rotate(32deg); } }
     @keyframes armB  { 0%,100% { transform:rotate(32deg); } 50% { transform:rotate(-32deg); } }
-    @keyframes bodybob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-2.5px); } }
+    @keyframes bodybob { 0%,100% { transform:translateY(1px); } 50% { transform:translateY(-4px); } }
     @keyframes grounddash { to { transform:translateX(-24px); } }
     @keyframes speedpulse { 0%,100% { opacity:.2; } 50% { opacity:.75; } }
     @media (prefers-reduced-motion:reduce) { .runners * { animation:none !important; } }
@@ -253,7 +268,12 @@
     .plan-name { font-weight:800; font-size:15px; color:var(--primary); letter-spacing:.2px; }
     .plan-price { font-size:27px; font-weight:800; color:var(--ink); margin:8px 0 0; line-height:1; }
     .plan-price span { font-size:13px; font-weight:600; color:var(--muted); }
-    .plan-tag { font-size:12px; color:var(--muted); margin:7px 0 2px; min-height:30px; line-height:1.35; }
+    .plan-year { font-size:11.5px; color:var(--muted); margin:5px 0 0; }
+    .plan-year strong { color:var(--ink); font-weight:700; }
+    .plan-year .save { display:inline-block; margin-left:4px; padding:1px 7px; border-radius:999px;
+                       font-size:10.5px; font-weight:800; background:var(--accent-soft); color:#b4631a; }
+    [data-theme="dark"] .plan-year .save { color:var(--accent); }
+    .plan-tag { font-size:12px; color:var(--muted); margin:9px 0 2px; min-height:30px; line-height:1.35; }
     .plan ul { list-style:none; padding:0; margin:12px 0 16px; display:flex; flex-direction:column; gap:8px; flex:1; }
     .plan li { display:flex; gap:8px; font-size:12.5px; line-height:1.35; color:var(--ink); align-items:flex-start; }
     .plan li svg { width:15px; height:15px; flex:none; stroke:var(--accent); fill:none; stroke-width:2.6; margin-top:1px; }
@@ -267,6 +287,34 @@
     [data-theme="dark"] .plan.free .plan-cta { background:var(--primary-soft); color:var(--ink); }
     .plan.premium .plan-cta { border-color:#d98534; background:linear-gradient(180deg,var(--accent),#e8863a); color:#3a2208; }
     .plan-foot { font-size:11.5px; color:var(--muted); margin-top:14px; text-align:center; }
+    /* AI plan deck */
+    .deck { display:flex; gap:12px; overflow-x:auto; padding:4px 2px 14px; scroll-snap-type:x mandatory; }
+    .deck::-webkit-scrollbar { height:7px; } .deck::-webkit-scrollbar-thumb { background:var(--line); border-radius:4px; }
+    .deck-card { scroll-snap-align:start; flex:0 0 232px; border:1px solid var(--line); border-radius:14px;
+                 padding:14px; background:var(--card); display:flex; flex-direction:column; gap:9px;
+                 box-shadow:0 4px 14px rgba(47,79,115,.08); }
+    .deck-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .deck-num { width:26px; height:26px; border-radius:8px; color:#fff; font-weight:800; font-size:13px;
+                display:flex; align-items:center; justify-content:center;
+                background:linear-gradient(180deg,var(--primary),var(--primary-dark)); }
+    .deck-hz { font-size:10px; font-weight:800; letter-spacing:.3px; color:var(--primary);
+               background:var(--primary-soft); border-radius:999px; padding:3px 9px; white-space:nowrap; }
+    .deck-ic { width:38px; height:38px; color:var(--accent); }
+    .deck-ic path, .deck-ic circle { fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .deck-head { font-weight:800; font-size:15px; color:var(--ink); line-height:1.2; }
+    .deck-act { font-size:12.5px; color:var(--muted); line-height:1.4; flex:1; }
+    .deck-meters { display:flex; gap:16px; }
+    .meter { font-size:9.5px; font-weight:800; letter-spacing:.4px; text-transform:uppercase; color:var(--muted); }
+    .meter .bars { display:flex; gap:3px; margin-top:4px; }
+    .meter .bars i { width:15px; height:5px; border-radius:2px; background:var(--line); display:block; }
+    .meter.impact .bars i.on { background:var(--accent); }
+    .meter.effort .bars i.on { background:var(--primary); }
+    .htrack .rail { display:flex; align-items:center; }
+    .htrack .rail .seg { flex:1; height:2px; background:var(--line); }
+    .htrack .rail .dot { width:8px; height:8px; border-radius:50%; background:var(--line); flex:0 0 auto; }
+    .htrack .rail .dot.on { background:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+    .htrack .labs { display:flex; justify-content:space-between; margin-top:3px; font-size:8.5px; color:var(--muted); }
+    .htrack .labs span.on { color:var(--accent); font-weight:800; }
     @media (max-width:860px) { .plans { grid-template-columns:repeat(2,1fr); } }
     @media (max-width:520px) { .plans { grid-template-columns:1fr; } }
     /* skills chip input */
@@ -312,7 +360,7 @@
   <div class="dev-banner">Private preview. Not a public release.</div>
   {% endif %}
   <header class="site"><div class="wrap">
-    <a class="brand" href="/">Job<span>cast</span></a>
+    <a class="brand" href="/" aria-label="JobBreak home">Job<span class="brk"><span class="brk-i">Break</span></span></a>
     <nav>
       <a href="/">Check a job</a><a href="/students">Future careers</a><a href="/methodology">How it works</a>
       <button id="theme-toggle" type="button" aria-label="Toggle dark mode"
@@ -361,7 +409,7 @@
       })();
     </script>
     <footer>
-      Jobcast {{ version }}. Results are probability ranges, not verdicts.
+      JobBreak {{ version }}. Results are probability ranges, not verdicts.
       Sources on the <a href="/methodology">How it works</a> page.
     </footer>
   </div>

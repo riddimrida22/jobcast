@@ -48,14 +48,24 @@ def _context(assessment: Dict[str, Any], profile: Dict[str, Any]) -> Dict[str, A
     }
 
 
+ICONS = {"skill", "pivot", "buffer", "network", "credential", "automate"}
+HORIZONS = {"Now", "0-6 months", "6-18 months", "1-3 years"}
+LEVELS = {"High", "Medium", "Low"}
+
 SYSTEM = (
-    "You are a careful career strategist for Jobcast. Using ONLY the facts in the user message, write "
-    "{n} concrete, personalised strategies to protect this person's livelihood from automation and avoid "
-    "financial hardship, most important first. Hard rules: never invent statistics, probabilities, or "
-    "numbers; reference only the facts given; frame everything as options and ranges, never a certainty "
-    "that a job will be lost; be specific and actionable, naming the adjacent roles and the person's own "
-    "skills and field where relevant, with rough timeframes. Output STRICT JSON only: a JSON array of "
-    "objects each with keys \"title\" (short) and \"detail\" (2-3 sentences). No text outside the JSON."
+    "You are a careful career strategist for JobBreak. Using ONLY the facts in the user message, produce "
+    "{n} concrete, personalised steps to protect this person's livelihood from automation, most important "
+    "first. Hard rules: never invent statistics, probabilities, or numbers; reference only the facts given; "
+    "frame everything as options, never a certainty that a job will be lost; name the adjacent roles and "
+    "the person's own skills and field where relevant. Keep words minimal and meaningful - a card, not a "
+    "paragraph. Output STRICT JSON only: an array of objects, each with keys "
+    "\"headline\" (2 to 4 words), "
+    "\"action\" (one imperative sentence, at most 16 words), "
+    "\"horizon\" (exactly one of: Now, 0-6 months, 6-18 months, 1-3 years), "
+    "\"impact\" (exactly one of: High, Medium, Low - how much this protects their livelihood), "
+    "\"effort\" (exactly one of: Low, Medium, High), "
+    "\"icon\" (exactly one of: skill, pivot, buffer, network, credential, automate - the closest match). "
+    "No text outside the JSON."
 )
 
 
@@ -83,8 +93,22 @@ def generate_plan(assessment: Dict[str, Any], profile: Dict[str, Any],
             messages=[{"role": "user", "content": json.dumps(_context(assessment, profile))}])
         text = "".join(getattr(b, "text", "") for b in msg.content)
         arr = json.loads(text[text.find("["):text.rfind("]") + 1])
-        out = [{"title": str(x.get("title", "")).strip(), "detail": str(x.get("detail", "")).strip()}
-               for x in arr if x.get("title")]
+        out = []
+        for x in arr:
+            head = str(x.get("headline") or x.get("title") or "").strip()
+            if not head:
+                continue
+            act = str(x.get("action") or x.get("detail") or "").strip()
+            out.append({
+                "headline": head,
+                "action": act,
+                "horizon": x.get("horizon") if x.get("horizon") in HORIZONS else "6-18 months",
+                "impact": x.get("impact") if x.get("impact") in LEVELS else "High",
+                "effort": x.get("effort") if x.get("effort") in LEVELS else "Medium",
+                "icon": x.get("icon") if x.get("icon") in ICONS else "skill",
+                # back-compat for any text consumer
+                "title": head, "detail": act,
+            })
         return out[:n] or None
     except Exception as e:
         print(f"[advice] API call failed ({type(e).__name__}): {e}; fallback", file=sys.stderr, flush=True)
