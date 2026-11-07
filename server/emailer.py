@@ -42,6 +42,10 @@ def send(to: str, subject: str, text: str, html: str = "") -> Tuple[bool, str]:
     req = urllib.request.Request(_API, data=data, method="POST", headers={
         "Authorization": "Bearer " + key,
         "Content-Type": "application/json",
+        "Accept": "application/json",
+        # Cloudflare fronts the Resend API and blocks the default Python-urllib
+        # user-agent (403 error 1010), so present an explicit client identity.
+        "User-Agent": "JobBreak-Alerts/1.0 (+https://jobbreak.ai)",
     })
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
