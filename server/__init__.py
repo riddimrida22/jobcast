@@ -398,7 +398,12 @@ def create_app() -> Flask:
     # ---- SEO: robots + sitemap. Every occupation is its own landing page, so the
     # sitemap lists them all - that is the organic search engine for the site. ----
     def _canonical_base():
-        return (os.environ.get("JOBCAST_BASE_URL") or request.host_url).rstrip("/")
+        base = (os.environ.get("JOBCAST_BASE_URL") or request.host_url).rstrip("/")
+        # Render terminates TLS upstream, so request.host_url arrives as http://.
+        # Search engines want canonical https URLs in robots/sitemap.
+        if base.startswith("http://"):
+            base = "https://" + base[len("http://"):]
+        return base
 
     @app.get("/robots.txt")
     def robots_txt():
