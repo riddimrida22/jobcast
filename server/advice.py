@@ -66,7 +66,7 @@ def generate_plan(assessment: Dict[str, Any], profile: Dict[str, Any],
     try:
         client = anthropic.Anthropic(api_key=api_key)
         msg = client.messages.create(
-            model=model, max_tokens=1300, temperature=0.4,
+            model=model, max_tokens=1300,
             system=SYSTEM.format(n=n),
             messages=[{"role": "user", "content": json.dumps(_context(assessment, profile))}])
         text = "".join(getattr(b, "text", "") for b in msg.content)
