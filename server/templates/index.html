@@ -82,7 +82,7 @@ if(window.ResizeObserver){new ResizeObserver(fit).observe(w.parentElement||w);}a
   <div class="full" style="margin-bottom:4px">
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <button type="button" id="resume-btn" class="secondary" style="margin:0">Upload resume to auto-fill <span style="opacity:.7;font-weight:400">(optional)</span></button>
-      <span id="resume-status" class="muted" style="font-size:12px">Optional shortcut. PDF, Word, or text. Read in your browser session, never stored. You can fill the form yourself instead.</span>
+      <span id="resume-status" class="muted" style="font-size:12px">Optional. PDF, Word, or text, read once to auto-fill your role, skills, and dates, then discarded &mdash; never stored. Please remove any personal details you do not want to share (name, address, phone, email) before uploading.</span>
       <input type="file" id="resume-file" accept=".pdf,.docx,.txt" style="display:none">
     </div>
   </div>
@@ -216,8 +216,14 @@ if(window.ResizeObserver){new ResizeObserver(fit).observe(w.parentElement||w);}a
     </div>
     <input type="hidden" id="skills" name="skills">
   </div>
+  <div class="full save-row">
+    <span class="q">Save my profile on this device?</span>
+    <label><input type="radio" name="save_profile" value="yes"> Yes</label>
+    <label><input type="radio" name="save_profile" value="no" checked> No</label>
+    <span class="note">Stored only in this browser to pre-fill next time, never on our servers.</span>
+  </div>
   <div class="full submit-row">
-    <button type="submit" style="width:100%">Show my read</button>
+    <button type="submit" style="width:100%">Show my future</button>
   </div>
 </form>
 <p class="muted" style="margin-top:8px;font-size:12px">No gender, race, or other protected characteristics in the score; pay is read only as a banded trajectory. Sourced from O*NET, BLS OEWS (393 metros), and peer-reviewed exposure research. <a href="/jobs">Browse all jobs</a>.</p>
@@ -439,6 +445,48 @@ if(window.ResizeObserver){new ResizeObserver(fit).observe(w.parentElement||w);}a
       status.textContent = filled.length ? ('Auto-filled: ' + filled.join(', ') + '. Review and edit before you submit.')
                                          : 'Read your resume, but nothing matched our occupations. Fill the form manually.';
     }).catch(function () { status.textContent = 'Upload failed. Try again or fill the form manually.'; });
+  });
+})();
+
+// Optional "save my profile" - stored only in this browser (localStorage), opt-in, never on the server.
+(function () {
+  var form = document.querySelector('form.form-grid'); if (!form) return;
+  var KEY = 'jb_profile';
+  var IDS = ['field','title','zip','age','experience_years','education','graduation_year',
+             'education_field','union_status','sector','pay_current','pay_5yr_ago','skills'];
+  function saveOn() { var r = form.querySelector('input[name="save_profile"]:checked'); return r && r.value === 'yes'; }
+  function setRadio(on) {
+    form.querySelectorAll('input[name="save_profile"]').forEach(function (x) { x.checked = (x.value === (on ? 'yes' : 'no')); });
+  }
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) {
+      var data = JSON.parse(raw) || {};
+      var gy = document.getElementById('graduation_year');
+      IDS.forEach(function (id) {
+        if (data[id] == null || data[id] === '') return;
+        if (id === 'skills') {
+          if (window.jobcastSetSkills) window.jobcastSetSkills(String(data[id]).split(',').map(function (s) { return s.trim(); }).filter(Boolean));
+          return;
+        }
+        var el = document.getElementById(id); if (!el) return;
+        if (id === 'graduation_year' && gy) gy.disabled = false;
+        el.value = data[id];
+      });
+      var ts = document.getElementById('title-search'); if (ts && data.title) ts.value = data.title;
+      setRadio(true);
+    }
+  } catch (e) {}
+  form.addEventListener('submit', function () {
+    try {
+      if (saveOn()) {
+        var out = {};
+        IDS.forEach(function (id) { var el = document.getElementById(id); if (el) out[id] = el.value; });
+        localStorage.setItem(KEY, JSON.stringify(out));
+      } else {
+        localStorage.removeItem(KEY);
+      }
+    } catch (e) {}
   });
 })();
 </script>
