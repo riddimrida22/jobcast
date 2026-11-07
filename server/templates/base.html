@@ -198,6 +198,28 @@
     @keyframes tick { to { transform:rotate(360deg); } }
     [data-theme="dark"] .tick-clock circle, [data-theme="dark"] .tick-clock line { stroke:#f2ab91; }
     @media (prefers-reduced-motion:reduce) { .tick-clock .tc-min, .tick-clock .tc-hr { animation:none; } }
+    /* hero "AI gobbler": a ticking clock leads to a mouth that almost eats JOB, then loops */
+    .gob-scene { display:inline-flex; align-items:center; gap:9px; margin:0 auto 6px; }
+    .gob-clock { width:21px; height:21px; }
+    .gob-arrow { color:var(--muted); font-weight:700; font-size:16px; }
+    .gob-job { position:relative; display:inline-flex; align-items:center; gap:5px; padding-right:38px; }
+    .gob-ltr { width:30px; height:40px; border-radius:7px; background:var(--primary); color:#fff;
+               display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:22px;
+               transform-origin:center; }
+    .gob-ltr.g1 { animation:gobEatJ 5.5s linear infinite; }
+    .gob-ltr.g2 { animation:gobEatO 5.5s linear infinite; }
+    .gob-ltr.g3 { animation:gobDipB 5.5s linear infinite; }
+    .gob-mouth { position:absolute; left:-30px; top:50%; width:34px; height:34px; transform:translateY(-50%);
+                 animation:gobGlide 5.5s linear infinite; }
+    @keyframes gobGlide { 0%{left:-30px;opacity:1} 58%{left:70px;opacity:1} 80%{left:70px;opacity:1}
+                          86%{left:70px;opacity:0} 100%{left:-30px;opacity:0} }
+    @keyframes gobEatJ { 0%,16%{opacity:1;transform:none} 24%,88%{opacity:0;transform:scale(.2) rotate(-25deg)}
+                         95%,100%{opacity:1;transform:none} }
+    @keyframes gobEatO { 0%,36%{opacity:1;transform:none} 44%,88%{opacity:0;transform:scale(.2) rotate(-25deg)}
+                         95%,100%{opacity:1;transform:none} }
+    @keyframes gobDipB { 0%,56%{opacity:1;transform:none} 76%{opacity:.25;transform:scale(.7) rotate(-14deg)}
+                         85%{opacity:.55} 95%,100%{opacity:1;transform:none} }
+    @media (prefers-reduced-motion:reduce) { .gob-ltr, .gob-mouth { animation:none !important; } .gob-mouth { opacity:0; } }
     .score-foot { display:flex; flex-wrap:wrap; gap:8px 22px; align-items:center; justify-content:center;
                   max-width:760px; margin:26px auto 0; padding-top:16px; border-top:1px solid var(--line);
                   font-size:12px; color:var(--muted); }

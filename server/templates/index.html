@@ -14,7 +14,15 @@
   '55':'#5a6a4a' } %}
 {% set disc_legend = [('#6cb4e0','Trades & manual'),('#2f4f73','Business & office'),('#5a6fc0','Tech & science'),('#159e8c','Healthcare'),('#7a5aa0','Legal'),('#c08a3a','Education & social'),('#c0607a','Arts & media'),('#d07a3a','Service')] %}
 <div class="slogan-banner">
-  <span class="urgent-tag"><svg class="tick-clock" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line class="tc-min" x1="12" y1="12" x2="12" y2="5.5"/><line class="tc-hr" x1="12" y1="12" x2="15.5" y2="12"/></svg><span class="urgent-label">The clock is already ticking</span></span>
+  <div class="gob-scene" aria-hidden="true">
+    <svg class="tick-clock gob-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line class="tc-min" x1="12" y1="12" x2="12" y2="5.5"/><line class="tc-hr" x1="12" y1="12" x2="15.5" y2="12"/></svg>
+    <span class="gob-arrow">&rarr;</span>
+    <span class="gob-job">
+      <span class="gob-ltr g1">J</span><span class="gob-ltr g2">O</span><span class="gob-ltr g3">B</span>
+      <svg class="gob-mouth" viewBox="0 0 40 40"><path d="M20 20 L40 8 A20 20 0 1 0 40 32 Z" fill="#e0824f"/><circle cx="14" cy="12.5" r="2.4" fill="#0a1626"/></svg>
+    </span>
+  </div>
+  <span class="urgent-tag"><span class="urgent-label">Act now to beat the AI gobbler</span></span>
   <span class="slogan-main">AI is coming for your job, sooner than you think.</span>
   <span class="accent">See your timeline now, and break free first with JobBreak.</span></div>
 
@@ -243,7 +251,7 @@
     health: { tag: 'AI is in the clinic', main: 'AI reads the scans and drafts the notes now.', cta: 'See what it means for your role, and where you stay essential, with JobBreak.' },
     teach:  { tag: 'AI tutors have arrived', main: 'AI can plan the lesson, grade the test, tutor the student.', cta: 'See how it reshapes your role, and your human edge, with JobBreak.' },
     arts:   { tag: 'Generative AI is flooding in', main: 'AI floods your field with instant content.', cta: 'See your exposure, and where human taste still wins, with JobBreak.' },
-    def:    { tag: 'The clock is already ticking', main: 'AI is coming for your job, sooner than you think.', cta: 'See your timeline now, and break free first with JobBreak.' }
+    def:    { tag: 'Act now to beat the AI gobbler', main: 'AI is coming for your job, sooner than you think.', cta: 'See your timeline now, and break free first with JobBreak.' }
   };
   var GROUP = { '11':'know','13':'know','15':'know','23':'know','43':'know','19':'know',
     '47':'trade','49':'trade','51':'trade','53':'trade','45':'trade','37':'trade','33':'trade',
