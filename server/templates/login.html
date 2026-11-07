@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · JobBreak</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --shell:#112741; --shell-dark:#0b1a2e; --ink:#1e2d3f; --muted:#5f6f83;
+            --primary:#2f4f73; --primary-dark:#1f3f60; --accent:#f3a35f; --line:#c3cedb;
+            --card:#ffffff; --input:#f6f8fb; --red:#b0422b; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+           padding:24px; font-family:"Poppins","Trebuchet MS",sans-serif; color:var(--ink);
+           background:radial-gradient(1100px 650px at 50% -5%, #1b3657, var(--shell-dark)); }
+    .login-card { width:100%; max-width:390px; background:var(--card); border-radius:18px;
+                  box-shadow:0 24px 60px rgba(6,15,26,.45); padding:34px 30px 30px; }
+    .brand { font-size:30px; font-weight:800; letter-spacing:-.5px; text-align:center;
+             margin:0 0 4px; color:var(--shell); }
+    .brand .brk { color:var(--accent); }
+    .tagline { text-align:center; color:var(--muted); font-size:13.5px; margin:0 0 22px; }
+    label { display:block; font-size:12.5px; font-weight:600; color:var(--muted);
+            text-transform:uppercase; letter-spacing:.04em; margin:0 0 6px; }
+    .field { margin-bottom:16px; }
+    input[type=text], input[type=password] { width:100%; border:1px solid var(--line); border-radius:11px;
+            padding:12px 13px; font:inherit; font-size:15px; background:var(--input); color:var(--ink); }
+    input:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(47,79,115,.15); }
+    .pw-wrap { position:relative; }
+    .pw-wrap input { padding-right:46px; }
+    .pw-toggle { position:absolute; top:50%; right:6px; transform:translateY(-50%); width:34px; height:34px;
+                 display:inline-flex; align-items:center; justify-content:center; border:0; background:transparent;
+                 color:var(--muted); cursor:pointer; border-radius:8px; padding:0; }
+    .pw-toggle:hover { color:var(--primary); background:rgba(47,79,115,.08); }
+    .pw-toggle svg { width:20px; height:20px; }
+    .pw-toggle .eye-off { display:none; }
+    .pw-toggle.on .eye-on { display:none; }
+    .pw-toggle.on .eye-off { display:block; }
+    button.submit { width:100%; margin-top:6px; border:0; border-radius:11px; padding:13px; font:inherit;
+                    font-size:16px; font-weight:700; color:#fff; cursor:pointer;
+                    background:linear-gradient(180deg,var(--primary),var(--primary-dark));
+                    box-shadow:0 4px 14px rgba(19,37,59,.28); }
+    button.submit:hover { filter:brightness(1.06); }
+    button.submit:active { transform:translateY(1px); }
+    .err { background:#fdf0ed; border:1px solid #f0c7bd; color:var(--red); font-size:13.5px;
+           border-radius:10px; padding:10px 12px; margin:0 0 16px; }
+    .note { text-align:center; color:var(--muted); font-size:11.5px; margin:18px 0 0; }
+  </style>
+</head>
+<body>
+  <form class="login-card" method="post" action="/login" autocomplete="on">
+    <div class="brand">Job<span class="brk">Break</span></div>
+    <p class="tagline">Private preview. Please sign in to continue.</p>
+    {% if error %}<div class="err">{{ error }}</div>{% endif %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <div class="field">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" autocomplete="username"
+             autocapitalize="none" autocorrect="off" required autofocus>
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <div class="pw-wrap">
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button type="button" class="pw-toggle" id="pw-toggle" aria-label="Show password" aria-pressed="false">
+          <svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.5 0 10 7 10 7a18 18 0 0 1-2.4 3.4M6.6 6.6A18 18 0 0 0 2 11s3.5 7 10 7a9 9 0 0 0 4.4-1.1"/>
+            <path d="M3 3l18 18"/></svg>
+        </button>
+      </div>
+    </div>
+    <button type="submit" class="submit">Sign in</button>
+    <p class="note">Access is limited to invited reviewers.</p>
+  </form>
+  <script>
+    (function () {
+      var btn = document.getElementById('pw-toggle'), pw = document.getElementById('password');
+      btn.addEventListener('click', function () {
+        var show = pw.type === 'password';
+        pw.type = show ? 'text' : 'password';
+        btn.classList.toggle('on', show);
+        btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+        btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        pw.focus();
+      });
+    })();
+  </script>
+</body>
+</html>

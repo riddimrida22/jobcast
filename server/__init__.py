@@ -67,7 +67,7 @@ def _cache_put(sig, result):
     except Exception:
         pass
 
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from riskcore import Profile, load_default_engine  # noqa: E402
@@ -109,22 +109,46 @@ def create_app() -> Flask:
     engine = load_default_engine()
 
     # Restricted-demo gate (env-controlled, off by default):
-    #  JOBCAST_DEMO_USER / JOBCAST_DEMO_PASS -> HTTP basic auth over the whole site.
+    #  JOBCAST_DEMO_USER / JOBCAST_DEMO_PASS -> branded login page over the whole site,
+    #    with a cookie-backed session (replaces the old HTTP basic-auth popup, so we can
+    #    style sign-in and offer a show/hide password toggle).
+    #  JOBCAST_SECRET -> signing key for the session cookie (falls back to a stable value
+    #    derived from the demo password so sessions survive restarts without extra config).
     #  JOBCAST_NOINDEX=1 -> emit <meta robots noindex> and a preview banner.
     demo_user = os.environ.get("JOBCAST_DEMO_USER")
     demo_pass = os.environ.get("JOBCAST_DEMO_PASS")
     noindex = os.environ.get("JOBCAST_NOINDEX") == "1"
+    app.secret_key = os.environ.get("JOBCAST_SECRET") or ("jobcast-preview-" + (demo_pass or "dev"))
 
     @app.before_request
     def _gate():
         if not demo_user:
             return None
-        auth = request.authorization
-        if auth and auth.username == demo_user and auth.password == demo_pass:
+        if request.endpoint in ("login", "static"):
             return None
-        from flask import Response
-        return Response("Authentication required.", 401,
-                        {"WWW-Authenticate": 'Basic realm="Jobcast preview"'})
+        if session.get("jb_authed"):
+            return None
+        return redirect(url_for("login", next=request.full_path if request.query_string else request.path))
+
+    @app.route("/login", methods=["GET", "POST"])
+    def login():
+        if not demo_user:
+            return redirect(url_for("index"))
+        if session.get("jb_authed"):
+            return redirect(url_for("index"))
+        nxt = request.values.get("next") or "/"
+        if not nxt.startswith("/"):   # only ever redirect to a local path
+            nxt = "/"
+        error = None
+        if request.method == "POST":
+            u = (request.form.get("username") or "").strip()
+            p = request.form.get("password") or ""
+            if u == demo_user and p == demo_pass:
+                session["jb_authed"] = True
+                session.permanent = True
+                return redirect(nxt)
+            error = "Incorrect username or password. Please try again."
+        return render_template("login.html", error=error, next=nxt)
 
     @app.context_processor
     def _inject():
