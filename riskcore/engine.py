@@ -159,7 +159,15 @@ class Engine:
                         "resilience": round(safe), "median_wage": wage, "job_zone": zone,
                         "edu": edu.get(zone, "Varies"), "growth": round(growth, 1), "fit": round(fit, 1),
                         "family": self.snapshot.family_name(self.snapshot.family_code(soc))})
-        out.sort(key=lambda x: -x["fit"])
+        # Order each list by the dimension its label promises, so the headline number
+        # reads in order; the blended fit only drives the all-round view. The resilience
+        # floor and fit still decide which jobs qualify.
+        if priority == "pay":
+            out.sort(key=lambda x: (-x["median_wage"], -x["resilience"]))
+        elif priority == "safe":
+            out.sort(key=lambda x: (-x["resilience"], -x["median_wage"]))
+        else:
+            out.sort(key=lambda x: -x["fit"])
         return out[:n]
 
     # ---- scoring internals ----------------------------------------------
