@@ -216,31 +216,31 @@
                              70% { box-shadow:0 0 0 7px rgba(199,58,42,0); }
                              100% { box-shadow:0 0 0 0 rgba(199,58,42,0); } }
     @media (prefers-reduced-motion:reduce) { .urgent-dot { animation:none; } }
-    /* hero: an AI gobbler and a robot gobbler race down the road eating the most-exposed
-       jobs; the JobBreak wall drops in and stops them at the safe jobs, "Act now" flashes. */
+    /* hero: a fanfare, then one lane sends the robot, then the Pac-Man; each eats the
+       most-exposed workers while one transitions to safety. Loops; jobs rotate each cycle. */
     .gob-wrap { margin:0 auto; overflow:hidden; }
-    .gob { --W:940px; --wall:694px; --predEnd:630px; --loop:11s;
-           width:var(--W); position:relative; transform-origin:top left; }
-    .gob-legend { display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:8px;
-                  flex-wrap:wrap; font-size:11px; font-weight:700; color:var(--muted); }
-    .gob-legend .lg { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
-    .gob-legend .sw { width:11px; height:11px; border-radius:3px; box-shadow:0 1px 2px rgba(20,30,45,.25); }
-    .gob-legend .sw.red{background:var(--red)} .gob-legend .sw.amber{background:var(--amber)} .gob-legend .sw.green{background:var(--green)}
-    .gob-legend .lab { font-size:10px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--ink); }
-    .gob-stage { position:relative; height:186px; }
-    .gob .road { position:absolute; left:0; right:0; height:72px; }
-    .gob .road.ai { top:6px; } .gob .road.rb { top:100px; }
-    .gob .road::after { content:""; position:absolute; left:4px; right:4px; bottom:9px; height:3px; border-radius:3px;
+    .gob { --W:940px; --wall:694px; --loop:15s; width:var(--W); position:relative; transform-origin:top left; }
+    .gob-stage { position:relative; height:118px; }
+    .gob .road { position:absolute; left:0; right:0; top:20px; height:80px; }
+    .gob .road::after { content:""; position:absolute; left:4px; right:4px; bottom:16px; height:3px; border-radius:3px;
         background:repeating-linear-gradient(90deg,var(--road) 0 18px,transparent 18px 34px); }
-    .gob .lane-tag { position:absolute; left:40px; top:-3px; font-size:10px; font-weight:800; letter-spacing:.6px;
-        text-transform:uppercase; color:var(--muted); }
-    .gob .jobs { position:absolute; top:8px; left:210px; display:flex; align-items:flex-end; gap:34px; }
+    .gob .fanfare { position:absolute; left:0; right:0; top:34px; text-align:center; z-index:9; pointer-events:none;
+        animation:gobFF var(--loop) ease-in-out infinite; }
+    .gob .fanfare b { display:inline-block; font-size:21px; font-weight:900; letter-spacing:.3px; color:var(--ink); }
+    .gob .fanfare .hot { color:var(--red); }
+    @keyframes gobFF { 0%{opacity:0;transform:scale(.72)} 2.5%{opacity:1;transform:scale(1.06)} 5%{opacity:1;transform:scale(1)}
+        8%{opacity:0;transform:scale(1.14)} 100%{opacity:0;transform:scale(1.14)} }
+    .gob .jobs { position:absolute; top:8px; left:210px; display:flex; align-items:flex-end; gap:40px; }
     .gob .fig { display:inline-flex; flex-direction:column; align-items:center; position:relative; }
     .gob .fig .emo { font-size:34px; line-height:1; filter:drop-shadow(0 2px 2px rgba(20,30,45,.25)); }
     .gob .fig .pad { width:30px; height:6px; border-radius:50%; background:rgba(20,30,45,.22); filter:blur(1.2px); margin-top:-3px; }
     .gob .fig .cap { font-size:10px; font-weight:800; margin-top:3px; white-space:nowrap; }
     .gob .fig.red .cap{color:var(--red)} .gob .fig.amber .cap{color:var(--amber)} .gob .fig.green .cap{color:var(--green)}
-    .gob .safe { position:absolute; top:8px; left:742px; display:flex; align-items:flex-end; gap:30px; }
+    .gob .safe { position:absolute; top:8px; left:742px; display:flex; align-items:flex-end; gap:28px; }
+    .gob .jobs.manual, .gob .safe.manual { animation:gobManualShow var(--loop) linear infinite; }
+    .gob .jobs.desk, .gob .safe.desk { animation:gobDeskShow var(--loop) linear infinite; }
+    @keyframes gobManualShow { 0%,9%{opacity:0} 11%{opacity:1} 52%{opacity:1} 54%{opacity:0} 100%{opacity:0} }
+    @keyframes gobDeskShow { 0%,55%{opacity:0} 57%{opacity:1} 98%{opacity:1} 99%{opacity:0} 100%{opacity:0} }
     .gob .hg { position:absolute; left:3px; top:50%; width:28px; height:44px; margin-top:-22px; z-index:3; }
     .gob .hg .wcap { position:absolute; left:-2px; width:32px; height:4px; border-radius:2px; background:linear-gradient(var(--wood-a),var(--wood-b)); box-shadow:0 1px 1px rgba(0,0,0,.3); }
     .gob .hg .wcap.t{top:0} .gob .hg .wcap.b{bottom:0}
@@ -255,24 +255,26 @@
     @keyframes hgTop{0%{transform:scaleY(1)}90%,100%{transform:scaleY(0)}}
     @keyframes hgBot{0%{height:0}90%,100%{height:15px}}
     @keyframes hgStream{0%,86%{opacity:.9}92%,100%{opacity:0}}
-    .gob .wall { position:absolute; left:var(--wall); top:0; width:34px; height:186px; border-radius:8px; z-index:6;
+    .gob .wall { position:absolute; left:var(--wall); top:0; width:34px; height:118px; border-radius:8px; z-index:6;
         background:linear-gradient(180deg,var(--primary),var(--primary-dark)); border:1.5px solid var(--primary-dark);
         box-shadow:0 8px 20px rgba(20,30,45,.3); display:flex; align-items:center; justify-content:center;
-        transform:translateY(-232px); animation:gobWall var(--loop) cubic-bezier(.2,1.25,.4,1) infinite; }
-    .gob .wall .brk { writing-mode:vertical-rl; text-orientation:upright; font-weight:900; font-size:15px;
-        letter-spacing:4px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); }
-    @keyframes gobWall { 0%,60%{transform:translateY(-232px)} 66%{transform:translateY(5px)} 70%{transform:translateY(-5px)}
-        74%,96%{transform:translateY(0)} 100%{transform:translateY(-232px)} }
-    .gob .pred { position:absolute; top:50%; left:8px; z-index:4; animation:gobAdvance var(--loop) linear infinite; }
-    .gob .road.rb .pred { animation:gobAdvanceRb var(--loop) linear infinite; }
-    @keyframes gobAdvance { 0%{transform:translate(44px,-50%)} 12%{transform:translate(120px,-50%)} 24%{transform:translate(262px,-50%)}
-        36%{transform:translate(384px,-50%)} 50%{transform:translate(486px,-50%)} 62%{transform:translate(566px,-50%)}
-        70%{transform:translate(var(--predEnd),-50%)} 73%{transform:translate(610px,-50%)} 78%{transform:translate(624px,-50%)}
-        96%{transform:translate(624px,-50%)} 100%{transform:translate(44px,-50%)} }
-    @keyframes gobAdvanceRb { 0%{transform:translate(44px,-50%)} 12%{transform:translate(104px,-50%)} 24%{transform:translate(236px,-50%)}
-        36%{transform:translate(360px,-50%)} 50%{transform:translate(470px,-50%)} 62%{transform:translate(560px,-50%)}
-        70%{transform:translate(var(--predEnd),-50%)} 73%{transform:translate(610px,-50%)} 78%{transform:translate(624px,-50%)}
-        96%{transform:translate(624px,-50%)} 100%{transform:translate(44px,-50%)} }
+        transform:translateY(-150px); animation:gobWall2 var(--loop) cubic-bezier(.2,1.25,.4,1) infinite; }
+    .gob .wall .brk { writing-mode:vertical-rl; text-orientation:upright; font-weight:900; font-size:13px;
+        letter-spacing:3px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); }
+    @keyframes gobWall2 { 0%,42%{transform:translateY(-150px)} 46%{transform:translateY(4px)} 49%{transform:translateY(-4px)}
+        52%,55%{transform:translateY(0)} 58%{transform:translateY(-150px)} 88%{transform:translateY(-150px)}
+        91%{transform:translateY(4px)} 94%{transform:translateY(-4px)} 97%,99%{transform:translateY(0)} 100%{transform:translateY(-150px)} }
+    .gob .pred { position:absolute; top:50%; left:8px; z-index:4; }
+    .gob .pred.robot { animation:gobRobotRun var(--loop) linear infinite; }
+    .gob .pred.pac { animation:gobPacRun var(--loop) linear infinite; }
+    @keyframes gobRobotRun { 0%,9%{transform:translate(44px,-50%);opacity:0} 11%{opacity:1;transform:translate(60px,-50%)}
+        18%{transform:translate(210px,-50%)} 28%{transform:translate(370px,-50%)} 38%{transform:translate(510px,-50%)}
+        45%{transform:translate(600px,-50%)} 48%{transform:translate(632px,-50%)} 50%{transform:translate(612px,-50%)}
+        52%{transform:translate(626px,-50%);opacity:1} 54%{transform:translate(626px,-50%);opacity:0} 100%{transform:translate(44px,-50%);opacity:0} }
+    @keyframes gobPacRun { 0%,54%{transform:translate(44px,-50%);opacity:0} 56%{opacity:1;transform:translate(60px,-50%)}
+        63%{transform:translate(210px,-50%)} 73%{transform:translate(370px,-50%)} 83%{transform:translate(510px,-50%)}
+        90%{transform:translate(600px,-50%)} 93%{transform:translate(632px,-50%)} 95%{transform:translate(612px,-50%)}
+        97%{transform:translate(626px,-50%);opacity:1} 99%{transform:translate(626px,-50%);opacity:0} 100%{transform:translate(44px,-50%);opacity:0} }
     .ai-g{width:48px;height:48px;position:relative;filter:drop-shadow(0 2px 3px rgba(20,30,45,.35))}
     .ai-g .body{position:absolute;top:0;left:0;width:48px;height:48px;border-radius:50%;
         background:radial-gradient(circle at 38% 33%, #ffb46e, #ec8338 60%, #d26a20);
@@ -303,31 +305,35 @@
         clip-path:polygon(0 100%,7% 0,14% 100%,21% 0,28% 100%,35% 0,42% 100%,49% 0,56% 100%,63% 0,70% 100%,77% 0,84% 100%,91% 0,98% 100%,100% 100%)}
     @keyframes rbChomp{0%,100%{transform:rotate(0)}50%{transform:rotate(26deg)}}
     @keyframes rbBlink{0%,55%{opacity:1}60%,100%{opacity:.2}}
-    .gob .eatc{transform-origin:center}
-    .gob .e1{animation:gobEat1 var(--loop) linear infinite}
-    .gob .e2{animation:gobEat2 var(--loop) linear infinite}
-    .gob .e5{animation:gobEat5 var(--loop) linear infinite}
-    @keyframes gobEat1{0%,14%{opacity:1;transform:scale(1)}16%{opacity:.6;transform:scale(1.2) rotate(-6deg)}18%{opacity:0;transform:scale(.1)}99.9%{opacity:0;transform:scale(.1)}100%{opacity:1;transform:scale(1)}}
-    @keyframes gobEat2{0%,25%{opacity:1;transform:scale(1)}27%{opacity:.6;transform:scale(1.2) rotate(-6deg)}29%{opacity:0;transform:scale(.1)}99.9%{opacity:0;transform:scale(.1)}100%{opacity:1;transform:scale(1)}}
-    @keyframes gobEat5{0%,51%{opacity:1;transform:scale(1)}53%{opacity:.6;transform:scale(1.2) rotate(-6deg)}55%{opacity:0;transform:scale(.1)}99.9%{opacity:0;transform:scale(.1)}100%{opacity:1;transform:scale(1)}}
-    /* one red worker acts early and crosses to safety (caption turns green) instead of being eaten */
-    .gob .escape{z-index:7}
-    .gob .ai-esc{animation:gobEscAi var(--loop) ease-in-out infinite}
-    .gob .rb-esc{animation:gobEscRb var(--loop) ease-in-out infinite}
-    .gob .ai-esc .cap,.gob .rb-esc .cap{animation:gobEscCap var(--loop) ease-in-out infinite}
-    @keyframes gobEscCap{0%,30%{color:var(--red)}48%,100%{color:var(--green)}}
-    @keyframes gobEscAi{0%,30%{transform:translate(0,0)}36%{transform:translate(30px,-30px) scale(1.06)}45%{transform:translate(230px,-30px) scale(1.06)}54%{transform:translate(360px,-10px)}60%,96%{transform:translate(410px,0)}100%{transform:translate(0,0)}}
-    @keyframes gobEscRb{0%,30%{transform:translate(0,0)}36%{transform:translate(30px,-34px) scale(1.06)}45%{transform:translate(250px,-34px) scale(1.06)}54%{transform:translate(380px,-12px)}60%,96%{transform:translate(430px,0)}100%{transform:translate(0,0)}}
-    .gob-actnow{--loop:11s;display:inline-flex;align-items:center;gap:6px;margin:10px auto 0;font-size:13px;font-weight:800;
+    .gob .fig{transform-origin:center}
+    .gob .eatM1{animation:gobEatM1 var(--loop) linear infinite}
+    .gob .eatM2{animation:gobEatM2 var(--loop) linear infinite}
+    .gob .eatD1{animation:gobEatD1 var(--loop) linear infinite}
+    .gob .eatD2{animation:gobEatD2 var(--loop) linear infinite}
+    @keyframes gobEatM1{0%,16%{opacity:1;transform:scale(1)}18%{opacity:.6;transform:scale(1.2) rotate(-6deg)}20%{opacity:0;transform:scale(.1)}53%{opacity:0;transform:scale(.1)}54%{opacity:0}100%{opacity:1;transform:scale(1)}}
+    @keyframes gobEatM2{0%,24%{opacity:1;transform:scale(1)}26%{opacity:.6;transform:scale(1.2) rotate(-6deg)}28%{opacity:0;transform:scale(.1)}53%{opacity:0;transform:scale(.1)}54%{opacity:0}100%{opacity:1;transform:scale(1)}}
+    @keyframes gobEatD1{0%,61%{opacity:1;transform:scale(1)}63%{opacity:.6;transform:scale(1.2) rotate(-6deg)}65%{opacity:0;transform:scale(.1)}98%{opacity:0;transform:scale(.1)}99%{opacity:0}100%{opacity:1;transform:scale(1)}}
+    @keyframes gobEatD2{0%,69%{opacity:1;transform:scale(1)}71%{opacity:.6;transform:scale(1.2) rotate(-6deg)}73%{opacity:0;transform:scale(.1)}98%{opacity:0;transform:scale(.1)}99%{opacity:0}100%{opacity:1;transform:scale(1)}}
+    /* one red worker transitions to safety (caption turns green) instead of being eaten */
+    .gob .escM,.gob .escD{z-index:7}
+    .gob .escM{animation:gobEscM var(--loop) ease-in-out infinite}
+    .gob .escD{animation:gobEscD var(--loop) ease-in-out infinite}
+    .gob .escM .cap{animation:gobEscCapM var(--loop) ease-in-out infinite}
+    .gob .escD .cap{animation:gobEscCapD var(--loop) ease-in-out infinite}
+    @keyframes gobEscCapM{0%,30%{color:var(--red)}42%,100%{color:var(--green)}}
+    @keyframes gobEscCapD{0%,75%{color:var(--red)}87%,100%{color:var(--green)}}
+    @keyframes gobEscM{0%,29%{transform:translate(0,0)}34%{transform:translate(26px,-30px) scale(1.06)}40%{transform:translate(230px,-30px) scale(1.06)}46%{transform:translate(360px,-10px)}50%,53%{transform:translate(410px,0)}54%{transform:translate(410px,0)}100%{transform:translate(0,0)}}
+    @keyframes gobEscD{0%,74%{transform:translate(0,0)}79%{transform:translate(26px,-30px) scale(1.06)}85%{transform:translate(230px,-30px) scale(1.06)}91%{transform:translate(360px,-10px)}95%,98%{transform:translate(410px,0)}99%{transform:translate(410px,0)}100%{transform:translate(0,0)}}
+    .gob-actnow{--loop:15s;display:inline-flex;align-items:center;gap:6px;margin:8px auto 0;font-size:13px;font-weight:800;
         text-transform:uppercase;letter-spacing:.7px;color:var(--red);background:rgba(176,66,43,.1);
         border:1px solid rgba(176,66,43,.32);border-radius:999px;padding:6px 15px;
-        animation:gobActFlash var(--loop) ease-in-out infinite}
+        animation:gobAct2 var(--loop) ease-in-out infinite}
     [data-theme="dark"] .gob-actnow{background:rgba(224,117,89,.14);border-color:rgba(224,117,89,.32);color:#f2ab91}
-    @keyframes gobActFlash{0%,60%{opacity:.22;transform:scale(.95)}66%{opacity:1;transform:scale(1.16)}72%{opacity:1;transform:scale(1)}86%{opacity:1}94%{opacity:.5}100%{opacity:.22;transform:scale(.95)}}
+    @keyframes gobAct2{0%,44%{opacity:.22;transform:scale(.95)}48%{opacity:1;transform:scale(1.13)}52%{opacity:1;transform:scale(1)}58%{opacity:.22}90%{opacity:.22}93%{opacity:1;transform:scale(1.13)}97%{opacity:1;transform:scale(1)}100%{opacity:.22;transform:scale(.95)}}
     @media (prefers-reduced-motion:reduce) {
-      .gob .pred,.ai-g .body,.rb2 .jaw,.rb2 .eye,.rb2 .ant::after,.gob .wall,.gob-actnow,.gob .eatc,.gob .escape,.gob .ai-esc .cap,.gob .rb-esc .cap,.gob .hg .sand-t::after,.gob .hg .sand-b::after,.gob .hg .stream { animation:none !important; }
-      .gob .wall { transform:translateY(0); } .gob .pred { left:8px; } .gob-actnow { opacity:1; }
-      .gob .escape { transform:translate(0,0); } .gob .ai-esc .cap,.gob .rb-esc .cap { color:var(--green); }
+      .gob .pred,.gob .fanfare,.ai-g .body,.rb2 .jaw,.rb2 .eye,.rb2 .ant::after,.gob .wall,.gob-actnow,.gob .jobs,.gob .safe,.gob .escM,.gob .escD,.gob .escM .cap,.gob .escD .cap,.gob .hg .sand-t::after,.gob .hg .sand-b::after,.gob .hg .stream { animation:none !important; }
+      .gob .wall { transform:translateY(0); } .gob .pred.pac { opacity:0; } .gob .jobs.desk,.gob .safe.desk { opacity:0; } .gob-actnow { opacity:1; } .gob .fanfare { opacity:0; }
+      .gob .escM,.gob .escD { transform:translate(0,0); }
     }
     .score-foot { display:flex; flex-wrap:wrap; gap:8px 22px; align-items:center; justify-content:center;
                   max-width:760px; margin:26px auto 0; padding-top:16px; border-top:1px solid var(--line);
