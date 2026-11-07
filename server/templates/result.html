@@ -8,23 +8,39 @@
 <p class="lead">How exposed this work is to automation, shown as ranges with the reasoning and sources.</p>
 
 <div class="card">
-  <h2 style="margin-top:0">Exposure</h2>
-  <p class="muted">AI / software exposure</p>
-  <div class="bar ai"><span style="width:{{ r.exposure.ai_software }}%"></span></div>
-  <div><span class="score">{{ r.exposure.ai_software }}</span>
-    <span class="muted">range {{ r.exposure_range.ai_software[0] }} to {{ r.exposure_range.ai_software[1] }}</span></div>
+  <div class="sect-title">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-2.3"/></svg>
+    <h2 style="margin:0">Exposure</h2>
+  </div>
+  <div class="gauges">
+    <div class="gauge">
+      <svg viewBox="0 0 120 120" role="img" aria-label="AI exposure {{ r.exposure.ai_software }} of 100">
+        <circle class="g-track" cx="60" cy="60" r="52"></circle>
+        <circle class="g-prog g-ai" cx="60" cy="60" r="52"
+          style="stroke-dasharray:326.7;stroke-dashoffset:{{ (326.7*(1 - r.exposure.ai_software/100))|round(1) }}"></circle>
+        <text class="g-num" x="60" y="60">{{ r.exposure.ai_software }}</text>
+        <text class="g-pct" x="60" y="78">of 100</text>
+      </svg>
+      <div class="g-caption">AI / software<small>range {{ r.exposure_range.ai_software[0] }} to {{ r.exposure_range.ai_software[1] }}</small></div>
+    </div>
+    <div class="gauge">
+      <svg viewBox="0 0 120 120" role="img" aria-label="Robotics exposure {{ r.exposure.physical_robotics }} of 100">
+        <circle class="g-track" cx="60" cy="60" r="52"></circle>
+        <circle class="g-prog g-robo" cx="60" cy="60" r="52"
+          style="stroke-dasharray:326.7;stroke-dashoffset:{{ (326.7*(1 - r.exposure.physical_robotics/100))|round(1) }}"></circle>
+        <text class="g-num" x="60" y="60">{{ r.exposure.physical_robotics }}</text>
+        <text class="g-pct" x="60" y="78">of 100</text>
+      </svg>
+      <div class="g-caption">Physical / robotics<small>range {{ r.exposure_range.physical_robotics[0] }} to {{ r.exposure_range.physical_robotics[1] }}</small></div>
+    </div>
+  </div>
 
-  <p class="muted" style="margin-top:14px">Physical / robotics exposure</p>
-  <div class="bar robo"><span style="width:{{ r.exposure.physical_robotics }}%"></span></div>
-  <div><span class="score">{{ r.exposure.physical_robotics }}</span>
-    <span class="muted">range {{ r.exposure_range.physical_robotics[0] }} to {{ r.exposure_range.physical_robotics[1] }}</span></div>
-
-  <p style="margin-top:16px">
+  <p style="margin-top:18px;text-align:center">
     Timeline: <span class="band {{ r.timeline.band.id }}">{{ r.timeline.band.label }}</span>
     <span class="muted">(local demand: {{ r.timeline.local_demand_trend }})</span>
   </p>
-  {% if r.timeline.union_note %}<p class="muted">{{ r.timeline.union_note }}</p>{% endif %}
-  {% if r.timeline.overlap_note %}<p>{{ r.timeline.overlap_note }}
+  {% if r.timeline.union_note %}<p class="muted" style="text-align:center">{{ r.timeline.union_note }}</p>{% endif %}
+  {% if r.timeline.overlap_note %}<p style="text-align:center">{{ r.timeline.overlap_note }}
     {% if r.timeline.remaining_working_years is not none %}
     <span class="muted">(about {{ r.timeline.remaining_working_years }} working years left)</span>{% endif %}</p>{% endif %}
 </div>

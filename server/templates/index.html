@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Will AI or robots replace your job?</h1>
-<p class="lead">An honest, sourced read on how exposed your work is, and when change is likely.
-Pick your job to start; add the rest for a personal result.</p>
+<div class="hero">
+  <h1 style="font-size:26px;margin:4px 0 4px">Will AI or robots replace your job?</h1>
+  <p class="lead" style="font-size:15px;margin:0 0 8px">An honest, sourced read on how exposed your
+  work is, and when change is likely.</p>
+</div>
 
 {% if error %}
 <div class="card" style="border-color:#f0c0c0;background:#fdf3f3">
@@ -11,152 +13,131 @@ Pick your job to start; add the rest for a personal result.</p>
 </div>
 {% endif %}
 
-<form class="card" method="post" action="/assess">
-  <label for="field">Field</label>
-  <select id="field" aria-label="General field">
-    <option value="">All fields</option>
-    {% for f in families %}<option value="{{ f.code }}">{{ f.name }}</option>{% endfor %}
-  </select>
-
-  <label for="title-search">Job</label>
-  <div class="combo">
-    <input id="title-search" type="text" autocomplete="off" placeholder="Type to find your job, e.g. nurse, driver"
-           role="combobox" aria-expanded="false" aria-controls="title-list">
-    <div id="title-list" class="combo-list" role="listbox" hidden></div>
+<form class="card form-grid" method="post" action="/assess">
+  <div>
+    <label for="field">Field</label>
+    <select id="field" aria-label="General field">
+      <option value="">All fields</option>
+      {% for f in families %}<option value="{{ f.code }}">{{ f.name }}</option>{% endfor %}
+    </select>
   </div>
-  <select id="title" name="title" required aria-label="Job">
-    <option value="">Choose a job</option>
-    {% for f in families %}
-    <optgroup label="{{ f.name }}" data-code="{{ f.code }}">
-      {% for j in f.jobs %}<option value="{{ j.title }}">{{ j.title }}</option>{% endfor %}
-    </optgroup>
-    {% endfor %}
-  </select>
-  <p class="muted" style="margin-top:6px">Cannot find it? <a href="/jobs">Browse all jobs</a>.</p>
-
-  <div class="row">
-    <div>
-      <label for="zip">Location</label>
-      <select id="zip" name="zip">
-        <option value="">United States (national)</option>
-        {% for m in metros %}<option value="{{ m.code }}">{{ m.name }}</option>{% endfor %}
-      </select>
+  <div>
+    <label for="title-search">Job</label>
+    <div class="combo">
+      <input id="title-search" type="text" autocomplete="off" placeholder="Type to find your job"
+             role="combobox" aria-expanded="false" aria-controls="title-list">
+      <div id="title-list" class="combo-list" role="listbox" hidden></div>
     </div>
-    <div>
-      <label for="age">Age</label>
-      <select id="age" name="age">
-        <option value="">Prefer not to say</option>
-        {% for a in range(18, 71) %}<option value="{{ a }}">{{ a }}</option>{% endfor %}
-      </select>
-    </div>
+    <select id="title" name="title" required aria-label="Job">
+      <option value="">Choose a job</option>
+      {% for f in families %}<optgroup label="{{ f.name }}" data-code="{{ f.code }}">{% for j in f.jobs %}<option value="{{ j.title }}">{{ j.title }}</option>{% endfor %}</optgroup>{% endfor %}
+    </select>
   </div>
 
-  <div class="row">
-    <div>
-      <label for="experience_years">Years of experience</label>
-      <select id="experience_years" name="experience_years">
-        <option value="">Prefer not to say</option>
-        <option value="1">Less than 2 years</option>
-        <option value="4">2 to 5 years</option>
-        <option value="8">6 to 10 years</option>
-        <option value="15">11 to 20 years</option>
-        <option value="25">More than 20 years</option>
-      </select>
-    </div>
-    <div>
-      <label for="education">Education</label>
-      <select id="education" name="education">
-        <option value="">Prefer not to say</option>
-        <option>High school</option>
-        <option>Some college</option>
-        <option>Associate</option>
-        <option>Bachelor</option>
-        <option>Graduate</option>
-      </select>
-    </div>
+  <div>
+    <label for="zip">Location</label>
+    <select id="zip" name="zip">
+      <option value="">United States (national)</option>
+      {% for m in metros %}<option value="{{ m.code }}">{{ m.name }}</option>{% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="age">Age</label>
+    <select id="age" name="age"><option value="">Prefer not to say</option>{% for a in range(18, 71) %}<option value="{{ a }}">{{ a }}</option>{% endfor %}</select>
   </div>
 
-  <div class="row">
-    <div>
-      <label for="union_status">Union status</label>
-      <select id="union_status" name="union_status">
-        <option value="">Prefer not to say</option>
-        <option value="yes">Union member or covered</option>
-        <option value="no">Not in a union</option>
-      </select>
-    </div>
-    <div>
-      <label for="education2" class="muted" style="visibility:hidden">spacer</label>
-      <span class="muted" style="display:block;padding-top:10px">Union-covered roles often have
-      negotiated protection that slows displacement.</span>
-    </div>
+  <div>
+    <label for="experience_years">Years of experience</label>
+    <select id="experience_years" name="experience_years">
+      <option value="">Prefer not to say</option>
+      <option value="1">Less than 2 years</option>
+      <option value="4">2 to 5 years</option>
+      <option value="8">6 to 10 years</option>
+      <option value="15">11 to 20 years</option>
+      <option value="25">More than 20 years</option>
+    </select>
+  </div>
+  <div>
+    <label for="education">Education</label>
+    <select id="education" name="education">
+      <option value="">Prefer not to say</option>
+      <option>High school</option><option>Some college</option>
+      <option>Associate</option><option>Bachelor</option><option>Graduate</option>
+    </select>
   </div>
 
-  <div class="row">
-    <div>
-      <label for="pay_current">Current annual gross pay</label>
-      <select id="pay_current" name="pay_current">
-        <option value="">Prefer not to say</option>
-        <option value="25000">Under $30,000</option>
-        <option value="37000">$30,000 to $44,999</option>
-        <option value="52000">$45,000 to $59,999</option>
-        <option value="70000">$60,000 to $79,999</option>
-        <option value="95000">$80,000 to $109,999</option>
-        <option value="130000">$110,000 to $149,999</option>
-        <option value="175000">$150,000 to $199,999</option>
-        <option value="225000">$200,000 or more</option>
-      </select>
-    </div>
-    <div>
-      <label for="pay_5yr_ago">Annual gross pay 5 years ago</label>
-      <select id="pay_5yr_ago" name="pay_5yr_ago">
-        <option value="">Prefer not to say</option>
-        <option value="25000">Under $30,000</option>
-        <option value="37000">$30,000 to $44,999</option>
-        <option value="52000">$45,000 to $59,999</option>
-        <option value="70000">$60,000 to $79,999</option>
-        <option value="95000">$80,000 to $109,999</option>
-        <option value="130000">$110,000 to $149,999</option>
-        <option value="175000">$150,000 to $199,999</option>
-        <option value="225000">$200,000 or more</option>
-      </select>
-    </div>
+  <div>
+    <label for="union_status">Union status</label>
+    <select id="union_status" name="union_status">
+      <option value="">Prefer not to say</option>
+      <option value="yes">Union member or covered</option>
+      <option value="no">Not in a union</option>
+    </select>
+  </div>
+  <div>
+    <label for="pay_current">Current annual gross pay</label>
+    <select id="pay_current" name="pay_current">
+      <option value="">Prefer not to say</option>
+      <option value="25000">Under $30,000</option><option value="37000">$30,000 to $44,999</option>
+      <option value="52000">$45,000 to $59,999</option><option value="70000">$60,000 to $79,999</option>
+      <option value="95000">$80,000 to $109,999</option><option value="130000">$110,000 to $149,999</option>
+      <option value="175000">$150,000 to $199,999</option><option value="225000">$200,000 or more</option>
+    </select>
   </div>
 
-  <button type="submit">Show my read</button>
+  <div>
+    <label for="pay_5yr_ago">Annual gross pay 5 years ago</label>
+    <select id="pay_5yr_ago" name="pay_5yr_ago">
+      <option value="">Prefer not to say</option>
+      <option value="25000">Under $30,000</option><option value="37000">$30,000 to $44,999</option>
+      <option value="52000">$45,000 to $59,999</option><option value="70000">$60,000 to $79,999</option>
+      <option value="95000">$80,000 to $109,999</option><option value="130000">$110,000 to $149,999</option>
+      <option value="175000">$150,000 to $199,999</option><option value="225000">$200,000 or more</option>
+    </select>
+  </div>
+  <div style="display:flex;align-items:flex-end">
+    <button type="submit" style="margin:0;width:100%">Show my read</button>
+  </div>
 </form>
-<p class="muted">We never use gender, race, or other protected characteristics in the score.
-Pay is optional and read only as a trajectory, in bands, not exact figures.</p>
+<p class="muted" style="margin-top:8px;font-size:12px">No gender, race, or other protected characteristics in the score; pay is read only as a banded trajectory. Sourced from O*NET, BLS OEWS (393 metros), and peer-reviewed exposure research. <a href="/jobs">Browse all jobs</a>.</p>
 
 <script>
-// Progressive enhancement: turn the native job <select> into a search-as-you-type
-// dropdown. With JavaScript off, the plain <select> still works.
+// Field -> Job cascade + search-as-you-type. Picking a field populates the job list with
+// that field's jobs; typing filters. With JavaScript off, the grouped <select> still works.
 (function () {
+  var field = document.getElementById('field');
   var select = document.getElementById('title');
   var search = document.getElementById('title-search');
   var list = document.getElementById('title-list');
   if (!select || !search || !list) return;
 
-  var items = [];
-  for (var i = 0; i < select.options.length; i++) {
-    var v = select.options[i].value;
-    if (v) items.push(v);
-  }
-  select.style.display = 'none';           // hide native select; keep it for form submit
+  var items = [];   // {title, code}
+  select.querySelectorAll('optgroup').forEach(function (g) {
+    var code = g.getAttribute('data-code');
+    g.querySelectorAll('option').forEach(function (o) {
+      if (o.value) items.push({ title: o.value, code: code });
+    });
+  });
+  select.style.display = 'none';
   select.removeAttribute('required');
   search.setAttribute('required', 'required');
+
+  function pool() {
+    var f = field ? field.value : '';
+    return f ? items.filter(function (it) { return it.code === f; }) : items;
+  }
 
   function render(matches) {
     list.innerHTML = '';
     if (!matches.length) { list.hidden = true; return; }
-    matches.slice(0, 30).forEach(function (title) {
+    matches.slice(0, 50).forEach(function (it) {
       var el = document.createElement('div');
       el.className = 'combo-item';
       el.setAttribute('role', 'option');
-      el.textContent = title;
+      el.textContent = it.title;
       el.addEventListener('mousedown', function (e) {
         e.preventDefault();
-        search.value = title; select.value = title;
+        search.value = it.title; select.value = it.title;
         list.hidden = true; search.setAttribute('aria-expanded', 'false');
       });
       list.appendChild(el);
@@ -164,15 +145,27 @@ Pay is optional and read only as a trajectory, in bands, not exact figures.</p>
     list.hidden = false; search.setAttribute('aria-expanded', 'true');
   }
 
-  search.addEventListener('input', function () {
+  function filtered() {
     var q = search.value.toLowerCase().trim();
-    select.value = '';
-    if (!q) { list.hidden = true; return; }
-    render(items.filter(function (t) { return t.toLowerCase().indexOf(q) !== -1; }));
-  });
-  search.addEventListener('focus', function () {
-    if (search.value.trim()) search.dispatchEvent(new Event('input'));
-  });
+    var p = pool();
+    if (!q) return p;
+    return p.filter(function (it) { return it.title.toLowerCase().indexOf(q) !== -1; });
+  }
+
+  search.addEventListener('input', function () { select.value = ''; render(filtered()); });
+  search.addEventListener('focus', function () { render(filtered()); });
+
+  if (field) {
+    field.addEventListener('change', function () {
+      search.value = ''; select.value = '';
+      var f = field.value;
+      search.placeholder = f ? 'Choose a job in ' + field.options[field.selectedIndex].text
+                             : 'Type to find your job, e.g. nurse, driver';
+      render(pool());          // populate the job list with this field's jobs
+      search.focus();
+    });
+  }
+
   document.addEventListener('click', function (e) {
     if (!list.contains(e.target) && e.target !== search) list.hidden = true;
   });

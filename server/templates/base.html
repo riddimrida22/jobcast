@@ -15,6 +15,15 @@
       --primary-soft:#dbe6f2; --accent:#f3a35f; --accent-soft:#fde8d2;
       --shell:#112741; --shell-dark:#0b1a2e; --green:#147b74; --red:#b0422b;
       --ai:#2f4f73; --robo:#c06a33; --row-head:#f1f5f9;
+      --track:#e6ebf1; --input:#ffffff; --hair:#e7ecf1;
+    }
+    [data-theme="dark"] {
+      --bg-a:#0e1620; --bg-b:#16212f; --card:#1b2734; --line:#4a5f78;
+      --ink:#e7eef6; --muted:#9bacc0; --primary:#5d8ac4; --primary-dark:#6c95cc;
+      --primary-soft:#233247; --accent:#f3a35f; --accent-soft:#3a2b1b;
+      --shell:#0a1320; --shell-dark:#060d16; --green:#3fb6a8; --red:#e07559;
+      --ai:#5d8ac4; --robo:#e08a57; --row-head:#222f3e;
+      --track:#2a3a4d; --input:#131c27; --hair:#2a3a4d; color-scheme:dark;
     }
     * { box-sizing:border-box; }
     body { margin:0; color:var(--ink); min-height:100vh;
@@ -44,11 +53,11 @@
     label { display:block; font-size:12.5px; font-weight:600; color:var(--muted);
             text-transform:uppercase; letter-spacing:.04em; margin:14px 0 5px; }
     input, select { width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:9px;
-                    font:inherit; font-size:15px; background:#fff; color:var(--ink); }
+                    font:inherit; font-size:15px; background:var(--input); color:var(--ink); }
     input:focus, select:focus { outline:2px solid var(--primary-soft); border-color:var(--primary); }
     .row { display:flex; gap:16px; } .row > div { flex:1; }
     .combo { position:relative; }
-    .combo-list { position:absolute; left:0; right:0; z-index:5; background:#fff; border:1px solid var(--line);
+    .combo-list { position:absolute; left:0; right:0; z-index:5; background:var(--card); border:1px solid var(--line);
                   border-top:0; border-radius:0 0 10px 10px; max-height:280px; overflow:auto;
                   box-shadow:0 10px 26px rgba(31,63,96,.16); }
     .combo-item { padding:10px 13px; cursor:pointer; font-size:15px; }
@@ -64,11 +73,36 @@
                        box-shadow:none; margin:6px 8px 0 0; padding:9px 16px; font-size:14px; }
     button.secondary:hover { background:var(--primary-soft); filter:none; }
 
-    .bar { height:14px; border-radius:8px; background:#e6ebf1; overflow:hidden; margin:6px 0 4px; }
+    .bar { height:14px; border-radius:8px; background:var(--track); overflow:hidden; margin:6px 0 4px; }
     .bar > span { display:block; height:100%; border-radius:8px; }
     .bar.ai > span { background:linear-gradient(90deg,#3a5f88,var(--ai)); }
     .bar.robo > span { background:linear-gradient(90deg,#d08650,var(--robo)); }
     .score { font-weight:700; font-size:20px; color:var(--ink); } .muted { color:var(--muted); font-size:13px; }
+
+    /* circular exposure gauges */
+    .gauges { display:flex; gap:30px; flex-wrap:wrap; align-items:center; justify-content:center; margin:8px 0; }
+    .gauge { text-align:center; }
+    .gauge svg { width:140px; height:140px; }
+    .g-track { fill:none; stroke:var(--track); stroke-width:11; }
+    .g-prog { fill:none; stroke-width:11; stroke-linecap:round; transform:rotate(-90deg); transform-origin:60px 60px; }
+    .g-ai { stroke:var(--ai); } .g-robo { stroke:var(--robo); }
+    .g-num { font-size:30px; font-weight:700; fill:var(--ink); text-anchor:middle; }
+    .g-pct { font-size:13px; fill:var(--muted); text-anchor:middle; }
+    .g-caption { margin-top:10px; font-weight:600; font-size:14px; color:var(--ink); }
+    .g-caption small { display:block; font-weight:400; color:var(--muted); margin-top:2px; }
+
+    /* hero + chips */
+    .hero { margin-bottom:6px; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:2px 18px; padding:20px 22px; }
+    .form-grid label { margin:9px 0 4px; }
+    .form-grid .full { grid-column:1 / -1; }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 4px; }
+    .chip { font-size:12.5px; font-weight:600; color:var(--primary); background:var(--primary-soft);
+            border-radius:999px; padding:6px 13px; }
+    [data-theme="dark"] .chip { color:#bcd2ee; }
+    .sect-title { display:flex; align-items:center; gap:9px; margin:0 0 12px; }
+    .sect-title svg { width:20px; height:20px; stroke:var(--primary); fill:none; stroke-width:1.9;
+                      stroke-linecap:round; stroke-linejoin:round; flex:0 0 auto; }
 
     .band { display:inline-block; padding:4px 13px; border-radius:999px; font-size:13px; font-weight:600; }
     .band.largely_unaffected { background:#e3f3ec; color:var(--green); }
@@ -79,7 +113,7 @@
     th { text-align:left; padding:9px 10px; font-size:12px; text-transform:uppercase; letter-spacing:.04em;
          color:var(--muted); background:var(--row-head); border-bottom:1px solid var(--line); }
     th:first-child { border-radius:8px 0 0 0; } th:last-child { border-radius:0 8px 0 0; }
-    td { text-align:left; padding:10px; border-bottom:1px solid #e7ecf1; }
+    td { text-align:left; padding:10px; border-bottom:1px solid var(--hair); }
     .tag { font-size:12px; font-weight:600; padding:3px 9px; border-radius:999px; white-space:nowrap; }
     .tag.exposed { background:#f7e1dc; color:var(--red); } .tag.protected { background:#e3f3ec; color:var(--green); }
     ul.sources { font-size:13px; color:var(--muted); padding-left:18px; line-height:1.7; }
@@ -94,8 +128,28 @@
   {% endif %}
   <header class="site"><div class="wrap">
     <a class="brand" href="/">Job<span>cast</span></a>
-    <nav><a href="/">Check a job</a><a href="/methodology">How it works</a></nav>
+    <nav>
+      <a href="/">Check a job</a><a href="/methodology">How it works</a>
+      <button id="theme-toggle" type="button" aria-label="Toggle dark mode"
+        style="margin:0 0 0 20px;padding:5px 12px;font-size:13px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);box-shadow:none;border-radius:999px;">Dark</button>
+    </nav>
   </div></header>
+  <script>
+    (function () {
+      var root = document.documentElement, btn;
+      function apply(t) { if (t === "dark") root.setAttribute("data-theme", "dark"); else root.removeAttribute("data-theme");
+        if (btn) btn.textContent = t === "dark" ? "Light" : "Dark"; }
+      apply(localStorage.getItem("jobcast-theme") || "light");
+      document.addEventListener("DOMContentLoaded", function () {
+        btn = document.getElementById("theme-toggle");
+        apply(localStorage.getItem("jobcast-theme") || "light");
+        btn.addEventListener("click", function () {
+          var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+          localStorage.setItem("jobcast-theme", next); apply(next);
+        });
+      });
+    })();
+  </script>
   <div class="wrap">
     {% block content %}{% endblock %}
     <footer>
