@@ -12,7 +12,17 @@ import sys
 import json
 from typing import Dict, Any, List, Optional
 
-TIER_N = {"free": 1, "tier1": 1, "tier2": 3}
+TIER_N = {"free": 1, "tier1": 1, "tier2": 3, "tier3": 5}
+
+# AI-written advice is reserved for paid tiers; free gets the deterministic strategies.
+AI_TIERS = {"tier1", "tier2", "tier3"}
+
+# Model ladder by tier: cheaper models for lower tiers, Opus for the top tier.
+MODEL_BY_TIER = {
+    "tier1": "claude-haiku-5-5",
+    "tier2": "claude-sonnet-5-5",
+    "tier3": "claude-opus-4-8",
+}
 
 
 def _context(assessment: Dict[str, Any], profile: Dict[str, Any]) -> Dict[str, Any]:
@@ -55,18 +65,20 @@ def generate_plan(assessment: Dict[str, Any], profile: Dict[str, Any],
     if not api_key:
         print("[advice] no API key in env; using deterministic fallback", file=sys.stderr, flush=True)
         return None
+    if tier not in AI_TIERS:
+        print(f"[advice] tier '{tier}' not AI-eligible; deterministic advice", file=sys.stderr, flush=True)
+        return None
     try:
         import anthropic
     except Exception as e:
         print(f"[advice] anthropic import failed: {e}; fallback", file=sys.stderr, flush=True)
         return None
     n = TIER_N.get(tier, 3)
-    # Lower-cost models for now: Sonnet for the paid tier, Haiku below it.
-    model = "claude-sonnet-5-5" if tier == "tier2" else "claude-haiku-5-5"
+    model = MODEL_BY_TIER.get(tier, "claude-haiku-5-5")
     try:
         client = anthropic.Anthropic(api_key=api_key)
         msg = client.messages.create(
-            model=model, max_tokens=1300,
+            model=model, max_tokens=min(4000, 600 + 400 * n),
             system=SYSTEM.format(n=n),
             messages=[{"role": "user", "content": json.dumps(_context(assessment, profile))}])
         text = "".join(getattr(b, "text", "") for b in msg.content)

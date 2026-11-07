@@ -227,6 +227,8 @@
     .runners .body-bob.b2 { animation-duration:.46s; }
     .runners .dashes { animation:grounddash .42s linear infinite; }
     .runners .speed line { stroke:var(--muted); animation:speedpulse .5s ease-in-out infinite; }
+    .runners .aicore { animation:aiglow 1.1s ease-in-out infinite; }
+    @keyframes aiglow { 0%,100% { opacity:.5; } 50% { opacity:1; } }
     @keyframes swingA { 0%,100% { transform:rotate(26deg); } 50% { transform:rotate(-26deg); } }
     @keyframes swingB { 0%,100% { transform:rotate(-26deg); } 50% { transform:rotate(26deg); } }
     @keyframes armA  { 0%,100% { transform:rotate(-32deg); } 50% { transform:rotate(32deg); } }
@@ -235,12 +237,36 @@
     @keyframes grounddash { to { transform:translateX(-24px); } }
     @keyframes speedpulse { 0%,100% { opacity:.2; } 50% { opacity:.75; } }
     @media (prefers-reduced-motion:reduce) { .runners * { animation:none !important; } }
-    .tier-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px; }
-    .tier { border:1px solid var(--line); border-radius:12px; padding:14px 12px; text-align:center; }
-    .tier.feat { border-color:var(--primary); box-shadow:0 5px 16px rgba(47,79,115,.16); }
-    .tier-name { font-weight:700; color:var(--primary); font-size:15px; }
-    .tier-sub { font-size:12.5px; color:var(--muted); margin-top:4px; line-height:1.35; }
-    @media (max-width:620px) { .tier-row { grid-template-columns:1fr; } }
+    .plans { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:22px; align-items:stretch; }
+    .plan { position:relative; display:flex; flex-direction:column; border:1px solid var(--line); border-radius:16px;
+            padding:22px 16px 16px; background:var(--card);
+            transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
+    .plan:hover { transform:translateY(-5px); box-shadow:0 14px 30px rgba(47,79,115,.20); border-color:var(--primary); }
+    .plan.feat { border-color:var(--primary); box-shadow:0 8px 22px rgba(47,79,115,.18); }
+    .plan.premium { border-color:var(--accent); background:linear-gradient(180deg,var(--accent-soft),var(--card)); }
+    .plan-badge { position:absolute; top:-10px; left:50%; transform:translateX(-50%); font-size:10px; font-weight:800;
+                  letter-spacing:.5px; text-transform:uppercase; padding:4px 11px; border-radius:999px; color:#fff;
+                  background:var(--primary); white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.18); }
+    .plan.premium .plan-badge { background:linear-gradient(90deg,var(--accent),#e8863a); color:#3a2208; }
+    .plan-name { font-weight:800; font-size:15px; color:var(--primary); letter-spacing:.2px; }
+    .plan-price { font-size:27px; font-weight:800; color:var(--ink); margin:8px 0 0; line-height:1; }
+    .plan-price span { font-size:13px; font-weight:600; color:var(--muted); }
+    .plan-tag { font-size:12px; color:var(--muted); margin:7px 0 2px; min-height:30px; line-height:1.35; }
+    .plan ul { list-style:none; padding:0; margin:12px 0 16px; display:flex; flex-direction:column; gap:8px; flex:1; }
+    .plan li { display:flex; gap:8px; font-size:12.5px; line-height:1.35; color:var(--ink); align-items:flex-start; }
+    .plan li svg { width:15px; height:15px; flex:none; stroke:var(--accent); fill:none; stroke-width:2.6; margin-top:1px; }
+    .plan li.off { color:var(--muted); opacity:.6; }
+    .plan li.off svg { stroke:var(--muted); }
+    .plan-cta { margin-top:auto; text-align:center; font-weight:700; font-size:13px; border-radius:10px; padding:11px 10px;
+                cursor:pointer; border:1px solid var(--primary-dark); color:#fff;
+                background:linear-gradient(180deg,var(--primary),var(--primary-dark)); transition:filter .15s ease; }
+    .plan-cta:hover { filter:brightness(1.07); }
+    .plan.free .plan-cta { background:#fff; color:var(--primary); border:1px solid var(--line); }
+    [data-theme="dark"] .plan.free .plan-cta { background:var(--primary-soft); color:var(--ink); }
+    .plan.premium .plan-cta { border-color:#d98534; background:linear-gradient(180deg,var(--accent),#e8863a); color:#3a2208; }
+    .plan-foot { font-size:11.5px; color:var(--muted); margin-top:14px; text-align:center; }
+    @media (max-width:860px) { .plans { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:520px) { .plans { grid-template-columns:1fr; } }
     /* skills chip input */
     .skill-box { display:flex; flex-wrap:wrap; gap:6px; align-items:center; border:1px solid var(--line);
                  border-radius:9px; padding:5px 8px; background:var(--input); min-height:44px; }

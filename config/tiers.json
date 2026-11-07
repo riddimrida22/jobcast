@@ -5,6 +5,7 @@
   "tiers": [
     { "id": "free",  "label": "Free",   "mitigation_options": 0 },
     { "id": "tier1", "label": "Tier 1", "mitigation_options": 1 },
-    { "id": "tier2", "label": "Tier 2", "mitigation_options": 3 }
+    { "id": "tier2", "label": "Tier 2", "mitigation_options": 3 },
+    { "id": "tier3", "label": "Tier 3", "mitigation_options": 5 }
   ]
 }

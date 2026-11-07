@@ -2,6 +2,7 @@
 {% block title %}{{ r.occupation.title }} - AI and robot exposure | Jobcast{% endblock %}
 {% block description %}How exposed is {{ r.occupation.title }} to AI and robots, and when. Sourced ranges, not verdicts.{% endblock %}
 {% block content %}
+{% set check %}<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>{% endset %}
 
 <p class="muted">{{ r.occupation.family }} &middot; {{ r.location.metro }}</p>
 <h1 style="margin-bottom:2px">{{ r.occupation.title }}</h1>
@@ -108,14 +109,36 @@
         <line x1="181" y1="40" x2="165" y2="40"></line>
         <line x1="178" y1="52" x2="163" y2="52"></line>
       </g>
-      <!-- human (ahead) -->
+      <!-- human riding an AI-powered horse (ahead, escaping) -->
       <g class="human">
-        <g class="limb-a" style="transform-origin:236px 44px"><line x1="236" y1="44" x2="232" y2="62" stroke-width="3"></line></g>
-        <g class="limb-b" style="transform-origin:236px 44px"><line x1="236" y1="44" x2="240" y2="62" stroke-width="3"></line></g>
-        <line x1="230" y1="20" x2="236" y2="44" stroke-width="3"></line>
-        <circle class="head" cx="229" cy="14" r="6"></circle>
-        <g class="arm-a" style="transform-origin:231px 24px"><line x1="231" y1="24" x2="223" y2="37" stroke-width="2.8"></line></g>
-        <g class="arm-b" style="transform-origin:231px 24px"><line x1="231" y1="24" x2="240" y2="36" stroke-width="2.8"></line></g>
+        <g class="body-bob">
+          <!-- tail -->
+          <path class="tail" d="M222 42 Q212 46 207 58" stroke="currentColor" stroke-width="3" fill="none"></path>
+          <!-- galloping legs (diagonal pairs alternate) -->
+          <g class="limb-b" style="transform-origin:228px 51px"><line x1="228" y1="50" x2="222" y2="67" stroke-width="3"></line></g>
+          <g class="limb-a" style="transform-origin:238px 51px"><line x1="238" y1="50" x2="244" y2="67" stroke-width="3"></line></g>
+          <g class="limb-b" style="transform-origin:258px 51px"><line x1="258" y1="50" x2="252" y2="67" stroke-width="3"></line></g>
+          <g class="limb-a" style="transform-origin:264px 51px"><line x1="264" y1="50" x2="270" y2="67" stroke-width="3"></line></g>
+          <!-- horse body -->
+          <ellipse cx="244" cy="46" rx="24" ry="9" fill="currentColor" stroke="none"></ellipse>
+          <!-- neck + head -->
+          <path d="M264 44 Q275 42 277 30" stroke="currentColor" stroke-width="7" fill="none" stroke-linecap="round"></path>
+          <polygon points="272,32 287,28 283,38 274,37" fill="currentColor" stroke="none"></polygon>
+          <polygon points="274,28 278,21 281,29" fill="currentColor" stroke="none"></polygon>
+          <!-- AI cues: antenna, glowing core, eye, circuitry -->
+          <line class="ai" x1="278" y1="21" x2="278" y2="14" stroke="var(--accent)" stroke-width="2"></line>
+          <circle class="aicore" cx="278" cy="12.5" r="2.4" fill="var(--accent)" stroke="none"></circle>
+          <circle cx="283" cy="31" r="1.6" fill="var(--accent)" stroke="none"></circle>
+          <circle cx="244" cy="46" r="6.5" fill="var(--accent)" opacity="0.22" stroke="none"></circle>
+          <circle class="aicore" cx="244" cy="46" r="2.7" fill="var(--accent)" stroke="none"></circle>
+          <path d="M236 46 h-6 M252 46 h6 M244 52 v4" stroke="var(--accent)" stroke-width="1.3" fill="none" opacity="0.7"></path>
+          <!-- rider -->
+          <line x1="241" y1="42" x2="236" y2="24" stroke-width="3"></line>
+          <circle class="head" cx="234" cy="18" r="5.5"></circle>
+          <line x1="236" y1="25" x2="256" y2="34" stroke-width="2.8"></line>
+          <line class="rein" x1="256" y1="34" x2="282" y2="31" stroke="var(--accent)" stroke-width="1.6"></line>
+          <line x1="241" y1="42" x2="247" y2="53" stroke-width="3"></line>
+        </g>
       </g>
     </svg>
     <p style="margin:0;font-weight:700;color:var(--accent);font-size:17px">Use AI to outpace AI.</p>
@@ -133,13 +156,68 @@
   </div>
   {% endfor %}
   </div>
-  <div class="tier-row">
-    <div class="tier"><div class="tier-name">Free</div><div class="tier-sub">Your single top strategy</div></div>
-    <div class="tier feat"><div class="tier-name">Tier 1</div><div class="tier-sub">The highest-impact move, in depth</div></div>
-    <div class="tier feat"><div class="tier-name">Tier 2</div><div class="tier-sub">Your top 3 strategies, step by step</div></div>
+  <h3 style="margin:26px 0 2px;font-size:17px">Unlock your survival plan</h3>
+  <p class="muted" style="margin-top:2px">Free shows where you stand. Paid plans turn it into a personalised action plan, written for your exact profile.</p>
+  <div class="plans">
+
+    <div class="plan free">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0</div>
+      <div class="plan-tag">See exactly where you stand.</div>
+      <ul>
+        <li>{{ check }}Full replacement-risk score &amp; timeline</li>
+        <li>{{ check }}Task-by-task exposure breakdown</li>
+        <li>{{ check }}One starter strategy</li>
+        <li class="off">{{ check }}AI-written personal plan</li>
+      </ul>
+      <div class="plan-cta" data-tier="free">Current plan</div>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price">$5<span>/mo</span></div>
+      <div class="plan-tag">Your single highest-impact move, written for you.</div>
+      <ul>
+        <li>{{ check }}Everything in Free</li>
+        <li>{{ check }}1 AI-written strategy, tailored to your result</li>
+        <li>{{ check }}Resume-aware personalisation</li>
+        <li>{{ check }}Email alerts when your outlook shifts</li>
+      </ul>
+      <div class="plan-cta" data-tier="tier1">Choose Starter</div>
+    </div>
+
+    <div class="plan feat">
+      <div class="plan-badge">Most popular</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">$12<span>/mo</span></div>
+      <div class="plan-tag">Your full top-3 plan on an advanced AI model.</div>
+      <ul>
+        <li>{{ check }}Everything in Starter</li>
+        <li>{{ check }}Your top 3 strategies, step by step</li>
+        <li>{{ check }}More advanced AI model</li>
+        <li>{{ check }}"What if" career-move simulator</li>
+        <li>{{ check }}Ranked safer adjacent roles</li>
+      </ul>
+      <div class="plan-cta" data-tier="tier2">Go Pro</div>
+    </div>
+
+    <div class="plan premium">
+      <div class="plan-badge">Best value</div>
+      <div class="plan-name">Career Shield</div>
+      <div class="plan-price">$29<span>/mo</span></div>
+      <div class="plan-tag">The deepest plan on our most capable AI.</div>
+      <ul>
+        <li>{{ check }}Everything in Pro</li>
+        <li>{{ check }}5 in-depth strategies on our most advanced AI</li>
+        <li>{{ check }}Full reskilling roadmap with timelines</li>
+        <li>{{ check }}Quarterly automatic re-assessment</li>
+        <li>{{ check }}Priority access to new data updates</li>
+      </ul>
+      <div class="plan-cta" data-tier="tier3">Get Career Shield</div>
+    </div>
+
   </div>
-  <p class="muted" style="margin-top:12px">This preview shows the full list; in production an AI writes each
-  into a personalised plan from your profile, and tiers unlock depth.</p>
+  <p class="plan-foot">Preview pricing, for layout only. Click any paid plan to generate your plan live at that level.</p>
 </div>
 {% endif %}
 
@@ -250,20 +328,25 @@
 
 <script>
 (function () {
-  var btn = document.getElementById('ai-plan-btn'); if (!btn) return;
+  var btn = document.getElementById('ai-plan-btn');
   var status = document.getElementById('ai-plan-status'), list = document.getElementById('strat-list');
+  if (!status || !list) return;
+  var TITLES = { free: 'Starter', tier1: 'Starter', tier2: 'Pro', tier3: 'Career Shield' };
   function getProfile() {
     var el = document.getElementById('profile-data');
     if (el) { try { return JSON.parse(el.textContent); } catch (e) {} }
-    return { title: btn.getAttribute('data-title') };
+    return { title: (btn ? btn.getAttribute('data-title') : '') };
   }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
-  btn.addEventListener('click', function () {
-    status.textContent = 'Writing your plan...'; btn.disabled = true;
-    var prof = getProfile(); prof.tier = 'tier2';
+  function generate(tier, busyEl) {
+    var label = TITLES[tier] || 'your';
+    status.textContent = 'Writing your ' + label + ' plan...';
+    if (busyEl) busyEl.disabled = true;
+    list.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var prof = getProfile(); prof.tier = tier;
     fetch('/v1/advice', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(prof) })
       .then(function (r) { return r.json(); }).then(function (d) {
-        btn.disabled = false;
+        if (busyEl) busyEl.disabled = false;
         if (!d.ok || !d.strategies || !d.strategies.length) { status.textContent = 'Could not generate a plan.'; return; }
         list.innerHTML = '';
         d.strategies.forEach(function (st, i) {
@@ -272,9 +355,16 @@
             esc(st.title) + '</strong><div class="muted">' + esc(st.detail) + '</div></div>';
           list.appendChild(row);
         });
-        status.textContent = d.source === 'ai' ? 'Personalised by AI from your result.'
-          : 'Standard plan shown; add an Anthropic API key to enable AI personalisation.';
-      }).catch(function () { btn.disabled = false; status.textContent = 'Could not generate a plan.'; });
+        status.textContent = d.source === 'ai'
+          ? 'Your ' + label + ' plan, written by AI from your result.'
+          : 'Starter preview shown. Upgrade to a paid plan for an AI-written plan.';
+      }).catch(function () { if (busyEl) busyEl.disabled = false; status.textContent = 'Could not generate a plan.'; });
+  }
+  if (btn) btn.addEventListener('click', function () { generate('tier2', btn); });
+  document.querySelectorAll('.plan-cta[data-tier]').forEach(function (cta) {
+    var tier = cta.getAttribute('data-tier');
+    if (tier === 'free') return;  // free is the read; no AI call
+    cta.addEventListener('click', function () { generate(tier, cta); });
   });
 })();
 </script>
