@@ -8,7 +8,7 @@ services:
     startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60
     envVars:
       - key: JOBCAST_NOINDEX
-        value: "1"
+        value: "0"
       - key: JOBCAST_DEMO_USER
         sync: false      # set in the Render dashboard
       - key: JOBCAST_DEMO_PASS
