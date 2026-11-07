@@ -12,9 +12,31 @@ import os
 from typing import Dict, Any, List
 
 from . import onet, bls_cpi, oews_files, zip_metro, exposure
-from .common import download_to_cache, write_snapshot
+from .common import download_to_cache, write_snapshot, ROOT
 
 ELOUNDOU_URL = "https://raw.githubusercontent.com/openai/GPTs-are-GPTs/main/data/occ_level.csv"
+ELOUNDOU_TASK_URL = "https://raw.githubusercontent.com/openai/GPTs-are-GPTs/main/data/automation_gpt4_human_labels.tsv"
+PROJECTIONS_URL = "https://raw.githubusercontent.com/openai/GPTs-are-GPTs/main/data/occupations_projections_processed.csv"
+_PROJ_FILE = ROOT / "data" / "cache" / "exposure" / "projections.csv"
+
+
+def _norm(title):
+    import re
+    return re.sub(r"[^a-z0-9 ]", "", title.lower()).strip()
+
+
+def _load_projections():
+    import csv
+    out = {}
+    if not _PROJ_FILE.exists():
+        return out
+    with open(_PROJ_FILE, encoding="utf-8") as fh:
+        for row in csv.DictReader(fh):
+            try:
+                out[_norm(row["occupation"])] = float(row["pct_emp_change_2020_2030"])
+            except (ValueError, KeyError):
+                continue
+    return out
 
 # The 23 SOC major groups (the general field), keyed by the 2-digit prefix.
 SOC_MAJOR_GROUPS = {
@@ -46,10 +68,21 @@ SOURCES = [
 
 def build(base_year: int = 2025, limit: int = 0) -> Dict[str, Any]:
     download_to_cache(ELOUNDOU_URL, "eloundou_occ_level.csv")
+    download_to_cache(ELOUNDOU_TASK_URL, "exposure/task_labels.tsv")
+    download_to_cache(PROJECTIONS_URL, "exposure/projections.csv")
     occupations = onet.fetch_and_parse()
     related = onet.build_related(onet.cached_zip())
     coverage = exposure.attach_exposure(occupations)
     print("exposure coverage:", coverage)
+
+    projections = _load_projections()
+    matched = 0
+    for occ in occupations.values():
+        p = projections.get(_norm(occ["title"]))
+        if p is not None:
+            occ["projection_pct"] = p
+            matched += 1
+    print(f"BLS projections matched: {matched}/{len(occupations)}")
 
     if limit:
         occupations = dict(list(occupations.items())[:limit])
@@ -105,6 +138,7 @@ def build(base_year: int = 2025, limit: int = 0) -> Dict[str, Any]:
             "median_wage_national": occ.get("median_wage_national"),
             "employment_national": occ.get("employment_national"),
             "wage_trend_5yr_real_pct": occ.get("wage_trend_5yr_real_pct"),
+            "projection_pct": occ.get("projection_pct"),
         })
 
     notice = None if have_wages else ("Exposure from O*NET 29.1 and Eloundou et al. (2023). "

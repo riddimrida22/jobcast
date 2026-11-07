@@ -22,6 +22,8 @@ from typing import Dict, Any
 ROOT = Path(__file__).resolve().parents[1]
 ELOUNDOU_CSV = ROOT / "data" / "cache" / "eloundou_occ_level.csv"
 ONET_ZIP = ROOT / "data" / "cache" / "onet_db_29_1_text.zip"
+TASK_LABELS = ROOT / "data" / "cache" / "exposure" / "task_labels.tsv"
+_LABEL_TO_AI = {"T0": 0.0, "T1": 1.0, "T2": 0.5}   # E1 direct LLM exposure; E2 exposed only with extra tools (beta weights it 0.5)
 
 # O*NET Work Context physical/manual elements (CX scale 1-5) used for the robotics proxy.
 PHYS_ELEMENTS = {
@@ -70,6 +72,20 @@ def load_robo(zip_path: Path = ONET_ZIP) -> Dict[str, float]:
     return {k: round(sum(vs) / len(vs), 4) for k, vs in acc.items() if vs}
 
 
+def load_task_ai(path: Path = TASK_LABELS) -> Dict[str, float]:
+    """Task ID -> AI exposure (0..1) from Eloundou's per-task labels (human preferred)."""
+    import csv
+    out: Dict[str, float] = {}
+    if not path.exists():
+        return out
+    with open(path, encoding="utf-8") as fh:
+        for row in csv.DictReader(fh, delimiter="\t"):
+            lbl = (row.get("human_automation") or row.get("gpt4_automation") or "").strip()
+            if lbl in _LABEL_TO_AI:
+                out[row["Task ID"].strip()] = _LABEL_TO_AI[lbl]
+    return out
+
+
 def _soc_group_mean(ai: Dict[str, float]) -> Dict[str, float]:
     groups: Dict[str, list] = {}
     for code, v in ai.items():
@@ -81,24 +97,35 @@ def attach_exposure(occupations: Dict[str, Dict[str, Any]],
                     zip_path: Path = ONET_ZIP, csv_path: Path = ELOUNDOU_CSV) -> Dict[str, int]:
     """Fill each occupation's and task's 'ai' and 'robo' (0..1) in place.
     Returns coverage counts."""
-    ai = load_ai(csv_path)
+    ai = load_ai(csv_path)              # occupation-level beta (fallback for unlabeled tasks)
     robo = load_robo(zip_path)
+    task_ai = load_task_ai()            # per-task AI exposure
     group_mean = _soc_group_mean(ai)
     overall = sum(ai.values()) / len(ai) if ai else 0.0
-    stats = {"ai_direct": 0, "ai_fallback": 0, "robo_direct": 0, "robo_missing": 0}
+    stats = {"ai_direct": 0, "ai_fallback": 0, "robo_direct": 0, "robo_missing": 0,
+             "task_labeled": 0, "task_fallback": 0}
 
     for code, occ in occupations.items():
         if code in ai:
-            a = ai[code]; stats["ai_direct"] += 1
+            beta = ai[code]; stats["ai_direct"] += 1
         else:
-            a = group_mean.get(code.split("-")[0], overall); stats["ai_fallback"] += 1
+            beta = group_mean.get(code.split("-")[0], overall); stats["ai_fallback"] += 1
         if code in robo:
             r = robo[code]; stats["robo_direct"] += 1
         else:
             r = 0.0; stats["robo_missing"] += 1
-        occ["ai"] = round(a, 4)
         occ["robo"] = round(r, 4)
+        tvals = []
         for t in occ.get("tasks", []):
-            t["ai"] = occ["ai"]
-            t["robo"] = occ["robo"]
+            tid = str(t.get("id", "")).strip()
+            if tid in task_ai:
+                t_ai = task_ai[tid]; stats["task_labeled"] += 1
+            else:
+                t_ai = beta; stats["task_fallback"] += 1
+            t["ai"] = round(t_ai, 4)
+            t["robo"] = round(r, 4)
+            tvals.append(t_ai)
+        # Gauge uses the calibrated occupation-level beta (over all tasks); the per-task
+        # labels above drive only the task-bar breakdown on the result page.
+        occ["ai"] = round(beta, 4)
     return stats

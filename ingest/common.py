@@ -34,6 +34,7 @@ def download_to_cache(url: str, name: str, force: bool = False) -> Path:
     Prints the size so a download is never silent."""
     _ensure_dirs()
     dest = CACHE_DIR / name
+    dest.parent.mkdir(parents=True, exist_ok=True)
     if dest.exists() and not force:
         print(f"cached: {name} ({dest.stat().st_size} bytes)")
         return dest

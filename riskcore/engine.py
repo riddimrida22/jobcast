@@ -130,41 +130,46 @@ class Engine:
             if max_zone and zone and zone > max_zone:
                 continue
             base = max(o.get("ai") or 0, o.get("robo") or 0) * 100
-            trend = o.get("wage_trend_5yr_real_pct") or 0
+            growth = o.get("projection_pct")              # BLS 2020-2030 projected % change
+            if growth is None:
+                growth = o.get("wage_trend_5yr_real_pct") or 0
             safe = 100 - base
             paynorm = min(wage, 200000) / 2000.0          # 0..100
             if priority == "safe":
-                fit = safe * 0.70 + paynorm * 0.20 + trend * 1.0
+                fit = safe * 0.60 + paynorm * 0.20 + growth * 1.5
             elif priority == "pay":
-                fit = safe * 0.30 + paynorm * 0.60 + trend * 1.0
+                fit = safe * 0.25 + paynorm * 0.55 + growth * 1.5
             else:
-                fit = safe * 0.50 + paynorm * 0.40 + trend * 1.2
+                fit = safe * 0.45 + paynorm * 0.35 + growth * 2.0
             out.append({"soc": soc, "title": o["title"], "base_exposure": round(base),
                         "resilience": round(safe), "median_wage": wage, "job_zone": zone,
-                        "edu": edu.get(zone, "Varies"), "trend": round(trend, 1), "fit": round(fit, 1),
+                        "edu": edu.get(zone, "Varies"), "growth": round(growth, 1), "fit": round(fit, 1),
                         "family": self.snapshot.family_name(self.snapshot.family_code(soc))})
         out.sort(key=lambda x: -x["fit"])
         return out[:n]
 
     # ---- scoring internals ----------------------------------------------
     def _score_axes(self, occ: Dict[str, Any], profile: Profile):
-        tasks = occ.get("tasks", [])
-        if not tasks:
-            # Fall back to occupation-level exposure when task rows are absent.
-            factor = self._seniority_factor(profile)
-            ai = _clamp((occ.get("ai") or 0.0) * 100 * factor)
-            robo = _clamp((occ.get("robo") or 0.0) * 100 * factor)
-            return {"ai_software": round(ai, 1), "physical_robotics": round(robo, 1)}, []
-        ai_mean = sum(t["ai"] for t in tasks) / len(tasks)
-        robo_mean = sum(t["robo"] for t in tasks) / len(tasks)
+        # Headline axis scores use the calibrated occupation-level exposure (AI = Eloundou
+        # beta over all tasks; robotics = O*NET work-context proxy), adjusted for seniority.
+        # The fixture has no occupation-level fields, so fall back to the task mean there.
         factor = self._seniority_factor(profile)
-        ai_score = _clamp(ai_mean * 100 * factor)
-        robo_score = _clamp(robo_mean * 100 * factor)
+        tasks = occ.get("tasks", [])
+        if occ.get("ai") is not None or occ.get("robo") is not None:
+            ai_raw, robo_raw = occ.get("ai") or 0.0, occ.get("robo") or 0.0
+        elif tasks:
+            ai_raw = sum(t["ai"] for t in tasks) / len(tasks)
+            robo_raw = sum(t["robo"] for t in tasks) / len(tasks)
+        else:
+            ai_raw = robo_raw = 0.0
+        ai_score = _clamp(ai_raw * 100 * factor)
+        robo_score = _clamp(robo_raw * 100 * factor)
+        # The task bars show per-task AI exposure (Eloundou task labels) vs the robotics proxy.
         decomposition = [
             {"id": t["id"], "name": t["name"],
              "ai": round(t["ai"] * 100, 1), "robo": round(t["robo"] * 100, 1),
              "exposed": max(t["ai"], t["robo"]) >= 0.5}
-            for t in tasks
+            for t in occ.get("tasks", [])
         ]
         return {"ai_software": round(ai_score, 1),
                 "physical_robotics": round(robo_score, 1)}, decomposition
@@ -193,7 +198,13 @@ class Engine:
             if base_exposure <= b["max_exposure"]:
                 idx = i
                 break
-        trend = self._metro(occ, metro_id).get("demand_trend", "stable")
+        trend = self._metro(occ, metro_id).get("demand_trend")
+        if not trend:
+            proj = occ.get("projection_pct")   # BLS national 2020-2030 projected % change
+            if proj is not None:
+                trend = "growing" if proj >= 10 else "declining" if proj <= 2 else "stable"
+            else:
+                trend = "stable"
         shift = self.weights.get("demand_trend_shift", {}).get(trend, 0)
         union_shift = 0
         if profile.union_status == "yes":

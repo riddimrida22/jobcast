@@ -43,7 +43,7 @@ careers - low automation exposure, solid pay, and a positive wage trend - from t
     <div class="cc-meta">
       <span>${{ "{:,.0f}".format(c.median_wage) }} median</span>
       <span>{{ c.edu }}</span>
-      {% if c.trend > 0 %}<span style="color:var(--green)">pay rising</span>{% endif %}
+      {% if c.growth is not none %}<span style="color:{{ 'var(--green)' if c.growth >= 7 else 'var(--muted)' }}">{{ '+' if c.growth > 0 else '' }}{{ c.growth }}% by 2030</span>{% endif %}
     </div>
   </a>
   {% endfor %}
