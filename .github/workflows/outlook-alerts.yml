@@ -1,0 +1,21 @@
+name: Outlook alert check
+
+# Runs the "has this job's automation outlook shifted?" check against the live
+# app on a schedule. The app only emails a watcher when a job's exposure or
+# projected demand actually moves past a threshold, so a run on unchanged data
+# simply reports "unchanged" and sends nothing. Also runnable on demand.
+on:
+  schedule:
+    - cron: "0 13 * * 1"   # Mondays 13:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the alert check
+        run: |
+          code=$(curl -sS -o /tmp/out.json -w "%{http_code}" \
+            "https://jobbreak.ai/tasks/check-alerts?key=${{ secrets.JOBCAST_ADMIN_KEY }}")
+          echo "HTTP $code"; cat /tmp/out.json || true
+          test "$code" = "200"
