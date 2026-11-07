@@ -170,6 +170,28 @@
     .panel { display:none; } .panel.active { display:block; }
     .ol-steps { margin:0; padding-left:20px; line-height:1.7; } .ol-steps li { margin-bottom:5px; }
 
+    /* strategies + tiers */
+    .strat { display:flex; gap:13px; padding:11px 0; border-bottom:1px solid var(--hair); }
+    .strat:last-child { border-bottom:0; }
+    .strat-num { flex:0 0 26px; height:26px; border-radius:50%;
+                 background:linear-gradient(180deg,var(--primary),var(--primary-dark)); color:#fff;
+                 font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; }
+    .strat-t { line-height:1.35; }
+    .tier-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px; }
+    .tier { border:1px solid var(--line); border-radius:12px; padding:14px 12px; text-align:center; }
+    .tier.feat { border-color:var(--primary); box-shadow:0 5px 16px rgba(47,79,115,.16); }
+    .tier-name { font-weight:700; color:var(--primary); font-size:15px; }
+    .tier-sub { font-size:12.5px; color:var(--muted); margin-top:4px; line-height:1.35; }
+    @media (max-width:620px) { .tier-row { grid-template-columns:1fr; } }
+    /* skills chip input */
+    .skill-box { display:flex; flex-wrap:wrap; gap:6px; align-items:center; border:1px solid var(--line);
+                 border-radius:9px; padding:5px 8px; background:var(--input); min-height:44px; }
+    .skill-box input { border:0; outline:none; flex:1; min-width:120px; padding:6px; background:transparent; color:var(--ink); }
+    .skill-chip { background:var(--primary-soft); color:var(--primary); border-radius:999px; padding:3px 6px 3px 11px;
+                  font-size:13px; display:inline-flex; gap:4px; align-items:center; }
+    [data-theme="dark"] .skill-chip { color:#cfe0f5; }
+    .skill-chip b { cursor:pointer; font-weight:700; opacity:.7; padding:0 3px; } .skill-chip b:hover { opacity:1; }
+
     /* pipeline flow diagram */
     .flow { display:flex; flex-wrap:wrap; align-items:stretch; gap:7px; margin:8px 0 4px; }
     .flow-step { flex:1 1 120px; background:var(--primary-soft); border-radius:11px; padding:13px 10px;

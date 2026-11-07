@@ -35,6 +35,8 @@ def profile_from(source) -> Profile:
         age=_num(source.get("age")),
         experience_years=_num(source.get("experience_years")),
         education=(source.get("education") or "").strip() or None,
+        education_field=(source.get("education_field") or "").strip() or None,
+        skills=(source.get("skills") or "").strip() or None,
         union_status=(source.get("union_status") or "").strip() or None,
         pay_current=_num(source.get("pay_current")),
         pay_5yr_ago=_num(source.get("pay_5yr_ago")),

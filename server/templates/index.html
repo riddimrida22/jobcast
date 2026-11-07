@@ -1,12 +1,24 @@
 {% extends "base.html" %}
 {% block body_class %}wide{% endblock %}
 {% block content %}
+{# Color by broad discipline: blue-collar/trades = light blue, business = navy, tech = indigo, etc. #}
+{% set famcol = {
+  '11':'#2f4f73','13':'#2f4f73','41':'#2f4f73','43':'#2f4f73',
+  '15':'#5a6fc0','17':'#5a6fc0','19':'#5a6fc0',
+  '29':'#159e8c','31':'#159e8c',
+  '23':'#7a5aa0',
+  '21':'#c08a3a','25':'#c08a3a',
+  '27':'#c0607a',
+  '35':'#d07a3a','39':'#d07a3a',
+  '33':'#6cb4e0','37':'#6cb4e0','45':'#6cb4e0','47':'#6cb4e0','49':'#6cb4e0','51':'#6cb4e0','53':'#6cb4e0',
+  '55':'#5a6a4a' } %}
+{% set disc_legend = [('#6cb4e0','Trades & manual'),('#2f4f73','Business & office'),('#5a6fc0','Tech & science'),('#159e8c','Healthcare'),('#7a5aa0','Legal'),('#c08a3a','Education & social'),('#c0607a','Arts & media'),('#d07a3a','Service')] %}
 <div class="home-layout">
   <aside class="side">
     <div class="side-title risk">Most at risk</div>
     <div class="ticker"><div class="ticker-inner">
-      {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.base }}</span></a>{% endfor %}
-      {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.base }}</span></a>{% endfor %}
+      {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.base }}</span></a>{% endfor %}
+      {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.base }}</span></a>{% endfor %}
     </div></div>
   </aside>
   <div class="center">
@@ -66,11 +78,32 @@
     </select>
   </div>
   <div>
-    <label for="education">Education</label>
+    <label for="education">Degree level</label>
     <select id="education" name="education">
       <option value="">Prefer not to say</option>
       <option>High school</option><option>Some college</option>
       <option>Associate</option><option>Bachelor</option><option>Graduate</option>
+    </select>
+  </div>
+  <div>
+    <label for="education_field">Field of study</label>
+    <select id="education_field" name="education_field">
+      <option value="">Prefer not to say</option>
+      <option>Business or Management</option>
+      <option>Finance or Accounting</option>
+      <option>Economics</option>
+      <option>Law</option>
+      <option>Engineering</option>
+      <option>Computer Science or IT</option>
+      <option>Healthcare or Medicine</option>
+      <option>Life Sciences</option>
+      <option>Physical Sciences or Math</option>
+      <option>Social Sciences</option>
+      <option>Education</option>
+      <option>Arts or Humanities</option>
+      <option>Communications or Media</option>
+      <option>Trades or Vocational</option>
+      <option>Other</option>
     </select>
   </div>
 
@@ -103,8 +136,15 @@
       <option value="175000">$150,000 to $199,999</option><option value="225000">$200,000 or more</option>
     </select>
   </div>
-  <div style="display:flex;align-items:flex-end">
-    <button type="submit" style="margin:0;width:100%">Show my read</button>
+  <div class="full">
+    <label for="skill-input">Skills <span class="muted" style="text-transform:none;font-weight:400;letter-spacing:0">(optional, type a skill and press Enter)</span></label>
+    <div class="skill-box" id="skill-box">
+      <input id="skill-input" type="text" autocomplete="off" placeholder="e.g. Python, project management, CAD">
+    </div>
+    <input type="hidden" id="skills" name="skills">
+  </div>
+  <div class="full">
+    <button type="submit" style="width:100%">Show my read</button>
   </div>
 </form>
 <p class="muted" style="margin-top:8px;font-size:12px">No gender, race, or other protected characteristics in the score; pay is read only as a banded trajectory. Sourced from O*NET, BLS OEWS (393 metros), and peer-reviewed exposure research. <a href="/jobs">Browse all jobs</a>.</p>
@@ -112,10 +152,16 @@
   <aside class="side">
     <div class="side-title safe">Most resilient</div>
     <div class="ticker rev"><div class="ticker-inner">
-      {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}
-      {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}
+      {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}
+      {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}
     </div></div>
   </aside>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:7px 16px;justify-content:center;margin:16px auto 0;max-width:920px;font-size:12px" class="muted">
+  {% for c, lbl in disc_legend %}
+  <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:11px;height:11px;border-radius:3px;background:{{ c }};display:inline-block"></span>{{ lbl }}</span>
+  {% endfor %}
 </div>
 
 <script>
@@ -186,6 +232,40 @@
   document.addEventListener('click', function (e) {
     if (!list.contains(e.target) && e.target !== search) list.hidden = true;
   });
+})();
+
+// Skills chip input (LinkedIn-style). Chips are stored comma-separated in the hidden field.
+(function () {
+  var box = document.getElementById('skill-box');
+  var input = document.getElementById('skill-input');
+  var hidden = document.getElementById('skills');
+  if (!box || !input || !hidden) return;
+  var skills = [];
+  function sync() { hidden.value = skills.join(', '); }
+  function render() {
+    box.querySelectorAll('.skill-chip').forEach(function (c) { c.remove(); });
+    skills.forEach(function (sk, i) {
+      var chip = document.createElement('span');
+      chip.className = 'skill-chip';
+      chip.textContent = sk;
+      var x = document.createElement('b'); x.textContent = '×';
+      x.addEventListener('click', function () { skills.splice(i, 1); render(); });
+      chip.appendChild(x);
+      box.insertBefore(chip, input);
+    });
+    sync();
+  }
+  function add(val) {
+    val = val.replace(/,/g, '').trim();
+    if (val && skills.indexOf(val) === -1 && skills.length < 20) { skills.push(val); render(); }
+    input.value = '';
+  }
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(input.value); }
+    else if (e.key === 'Backspace' && !input.value && skills.length) { skills.pop(); render(); }
+  });
+  input.addEventListener('blur', function () { if (input.value.trim()) add(input.value); });
+  box.addEventListener('click', function () { input.focus(); });
 })();
 </script>
 {% endblock %}

@@ -9,6 +9,7 @@
 
 <div class="tabs" role="tablist">
   <button class="tab active" data-panel="p-overview">Overview</button>
+  {% if r.strategies %}<button class="tab" data-panel="p-strategy">What to do</button>{% endif %}
   <button class="tab" data-panel="p-tasks">My tasks</button>
   {% if r.key_drivers %}<button class="tab" data-panel="p-drivers">What drives it</button>{% endif %}
   {% if not seo %}<button class="tab" data-panel="p-pay">Pay &amp; place</button>{% endif %}
@@ -71,6 +72,28 @@
     {% if r.timeline.remaining_working_years is not none %}<span class="muted">(about {{ r.timeline.remaining_working_years }} working years left)</span>{% endif %}</p>{% endif %}
   {% if r.timeline.union_note %}<p class="muted" style="text-align:center;margin:4px 0 0">{{ r.timeline.union_note }}</p>{% endif %}
 </div>
+
+<!-- WHAT TO DO -->
+{% if r.strategies %}
+<div id="p-strategy" class="panel card">
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><h2 style="margin:0">What to do about it</h2></div>
+  <p class="muted" style="margin-top:0">Strategies to protect your livelihood, most important first.
+  A paid plan expands each into a personalised, step-by-step version.</p>
+  {% for st in r.strategies %}
+  <div class="strat">
+    <div class="strat-num">{{ loop.index }}</div>
+    <div class="strat-t"><strong>{{ st.title }}</strong><div class="muted">{{ st.detail }}</div></div>
+  </div>
+  {% endfor %}
+  <div class="tier-row">
+    <div class="tier"><div class="tier-name">Free</div><div class="tier-sub">Your single top strategy</div></div>
+    <div class="tier feat"><div class="tier-name">Tier 1</div><div class="tier-sub">The highest-impact move, in depth</div></div>
+    <div class="tier feat"><div class="tier-name">Tier 2</div><div class="tier-sub">Your top 3 strategies, step by step</div></div>
+  </div>
+  <p class="muted" style="margin-top:12px">This preview shows the full list; in production an AI writes each
+  into a personalised plan from your profile, and tiers unlock depth.</p>
+</div>
+{% endif %}
 
 <!-- TASKS -->
 <div id="p-tasks" class="panel card">

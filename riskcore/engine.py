@@ -46,6 +46,7 @@ class Engine:
         adjacency = self._adjacency(occ, base_exposure)
         confidence = self._confidence_band(axes)
         drivers = self._key_drivers(occ, axes, decomposition, timeline, wages, profile)
+        strategies = self._strategies(axes, base_exposure, timeline, wages, adjacency, profile)
 
         return {
             "ok": True,
@@ -57,6 +58,7 @@ class Engine:
             "exposure_range": confidence,
             "base_exposure": round(base_exposure, 1),
             "key_drivers": drivers,
+            "strategies": strategies,
             "timeline": timeline,
             "tasks": decomposition,
             "wages": wages,
@@ -264,6 +266,72 @@ class Engine:
 
         drivers.sort(key=lambda d: d["weight"], reverse=True)
         return drivers[:5]
+
+    def _strategies(self, axes, base_exposure, timeline, wages, adjacency, profile) -> List[Dict[str, Any]]:
+        """Concrete, data-grounded strategies to protect the person's livelihood, most
+        relevant first. Deterministic here; the paid plan expands each with a
+        language-model-written, personalised version. Never changes the score."""
+        s: List[Dict[str, Any]] = []
+        band = timeline.get("band", {}).get("id")
+
+        # 1. Timing, from the timeline band.
+        if band == "near_term_high":
+            s.append({"title": "Act within the next 1 to 2 years",
+                      "detail": "Displacement for this role is near-term. Start a concrete reskilling "
+                                "plan now, while you still have income and leverage."})
+        elif band == "partial_5_10yr":
+            s.append({"title": "Use your 5 to 10 year runway",
+                      "detail": "Change here is gradual. Build resilient skills steadily and watch the "
+                                "signals rather than waiting for a shock."})
+        else:
+            s.append({"title": "Stay sharp; urgency is low",
+                      "detail": "This role looks durable. Keep your skills current and watch for shifts "
+                                "in your field."})
+
+        # 2. The dominant threat axis.
+        if axes["ai_software"] >= axes["physical_robotics"] and axes["ai_software"] >= 45:
+            s.append({"title": "Lean into the human edge",
+                      "detail": "The exposed parts are routine and cognitive. Invest in judgment, client "
+                                "relationships, and complex problem-solving that AI still cannot do."})
+        elif axes["physical_robotics"] >= 45:
+            s.append({"title": "Move up from the task to the system",
+                      "detail": "Robotics targets the physical work. Shift toward supervising, maintaining, "
+                                "or programming the automation instead of competing with it."})
+
+        # 3. A concrete lower-risk pivot.
+        if adjacency:
+            a = adjacency[0]
+            s.append({"title": f"Pivot toward {a['title']}",
+                      "detail": f"It is skill-adjacent and less exposed ({a['max_exposure']} vs "
+                                f"{round(base_exposure)}). A lateral move now beats a forced one later."})
+
+        # 4. Financial resilience - the core of avoiding a livelihood shock.
+        s.append({"title": "Build a financial buffer",
+                  "detail": "Keep 6 to 12 months of expenses and diversify your income, so a disruption "
+                            "is a setback rather than a catastrophe."})
+
+        # 5. Wage trajectory.
+        if wages.get("available") and (wages.get("real_change_pct") or 0) < 0:
+            s.append({"title": "Stop the income slide",
+                      "detail": "Your real pay is already falling. Renegotiate, add a credential, or move "
+                                "before the erosion compounds."})
+
+        # 6. Protection and credentials.
+        if timeline.get("union_protected"):
+            s.append({"title": "Use your collective leverage",
+                      "detail": "Union coverage can fund retraining and ease transitions. Push for those "
+                                "protections while you have them."})
+        else:
+            s.append({"title": "Add a recognised credential",
+                      "detail": "A certification or license raises the bar against automation and signals "
+                                "value in a tightening market."})
+
+        # 7. Skills the person listed.
+        if profile.skills:
+            s.append({"title": "Market your transferable skills",
+                      "detail": f"Your skills ({profile.skills}) carry into adjacent roles. Frame them for "
+                                "where the work is heading, not just where it has been."})
+        return s
 
     def _adjacency(self, occ, base_exposure) -> List[Dict[str, Any]]:
         out = []

@@ -12,6 +12,8 @@ class Profile:
     age: Optional[int] = None
     experience_years: Optional[int] = None
     education: Optional[str] = None
+    education_field: Optional[str] = None   # field of study: finance, law, engineering, ...
+    skills: Optional[str] = None            # comma-separated skills the user added
     union_status: Optional[str] = None  # "yes" | "no" | None
     pay_current: Optional[float] = None
     pay_5yr_ago: Optional[float] = None
