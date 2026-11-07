@@ -46,6 +46,7 @@ def _context(assessment: Dict[str, Any], profile: Dict[str, Any]) -> Dict[str, A
         "age": profile.get("age"),
         "years_of_experience": profile.get("experience_years"),
         "union_status": profile.get("union_status"),
+        "employer_sector": profile.get("sector"),
         "ai_software_exposure_0_100": assessment["exposure"]["ai_software"],
         "physical_robotics_exposure_0_100": assessment["exposure"]["physical_robotics"],
         "timeline_band": t.get("band", {}).get("label"),

@@ -18,6 +18,7 @@ class Profile:
     pay_current: Optional[float] = None
     pay_5yr_ago: Optional[float] = None
     graduation_year: Optional[int] = None
+    sector: Optional[str] = None   # private | government | non-profit | self-employed | other
 
     def with_overrides(self, overrides: Dict[str, Any]) -> "Profile":
         """Return a copy with some fields replaced. Used for what-if scenarios.

@@ -14,18 +14,21 @@
   '55':'#5a6a4a' } %}
 {% set disc_legend = [('#6cb4e0','Trades & manual'),('#2f4f73','Business & office'),('#5a6fc0','Tech & science'),('#159e8c','Healthcare'),('#7a5aa0','Legal'),('#c08a3a','Education & social'),('#c0607a','Arts & media'),('#d07a3a','Service')] %}
 <div class="slogan-banner">
+  <div class="slogan-ticker"><div class="st-track">
+    {% set slg = ['AI is coming for your job, sooner than you think.','Don\'t get gobbled. See your timeline.','Know your number before your boss does.','The sand is running out on the old way of working.','Break free first, with JobBreak.'] %}
+    {% for pass in [1, 2] %}{% for s in slg %}<span class="st-item">{{ s }}</span><span class="st-sep">&bull;</span>{% endfor %}{% endfor %}
+  </div></div>
   <div class="gob-scene" aria-hidden="true">
-    <svg class="tick-clock gob-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line class="tc-min" x1="12" y1="12" x2="12" y2="4.5"/><line class="tc-hr" x1="12" y1="12" x2="16.5" y2="12"/></svg>
-    <span class="gob-track">
+    <span class="gob-hour"><span class="gh-glass"></span><span class="gh-top"></span><span class="gh-bot"></span><span class="gh-stream"></span></span>
+    <span class="gob-road">
       <span class="gob-pac"><span class="gp-top"></span><span class="gp-bot"></span><span class="gp-eye"></span></span>
+      <span class="gob-wall"><span class="gw-tag">JobBreak</span></span>
       <span class="gob-job">
-        <span class="gob-ltr g1">J</span><span class="gob-ltr g2">O</span><span class="gob-ltr g3">B</span>
+        <span class="gob-ltr">J</span><span class="gob-ltr">O</span><span class="gob-ltr">B</span>
       </span>
     </span>
   </div>
-  <span class="urgent-tag"><span class="urgent-label">Act now to beat the AI gobbler</span></span>
-  <span class="slogan-main">AI is coming for your job, sooner than you think.</span>
-  <span class="accent">See your timeline now, and break free first with JobBreak.</span></div>
+  <span class="urgent-tag"><span class="urgent-label">Act now to beat the AI gobbler</span></span></div>
 
 <div class="home-layout">
   <aside class="side">
@@ -142,6 +145,17 @@
       <option value="">Prefer not to say</option>
       <option value="yes">Union member or covered</option>
       <option value="no">Not in a union</option>
+    </select>
+  </div>
+  <div>
+    <label for="sector">Employer type</label>
+    <select id="sector" name="sector">
+      <option value="">Prefer not to say</option>
+      <option>Private sector</option>
+      <option>Government or public sector</option>
+      <option>Non-profit</option>
+      <option>Self-employed</option>
+      <option>Other</option>
     </select>
   </div>
   <div>

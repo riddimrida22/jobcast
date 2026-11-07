@@ -101,6 +101,7 @@ def profile_from(source) -> Profile:
         pay_current=_num(source.get("pay_current")),
         pay_5yr_ago=_num(source.get("pay_5yr_ago")),
         graduation_year=_num(source.get("graduation_year")),
+        sector=(source.get("sector") or "").strip() or None,
     )
 
 
