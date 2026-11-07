@@ -369,6 +369,20 @@
     [data-theme="dark"] .plan.free .plan-cta { background:var(--primary-soft); color:var(--ink); }
     .plan.premium .plan-cta { border-color:#d98534; background:linear-gradient(180deg,var(--accent),#e8863a); color:#3a2208; }
     .plan-foot { font-size:11.5px; color:var(--muted); margin-top:14px; text-align:center; }
+    /* single-plan (Free + Monitor) layout + monthly/yearly toggle */
+    .plans-2 { grid-template-columns:repeat(2,minmax(0,1fr)); max-width:640px; margin-left:auto; margin-right:auto; }
+    .period-toggle { display:flex; justify-content:center; margin:14px 0 4px; }
+    .per-btn { margin:0; background:var(--card); color:var(--muted); border:1px solid var(--line); box-shadow:none;
+               padding:8px 20px; font-size:13.5px; font-weight:600; }
+    .per-btn:first-child { border-radius:9px 0 0 9px; }
+    .per-btn:last-child { border-radius:0 9px 9px 0; border-left:0; }
+    .per-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .per-btn:hover { filter:none; }
+    .per-save { font-size:11px; font-weight:800; color:var(--green); }
+    .per-btn.active .per-save { color:#cdeee6; }
+    .plans[data-period="monthly"] .per-yearly { display:none; }
+    .plans[data-period="yearly"] .per-monthly { display:none; }
+    @media (max-width:620px) { .plans-2 { grid-template-columns:1fr; } }
     /* AI plan deck */
     .deck { display:flex; gap:12px; overflow-x:auto; padding:4px 2px 14px; scroll-snap-type:x mandatory; }
     .deck::-webkit-scrollbar { height:7px; } .deck::-webkit-scrollbar-thumb { background:var(--line); border-radius:4px; }

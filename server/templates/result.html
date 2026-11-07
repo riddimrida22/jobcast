@@ -277,9 +277,15 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     <div class="ss-dots" id="ss-dots"></div>
   </div>
 
-  <h3 style="margin:26px 0 2px;font-size:17px">Unlock your survival plan</h3>
-  <p class="muted" style="margin-top:2px">Free shows where you stand. Paid plans turn it into a personalised action plan, written for your exact profile.</p>
-  <div class="plans">
+  <h3 style="margin:26px 0 2px;font-size:17px">Keep the monitor on</h3>
+  <p class="muted" style="margin-top:2px">Free shows where you stand today. JobBreak Monitor writes your full AI-researched plan and keeps watching, so you know the moment your outlook shifts.</p>
+
+  <div class="period-toggle" role="group" aria-label="Billing period">
+    <button type="button" class="per-btn active" data-period="monthly">Monthly</button>
+    <button type="button" class="per-btn" data-period="yearly">Yearly <span class="per-save">save 39%</span></button>
+  </div>
+
+  <div class="plans plans-2" data-period="monthly">
 
     <div class="plan free">
       <div class="plan-name">Free</div>
@@ -289,55 +295,28 @@ It is a sourced range, not a verdict, and the detail is below.</p>
         <li>{{ check }}Full job-risk score &amp; timeline</li>
         <li>{{ check }}Task-by-task exposure breakdown</li>
         <li>{{ check }}One starter strategy</li>
-        <li class="off">{{ check }}AI-written personal plan</li>
+        <li class="off">{{ check }}AI-researched personal plan</li>
+        <li class="off">{{ check }}Ongoing monitoring &amp; alerts</li>
       </ul>
       <div class="plan-cta" data-tier="free">Current plan</div>
     </div>
 
-    <div class="plan">
-      <div class="plan-name">Starter</div>
-      <div class="plan-price">$5<span>/mo</span></div>
-      <div class="plan-year"><strong>$50</strong>/yr billed yearly<span class="save">2 months free</span></div>
-      <div class="plan-tag">Your single highest-impact move, written for you.</div>
+    <div class="plan feat">
+      <div class="plan-badge">Keep ahead</div>
+      <div class="plan-name">JobBreak Monitor</div>
+      <div class="plan-price per-monthly">$3.99<span>/mo</span></div>
+      <div class="plan-price per-yearly">$29<span>/yr</span></div>
+      <div class="plan-year per-monthly">or $29/yr <span class="save">save 39%</span></div>
+      <div class="plan-year per-yearly">that's about $2.42/mo, billed yearly</div>
+      <div class="plan-tag">Your full researched plan, plus a watch on your job.</div>
       <ul>
         <li>{{ check }}Everything in Free</li>
-        <li>{{ check }}1 AI-written strategy, tailored to your result</li>
+        <li>{{ check }}Full AI-researched, cited action plan</li>
         <li>{{ check }}Resume-aware personalisation</li>
-        <li>{{ check }}Email alerts when your outlook shifts</li>
+        <li>{{ check }}Re-run your plan any time</li>
+        <li>{{ check }}Alerts when your outlook shifts</li>
       </ul>
-      <div class="plan-cta" data-tier="tier1">Choose Starter</div>
-    </div>
-
-    <div class="plan feat">
-      <div class="plan-badge">Most popular</div>
-      <div class="plan-name">Pro</div>
-      <div class="plan-price">$12<span>/mo</span></div>
-      <div class="plan-year"><strong>$120</strong>/yr billed yearly<span class="save">Save $24</span></div>
-      <div class="plan-tag">Your full top-3 plan on an advanced AI model.</div>
-      <ul>
-        <li>{{ check }}Everything in Starter</li>
-        <li>{{ check }}Your top 3 strategies, step by step</li>
-        <li>{{ check }}More advanced AI model</li>
-        <li>{{ check }}"What if" career-move simulator</li>
-        <li>{{ check }}Ranked safer adjacent roles</li>
-      </ul>
-      <div class="plan-cta" data-tier="tier2">Go Pro</div>
-    </div>
-
-    <div class="plan premium">
-      <div class="plan-badge">Best value</div>
-      <div class="plan-name">Career Shield</div>
-      <div class="plan-price">$29<span>/mo</span></div>
-      <div class="plan-year"><strong>$290</strong>/yr billed yearly<span class="save">Save $58</span></div>
-      <div class="plan-tag">The deepest plan on our most capable AI.</div>
-      <ul>
-        <li>{{ check }}Everything in Pro</li>
-        <li>{{ check }}5 in-depth strategies on our most advanced AI</li>
-        <li>{{ check }}Full reskilling roadmap with timelines</li>
-        <li>{{ check }}Quarterly automatic re-assessment</li>
-        <li>{{ check }}Priority access to new data updates</li>
-      </ul>
-      <div class="plan-cta" data-tier="tier3">Get Career Shield</div>
+      <div class="plan-cta" data-tier="tier2">Start monitoring</div>
     </div>
 
   </div>
@@ -579,11 +558,22 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   try { BILL = JSON.parse(document.getElementById('billing-data').textContent) || BILL; } catch (e) {}
   var RANK = { free: 0, tier1: 1, tier2: 2, tier3: 3 };
   function entitled(tier) { return RANK[BILL.entitlement || 'free'] >= RANK[tier]; }
+  function selectedPeriod() {
+    var p = document.querySelector('.plans'); return (p && p.dataset.period) || 'monthly';
+  }
+  document.querySelectorAll('.per-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.per-btn').forEach(function (x) { x.classList.remove('active'); });
+      b.classList.add('active');
+      var plans = document.querySelector('.plans');
+      if (plans) plans.dataset.period = b.getAttribute('data-period');
+    });
+  });
   function startCheckout(tier, cta) {
     var old = cta ? cta.textContent : '';
     if (cta) { cta.textContent = 'Redirecting to checkout...'; cta.style.pointerEvents = 'none'; }
     fetch('/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tier: tier, period: 'monthly' }) })
+      body: JSON.stringify({ tier: tier, period: selectedPeriod() }) })
       .then(function (r) { return r.json(); }).then(function (d) {
         if (d.ok && d.url) { window.location.href = d.url; }
         else { if (cta) { cta.textContent = old; cta.style.pointerEvents = ''; } status.textContent = 'Checkout is unavailable right now.'; }
