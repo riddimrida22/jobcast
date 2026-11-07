@@ -1,7 +1,10 @@
 {% extends "base.html" %}
+{% block body_class %}wide{% endblock %}
 {% block title %}Future-proof careers for students | JobBreak{% endblock %}
 {% block description %}Choosing a career or major? See which paths AI and robots can't easily automate, with pay and years of school, ranked from real government data.{% endblock %}
 {% block content %}
+
+{% include "_hero_gif.html" %}
 
 <section class="stu-hero">
   <span class="stu-eyebrow">Free | No sign-up | Real data</span>
@@ -15,62 +18,82 @@
   </div>
 </section>
 
-<form class="stu-filter" method="get" action="/students">
-  <div class="sf-row">
-    <div class="sf-field">
-      <label for="field">I'm into</label>
-      <select id="field" name="field" onchange="this.form.submit()">
-        <option value="">Anything</option>
-        {% for f in families %}<option value="{{ f.code }}"{{ ' selected' if sel_field == f.code else '' }}>{{ f.name }}</option>{% endfor %}
-      </select>
-    </div>
-    <div class="sf-field">
-      <label for="education">I'll study</label>
-      <select id="education" name="education" onchange="this.form.submit()">
-        <option value="">Any length</option>
-        <option value="2"{{ ' selected' if sel_zone == '2' else '' }}>Just high school</option>
-        <option value="3"{{ ' selected' if sel_zone == '3' else '' }}>A year or two after</option>
-        <option value="4"{{ ' selected' if sel_zone == '4' else '' }}>Up to a 4-year degree</option>
-        <option value="5"{{ ' selected' if sel_zone == '5' else '' }}>Grad school is fine</option>
-      </select>
-    </div>
-  </div>
-  <div class="sf-rank">
-    <span class="sf-rank-label">Rank by</span>
-    <div class="seg">
-      <label class="{{ 'on' if sel_priority == 'balanced' else '' }}"><input type="radio" name="priority" value="balanced" onchange="this.form.submit()"{{ ' checked' if sel_priority == 'balanced' else '' }}>Best all-round</label>
-      <label class="{{ 'on' if sel_priority == 'safe' else '' }}"><input type="radio" name="priority" value="safe" onchange="this.form.submit()"{{ ' checked' if sel_priority == 'safe' else '' }}>Safest from AI</label>
-      <label class="{{ 'on' if sel_priority == 'pay' else '' }}"><input type="radio" name="priority" value="pay" onchange="this.form.submit()"{{ ' checked' if sel_priority == 'pay' else '' }}>Best paid</label>
-    </div>
-  </div>
-</form>
+<div class="home-layout">
+  <aside class="side">
+    <div class="side-title safe">No degree needed</div>
+    <div class="ticker"><div class="ticker-inner">
+      {% for c in rail_early %}<a class="jobcard" href="/jobs/{{ c.soc }}"><span class="jc-t">{{ c.title }}<small>{{ c.school }}</small></span><span class="jc-score safe">{{ c.safe }}</span></a>{% endfor %}
+      {% for c in rail_early %}<a class="jobcard" href="/jobs/{{ c.soc }}"><span class="jc-t">{{ c.title }}<small>{{ c.school }}</small></span><span class="jc-score safe">{{ c.safe }}</span></a>{% endfor %}
+    </div></div>
+  </aside>
 
-{% if careers %}
-<div class="stu-grid">
-  {% for c in careers %}
-  <a class="stu-card{{ ' top' if loop.index <= 3 else '' }}" href="/jobs/{{ c.soc }}">
-    {% if loop.index <= 3 %}<span class="sc-rank">{{ ['\U0001F947','\U0001F948','\U0001F949'][loop.index0] }} Top pick</span>{% endif %}
-    <div class="sc-head">
-      <span class="sc-emoji">{{ c.emoji }}</span>
-      <span class="sc-titles">
-        <span class="sc-title">{{ c.title }}</span>
-        <span class="sc-fam">{{ c.family }}</span>
-      </span>
+  <div class="center">
+    <form class="stu-filter" method="get" action="/students">
+      <div class="sf-row">
+        <div class="sf-field">
+          <label for="field">I'm into</label>
+          <select id="field" name="field" onchange="this.form.submit()">
+            <option value="">Anything</option>
+            {% for f in families %}<option value="{{ f.code }}"{{ ' selected' if sel_field == f.code else '' }}>{{ f.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="sf-field">
+          <label for="education">I'll study</label>
+          <select id="education" name="education" onchange="this.form.submit()">
+            <option value="">Any length</option>
+            <option value="2"{{ ' selected' if sel_zone == '2' else '' }}>Just high school</option>
+            <option value="3"{{ ' selected' if sel_zone == '3' else '' }}>A year or two after</option>
+            <option value="4"{{ ' selected' if sel_zone == '4' else '' }}>Up to a 4-year degree</option>
+            <option value="5"{{ ' selected' if sel_zone == '5' else '' }}>Grad school is fine</option>
+          </select>
+        </div>
+      </div>
+      <div class="sf-rank">
+        <span class="sf-rank-label">Rank by</span>
+        <div class="seg">
+          <label class="{{ 'on' if sel_priority == 'balanced' else '' }}"><input type="radio" name="priority" value="balanced" onchange="this.form.submit()"{{ ' checked' if sel_priority == 'balanced' else '' }}>Best all-round</label>
+          <label class="{{ 'on' if sel_priority == 'safe' else '' }}"><input type="radio" name="priority" value="safe" onchange="this.form.submit()"{{ ' checked' if sel_priority == 'safe' else '' }}>Safest from AI</label>
+          <label class="{{ 'on' if sel_priority == 'pay' else '' }}"><input type="radio" name="priority" value="pay" onchange="this.form.submit()"{{ ' checked' if sel_priority == 'pay' else '' }}>Best paid</label>
+        </div>
+      </div>
+    </form>
+
+    {% if careers %}
+    <div class="stu-grid">
+      {% for c in careers %}
+      <a class="stu-card{{ ' top' if loop.index <= 3 else '' }}" href="/jobs/{{ c.soc }}">
+        {% if loop.index <= 3 %}<span class="sc-rank">{{ ['\U0001F947','\U0001F948','\U0001F949'][loop.index0] }} Top pick</span>{% endif %}
+        <div class="sc-head">
+          <span class="sc-emoji">{{ c.emoji }}</span>
+          <span class="sc-titles">
+            <span class="sc-title">{{ c.title }}</span>
+            <span class="sc-fam">{{ c.family }}</span>
+          </span>
+        </div>
+        <div class="sc-body">
+          <span class="ring" style="--p:{{ c.resilience }}"><b>{{ c.resilience }}</b><small>safe</small></span>
+          <span class="sc-stats">
+            <span class="sc-stat"><b>${{ "{:,.0f}".format(c.median_wage) }}</b><span>median pay</span></span>
+            <span class="sc-stat"><b>{{ c.school }}</b><span>school needed</span></span>
+            {% if c.growth is not none %}<span class="sc-stat"><b class="{{ 'up' if c.growth > 0 else ('down' if c.growth < 0 else '') }}">{{ '+' if c.growth > 0 else '' }}{{ c.growth }}%</b><span>jobs by 2030</span></span>{% endif %}
+          </span>
+        </div>
+      </a>
+      {% endfor %}
     </div>
-    <div class="sc-body">
-      <span class="ring" style="--p:{{ c.resilience }}"><b>{{ c.resilience }}</b><small>safe</small></span>
-      <span class="sc-stats">
-        <span class="sc-stat"><b>${{ "{:,.0f}".format(c.median_wage) }}</b><span>median pay</span></span>
-        <span class="sc-stat"><b>{{ c.school }}</b><span>school needed</span></span>
-        {% if c.growth is not none %}<span class="sc-stat"><b class="{{ 'up' if c.growth > 0 else ('down' if c.growth < 0 else '') }}">{{ '+' if c.growth > 0 else '' }}{{ c.growth }}%</b><span>jobs by 2030</span></span>{% endif %}
-      </span>
-    </div>
-  </a>
-  {% endfor %}
+    {% else %}
+    <p class="muted" style="margin-top:18px">Nothing matches those picks yet. Try widening the field or the schooling.</p>
+    {% endif %}
+  </div>
+
+  <aside class="side">
+    <div class="side-title safe">Worth a degree</div>
+    <div class="ticker rev"><div class="ticker-inner">
+      {% for c in rail_degree %}<a class="jobcard" href="/jobs/{{ c.soc }}"><span class="jc-t">{{ c.title }}<small>{{ c.school }}</small></span><span class="jc-score safe">{{ c.safe }}</span></a>{% endfor %}
+      {% for c in rail_degree %}<a class="jobcard" href="/jobs/{{ c.soc }}"><span class="jc-t">{{ c.title }}<small>{{ c.school }}</small></span><span class="jc-score safe">{{ c.safe }}</span></a>{% endfor %}
+    </div></div>
+  </aside>
 </div>
-{% else %}
-<p class="muted" style="margin-top:18px">Nothing matches those picks yet. Try widening the field or the schooling.</p>
-{% endif %}
 
 <section class="share-band">
   <div class="sb-copy">
@@ -83,10 +106,10 @@
   </div>
 </section>
 
-<p class="stu-note">The ring is each career's <strong>safe score</strong> - 100 minus how exposed its tasks are
-to AI and robots, so higher is safer. Picks are ranked on that score, pay, and how much the job is projected
-to grow. It's a guide, not a promise; tap any card for the full breakdown and sources. See
-<a href="/methodology">How it works</a>.</p>
+<p class="stu-note">The green number is each career's <strong>safe score</strong> - 100 minus how exposed its tasks are
+to AI and robots, so higher is safer. The side rails group resilient careers by the schooling they take. The main
+picks are ranked on safe score, pay, and projected growth. It's a guide, not a promise; tap any card for the full
+breakdown and sources. See <a href="/methodology">How it works</a>.</p>
 
 <script>
 (function () {

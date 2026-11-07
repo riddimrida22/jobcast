@@ -343,9 +343,27 @@ def create_app() -> Flask:
         for c in careers:
             c["emoji"] = fam_emoji.get((c["soc"] or "")[:2], "\U0001F9ED")
             c["school"] = school.get(c.get("job_zone"), "Varies")
+        # Side rails stream resilient careers grouped by the schooling they need, each with
+        # its AI-safe score, so students can scan "safe options by education level".
+        def _rail(zones):
+            out = []
+            for o in engine.snapshot.all_occupations():
+                zone = o.get("job_zone")
+                if zone not in zones:
+                    continue
+                safe = round(100 - max(o.get("ai") or 0, o.get("robo") or 0) * 100)
+                if safe < 55:
+                    continue
+                out.append({"soc": o["soc"], "title": o["title"], "safe": safe,
+                            "school": school.get(zone, "Varies")})
+            out.sort(key=lambda x: -x["safe"])
+            return out[:16]
+        rail_early = _rail({2, 3})      # high school / some college or training
+        rail_degree = _rail({4, 5})     # bachelor's / graduate
         return render_template("students.html", version=VERSION, licensed=engine.snapshot.licensed,
                                careers=careers, families=engine.snapshot.families(),
-                               sel_field=fam, sel_zone=z, sel_priority=priority)
+                               sel_field=fam, sel_zone=z, sel_priority=priority,
+                               rail_early=rail_early, rail_degree=rail_degree)
 
     @app.post("/subscribe")
     def subscribe():

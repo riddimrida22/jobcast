@@ -1,0 +1,49 @@
+<div class="slogan-banner">
+  <div class="gob-wrap" aria-hidden="true">
+   <div class="gob">
+    <div class="gob-stage">
+      <div class="road"></div>
+      <div class="fanfare"><b>Is your job <span class="hot">next?</span></b></div>
+      <span class="hg"><span class="wcap t"></span><span class="wcap b"></span><span class="glass"></span><span class="sand-t"></span><span class="sand-b"></span><span class="stream"></span></span>
+      <div class="jobs manual">
+        <span class="fig red eatM1"><span class="emo">👷</span><span class="pad"></span><span class="cap">Laborer</span></span>
+        <span class="fig red eatM2"><span class="emo">🧑‍🍳</span><span class="pad"></span><span class="cap">Cook</span></span>
+        <span class="fig red escM"><span class="emo">🧑‍🏭</span><span class="pad"></span><span class="cap">Assembler</span></span>
+      </div>
+      <div class="safe manual"><span class="fig green"><span class="emo">🧑‍🔧</span><span class="pad"></span><span class="cap">Plumber</span></span></div>
+      <div class="pred robot"><span class="rb2"><span class="ant"></span><span class="mouth"></span><span class="head"><span class="shine"></span><span class="brow"></span><span class="eye l"></span><span class="eye r"></span><span class="bolt b1"></span><span class="bolt b2"></span><span class="uteeth"></span></span><span class="jaw"><span class="lteeth"></span></span></span></div>
+      <div class="jobs desk">
+        <span class="fig red eatD1"><span class="emo">🧑‍💻</span><span class="pad"></span><span class="cap">Data entry</span></span>
+        <span class="fig red eatD2"><span class="emo">🧑‍💼</span><span class="pad"></span><span class="cap">Bookkeeper</span></span>
+        <span class="fig red escD"><span class="emo">🧑‍⚖️</span><span class="pad"></span><span class="cap">Paralegal</span></span>
+      </div>
+      <div class="safe desk"><span class="fig green"><span class="emo">🧑‍⚕️</span><span class="pad"></span><span class="cap">Therapist</span></span></div>
+      <div class="pred pac"><span class="ai-g"><span class="body"></span><span class="eye"></span></span></div>
+      <div class="wall"><span class="brk">JOBBREAK</span></div>
+    </div>
+   </div>
+  </div>
+  <div class="gob-actnow">&#9888; Act now &mdash; even red-zone job holders can transition</div></div>
+<script>(function(){var w=document.querySelector('.gob-wrap');if(!w)return;var g=w.querySelector('.gob');var DH=120;
+function fit(){var avail=(w.parentElement?w.parentElement.clientWidth:w.clientWidth)||940;var s=Math.min(1,avail/940);
+g.style.transform='scale('+s+')';w.style.width=(940*s)+'px';w.style.height=(DH*s)+'px';}
+if(window.ResizeObserver){new ResizeObserver(fit).observe(w.parentElement||w);}addEventListener('resize',fit);fit();})();</script>
+<script>(function(){
+  var MV=[["👷","Laborer"],["🧑‍🍳","Cook"],["🧑‍🏭","Assembler"],["🧑‍🌾","Farm hand"],["🚚","Driver"],["💁","Cashier"],["🧑‍🏭","Welder"],["📦","Packer"]];
+  var MS=[["🧑‍🔧","Plumber"],["👩‍🔧","Electrician"],["🔧","Mechanic"],["🪚","Carpenter"]];
+  var DV=[["🧑‍💻","Data entry"],["🧑‍💼","Bookkeeper"],["🧑‍⚖️","Paralegal"],["📞","Telemarketer"],["🧾","Clerk"],["✍️","Copywriter"],["🧑‍💼","Analyst"]];
+  var DS=[["🧑‍⚕️","Therapist"],["🧑‍🏫","Teacher"],["👩‍⚕️","Nurse"],["🧠","Counselor"]];
+  var mi=0,di=0,ms=0,ds=0;
+  function set(el,p){ if(!el)return; var e=el.querySelector('.emo'),c=el.querySelector('.cap'); if(e)e.textContent=p[0]; if(c)c.textContent=p[1]; }
+  function rot(){
+    var m=document.querySelectorAll('.jobs.manual .fig');
+    for(var i=0;i<m.length;i++) set(m[i], MV[(mi+i)%MV.length]); mi+=m.length;
+    set(document.querySelector('.safe.manual .fig'), MS[ms++%MS.length]);
+    var d=document.querySelectorAll('.jobs.desk .fig');
+    for(var j=0;j<d.length;j++) set(d[j], DV[(di+j)%DV.length]); di+=d.length;
+    set(document.querySelector('.safe.desk .fig'), DS[ds++%DS.length]);
+  }
+  var robot=document.querySelector('.pred.robot');
+  if(robot) robot.addEventListener('animationiteration', rot);
+  rot();
+})();</script>
