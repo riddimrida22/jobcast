@@ -229,6 +229,8 @@
     .runners .speed line { stroke:var(--muted); animation:speedpulse .5s ease-in-out infinite; }
     .runners .aicore { animation:aiglow 1.1s ease-in-out infinite; }
     @keyframes aiglow { 0%,100% { opacity:.5; } 50% { opacity:1; } }
+    .runners .flow { transform-box:view-box; animation:maneflow .42s ease-in-out infinite; }
+    @keyframes maneflow { 0%,100% { transform:rotate(3deg); } 50% { transform:rotate(-6deg); } }
     @keyframes swingA { 0%,100% { transform:rotate(26deg); } 50% { transform:rotate(-26deg); } }
     @keyframes swingB { 0%,100% { transform:rotate(-26deg); } 50% { transform:rotate(26deg); } }
     @keyframes armA  { 0%,100% { transform:rotate(-32deg); } 50% { transform:rotate(32deg); } }
