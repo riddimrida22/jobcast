@@ -63,7 +63,7 @@ def _context(assessment: Dict[str, Any], profile: Dict[str, Any]) -> Dict[str, A
     }
 
 
-ICONS = {"skill", "pivot", "buffer", "network", "credential", "automate"}
+ICONS = {"skill", "pivot", "buffer", "network", "credential", "automate", "dna"}
 HORIZONS = {"Now", "0-6 months", "6-18 months", "1-3 years"}
 LEVELS = {"High", "Medium", "Low"}
 
@@ -78,7 +78,8 @@ _SCHEMA = (
     "\"horizon\" (exactly one of: Now, 0-6 months, 6-18 months, 1-3 years), "
     "\"impact\" (exactly one of: High, Medium, Low - how much this protects their livelihood), "
     "\"effort\" (exactly one of: Low, Medium, High), "
-    "\"icon\" (exactly one of: skill, pivot, buffer, network, credential, automate - the closest match). "
+    "\"icon\" (exactly one of: skill, pivot, buffer, network, credential, automate, dna - the closest match; "
+    "use 'dna' for any step about leaning into human judgment, empathy, relationships, or other human strengths). "
     "No text outside the JSON."
 )
 

@@ -336,7 +336,7 @@ class Engine:
 
         # 2. The dominant threat axis.
         if axes["ai_software"] >= axes["physical_robotics"] and axes["ai_software"] >= 45:
-            s.append({"title": "Lean into the human edge",
+            s.append({"title": "Lean into the human edge", "icon": "dna",
                       "detail": "The exposed parts are routine and cognitive. Invest in judgment, client "
                                 "relationships, and complex problem-solving that AI still cannot do."})
         elif axes["physical_robotics"] >= 45:
