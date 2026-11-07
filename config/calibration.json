@@ -1,0 +1,14 @@
+{
+  "note": "Summary of the offline backtest (analysis/calibrate.py, full detail in CALIBRATION.md). Surfaced on the methodology page so the validation is public.",
+  "n_occupations": 702,
+  "horizon": "2020-2025 (BLS OEWS)",
+  "outcome": "5-year national employment change (percent)",
+  "r2_cross_validated": 0.046,
+  "band_backtest": [
+    { "band": "Largely unaffected", "n": 71, "mean_emp_change_pct": 7.7 },
+    { "band": "Partial, 5 to 10 years", "n": 533, "mean_emp_change_pct": 6.2 },
+    { "band": "Near-term, high", "n": 98, "mean_emp_change_pct": -3.8 }
+  ],
+  "headline": "Occupations in our highest-risk band lost jobs on average over 2020-2025, while the lowest-risk band grew the most - the risk ranking separates real outcomes in the right order. Individual prediction is weak (cross-validated R2 ~ 0.05), so results are shown as ranges, not point verdicts.",
+  "caveat": "The 2020 base year is the COVID shock and AI's large labor effects are recent, so this validates direction and plumbing, not a precise score."
+}

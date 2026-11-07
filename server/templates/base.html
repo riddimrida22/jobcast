@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Jobcast{% endblock %}</title>
+  <meta name="description" content="{% block description %}An honest, sourced read on whether AI or robots are likely to replace your job, and when.{% endblock %}">
+  {% if noindex %}<meta name="robots" content="noindex, nofollow">{% endif %}
+  <style>
+    :root { --ink:#1b1f24; --muted:#5b6670; --line:#e2e6ea; --bg:#f7f8fa;
+            --ai:#2f6fb0; --robo:#b05a2f; --ok:#2e7d52; --warn:#b03a3a; }
+    * { box-sizing: border-box; }
+    body { margin:0; font:16px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+           color:var(--ink); background:var(--bg); }
+    .wrap { max-width:760px; margin:0 auto; padding:24px 20px 64px; }
+    header.site { border-bottom:1px solid var(--line); background:#fff; }
+    header.site .wrap { padding:16px 20px; display:flex; justify-content:space-between; align-items:baseline; }
+    .brand { font-weight:700; font-size:20px; text-decoration:none; color:var(--ink); }
+    .brand span { color:var(--ai); }
+    nav a { color:var(--muted); text-decoration:none; margin-left:16px; font-size:14px; }
+    .dev-banner { background:#fff6e5; border-bottom:1px solid #f0d9a8; color:#7a5b16;
+                  font-size:13px; text-align:center; padding:6px 12px; }
+    h1 { font-size:26px; margin:8px 0 4px; }
+    h2 { font-size:18px; margin:28px 0 8px; }
+    .lead { color:var(--muted); margin-top:0; }
+    .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin:16px 0; }
+    label { display:block; font-size:13px; color:var(--muted); margin:12px 0 4px; }
+    input, select { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font-size:15px; }
+    .row { display:flex; gap:14px; } .row > div { flex:1; }
+    .combo { position:relative; }
+    .combo-list { position:absolute; left:0; right:0; z-index:5; background:#fff;
+                  border:1px solid var(--line); border-top:0; border-radius:0 0 8px 8px;
+                  max-height:260px; overflow:auto; box-shadow:0 6px 18px rgba(0,0,0,.08); }
+    .combo-item { padding:9px 12px; cursor:pointer; font-size:15px; }
+    .combo-item:hover { background:var(--bg); }
+    button { margin-top:18px; background:var(--ai); color:#fff; border:0; border-radius:8px;
+             padding:12px 18px; font-size:16px; cursor:pointer; }
+    button.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); }
+    .bar { height:12px; border-radius:6px; background:var(--line); overflow:hidden; margin:4px 0 2px; }
+    .bar > span { display:block; height:100%; }
+    .bar.ai > span { background:var(--ai); } .bar.robo > span { background:var(--robo); }
+    .score { font-weight:700; } .muted { color:var(--muted); font-size:13px; }
+    .band { display:inline-block; padding:3px 10px; border-radius:999px; font-size:13px; font-weight:600; }
+    .band.largely_unaffected { background:#e6f4ec; color:var(--ok); }
+    .band.partial_5_10yr { background:#fff1db; color:#8a5a12; }
+    .band.near_term_high { background:#fbe7e7; color:var(--warn); }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th, td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); }
+    .tag { font-size:12px; padding:2px 7px; border-radius:999px; }
+    .tag.exposed { background:#fbe7e7; color:var(--warn); } .tag.protected { background:#e6f4ec; color:var(--ok); }
+    ul.sources { font-size:13px; color:var(--muted); padding-left:18px; }
+    footer { color:var(--muted); font-size:12px; border-top:1px solid var(--line); margin-top:36px; padding-top:14px; }
+  </style>
+</head>
+<body>
+  {% if not licensed %}
+  <div class="dev-banner">Development data. Illustrative values, not published figures. Not for public use.</div>
+  {% elif noindex %}
+  <div class="dev-banner">Private preview. Not a public release.</div>
+  {% endif %}
+  <header class="site"><div class="wrap">
+    <a class="brand" href="/">Job<span>cast</span></a>
+    <nav><a href="/">Check a job</a><a href="/methodology">How it works</a></nav>
+  </div></header>
+  <div class="wrap">
+    {% block content %}{% endblock %}
+    <footer>
+      Jobcast {{ version }}. Results are probability ranges, not verdicts.
+      Sources shown on the <a href="/methodology">How it works</a> page.
+    </footer>
+  </div>
+</body>
+</html>

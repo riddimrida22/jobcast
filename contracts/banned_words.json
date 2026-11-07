@@ -1,0 +1,16 @@
+{
+  "note": "Words, phrases, and characters that must not appear in user-facing strings. Enforces the house style: plain ASCII punctuation, no AI or chat jargon, nothing that reads as generated. tools/banned_check.py fails on any 'banned' hit.",
+  "banned_substrings": [
+    "—", "–", "…",
+    "“", "”", "‘", "’",
+    " ",
+    "as an AI", "as a language model", "delve", "in today's fast-paced",
+    "game-changer", "revolutionize", "revolutionise", "unleash",
+    "harness the power", "supercharge", "it's worth noting that",
+    "navigating the", "in the realm of", "tapestry"
+  ],
+  "review_substrings": [
+    "leverage", "robust", "seamless", "cutting-edge", "powerful", "empower",
+    "unlock", "elevate", "streamline"
+  ]
+}

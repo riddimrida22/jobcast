@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}How Jobcast works{% endblock %}
+{% block content %}
+<h1>How it works</h1>
+<p class="lead">Every number comes from a transparent model built on published data. A language model is
+never used to produce a score; it is used only to explain and to write the paid mitigation plan.</p>
+
+<div class="card">
+  <h2 style="margin-top:0">The model, in order</h2>
+  <ol>
+    <li><strong>Map</strong> your job to a standard occupation and its task list.</li>
+    <li><strong>Score</strong> each task on two axes: AI / software exposure and physical / robotics
+        exposure. The occupation's scores are the task averages, shown 0 to 100.</li>
+    <li><strong>Adjust</strong> for seniority, which shifts your task mix toward less-exposed oversight work.</li>
+    <li><strong>Band the timeline</strong> from the exposure, then shift it for local demand and for
+        union or other negotiated protection, and read it against your remaining working years.</li>
+    <li><strong>Distil the key drivers</strong>: the few factors that move your result the most.</li>
+    <li><strong>Suggest</strong> lower-risk adjacent roles; the paid tiers add a ranked plan.</li>
+  </ol>
+  <p class="muted">Results are ranges with a stated confidence, never a single verdict. Every number
+     decomposes to the tasks and sources behind it.</p>
+</div>
+
+{% if calibration %}
+<div class="card">
+  <h2 style="margin-top:0">Does it hold up? (backtest)</h2>
+  <p>We checked our risk ranking against real employment change ({{ calibration.horizon }},
+     {{ calibration.n_occupations }} occupations). Occupations in our highest-risk band lost jobs on
+     average, while the lowest-risk band grew the most.</p>
+  <table>
+    <thead><tr><th>Risk band</th><th>Occupations</th><th>Avg 5-yr employment change</th></tr></thead>
+    <tbody>
+      {% for b in calibration.band_backtest %}
+      <tr><td>{{ b.band }}</td><td>{{ b.n }}</td><td>{{ b.mean_emp_change_pct }}%</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="muted">Individual outcomes are predicted weakly (cross-validated R-squared about
+     {{ calibration.r2_cross_validated }}), which is why results are shown as ranges, not point verdicts.
+     {{ calibration.caveat }}</p>
+</div>
+{% endif %}
+
+<div class="card">
+  <h2 style="margin-top:0">What we never use</h2>
+  <p>Gender, race, disability, and other protected characteristics are never inputs to the score. Age is
+     used only to work out your remaining working years, never to raise or lower exposure.</p>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">Sources</h2>
+  <ul class="sources">
+    {% for s in sources %}<li>{{ s.name }} ({{ s.version }}) - {{ s.use }}</li>{% endfor %}
+  </ul>
+  <p class="muted">Current data snapshot: {{ snapshot_id }}.
+     {% if not licensed %}Development data, illustrative values, not published figures.{% endif %}</p>
+</div>
+{% endblock %}

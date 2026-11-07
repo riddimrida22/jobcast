@@ -1,0 +1,33 @@
+{
+  "note": "Model weights live in config, not code, so the model can be tuned and audited without a rewrite (see BUILD_PLAN.md, research registry).",
+  "retirement_age": 65,
+  "axis_labels": {
+    "ai_software": "AI / software exposure",
+    "physical_robotics": "Physical / robotics exposure"
+  },
+  "timeline_bands": [
+    { "id": "largely_unaffected", "label": "Largely unaffected", "max_exposure": 35 },
+    { "id": "partial_5_10yr",     "label": "Partial, 5 to 10 years", "max_exposure": 65 },
+    { "id": "near_term_high",     "label": "Near-term, high", "max_exposure": 100 }
+  ],
+  "demand_trend_shift": {
+    "note": "A declining local demand trend pushes the timeline one band sooner; growing pulls it one band later. Affects timeline only, never the base exposure score.",
+    "declining": 1,
+    "stable": 0,
+    "growing": -1
+  },
+  "union_protection": {
+    "note": "Collective-bargaining coverage slows involuntary displacement (labour-economics research). Shifts the timeline one band later; never changes the base exposure score.",
+    "yes_band_shift": -1
+  },
+  "seniority": {
+    "note": "Experience shifts a worker's task mix toward less-exposed judgment and oversight work. Linear up to the cap.",
+    "years_for_full_shift": 20,
+    "max_exposure_reduction": 0.15
+  },
+  "confidence": {
+    "note": "Half-width of the reported exposure range, in points. Set wide on purpose: the backtest (CALIBRATION.md) shows the model ranks risk correctly in aggregate but predicts individual outcomes weakly (cross-validated R2 ~ 0.05), so honest results are ranges, not points.",
+    "fixture_half_width": 15,
+    "licensed_half_width": 12
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "snapshot_id": "FIXTURE-2026-11-06",
+  "snapshot_date": "2026-11-06",
+  "licensed": false,
+  "development_notice": "Development fixture. All values are illustrative and are NOT published figures. Not for public use.",
+  "base_year": 2024,
+  "cpi": {
+    "note": "CPI-U annual index, used to deflate the 5-years-ago pay into real terms. Approximate values for development.",
+    "index": { "2019": 255.7, "2024": 313.7 }
+  },
+  "metros": {
+    "35620": "New York-Newark-Jersey City",
+    "31080": "Los Angeles-Long Beach-Anaheim",
+    "US": "United States (national)"
+  },
+  "families": {
+    "note": "SOC major groups (the general field). The code is the first two digits of the SOC code, so occupations roll up to a family automatically.",
+    "15": "Computer and Mathematical",
+    "23": "Legal",
+    "29": "Healthcare Practitioners and Technical",
+    "37": "Building and Grounds Cleaning and Maintenance",
+    "43": "Office and Administrative Support",
+    "53": "Transportation and Material Moving"
+  },
+  "zip_to_metro": {
+    "note": "Tiny development crosswalk. Real version uses the full ZIP-to-CBSA table.",
+    "default": "US",
+    "map": { "10001": "35620", "11201": "35620", "07030": "35620", "90001": "31080", "90210": "31080" }
+  },
+  "occupations": [
+    {
+      "soc": "43-9021",
+      "title": "Data Entry Keyers",
+      "aliases": ["data entry", "data entry clerk", "keyer", "data entry operator"],
+      "job_zone": 2,
+      "tasks": [
+        { "id": "key_in",  "name": "Enter and key data from source documents", "ai": 0.92, "robo": 0.10 },
+        { "id": "verify",  "name": "Verify and correct data in records",        "ai": 0.80, "robo": 0.10 },
+        { "id": "compile", "name": "Compile and format data into reports",      "ai": 0.70, "robo": 0.10 },
+        { "id": "file",    "name": "Locate and retrieve files and records",     "ai": 0.45, "robo": 0.35 }
+      ],
+      "employment_national": 150000,
+      "median_wage_national": 37000,
+      "wage_trend_5yr_real_pct": -6.0,
+      "metros": {
+        "35620": { "employment": 9000, "median_wage": 41000, "demand_trend": "declining" },
+        "31080": { "employment": 7000, "median_wage": 39000, "demand_trend": "declining" }
+      },
+      "adjacent": [
+        { "soc": "43-3031", "title": "Bookkeeping and Accounting Clerks",   "ai": 0.72, "robo": 0.10 },
+        { "soc": "43-4051", "title": "Customer Service Representatives",      "ai": 0.65, "robo": 0.10 },
+        { "soc": "29-2072", "title": "Medical Records Specialists",          "ai": 0.55, "robo": 0.10 }
+      ]
+    },
+    {
+      "soc": "53-3032",
+      "title": "Heavy and Tractor-Trailer Truck Drivers",
+      "aliases": ["truck driver", "trucker", "tractor trailer driver", "cdl driver", "hgv driver"],
+      "job_zone": 2,
+      "tasks": [
+        { "id": "drive",   "name": "Drive trucks to transport goods over long distances", "ai": 0.20, "robo": 0.70 },
+        { "id": "inspect", "name": "Inspect the vehicle and check safety equipment",       "ai": 0.25, "robo": 0.55 },
+        { "id": "cargo",   "name": "Secure and oversee loading and unloading of cargo",     "ai": 0.15, "robo": 0.60 },
+        { "id": "logs",    "name": "Maintain logs of hours and vehicle condition",         "ai": 0.80, "robo": 0.10 }
+      ],
+      "employment_national": 2000000,
+      "median_wage_national": 54000,
+      "wage_trend_5yr_real_pct": 2.0,
+      "metros": {
+        "35620": { "employment": 60000, "median_wage": 58000, "demand_trend": "stable" },
+        "31080": { "employment": 70000, "median_wage": 56000, "demand_trend": "growing" }
+      },
+      "adjacent": [
+        { "soc": "53-3033", "title": "Light Truck Drivers",                               "ai": 0.20, "robo": 0.55 },
+        { "soc": "49-3031", "title": "Bus and Truck Mechanics and Diesel Engine Specialists", "ai": 0.30, "robo": 0.35 },
+        { "soc": "53-1047", "title": "First-Line Supervisors of Transportation Workers",  "ai": 0.35, "robo": 0.25 }
+      ]
+    },
+    {
+      "soc": "15-1252",
+      "title": "Software Developers",
+      "aliases": ["software developer", "software engineer", "programmer", "developer"],
+      "job_zone": 4,
+      "tasks": [
+        { "id": "code",    "name": "Write and test code for applications",          "ai": 0.65, "robo": 0.05 },
+        { "id": "design",  "name": "Design software architecture and systems",      "ai": 0.40, "robo": 0.05 },
+        { "id": "review",  "name": "Review code and collaborate with the team",     "ai": 0.45, "robo": 0.05 },
+        { "id": "reqs",    "name": "Analyse user needs and define requirements",    "ai": 0.35, "robo": 0.05 }
+      ],
+      "employment_national": 1700000,
+      "median_wage_national": 132000,
+      "wage_trend_5yr_real_pct": 8.0,
+      "metros": {
+        "35620": { "employment": 120000, "median_wage": 145000, "demand_trend": "growing" },
+        "31080": { "employment": 90000,  "median_wage": 140000, "demand_trend": "growing" }
+      },
+      "adjacent": [
+        { "soc": "15-1211", "title": "Computer Systems Analysts",                   "ai": 0.45, "robo": 0.05 },
+        { "soc": "11-3021", "title": "Computer and Information Systems Managers",    "ai": 0.30, "robo": 0.05 },
+        { "soc": "15-1243", "title": "Database Architects",                         "ai": 0.40, "robo": 0.05 }
+      ]
+    },
+    {
+      "soc": "29-1141",
+      "title": "Registered Nurses",
+      "aliases": ["nurse", "registered nurse", "rn"],
+      "job_zone": 4,
+      "tasks": [
+        { "id": "assess",   "name": "Assess patient conditions and record symptoms", "ai": 0.35, "robo": 0.15 },
+        { "id": "administer","name": "Administer medications and treatments",         "ai": 0.20, "robo": 0.30 },
+        { "id": "coord",    "name": "Coordinate care with physicians and families",  "ai": 0.25, "robo": 0.10 },
+        { "id": "educate",  "name": "Educate patients and families on care",         "ai": 0.30, "robo": 0.10 }
+      ],
+      "employment_national": 3200000,
+      "median_wage_national": 86000,
+      "wage_trend_5yr_real_pct": 4.0,
+      "metros": {
+        "35620": { "employment": 180000, "median_wage": 100000, "demand_trend": "growing" },
+        "31080": { "employment": 150000, "median_wage": 133000, "demand_trend": "growing" }
+      },
+      "adjacent": [
+        { "soc": "29-2061", "title": "Licensed Practical and Vocational Nurses",    "ai": 0.35, "robo": 0.20 },
+        { "soc": "29-1171", "title": "Nurse Practitioners",                        "ai": 0.25, "robo": 0.10 },
+        { "soc": "11-9111", "title": "Medical and Health Services Managers",        "ai": 0.30, "robo": 0.05 }
+      ]
+    },
+    {
+      "soc": "23-1011",
+      "title": "Lawyers",
+      "aliases": ["lawyer", "attorney", "solicitor"],
+      "job_zone": 5,
+      "tasks": [
+        { "id": "research", "name": "Research legal precedents and draft documents", "ai": 0.70, "robo": 0.05 },
+        { "id": "advise",   "name": "Advise clients on legal rights and obligations", "ai": 0.35, "robo": 0.05 },
+        { "id": "represent","name": "Represent clients in court and negotiations",    "ai": 0.20, "robo": 0.05 },
+        { "id": "review",   "name": "Review contracts and case documents",           "ai": 0.65, "robo": 0.05 }
+      ],
+      "employment_national": 820000,
+      "median_wage_national": 146000,
+      "wage_trend_5yr_real_pct": 3.0,
+      "metros": {
+        "35620": { "employment": 85000, "median_wage": 190000, "demand_trend": "stable" },
+        "31080": { "employment": 45000, "median_wage": 170000, "demand_trend": "stable" }
+      },
+      "adjacent": [
+        { "soc": "23-2011", "title": "Paralegals and Legal Assistants",             "ai": 0.70, "robo": 0.05 },
+        { "soc": "13-1041", "title": "Compliance Officers",                         "ai": 0.50, "robo": 0.05 },
+        { "soc": "11-9199", "title": "Managers, All Other",                         "ai": 0.30, "robo": 0.05 }
+      ]
+    },
+    {
+      "soc": "37-2011",
+      "title": "Janitors and Cleaners",
+      "aliases": ["janitor", "cleaner", "custodian", "building cleaner"],
+      "job_zone": 1,
+      "tasks": [
+        { "id": "clean",    "name": "Clean and service buildings and facilities",    "ai": 0.10, "robo": 0.55 },
+        { "id": "maintain", "name": "Perform routine maintenance and minor repairs",  "ai": 0.15, "robo": 0.45 },
+        { "id": "supplies", "name": "Order and stock cleaning supplies",              "ai": 0.55, "robo": 0.25 },
+        { "id": "waste",    "name": "Gather and empty trash and recycling",           "ai": 0.05, "robo": 0.60 }
+      ],
+      "employment_national": 2100000,
+      "median_wage_national": 35000,
+      "wage_trend_5yr_real_pct": -1.0,
+      "metros": {
+        "35620": { "employment": 120000, "median_wage": 40000, "demand_trend": "stable" },
+        "31080": { "employment": 90000,  "median_wage": 38000, "demand_trend": "stable" }
+      },
+      "adjacent": [
+        { "soc": "37-2012", "title": "Maids and Housekeeping Cleaners",             "ai": 0.10, "robo": 0.50 },
+        { "soc": "49-9071", "title": "Maintenance and Repair Workers, General",     "ai": 0.25, "robo": 0.35 },
+        { "soc": "37-1011", "title": "First-Line Supervisors of Housekeeping",      "ai": 0.35, "robo": 0.20 }
+      ]
+    }
+  ]
+}

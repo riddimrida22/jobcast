@@ -1,0 +1,10 @@
+{
+  "note": "Advice-depth tiers. Free is the read; paid tiers differ by how many mitigation options the plan returns. Billing is not built in v1; tier is a dev flag via the dev_plan_header.",
+  "default_tier": "free",
+  "dev_plan_header": "X-Plan",
+  "tiers": [
+    { "id": "free",  "label": "Free",   "mitigation_options": 0 },
+    { "id": "tier1", "label": "Tier 1", "mitigation_options": 1 },
+    { "id": "tier2", "label": "Tier 2", "mitigation_options": 3 }
+  ]
+}

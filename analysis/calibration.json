@@ -1,0 +1,88 @@
+{
+  "n_occupations": 702,
+  "horizon": "2020-2025 (OEWS May)",
+  "outcome": "5-year national employment change (percent)",
+  "r2_in_sample": 0.06,
+  "r2_cross_validated": 0.046,
+  "coefficients_standardized": [
+    {
+      "feature": "intercept",
+      "std_coef": 4.933,
+      "se": 0.963,
+      "t": 5.12,
+      "p": 0.0
+    },
+    {
+      "feature": "ai",
+      "std_coef": -0.711,
+      "se": 1.73,
+      "t": -0.41,
+      "p": 0.6813
+    },
+    {
+      "feature": "robo",
+      "std_coef": -1.762,
+      "se": 1.711,
+      "t": -1.03,
+      "p": 0.3034
+    },
+    {
+      "feature": "log_median",
+      "std_coef": 4.591,
+      "se": 1.078,
+      "t": 4.26,
+      "p": 0.0
+    },
+    {
+      "feature": "log_emp0",
+      "std_coef": 4.454,
+      "se": 0.989,
+      "t": 4.5,
+      "p": 0.0
+    }
+  ],
+  "correlations": {
+    "ai": {
+      "pearson_r": 0.117,
+      "pearson_p": 0.0019,
+      "spearman_r": 0.163
+    },
+    "robo": {
+      "pearson_r": -0.124,
+      "pearson_p": 0.001,
+      "spearman_r": -0.159
+    },
+    "log_median": {
+      "pearson_r": 0.168,
+      "pearson_p": 0.0,
+      "spearman_r": 0.185
+    },
+    "log_emp0": {
+      "pearson_r": 0.147,
+      "pearson_p": 0.0001,
+      "spearman_r": 0.247
+    }
+  },
+  "timeline_band_backtest": {
+    "Partial, 5 to 10 years": {
+      "n": 533,
+      "mean_emp_change_pct": 6.2,
+      "median_emp_change_pct": 5.3
+    },
+    "Largely unaffected": {
+      "n": 71,
+      "mean_emp_change_pct": 7.7,
+      "median_emp_change_pct": 9.7
+    },
+    "Near-term, high": {
+      "n": 98,
+      "mean_emp_change_pct": -3.8,
+      "median_emp_change_pct": -6.6
+    }
+  },
+  "caveats": [
+    "The 2020 base year is the COVID shock; employment change partly reflects pandemic recovery, not automation.",
+    "Five years is a short horizon and AI's large labor effects are recent/prospective; weak in-sample signal is expected and honest.",
+    "Employment change is one outcome; wage and hours effects are not modeled here."
+  ]
+}

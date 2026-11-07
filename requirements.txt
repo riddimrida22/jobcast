@@ -1,0 +1,4 @@
+# Jobcast v1. The engine (riskcore) uses only the Python standard library.
+# These are for the web server and tests.
+Flask>=3.0
+pytest>=7.4

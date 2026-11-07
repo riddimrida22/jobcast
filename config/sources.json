@@ -1,0 +1,11 @@
+{
+  "note": "Research registry. The list of sources behind the model is config, not code; new studies are added here with a weight and a version. In v1 these describe the development fixture and carry version FIXTURE.",
+  "sources": [
+    { "id": "onet",             "name": "O*NET",                                  "version": "FIXTURE", "url": "https://www.onetonline.org/", "use": "Occupation task lists, work activities, job zones; SOC mapping." },
+    { "id": "frey_osborne_2013","name": "Frey & Osborne (2013)",                   "version": "FIXTURE", "use": "Probability of computerisation by occupation." },
+    { "id": "eloundou_2023",    "name": "Eloundou et al. (2023), GPTs are GPTs",   "version": "FIXTURE", "use": "LLM task exposure for the AI/software axis." },
+    { "id": "bls_oews",         "name": "BLS OEWS",                                "version": "FIXTURE", "url": "https://www.bls.gov/oes/", "use": "Employment and wages by occupation and metro." },
+    { "id": "bls_projections",  "name": "BLS Employment Projections",              "version": "FIXTURE", "url": "https://www.bls.gov/emp/", "use": "Occupation demand outlook." },
+    { "id": "bls_cpi",          "name": "BLS CPI-U",                               "version": "FIXTURE", "url": "https://www.bls.gov/cpi/", "use": "Inflation adjustment for the wage-trajectory signal." }
+  ]
+}

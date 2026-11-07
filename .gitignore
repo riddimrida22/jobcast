@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Data snapshots: never commit pulled source data or caches.
+# The development fixture under data/fixtures/ is the one exception and is committed.
+data/snapshots/
+data/cache/
+*.local
+
+# Secrets: never commit.
+.env
+*.key
+secrets.*

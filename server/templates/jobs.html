@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Browse all jobs | Jobcast{% endblock %}
+{% block content %}
+<h1>Browse all jobs</h1>
+<p class="lead">Pick a field, then a job, to see its automation exposure. Each job has its own page.</p>
+{% for f in families %}
+<div class="card">
+  <h2 style="margin-top:0">{{ f.name }}</h2>
+  <ul>
+    {% for j in f.jobs %}<li><a href="/jobs/{{ j.soc }}">{{ j.title }}</a></li>{% endfor %}
+  </ul>
+</div>
+{% endfor %}
+<p><a href="/">Back to the personal read</a></p>
+{% endblock %}

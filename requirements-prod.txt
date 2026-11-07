@@ -1,0 +1,4 @@
+# Production serving needs only these. The scoring engine (riskcore) is pure standard
+# library; pandas/numpy/scipy/openpyxl are ingestion/calibration tools, not runtime deps.
+Flask>=3.0
+gunicorn>=21.2

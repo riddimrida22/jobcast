@@ -1,0 +1,15 @@
+# Render blueprint for the restricted demo. Connect the repo at render.com and it reads this.
+services:
+  - type: web
+    name: jobcast-demo
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-prod.txt
+    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+    envVars:
+      - key: JOBCAST_NOINDEX
+        value: "1"
+      - key: JOBCAST_DEMO_USER
+        sync: false      # set in the Render dashboard
+      - key: JOBCAST_DEMO_PASS
+        sync: false      # set in the Render dashboard
