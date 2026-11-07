@@ -275,6 +275,22 @@ def create_app() -> Flask:
         return render_template("result.html", r=result, profile=Profile(title=occ["title"]),
                                version=VERSION, licensed=engine.snapshot.licensed, seo=True)
 
+    @app.get("/jobs/<soc>/card.png")
+    def occupation_card(soc):
+        """Shareable Open Graph score card (PNG) for an occupation."""
+        occ = engine.snapshot.occupation(soc)
+        if occ is None:
+            from flask import abort
+            abort(404)
+        result = engine.assess(Profile(title=occ["title"]))
+        from . import card as card_mod
+        from flask import Response
+        png = card_mod.render_card(
+            occ["title"], result.get("base_exposure", 0),
+            ((result.get("timeline") or {}).get("band") or {}).get("label", ""))
+        return Response(png, mimetype="image/png",
+                        headers={"Cache-Control": "public, max-age=86400"})
+
     @app.post("/resume")
     def parse_resume_route():
         f = request.files.get("file")

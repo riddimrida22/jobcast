@@ -11,9 +11,9 @@
   <meta property="og:title" content="{{ self.title() }}">
   <meta property="og:description" content="{{ self.description() }}">
   <meta property="og:url" content="{{ request.url }}">
-  <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="{{ self.title() }}">
   <meta name="twitter:description" content="{{ self.description() }}">
+  {% block og_media %}<meta name="twitter:card" content="summary">{% endblock %}
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#112741">
   <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
@@ -193,6 +193,18 @@
                   max-width:760px; margin:26px auto 0; padding-top:16px; border-top:1px solid var(--line);
                   font-size:12px; color:var(--muted); }
     .score-foot a { color:var(--primary); }
+    /* honest-answers FAQ (native collapsibles) */
+    .faq { max-width:760px; margin:34px auto 0; }
+    .faq h2 { text-align:center; font-size:18px; margin:0 0 14px; }
+    .faq details { border:1px solid var(--line); border-radius:11px; background:var(--card); margin-bottom:10px;
+                   box-shadow:0 2px 8px rgba(31,63,96,.04); }
+    .faq summary { cursor:pointer; padding:13px 16px; font-weight:600; font-size:15px; list-style:none;
+                   display:flex; justify-content:space-between; align-items:center; gap:10px; color:var(--ink); }
+    .faq summary::-webkit-details-marker { display:none; }
+    .faq summary::after { content:'+'; color:var(--primary); font-weight:700; font-size:20px; line-height:1; }
+    .faq details[open] summary::after { content:'\2212'; }
+    .faq details p { margin:0; padding:0 16px 14px; color:var(--muted); font-size:14px; line-height:1.55; }
+    .faq details p a { color:var(--primary); }
     .scale { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:12px; }
     .scale-bar { width:170px; height:10px; border-radius:6px; position:relative;
                  background:linear-gradient(90deg,var(--green),#c88a2e,var(--red)); }
