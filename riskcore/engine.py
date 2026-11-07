@@ -384,10 +384,12 @@ class Engine:
         for adj in occ.get("adjacent", []):
             adj_max = max(adj["ai"], adj["robo"]) * 100
             if adj_max < base_exposure - 0.01:
+                full = self.snapshot.occupation(adj["soc"]) or {}
                 out.append({"soc": adj["soc"], "title": adj["title"],
                             "ai_software": round(adj["ai"] * 100, 1),
                             "physical_robotics": round(adj["robo"] * 100, 1),
-                            "max_exposure": round(adj_max, 1)})
+                            "max_exposure": round(adj_max, 1),
+                            "projection_pct": full.get("projection_pct")})
         out.sort(key=lambda a: a["max_exposure"])
         return out
 

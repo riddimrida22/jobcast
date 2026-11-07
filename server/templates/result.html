@@ -165,7 +165,43 @@
     <symbol id="ic-network" viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.3"/><circle cx="18" cy="8" r="2.3"/><circle cx="10" cy="17" r="2.3"/><path d="M8.2 7.6l7.6 1M8.3 9l1.4 6"/></symbol>
     <symbol id="ic-credential" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M9 13l-2 7 5-3 5 3-2-7"/></symbol>
     <symbol id="ic-automate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3M6.5 6.5l2 2M15.5 15.5l2 2M17.5 6.5l-2 2M6.5 17.5l2-2"/></symbol>
+    <!-- motivational illustrations (used large on the slides) -->
+    <symbol id="mo-skill" viewBox="0 0 48 48">
+      <rect x="7" y="30" width="7" height="11" rx="1.5" style="fill:currentColor;opacity:.3;stroke:none"/>
+      <rect x="18" y="23" width="7" height="18" rx="1.5" style="fill:currentColor;opacity:.55;stroke:none"/>
+      <rect x="29" y="15" width="7" height="26" rx="1.5" style="fill:currentColor;stroke:none"/>
+      <path d="M8 21 L20 15 L28 18 L41 7" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"/>
+      <path d="M34 7 L41 7 L41 14" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"/>
+    </symbol>
+    <symbol id="mo-pivot" viewBox="0 0 48 48">
+      <path d="M8 39 C8 24 20 20 31 20" style="fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round"/>
+      <path d="M31 12 L39 20 L31 28" style="fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round"/>
+      <circle cx="8" cy="39" r="2.6" style="fill:currentColor;stroke:none"/>
+    </symbol>
+    <symbol id="mo-buffer" viewBox="0 0 48 48">
+      <path d="M24 6 L39 11 V23 C39 32 32 38 24 42 C16 38 9 32 9 23 V11 Z" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linejoin:round"/>
+      <path d="M16 26 L22 20 L27 24 L33 16" style="fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round"/>
+      <path d="M28 16 L33 16 L33 21" style="fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round"/>
+    </symbol>
+    <symbol id="mo-network" viewBox="0 0 48 48">
+      <path d="M13 31 L21 27 M27 21 L35 15" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round"/>
+      <circle cx="10" cy="34" r="4" style="fill:none;stroke:currentColor;stroke-width:2.4"/>
+      <circle cx="24" cy="24" r="4" style="fill:none;stroke:currentColor;stroke-width:2.4"/>
+      <circle cx="38" cy="12" r="4" style="fill:currentColor;stroke:none"/>
+    </symbol>
+    <symbol id="mo-credential" viewBox="0 0 48 48">
+      <path d="M18 27 L14 42 L24 37 L34 42 L30 27" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linejoin:round"/>
+      <circle cx="24" cy="18" r="11" style="fill:none;stroke:currentColor;stroke-width:2.4"/>
+      <path d="M24 13 l1.7 3.6 3.9 .5 -2.9 2.7 .8 3.9 -3.5 -2 -3.5 2 .8 -3.9 -2.9 -2.7 3.9 -.5 Z" style="fill:currentColor;stroke:none"/>
+    </symbol>
+    <symbol id="mo-automate" viewBox="0 0 48 48">
+      <path d="M19 17 v-5 M19 35 v5 M9 26 H4 M29 26 h5 M12 19 l-3 -3 M26 33 l3 3 M26 19 l3 -3 M12 33 l-3 3" style="fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round"/>
+      <circle cx="19" cy="26" r="7" style="fill:none;stroke:currentColor;stroke-width:2.4"/>
+      <circle cx="19" cy="26" r="2.2" style="fill:currentColor;stroke:none"/>
+      <path d="M34 32 L42 14 M35 16 L42 14 L44 21" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"/>
+    </symbol>
   </defs></svg>
+  <script id="opportunity-data" type="application/json">{{ {"current_title": r.occupation.title, "current_exposure": r.base_exposure, "roles": r.adjacent_lower_risk[:6]} | tojson }}</script>
   <div id="strat-list" class="deck">
   {% for st in r.strategies %}
     <div class="deck-card">
@@ -403,7 +439,7 @@
     }
     return '<div class="deck-card">' +
       '<div class="deck-top"><span class="deck-num">' + (i + 1) + '</span><span class="deck-hz">' + esc(HZ[hi]) + '</span></div>' +
-      '<svg class="deck-ic"><use href="#ic-' + icon + '"></use></svg>' +
+      '<svg class="deck-illus"><use href="#mo-' + icon + '"></use></svg>' +
       '<div class="deck-head">' + esc(head) + '</div>' +
       '<div class="deck-act">' + esc(act) + '</div>' +
       ev +
@@ -411,11 +447,34 @@
       '<div class="htrack"><div class="rail">' + rail + '</div><div class="labs">' + labs + '</div></div>' +
       '</div>';
   }
+  // Real opportunity data (safer adjacent roles, their exposure and BLS growth).
+  var OPP = {};
+  try { OPP = JSON.parse(document.getElementById('opportunity-data').textContent) || {}; } catch (e) {}
+  function hasOpp() { return OPP && OPP.roles && OPP.roles.length; }
+  function oppRow(title, exp, cls, g) {
+    var tag = (typeof g === 'number') ? '<span class="opp-grow' + (g >= 0 ? '' : ' neg') + '">' + (g >= 0 ? '+' : '') + g + '%</span>' : '';
+    var w = Math.max(3, Math.min(100, exp));
+    return '<div class="opp-row"><div class="opp-lab">' + esc(title) + ' <b class="opp-val">' + exp + '</b>' + tag + '</div>' +
+      '<div class="opp-track"><div class="opp-bar ' + cls + '" style="width:' + w + '%"></div></div></div>';
+  }
+  function chartCard() {
+    if (!hasOpp()) return '';
+    var rows = oppRow((OPP.current_title || 'Your job') + ' (you)', OPP.current_exposure, 'risk');
+    OPP.roles.slice(0, 5).forEach(function (r) {
+      rows += oppRow(r.title, r.max_exposure, 'safe', (typeof r.projection_pct === 'number' ? r.projection_pct : undefined));
+    });
+    return '<div class="deck-card opp-card">' +
+      '<div class="deck-top"><span class="deck-num star">&#9733;</span><span class="deck-hz">Opportunity</span></div>' +
+      '<div class="deck-head">Safer paths from your job</div>' +
+      '<div class="opp-chart">' + rows + '</div>' +
+      '<div class="opp-note">Bar = automation exposure (shorter is safer). Green = BLS projected demand growth to 2030.</div>' +
+      '</div>';
+  }
   var currentSteps = [];
   function renderDeck(steps) {
     currentSteps = steps;
     list.className = 'deck';
-    list.innerHTML = steps.map(card).join('');
+    list.innerHTML = steps.map(card).join('') + chartCard();
   }
   // Render the server-provided strategies as a rich deck on load.
   try {
@@ -468,16 +527,19 @@
       closeB = document.getElementById('ss-close'), showBtn = document.getElementById('deck-show-btn');
   if (showEl && stage && showBtn) {
     var sidx = 0, stimer = null;
+    function ssTotal() { return currentSteps.length + (hasOpp() ? 1 : 0); }
+    function ssHTML(i) { return i < currentSteps.length ? card(currentSteps[i], i) : chartCard(); }
     function renderSlide() {
-      stage.innerHTML = card(currentSteps[sidx], sidx);
-      countEl.textContent = (sidx + 1) + ' / ' + currentSteps.length;
-      prevB.disabled = sidx === 0; nextB.disabled = sidx === currentSteps.length - 1;
-      var d = ''; for (var i = 0; i < currentSteps.length; i++) d += '<i class="' + (i === sidx ? 'on' : '') + '" data-i="' + i + '"></i>';
+      var total = ssTotal();
+      stage.innerHTML = ssHTML(sidx);
+      countEl.textContent = (sidx + 1) + ' / ' + total;
+      prevB.disabled = sidx === 0; nextB.disabled = sidx === total - 1;
+      var d = ''; for (var i = 0; i < total; i++) d += '<i class="' + (i === sidx ? 'on' : '') + '" data-i="' + i + '"></i>';
       dotsEl.innerHTML = d;
     }
-    function schedule() { clearTimeout(stimer); if (currentSteps.length > 1) stimer = setTimeout(function () { go(sidx >= currentSteps.length - 1 ? 0 : sidx + 1); }, 6000); }
-    function go(i) { sidx = Math.max(0, Math.min(currentSteps.length - 1, i)); renderSlide(); schedule(); }
-    function openShow() { if (!currentSteps.length) return; sidx = 0; showEl.hidden = false; document.body.style.overflow = 'hidden'; renderSlide(); schedule(); }
+    function schedule() { clearTimeout(stimer); if (ssTotal() > 1) stimer = setTimeout(function () { go(sidx >= ssTotal() - 1 ? 0 : sidx + 1); }, 6000); }
+    function go(i) { sidx = Math.max(0, Math.min(ssTotal() - 1, i)); renderSlide(); schedule(); }
+    function openShow() { if (!ssTotal()) return; sidx = 0; showEl.hidden = false; document.body.style.overflow = 'hidden'; renderSlide(); schedule(); }
     function closeShow() { showEl.hidden = true; clearTimeout(stimer); document.body.style.overflow = ''; }
     showBtn.addEventListener('click', openShow);
     prevB.addEventListener('click', function () { go(sidx - 1); });
