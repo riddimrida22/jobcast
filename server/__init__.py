@@ -4,9 +4,14 @@ only reads inputs, calls the engine, and renders."""
 
 import os
 import sys
+import re
+import time
 import json
 from dataclasses import asdict
 from pathlib import Path
+
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+SIGNUP_FILE = Path(__file__).resolve().parents[1] / "data" / "signups.jsonl"
 
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 
@@ -206,6 +211,21 @@ def create_app() -> Flask:
         return render_template("students.html", version=VERSION, licensed=engine.snapshot.licensed,
                                careers=careers, families=engine.snapshot.families(),
                                sel_field=fam, sel_zone=z, sel_priority=priority)
+
+    @app.post("/subscribe")
+    def subscribe():
+        src = request.get_json(silent=True) or request.form
+        email = (src.get("email") or "").strip()
+        if not EMAIL_RE.match(email) or len(email) > 254:
+            return jsonify({"ok": False, "error": "invalid_email"}), 400
+        rec = {"email": email, "context": (src.get("context") or "")[:80], "ts": int(time.time())}
+        try:
+            SIGNUP_FILE.parent.mkdir(parents=True, exist_ok=True)
+            with open(SIGNUP_FILE, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(rec) + "\n")
+        except Exception:
+            pass
+        return jsonify({"ok": True})
 
     @app.get("/methodology")
     def methodology():

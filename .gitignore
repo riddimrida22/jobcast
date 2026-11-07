@@ -15,3 +15,6 @@ data/cache/
 .env
 *.key
 secrets.*
+
+# user email signups (PII) - never commit
+data/signups.jsonl
