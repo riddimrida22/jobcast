@@ -14,7 +14,7 @@ import urllib.error
 from typing import Tuple
 
 _API = "https://api.resend.com/emails"
-_DEFAULT_FROM = "JobBreak <alerts@jobbreak.ai>"
+_DEFAULT_FROM = "JobBreak <alerts@send.jobbreak.ai>"   # the Resend-verified sending subdomain
 
 
 def configured() -> bool:
