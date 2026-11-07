@@ -269,6 +269,9 @@ def create_app() -> Flask:
                                    most_exposed=most, least_exposed=least,
                                    licensed=engine.snapshot.licensed,
                                    notice=engine.snapshot.data.get("development_notice")), 404
+        soc = (result.get("occupation") or {}).get("soc")
+        if soc:
+            session["jb_soc"] = soc          # so a later "notify me" / checkout watches this job
         return render_template("result.html", r=result, profile=profile,
                                profile_json=json.dumps(asdict(profile)), version=VERSION,
                                licensed=engine.snapshot.licensed)
@@ -285,6 +288,7 @@ def create_app() -> Flask:
         if occ is None:
             return redirect(url_for("index"))
         result = engine.assess(Profile(title=occ["title"]))
+        session["jb_soc"] = soc              # so a "notify me" on this page watches this job
         return render_template("result.html", r=result, profile=Profile(title=occ["title"]),
                                version=VERSION, licensed=engine.snapshot.licensed, seo=True)
 
@@ -349,7 +353,22 @@ def create_app() -> Flask:
         email = (src.get("email") or "").strip()
         if not EMAIL_RE.match(email) or len(email) > 254:
             return jsonify({"ok": False, "error": "invalid_email"}), 400
-        rec = {"email": email, "context": (src.get("context") or "")[:80], "ts": int(time.time())}
+        context = (src.get("context") or "")[:80]
+        # Durable, job-tied watch so we can actually alert later. The job is whatever the
+        # person is looking at (posted soc, else the last one they assessed this session).
+        soc = (src.get("soc") or "").strip() or session.get("jb_soc")
+        occ = engine.snapshot.occupation(soc) if soc else None
+        try:
+            from . import store
+            from .alerts import outlook
+            exp, dem = outlook(occ) if occ else (None, None)
+            store.add_watch(email, occ and soc, source=context or "signup",
+                            exposure=exp, demand=dem)
+        except Exception as e:  # never let a store hiccup drop the signup
+            print(f"[subscribe] store failed: {e}", file=sys.stderr, flush=True)
+        # Keep the legacy append log too (harmless belt-and-braces).
+        rec = {"email": email, "soc": (soc if occ else None), "context": context,
+               "ts": int(time.time())}
         try:
             SIGNUP_FILE.parent.mkdir(parents=True, exist_ok=True)
             with open(SIGNUP_FILE, "a", encoding="utf-8") as fh:
@@ -422,13 +441,46 @@ def create_app() -> Flask:
                 session["jb_tier"] = tier
                 session.permanent = True
                 details = pay._get(sess, "customer_details") or {}
+                email = details.get("email") if hasattr(details, "get") else None
                 pay.record_subscription({
-                    "email": details.get("email") if hasattr(details, "get") else None,
+                    "email": email,
                     "customer": pay._get(sess, "customer"),
                     "subscription": pay._get(sess, "subscription"),
                     "tier": tier, "ts": int(time.time())})
+                # Monitor subscribers are watching the job they were on: arm an alert for it.
+                soc = session.get("jb_soc")
+                occ = engine.snapshot.occupation(soc) if soc else None
+                if email and occ:
+                    try:
+                        from . import store
+                        from .alerts import outlook
+                        exp, dem = outlook(occ)
+                        store.add_watch(email, soc, source="monitor", exposure=exp, demand=dem)
+                    except Exception as e:
+                        print(f"[billing] watch failed: {e}", file=sys.stderr, flush=True)
         return render_template("billing.html", ok=bool(tier), tier=tier,
                                version=VERSION, licensed=engine.snapshot.licensed)
+
+    @app.get("/unsubscribe")
+    def unsubscribe():
+        from . import store
+        ok = store.deactivate(request.args.get("t", ""))
+        return render_template("billing.html", ok=ok, tier=None, unsubscribed=ok,
+                               version=VERSION, licensed=engine.snapshot.licensed)
+
+    @app.post("/tasks/check-alerts")
+    @app.get("/tasks/check-alerts")
+    def check_alerts_task():
+        """Run the outlook-shift check. Protected by JOBCAST_ADMIN_KEY (set it to enable;
+        with no key set the endpoint is disabled). Intended for a scheduled trigger."""
+        admin_key = os.environ.get("JOBCAST_ADMIN_KEY")
+        if not admin_key or request.args.get("key") != admin_key:
+            from flask import abort
+            abort(404)
+        from . import alerts
+        dry = request.args.get("dry") == "1"
+        summary = alerts.run_check(engine, dry_run=dry)
+        return jsonify({"ok": True, "dry_run": dry, **summary})
 
     @app.get("/billing/cancel")
     def billing_cancel():

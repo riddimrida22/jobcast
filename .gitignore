@@ -16,5 +16,8 @@ data/cache/
 *.key
 secrets.*
 
-# user email signups (PII) - never commit
+# user email signups + watch store (PII / runtime state) - never commit
 data/signups.jsonl
+data/subscriptions.jsonl
+data/watches.db
+*.db
