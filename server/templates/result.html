@@ -264,6 +264,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   {% endfor %}
   </div>
   <script id="init-strats" type="application/json">{{ r.strategies | tojson }}</script>
+  <script id="billing-data" type="application/json">{{ {"stripe": stripe_enabled, "entitlement": entitlement} | tojson }}</script>
   <div id="deck-sources" class="deck-sources"></div>
 
   <!-- fullscreen slideshow of the plan -->
@@ -340,7 +341,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     </div>
 
   </div>
-  <p class="plan-foot">Preview pricing, for layout only. Click any paid plan to generate your plan live at that level.</p>
+  <p class="plan-foot">{% if stripe_enabled %}Secure checkout by Stripe. Cancel anytime.{% else %}Preview pricing, for layout only. Click any paid plan to generate your plan live at that level.{% endif %}</p>
 </div>
 {% endif %}
 
@@ -549,6 +550,11 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     fetch('/v1/advice', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(prof) })
       .then(function (r) { return r.json(); }).then(function (d) {
         if (busyEl) busyEl.disabled = false;
+        if (d.error === 'payment_required') {
+          status.textContent = 'Choose a plan below to unlock your AI-researched plan.';
+          var p = document.querySelector('.plans'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
         if (!d.ok || !d.strategies || !d.strategies.length) { status.textContent = 'Could not generate a plan.'; return; }
         renderDeck(d.strategies);
         var srcEl = document.getElementById('deck-sources');
@@ -567,11 +573,31 @@ It is a sourced range, not a verdict, and the detail is below.</p>
         }
       }).catch(function () { if (busyEl) busyEl.disabled = false; status.textContent = 'Could not generate a plan.'; });
   }
-  if (btn) btn.addEventListener('click', function () { generate('tier2', btn); });
+  // Billing state: when Stripe is live, a paid plan the user is not entitled to starts
+  // checkout; otherwise (entitled, or preview with Stripe off) it generates the plan.
+  var BILL = { stripe: false, entitlement: 'free' };
+  try { BILL = JSON.parse(document.getElementById('billing-data').textContent) || BILL; } catch (e) {}
+  var RANK = { free: 0, tier1: 1, tier2: 2, tier3: 3 };
+  function entitled(tier) { return RANK[BILL.entitlement || 'free'] >= RANK[tier]; }
+  function startCheckout(tier, cta) {
+    var old = cta ? cta.textContent : '';
+    if (cta) { cta.textContent = 'Redirecting to checkout...'; cta.style.pointerEvents = 'none'; }
+    fetch('/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tier: tier, period: 'monthly' }) })
+      .then(function (r) { return r.json(); }).then(function (d) {
+        if (d.ok && d.url) { window.location.href = d.url; }
+        else { if (cta) { cta.textContent = old; cta.style.pointerEvents = ''; } status.textContent = 'Checkout is unavailable right now.'; }
+      }).catch(function () { if (cta) { cta.textContent = old; cta.style.pointerEvents = ''; } status.textContent = 'Checkout failed. Try again.'; });
+  }
+  function choosePlan(tier, cta) {
+    if (BILL.stripe && !entitled(tier)) { startCheckout(tier, cta); }
+    else { generate(tier, cta); }
+  }
+  if (btn) btn.addEventListener('click', function () { choosePlan('tier2', btn); });
   document.querySelectorAll('.plan-cta[data-tier]').forEach(function (cta) {
     var tier = cta.getAttribute('data-tier');
     if (tier === 'free') return;  // free is the read; no AI call
-    cta.addEventListener('click', function () { generate(tier, cta); });
+    cta.addEventListener('click', function () { choosePlan(tier, cta); });
   });
 
   // ---- Plan slideshow ----

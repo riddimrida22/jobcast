@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ 'You are in' if ok else 'Checkout' }} - JobBreak{% endblock %}
+{% block og_media %}<meta name="twitter:card" content="summary">{% endblock %}
+{% block content %}
+{% set names = {'tier1':'Starter','tier2':'Pro','tier3':'Career Shield'} %}
+<div class="card" style="max-width:560px;margin:30px auto;text-align:center;padding:30px 26px">
+  {% if ok %}
+    <div style="font-size:40px;line-height:1">&#10003;</div>
+    <h1 style="font-size:22px;margin:10px 0 6px">You are on {{ names.get(tier, 'your plan') }}</h1>
+    <p class="lead" style="margin:0 0 18px">Your subscription is active. Head back to your result and generate
+    your AI-researched plan at this level.</p>
+    <a href="/" class="plan-cta" style="display:inline-block;text-decoration:none;padding:12px 22px;border-radius:11px;
+      background:linear-gradient(180deg,var(--primary),var(--primary-dark));color:#fff;font-weight:700">Check a job</a>
+  {% elif canceled %}
+    <h1 style="font-size:22px;margin:10px 0 6px">Checkout canceled</h1>
+    <p class="lead" style="margin:0 0 18px">No charge was made. You can pick a plan again whenever you are ready.</p>
+    <a href="/" style="color:var(--primary);font-weight:600">Back to JobBreak</a>
+  {% else %}
+    <h1 style="font-size:22px;margin:10px 0 6px">We could not confirm that payment</h1>
+    <p class="lead" style="margin:0 0 18px">If you were charged, it will appear shortly. Contact support if anything
+    looks wrong.</p>
+    <a href="/" style="color:var(--primary);font-weight:600">Back to JobBreak</a>
+  {% endif %}
+</div>
+{% endblock %}

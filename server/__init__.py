@@ -124,7 +124,7 @@ def create_app() -> Flask:
     def _gate():
         if not demo_user:
             return None
-        if request.endpoint in ("login", "static", "manifest", "service_worker"):
+        if request.endpoint in ("login", "static", "manifest", "service_worker", "stripe_webhook"):
             return None
         if session.get("jb_authed"):
             return None
@@ -152,7 +152,9 @@ def create_app() -> Flask:
 
     @app.context_processor
     def _inject():
-        return {"noindex": noindex}
+        from . import payments as pay
+        return {"noindex": noindex, "stripe_enabled": pay.configured(),
+                "entitlement": session.get("jb_tier", "free")}
 
     def tier_from_request() -> str:
         header = engine.tiers.get("dev_plan_header", "X-Plan")
@@ -205,6 +207,14 @@ def create_app() -> Flask:
         if not assessment.get("ok"):
             return jsonify({"ok": False, "error": "occupation_not_found"}), 404
         tier = (body.get("tier") or "tier2") if hasattr(body, "get") else "tier2"
+        # When payments are live, a paid tier requires an entitlement from a completed
+        # checkout. With Stripe unconfigured (preview), this gate is skipped so the demo
+        # still generates plans at any tier.
+        from . import payments as pay
+        if pay.configured() and tier != "free":
+            ent = session.get("jb_tier", "free")
+            if pay.TIER_RANK.get(ent, 0) < pay.TIER_RANK.get(tier, 0):
+                return jsonify({"ok": False, "error": "payment_required", "tier": tier}), 402
         from . import advice as advice_mod
 
         # Reuse a cached plan for a similar profile when we have a fresh one.
@@ -362,6 +372,76 @@ def create_app() -> Flask:
         )
         return Response(sw, mimetype="application/javascript",
                         headers={"Service-Worker-Allowed": "/"})
+
+    # ---- Payments (Stripe hosted Checkout; env-driven, test-mode ready) ----
+    @app.post("/checkout")
+    def checkout():
+        from . import payments as pay
+        if not pay.configured():
+            return jsonify({"ok": False, "error": "payments_disabled"}), 503
+        body = request.get_json(silent=True) or request.form
+        tier = (body.get("tier") or "").strip()
+        period = (body.get("period") or "monthly").strip()
+        if tier not in ("tier1", "tier2", "tier3") or period not in ("monthly", "yearly"):
+            return jsonify({"ok": False, "error": "bad_request"}), 400
+        base = request.host_url.rstrip("/")
+        sess, err = pay.create_checkout_session(
+            tier, period,
+            success_url=base + "/billing/success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url=base + "/billing/cancel",
+            email=(body.get("email") or None))
+        if err or not sess:
+            return jsonify({"ok": False, "error": err or "stripe_error"}), 400
+        return jsonify({"ok": True, "url": sess.url})
+
+    @app.get("/billing/success")
+    def billing_success():
+        from . import payments as pay
+        sid = request.args.get("session_id")
+        tier = None
+        if sid and pay.configured():
+            sess = pay.retrieve_session(sid)
+            tier = pay.tier_from_session(sess)
+            if tier:
+                session["jb_tier"] = tier
+                session.permanent = True
+                details = pay._get(sess, "customer_details") or {}
+                pay.record_subscription({
+                    "email": details.get("email") if hasattr(details, "get") else None,
+                    "customer": pay._get(sess, "customer"),
+                    "subscription": pay._get(sess, "subscription"),
+                    "tier": tier, "ts": int(time.time())})
+        return render_template("billing.html", ok=bool(tier), tier=tier,
+                               version=VERSION, licensed=engine.snapshot.licensed)
+
+    @app.get("/billing/cancel")
+    def billing_cancel():
+        return render_template("billing.html", ok=False, canceled=True,
+                               version=VERSION, licensed=engine.snapshot.licensed)
+
+    @app.post("/webhooks/stripe")
+    def stripe_webhook():
+        from . import payments as pay
+        if not pay.configured():
+            return ("", 503)
+        try:
+            event = pay.verify_webhook(request.get_data(), request.headers.get("Stripe-Signature", ""))
+        except Exception as e:
+            print(f"[payments] webhook verify failed: {e}", file=sys.stderr, flush=True)
+            return ("bad signature", 400)
+        etype = pay._get(event, "type")
+        obj = pay._get(pay._get(event, "data"), "object")
+        if etype == "checkout.session.completed":
+            md = pay._get(obj, "metadata") or {}
+            details = pay._get(obj, "customer_details") or {}
+            pay.record_subscription({
+                "event": etype,
+                "email": details.get("email") if hasattr(details, "get") else None,
+                "customer": pay._get(obj, "customer"),
+                "subscription": pay._get(obj, "subscription"),
+                "tier": md.get("tier") if hasattr(md, "get") else None,
+                "ts": int(time.time())})
+        return jsonify({"received": True})
 
     @app.get("/methodology")
     def methodology():
