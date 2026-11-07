@@ -76,6 +76,15 @@
     button.secondary { background:#fff; color:var(--primary); border:1px solid var(--line);
                        box-shadow:none; margin:6px 8px 0 0; padding:9px 16px; font-size:14px; }
     button.secondary:hover { background:var(--primary-soft); filter:none; }
+    #theme-toggle { margin:0 0 0 20px; padding:0; width:36px; height:36px; flex:0 0 auto;
+                    display:inline-flex; align-items:center; justify-content:center;
+                    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.28);
+                    box-shadow:none; border-radius:999px; color:#fff; }
+    #theme-toggle:hover { background:rgba(255,255,255,.2); filter:none; transform:none; }
+    #theme-toggle svg { width:19px; height:19px; display:block; }
+    #theme-toggle .ico-moon { display:none; }
+    [data-theme="dark"] #theme-toggle .ico-sun { display:none; }
+    [data-theme="dark"] #theme-toggle .ico-moon { display:block; }
 
     .bar { height:14px; border-radius:8px; background:var(--track); overflow:hidden; margin:6px 0 4px; }
     .bar > span { display:block; height:100%; border-radius:8px; }
@@ -129,8 +138,10 @@
       .home-layout { grid-template-columns:1fr; }
       /* data entry first, both rolling rows below it */
       .home-layout .center { order:0; }
-      .home-layout .side { order:1; position:static; top:auto; margin:14px 0 0; }
-      .ticker { height:auto; width:100%;
+      /* let the 1-col grid items shrink so the wide rolling track does not blow out page width */
+      .home-layout .center, .home-layout .side { min-width:0; }
+      .home-layout .side { order:1; position:static; top:auto; margin:14px 0 0; overflow:hidden; }
+      .ticker { height:auto; width:100%; overflow:hidden;
                 -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
                 mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent); }
       .ticker-inner { flex-direction:row; width:max-content; animation-name:tickerLeft; animation-duration:40s; }
@@ -385,6 +396,11 @@
       nav a { margin-left:0; margin-right:16px; font-size:13.5px; }
       nav #theme-toggle { margin-left:auto !important; }
       .form-grid { grid-template-columns:1fr; padding:18px; }
+      /* keep the submit button reachable without scrolling to the very bottom */
+      .form-grid .submit-row { position:sticky; bottom:0; z-index:20;
+        margin:6px -18px -18px; padding:12px 18px 14px;
+        background:linear-gradient(180deg, transparent, var(--card) 28%); }
+      .form-grid .submit-row button { margin-top:0; box-shadow:0 8px 22px rgba(19,37,59,.30); }
     }
     /* skills chip input */
     .skill-box { display:flex; flex-wrap:wrap; gap:6px; align-items:center; border:1px solid var(--line);
@@ -432,15 +448,19 @@
     <a class="brand" href="/" aria-label="JobBreak home">Job<span class="brk">Break</span></a>
     <nav>
       <a href="/">Check a job</a><a href="/students">Future careers</a><a href="/methodology">How it works</a>
-      <button id="theme-toggle" type="button" aria-label="Toggle dark mode"
-        style="margin:0 0 0 20px;padding:5px 12px;font-size:13px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);box-shadow:none;border-radius:999px;">Dark</button>
+      <button id="theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch theme">
+        <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/>
+          <path d="M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M5 5l1.7 1.7M17.3 17.3l1.7 1.7M19 5l-1.7 1.7M6.7 17.3L5 19"/></svg>
+        <svg class="ico-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path
+          d="M21 12.9A9 9 0 1 1 11.1 3a7.1 7.1 0 0 0 9.9 9.9z"/></svg></button>
     </nav>
   </div></header>
   <script>
     (function () {
       var root = document.documentElement, btn;
       function apply(t) { if (t === "dark") root.setAttribute("data-theme", "dark"); else root.removeAttribute("data-theme");
-        if (btn) btn.textContent = t === "dark" ? "Light" : "Dark"; }
+        if (btn) btn.setAttribute("aria-label", t === "dark" ? "Switch to light mode" : "Switch to dark mode"); }
       apply(localStorage.getItem("jobcast-theme") || "light");
       document.addEventListener("DOMContentLoaded", function () {
         btn = document.getElementById("theme-toggle");
