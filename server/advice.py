@@ -8,6 +8,7 @@ deterministic strategies, so nothing breaks.
 """
 
 import os
+import sys
 import json
 from typing import Dict, Any, List, Optional
 
@@ -52,10 +53,12 @@ def generate_plan(assessment: Dict[str, Any], profile: Dict[str, Any],
                   tier: str = "tier2", api_key: Optional[str] = None) -> Optional[List[Dict[str, str]]]:
     api_key = api_key or os.environ.get("JOBCAST_ANTHROPIC_KEY") or os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
+        print("[advice] no API key in env; using deterministic fallback", file=sys.stderr, flush=True)
         return None
     try:
         import anthropic
-    except Exception:
+    except Exception as e:
+        print(f"[advice] anthropic import failed: {e}; fallback", file=sys.stderr, flush=True)
         return None
     n = TIER_N.get(tier, 3)
     # Lower-cost models for now: Sonnet for the paid tier, Haiku below it.
@@ -71,5 +74,6 @@ def generate_plan(assessment: Dict[str, Any], profile: Dict[str, Any],
         out = [{"title": str(x.get("title", "")).strip(), "detail": str(x.get("detail", "")).strip()}
                for x in arr if x.get("title")]
         return out[:n] or None
-    except Exception:
+    except Exception as e:
+        print(f"[advice] API call failed ({type(e).__name__}): {e}; fallback", file=sys.stderr, flush=True)
         return None
