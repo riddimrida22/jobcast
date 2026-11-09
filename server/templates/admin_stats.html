@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>JobBreak - traffic</title>
+  <style>
+    :root{ --navy:#112741; --navy2:#0c1c30; --card:#17304d; --line:#274463;
+           --ink:#eef3f9; --muted:#9db0c6; --orange:#f3a35f; --green:#5ec98c; }
+    *{ box-sizing:border-box; }
+    body{ margin:0; background:var(--navy2); color:var(--ink);
+          font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+    .wrap{ max-width:980px; margin:0 auto; padding:28px 20px 60px; }
+    h1{ font-size:24px; margin:0 0 2px; } h1 b{ color:var(--orange); }
+    .sub{ color:var(--muted); font-size:13px; margin-bottom:22px; }
+    .ranges{ margin:0 0 20px; } .ranges a{ color:var(--muted); text-decoration:none;
+      border:1px solid var(--line); padding:5px 12px; border-radius:999px; font-size:13px; margin-right:8px; }
+    .ranges a.on{ color:var(--navy2); background:var(--orange); border-color:var(--orange); font-weight:600; }
+    .tiles{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:26px; }
+    @media(max-width:720px){ .tiles{ grid-template-columns:repeat(2,1fr); } }
+    .tile{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+    .tile .k{ color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.4px; }
+    .tile .v{ font-size:28px; font-weight:700; margin-top:4px; }
+    .tile .v small{ font-size:13px; color:var(--muted); font-weight:500; }
+    h2{ font-size:15px; margin:26px 0 10px; color:var(--ink); }
+    table{ width:100%; border-collapse:collapse; background:var(--card);
+           border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+    th,td{ text-align:left; padding:9px 14px; font-size:14px; border-bottom:1px solid var(--line); }
+    th{ color:var(--muted); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.3px; }
+    tr:last-child td{ border-bottom:none; }
+    td.num,th.num{ text-align:right; font-variant-numeric:tabular-nums; }
+    .bar{ position:relative; }
+    .bar .fill{ position:absolute; left:0; top:0; bottom:0; background:rgba(243,163,95,.18); }
+    .bar span{ position:relative; }
+    .empty{ color:var(--muted); padding:16px; font-size:14px; }
+    .foot{ color:var(--muted); font-size:12px; margin-top:28px; }
+    .foot code{ color:var(--orange); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1><b>JobBreak</b> traffic</h1>
+    <div class="sub">First-party, cookie-free. Visitors are counted once per day. All times UTC.</div>
+
+    <div class="ranges">
+      {% for d in [7,30,90,365] %}
+        <a href="/admin/stats?key={{ key }}&days={{ d }}" class="{{ 'on' if days==d else '' }}">{{ 'Year' if d==365 else d ~ ' days' }}</a>
+      {% endfor %}
+    </div>
+
+    <div class="tiles">
+      <div class="tile"><div class="k">Today</div><div class="v">{{ "{:,}".format(s.today.visitors) }} <small>visitors</small></div><div class="k" style="margin-top:6px">{{ "{:,}".format(s.today.views) }} views</div></div>
+      <div class="tile"><div class="k">Last 7 days</div><div class="v">{{ "{:,}".format(s.last7.visitors) }} <small>visitors</small></div><div class="k" style="margin-top:6px">{{ "{:,}".format(s.last7.views) }} views</div></div>
+      <div class="tile"><div class="k">Last {{ days }} days</div><div class="v">{{ "{:,}".format(s.window.visitors) }} <small>visitors</small></div><div class="k" style="margin-top:6px">{{ "{:,}".format(s.window.views) }} views</div></div>
+      <div class="tile"><div class="k">All time</div><div class="v">{{ "{:,}".format(s.all_time.visitors) }} <small>visitors</small></div><div class="k" style="margin-top:6px">{{ "{:,}".format(s.all_time.views) }} views</div></div>
+    </div>
+
+    <div class="tiles" style="grid-template-columns:repeat(2,1fr)">
+      <div class="tile"><div class="k">Monitor signups (active)</div><div class="v">{{ "{:,}".format(watches.active) }}</div></div>
+      <div class="tile"><div class="k">Job alerts armed</div><div class="v">{{ "{:,}".format(watches.job_watches) }}</div></div>
+    </div>
+
+    <h2>Top pages</h2>
+    {% if s.top_paths %}
+    <table>
+      <tr><th>Page</th><th class="num">Visitors</th><th class="num">Views</th></tr>
+      {% for p in s.top_paths %}
+      <tr><td>{{ p.path }}</td><td class="num">{{ "{:,}".format(p.visitors) }}</td><td class="num">{{ "{:,}".format(p.views) }}</td></tr>
+      {% endfor %}
+    </table>
+    {% else %}<div class="empty">No page views recorded yet.</div>{% endif %}
+
+    <h2>Where visitors come from</h2>
+    {% if s.top_refs %}
+    <table>
+      <tr><th>Referrer</th><th class="num">Views</th></tr>
+      {% for r in s.top_refs %}
+      <tr><td>{{ r.ref }}</td><td class="num">{{ "{:,}".format(r.views) }}</td></tr>
+      {% endfor %}
+    </table>
+    {% else %}<div class="empty">No external referrers yet (direct visits, or none recorded).</div>{% endif %}
+
+    <h2>By day</h2>
+    {% if s.by_day %}
+    {% set maxv = (s.by_day|map(attribute='views')|max) or 1 %}
+    <table>
+      <tr><th>Day (UTC)</th><th class="num">Visitors</th><th class="num">Views</th></tr>
+      {% for d in s.by_day %}
+      <tr><td class="bar"><span class="fill" style="width:{{ (100*d.views/maxv)|round(0,'floor') }}%"></span><span>{{ d.day }}</span></td><td class="num">{{ "{:,}".format(d.visitors) }}</td><td class="num">{{ "{:,}".format(d.views) }}</td></tr>
+      {% endfor %}
+    </table>
+    {% else %}<div class="empty">No traffic yet in this window.</div>{% endif %}
+
+    <div class="foot">Build {{ version }}. Private page - the <code>key</code> in the URL is your admin key; keep the link private.</div>
+  </div>
+</body>
+</html>

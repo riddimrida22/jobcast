@@ -127,7 +127,7 @@ def create_app() -> Flask:
         if not demo_user:
             return None
         if request.endpoint in ("login", "static", "manifest", "service_worker", "stripe_webhook",
-                                "privacy", "terms"):
+                                "privacy", "terms", "admin_stats"):
             return None
         if session.get("jb_authed"):
             return None
@@ -158,6 +158,45 @@ def create_app() -> Flask:
         from . import payments as pay
         return {"noindex": noindex, "stripe_enabled": pay.configured(),
                 "entitlement": session.get("jb_tier", "free")}
+
+    @app.after_request
+    def _track(resp):
+        """First-party page-view analytics. Best-effort; never breaks a response."""
+        try:
+            if request.method != "GET" or resp.status_code != 200:
+                return resp
+            if not (resp.content_type or "").startswith("text/html"):
+                return resp
+            p = request.path or "/"
+            if (p.startswith(("/static", "/webhooks", "/tasks", "/v1", "/admin"))
+                    or p in ("/robots.txt", "/sitemap.xml", "/sw.js", "/manifest.webmanifest", "/login")
+                    or p.endswith("card.png")):
+                return resp
+            ua = request.headers.get("User-Agent", "")
+            ual = ua.lower()
+            if any(b in ual for b in ("bot", "spider", "crawl", "slurp", "bingpreview",
+                                      "facebookexternalhit", "headless", "python-", "curl", "wget")):
+                return resp
+            import hashlib
+            from urllib.parse import urlparse
+            xff = request.headers.get("X-Forwarded-For", "")
+            ip = (xff.split(",")[0].strip() if xff else (request.remote_addr or ""))
+            day = time.strftime("%Y-%m-%d", time.gmtime())
+            vid = hashlib.sha256(f"{ip}|{ua}|{day}|{app.secret_key}".encode("utf-8", "ignore")).hexdigest()[:16]
+            ref_host = ""
+            r = request.referrer or ""
+            if r:
+                try:
+                    h = urlparse(r).netloc.lower()
+                    if h and h != (request.host or "").lower():
+                        ref_host = h
+                except Exception:
+                    ref_host = ""
+            from . import analytics_store as an
+            an.record(p, ref_host, vid)
+        except Exception:
+            pass
+        return resp
 
     def tier_from_request() -> str:
         header = engine.tiers.get("dev_plan_header", "X-Plan")
@@ -573,6 +612,26 @@ def create_app() -> Flask:
                 "tier": md.get("tier") if hasattr(md, "get") else None,
                 "ts": int(time.time())})
         return jsonify({"received": True})
+
+    @app.get("/admin/stats")
+    def admin_stats():
+        """Private traffic dashboard. Protected by JOBCAST_ADMIN_KEY (?key=...); with no
+        key set the endpoint is disabled (404)."""
+        admin_key = os.environ.get("JOBCAST_ADMIN_KEY")
+        if not admin_key or request.args.get("key") != admin_key:
+            from flask import abort
+            abort(404)
+        from . import analytics_store as an
+        from . import store as watchstore
+        try:
+            wc = watchstore.counts()
+        except Exception:
+            wc = {"active": 0, "job_watches": 0}
+        days = request.args.get("days", type=int) or 30
+        if days not in (7, 30, 90, 365):
+            days = 30
+        return render_template("admin_stats.html", s=an.summary(days), watches=wc,
+                               key=admin_key, days=days, version=VERSION, noindex=True)
 
     @app.get("/privacy")
     def privacy():
