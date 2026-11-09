@@ -18,9 +18,17 @@
   </div>
 </section>
 
+{% if not sel_field and not sel_zone %}
+<div class="start-cue" id="start-cue">
+  <a href="#field" class="cue-msg"><b>Start here</b> &mdash; tell us what you're into</a>
+  <span class="cue-chevs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+</div>
+{% endif %}
+
 <div class="home-layout">
   <aside class="side">
     <div class="side-title safe">No degree needed</div>
+    <div class="side-sub">Tap any career</div>
     <div class="ticker"><div class="ticker-inner">
       {% for c in rail_early %}<a class="jobcard" href="/jobs/{{ c.soc }}"><span class="jc-t">{{ c.title }}<small>{{ c.school }}</small></span><span class="jc-score safe">{{ c.safe }}</span></a>{% endfor %}
       {% for c in rail_early %}<a class="jobcard" href="/jobs/{{ c.soc }}"><span class="jc-t">{{ c.title }}<small>{{ c.school }}</small></span><span class="jc-score safe">{{ c.safe }}</span></a>{% endfor %}
@@ -88,6 +96,7 @@
 
   <aside class="side">
     <div class="side-title safe">Worth a degree</div>
+    <div class="side-sub">Tap any career</div>
     <div class="ticker rev"><div class="ticker-inner">
       {% for c in rail_degree %}<a class="jobcard" href="/jobs/{{ c.soc }}"><span class="jc-t">{{ c.title }}<small>{{ c.school }}</small></span><span class="jc-score safe">{{ c.safe }}</span></a>{% endfor %}
       {% for c in rail_degree %}<a class="jobcard" href="/jobs/{{ c.soc }}"><span class="jc-t">{{ c.title }}<small>{{ c.school }}</small></span><span class="jc-score safe">{{ c.safe }}</span></a>{% endfor %}

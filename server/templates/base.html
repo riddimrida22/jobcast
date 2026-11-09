@@ -62,7 +62,6 @@
     @keyframes swing { 0%,8%,100% { transform:rotate(0deg); } 54% { transform:rotate(90deg); } }
     /* on phones the full 90deg swing dangles into the wrapped nav row; use a gentle dangle */
     @keyframes swingSmall { 0%,8%,100% { transform:rotate(0deg); } 54% { transform:rotate(20deg); } }
-    @media (prefers-reduced-motion:reduce) { .brand .brk { animation:none; transform:rotate(0deg); } }
     nav a { color:#cdd9ea; text-decoration:none; margin-left:4px; font-size:14px; font-weight:600;
             padding:7px 13px; border-radius:999px; transition:background .15s ease, color .15s ease; }
     nav a:hover { color:#fff; background:rgba(255,255,255,.12); }
@@ -206,7 +205,6 @@
     .mk-val.dn, .mk-arr.dn { color:var(--green); }
     .mk-item:hover .mk-sym { text-decoration:underline; }
     @keyframes stScroll { from { transform:translateX(0); } to { transform:translateX(-50%); } }
-    @media (prefers-reduced-motion:reduce) { .st-track { animation:none; } }
     .urgent-tag { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:700;
                   text-transform:uppercase; letter-spacing:.06em; color:var(--red);
                   background:rgba(199,58,42,.08); border:1px solid rgba(199,58,42,.22);
@@ -217,7 +215,6 @@
     @keyframes urgentPulse { 0% { box-shadow:0 0 0 0 rgba(199,58,42,.5); }
                              70% { box-shadow:0 0 0 7px rgba(199,58,42,0); }
                              100% { box-shadow:0 0 0 0 rgba(199,58,42,0); } }
-    @media (prefers-reduced-motion:reduce) { .urgent-dot { animation:none; } }
     /* hero: a fanfare, then one lane sends the robot, then the Pac-Man; each eats the
        most-exposed workers while one transitions to safety. Loops; jobs rotate each cycle. */
     .gob-wrap { margin:0 auto; overflow:hidden; }
@@ -332,11 +329,27 @@
         animation:gobAct2 var(--loop) ease-in-out infinite}
     [data-theme="dark"] .gob-actnow{background:rgba(224,117,89,.14);border-color:rgba(224,117,89,.32);color:#f2ab91}
     @keyframes gobAct2{0%,44%{opacity:.22;transform:scale(.95)}48%{opacity:1;transform:scale(1.13)}52%{opacity:1;transform:scale(1)}58%{opacity:.22}90%{opacity:.22}93%{opacity:1;transform:scale(1.13)}97%{opacity:1;transform:scale(1)}100%{opacity:.22;transform:scale(.95)}}
-    @media (prefers-reduced-motion:reduce) {
-      .gob .pred,.gob .fanfare,.ai-g .body,.rb2 .jaw,.rb2 .eye,.rb2 .ant::after,.gob .wall,.gob-actnow,.gob .jobs,.gob .safe,.gob .escM,.gob .escD,.gob .escM .cap,.gob .escD .cap,.gob .hg .sand-t::after,.gob .hg .sand-b::after,.gob .hg .stream { animation:none !important; }
-      .gob .wall { transform:translateY(0); } .gob .pred.pac { opacity:0; } .gob .jobs.desk,.gob .safe.desk { opacity:0; } .gob-actnow { opacity:1; } .gob .fanfare { opacity:0; }
-      .gob .escM,.gob .escD { transform:translate(0,0); }
-    }
+    /* onboarding cue: a blinking message and a row of chevrons pointing down to the one input that matters */
+    .start-cue { display:flex; flex-direction:column; align-items:center; gap:5px; margin:9px auto 2px; }
+    .start-cue.is-done { display:none; }
+    .cue-msg { text-decoration:none; font-size:14px; font-weight:700; color:var(--ink);
+               background:var(--accent-soft); border:1px solid var(--accent); border-radius:999px;
+               padding:6px 16px; box-shadow:0 2px 10px rgba(243,163,95,.28); animation:cueBlink 1.2s ease-in-out infinite; }
+    .cue-msg b { color:#b4631a; }
+    [data-theme="dark"] .cue-msg b { color:var(--accent); }
+    .cue-chevs { display:inline-flex; gap:11px; }
+    .cue-chevs i { width:9px; height:9px; border-right:2.6px solid var(--accent); border-bottom:2.6px solid var(--accent);
+                   transform:rotate(45deg); animation:cueChev 1.1s ease-in-out infinite; }
+    .cue-chevs i:nth-child(2){ animation-delay:.09s; } .cue-chevs i:nth-child(3){ animation-delay:.18s; }
+    .cue-chevs i:nth-child(4){ animation-delay:.27s; } .cue-chevs i:nth-child(5){ animation-delay:.36s; }
+    @keyframes cueBlink { 0%,100%{ opacity:1; } 50%{ opacity:.5; } }
+    @keyframes cueChev { 0%,100%{ opacity:.25; transform:rotate(45deg) translate(-1.5px,-1.5px); }
+                         50%{ opacity:1; transform:rotate(45deg) translate(1.5px,1.5px); } }
+    /* the field the cue points to: accented until a choice is made */
+    .job-cue .combo input { border-color:var(--accent); box-shadow:0 0 0 3px rgba(243,163,95,.2); }
+    .job-cue.is-done .combo input { border-color:var(--line); box-shadow:none; }
+    /* side-rail subtitle: says the scrolling cards are live, tappable example jobs */
+    .side-sub { font-size:11px; font-weight:500; color:var(--muted); margin:-6px 0 10px; }
     .score-foot { display:flex; flex-wrap:wrap; gap:8px 22px; align-items:center; justify-content:center;
                   max-width:760px; margin:26px auto 0; padding-top:16px; border-top:1px solid var(--line);
                   font-size:12px; color:var(--muted); }
@@ -555,7 +568,6 @@
     @keyframes bodybob { 0%,100% { transform:translateY(1px); } 50% { transform:translateY(-4px); } }
     @keyframes grounddash { to { transform:translateX(-24px); } }
     @keyframes speedpulse { 0%,100% { opacity:.2; } 50% { opacity:.75; } }
-    @media (prefers-reduced-motion:reduce) { .runners * { animation:none !important; } }
     .plans { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:22px; align-items:stretch; }
     .plan { position:relative; display:flex; flex-direction:column; border:1px solid var(--line); border-radius:16px;
             padding:22px 16px 16px; background:var(--card);

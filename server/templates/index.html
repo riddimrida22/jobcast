@@ -17,7 +17,8 @@
 
 <div class="home-layout">
   <aside class="side">
-    <div class="side-title risk">Most at risk</div>
+    <div class="side-title risk">Careers more at risk</div>
+    <div class="side-sub">Live scores &mdash; tap any job</div>
     <div class="ticker"><div class="ticker-inner">
       {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.base }}</span></a>{% endfor %}
       {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.base }}</span></a>{% endfor %}
@@ -48,7 +49,7 @@
       {% for f in families %}<option value="{{ f.code }}">{{ f.name }}</option>{% endfor %}
     </select>
   </div>
-  <div>
+  <div class="job-cue" id="job-cue">
     <label for="title-search">Job</label>
     <div class="combo">
       <input id="title-search" type="text" autocomplete="off" placeholder="Type to find your job"
@@ -184,7 +185,8 @@
 <p class="muted" style="margin-top:8px;font-size:12px">No gender, race, or other protected characteristics in the score; pay is read only as a banded trajectory. Sourced from O*NET, BLS OEWS (393 metros), and peer-reviewed exposure research. <a href="/jobs">Browse all jobs</a>.</p>
   </div>
   <aside class="side">
-    <div class="side-title safe">Most resilient</div>
+    <div class="side-title safe">Careers more resilient</div>
+    <div class="side-sub">Live scores &mdash; tap any job</div>
     <div class="ticker rev"><div class="ticker-inner">
       {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}
       {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}
@@ -237,6 +239,32 @@
     if (!has) gy.value = '';
   }
   edu.addEventListener('change', sync); sync();
+})();
+
+// Onboarding cue: the "Start here" chevrons and the Job-field highlight disappear
+// once a job is actually chosen, and the cue click jumps focus to the Job input.
+(function () {
+  var cue = document.getElementById('start-cue');
+  var jobCue = document.getElementById('job-cue');
+  var sel = document.getElementById('title');
+  var search = document.getElementById('title-search');
+  var field = document.getElementById('field');
+  var list = document.getElementById('title-list');
+  var msg = cue ? cue.querySelector('.cue-msg') : null;
+  if (msg && search) msg.addEventListener('click', function (e) {
+    e.preventDefault(); search.focus();
+    search.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
+  function sync() {
+    var done = !!(sel && sel.value);
+    if (cue) cue.classList.toggle('is-done', done);
+    if (jobCue) jobCue.classList.toggle('is-done', done);
+  }
+  if (sel) sel.addEventListener('change', sync);
+  if (search) { search.addEventListener('input', sync); search.addEventListener('blur', function () { setTimeout(sync, 0); }); }
+  if (field) field.addEventListener('change', function () { setTimeout(sync, 0); });
+  if (list) list.addEventListener('mousedown', function () { setTimeout(sync, 0); });
+  sync();
 })();
 
 // Audience-targeted hero: the slogan shifts to match the field the person picks,
