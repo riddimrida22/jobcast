@@ -148,8 +148,12 @@
     .wide .wrap { max-width:1260px; }
     .home-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(430px,560px) minmax(0,1fr); gap:18px; align-items:start; }
     .side { position:sticky; top:86px; }
-    .side-title { font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px; }
-    .side-title.risk { color:var(--red); } .side-title.safe { color:var(--green); }
+    .side-title { font-size:16.5px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; margin:0 0 4px; line-height:1.2;
+                  display:inline-block; padding:6px 13px; border-radius:10px; }
+    .side-title.risk { color:var(--red); background:rgba(176,66,43,.12); border:1px solid rgba(176,66,43,.34); }
+    .side-title.safe { color:var(--green); background:rgba(20,123,116,.13); border:1px solid rgba(20,123,116,.36); }
+    [data-theme="dark"] .side-title.risk { color:#f2ab91; background:rgba(224,117,89,.16); border-color:rgba(224,117,89,.38); }
+    [data-theme="dark"] .side-title.safe { color:#80e3cb; background:rgba(63,182,168,.16); border-color:rgba(63,182,168,.38); }
     .ticker { height:520px; overflow:hidden; -webkit-mask-image:linear-gradient(180deg,transparent,#000 7%,#000 93%,transparent);
               mask-image:linear-gradient(180deg,transparent,#000 7%,#000 93%,transparent); }
     .ticker:hover .ticker-inner { animation-play-state:paused; }
@@ -367,7 +371,7 @@
     .job-cue .combo input { border-color:var(--accent); box-shadow:0 0 0 3px rgba(243,163,95,.2); }
     .job-cue.is-done .combo input { border-color:var(--line); box-shadow:none; }
     /* side-rail subtitle: says the scrolling cards are live, tappable example jobs */
-    .side-sub { font-size:11px; font-weight:500; color:var(--muted); margin:-6px 0 10px; }
+    .side-sub { font-size:11.5px; font-weight:500; color:var(--muted); margin:6px 0 10px; }
     .score-foot { display:flex; flex-wrap:wrap; gap:8px 22px; align-items:center; justify-content:center;
                   max-width:760px; margin:26px auto 0; padding-top:16px; border-top:1px solid var(--line);
                   font-size:12px; color:var(--muted); }
