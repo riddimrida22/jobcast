@@ -54,16 +54,27 @@ coupled work in the **cluster**.
 
 ## This market already exists — the idea is partly built
 
-- **Cloud spot markets** — AWS Spot, GCP Preemptible, Azure Spot. Literally the airline
-  model: unsold capacity at 60–90% off, revocable when a full-price customer appears.
+- **Cloud spot markets** — AWS Spot, GCP Spot VMs (successor to Preemptible VMs, no 24h
+  cap), Azure Spot. Literally the airline model: unsold capacity at **~60–91% off**,
+  revocable on short notice (AWS 2-minute warning; Azure/GCP ~30 seconds).
 - **GPU broker marketplaces** — Vast.ai, RunPod, SF Compute, Together, Lambda. The
-  "Expedia for GPUs" aggregator layer; Vast already pools heterogeneous/consumer cards.
-- **Decentralised training research** — Prime Intellect (INTELLECT-1, trained across
-  volunteer nodes on multiple continents), Nous Research, Gensyn, Bittensor, Hugging Face
-  **Petals** (distributed inference). Low-communication methods (DiLoCo, DeMo) are the key
-  that is starting to loosen the network-coupling wall.
-- **Carbon/demand-aware scheduling** — Google and others already move flexible compute to
-  the greenest hours and places; datacentres are signing grid demand-response contracts.
+  "Expedia for GPUs" aggregator layer; **Vast is a P2P marketplace (~10% commission) where
+  hosts set their own rates and turn idle hardware into revenue**, and RunPod's Community
+  Cloud resells evictable spare capacity. Reliability varies by host — the perishable-tier
+  tradeoff in practice.
+- **Decentralised training research** — Prime Intellect **(INTELLECT-1: a 10B model
+  trained Nov 2024 across up to 14 nodes on 3 continents from 30 independent providers,
+  via a DiLoCo-FSDP2 hybrid with ~400× less communication)**, Nous Research (DeMo/DisTrO,
+  and the Psyche network), Gensyn (decentralised training with cryptographic verification),
+  Bittensor (subnet incentive network), Hugging Face **Petals** (BitTorrent-style
+  distributed inference, up to Llama-3.1-405B). Low-communication methods — **DiLoCo
+  (DeepMind, 2023, ~500× less comms) and DeMo (Nous, 2024, up to ~85× less data/GPU)** —
+  are the key starting to loosen the network-coupling wall.
+- **Carbon/demand-aware scheduling** — Google's Carbon-Intelligent Computing System
+  time-shifts flexible workloads (data analytics, AI training, batch) to greener hours and
+  can shift them geographically; Google has also described signing grid demand-response
+  contracts (reported ~1 GW with US utilities — figure worth confirming against Google's
+  own announcement).
 
 So the chain **datacentre spot → broker marketplace → individual contributors** is real;
 the last link is the current frontier.
@@ -133,13 +144,31 @@ analysis). As local AI matures, those automation timelines move _forward_. That 
 defensible, sourceable factor worth noting in the factor model (see `FACTORS.md`) — not a
 reason to pivot the product.
 
-## Further reading to verify the claims above
+## Sources & verification (checked 2026-11-09)
 
-- Frey & Osborne (2013); Eloundou et al. (2023) — already in Jobcast's source registry.
-- Prime Intellect INTELLECT-1 report; DiLoCo / DeMo papers (low-comms distributed training).
-- Hugging Face Petals (distributed inference).
-- Cloud spot-instance docs (AWS/GCP/Azure); Vast.ai / RunPod marketplace models.
-- Google carbon-aware computing write-ups; datacentre demand-response coverage.
+Each market claim above was checked against current sources. Status: **all confirmed**,
+with the minor refinements already folded into the text. Most third-party pricing figures
+vary by region/demand — treat exact percentages as "up to," not guarantees.
 
-_All market/product claims here are from general knowledge as of early 2026 and should be
-re-checked before any are used in a pitch or a decision._
+| Claim | Status | Primary / best source |
+|---|---|---|
+| Spot markets ~60–91% off, revocable (AWS 2-min, Azure/GCP ~30s) | ✅ Confirmed | AWS/GCP/Azure spot docs; [DataCenterDynamics guide](https://www.datacenterdynamics.com/en/opinions/complete-guide-spot-instances-aws-azure-and-gcp/) |
+| Vast.ai P2P marketplace (~10% commission), RunPod Community = evictable spare capacity | ✅ Confirmed | [Vast.ai docs](https://vast.ai/docs/overview/introduction); [RunPod vs Vast comparison](https://dev.to/theairabbit/runpod-vs-vastai-a-deep-dive-into-gpu-cloud-platforms-for-aiml-10ga) |
+| INTELLECT-1: 10B, ~14 nodes / 3 continents / 30 providers, DiLoCo-FSDP2, ~400× less comms (Nov 2024) | ✅ Confirmed | [Prime Intellect release](https://primeintellect.ai/blog/intellect-1-release); [arXiv 2412.01152](https://arxiv.org/abs/2412.01152) |
+| Petals = BitTorrent-style distributed inference, up to Llama-3.1-405B | ✅ Confirmed | [Petals (NeurIPS 2023 paper / project)](https://huggingface.co/papers/2312.08361) |
+| DiLoCo ~500× less comms (DeepMind 2023); DeMo up to ~85× less data/GPU (Nous 2024) | ✅ Confirmed | [DiLoCo arXiv 2311.08105](https://arxiv.org/abs/2311.08105); [DeMo arXiv 2411.19870](https://arxiv.org/abs/2411.19870) |
+| Gensyn (verified decentralised training); Bittensor (subnet incentive network) | ✅ Confirmed | [Gensyn intro](https://www.machinelearningatscale.com/p/decentralised-compute-machine-learning-1); Bittensor docs |
+| Google carbon-aware load-shifting; grid demand-response contracts | ✅ Confirmed (1 GW figure unverified) | [Google Carbon-Intelligent Computing (arXiv 2106.11750)](https://arxiv.org/pdf/2106.11750); [Electricity Maps case study](https://www.electricitymaps.com/resources/case-studies/google-data-centers-shift-their-computations-to-cleaner-times-and-locations) |
+| On-device AI: Apple Intelligence, Copilot+ PCs (40+ TOPS), Gemini Nano | ✅ Confirmed | Apple (WWDC 2024), Microsoft Copilot+, Google Gemini Nano official docs |
+| Frey & Osborne (2013); Eloundou et al. (2023) | ✅ In Jobcast's source registry | `config/sources.json` |
+
+**Caveats that remain:**
+- Exact spot discounts and GPU marketplace prices shift constantly; re-pull before quoting.
+- Google's "1 GW demand response" figure appears in secondary coverage — confirm against
+  Google's own announcement before using it in a pitch.
+- Most pricing came from vendor/comparison blogs, not official pages; verify a specific
+  number against the provider's pricing page when it matters.
+- One footnote of note: DeMo's paper lists Diederik Kingma, done before he joined Anthropic
+  — relevant only as a credibility signal for the method.
+
+_Checked 2026-11-09. The direction and magnitudes hold; specific prices are time-sensitive._
