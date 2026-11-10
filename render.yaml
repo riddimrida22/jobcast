@@ -3,13 +3,23 @@ services:
   - type: web
     name: jobcast-demo
     runtime: python
-    plan: free
+    # Starter (or any paid instance) is required for a persistent disk. The disk keeps the
+    # SQLite analytics, subscriber records and alert watches across deploys and restarts.
+    plan: starter
     buildCommand: pip install -r requirements-prod.txt
     startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+    disk:
+      name: jobcast-data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: JOBCAST_NOINDEX
         value: "0"
+      - key: JOBCAST_DATA_DIR
+        value: /var/data        # all durable data lives on the mounted disk
       - key: JOBCAST_DEMO_USER
         sync: false      # set in the Render dashboard
       - key: JOBCAST_DEMO_PASS
         sync: false      # set in the Render dashboard
+      - key: JOBCAST_ADMIN_KEY
+        sync: false      # set in the Render dashboard, then view /admin/stats?key=...
