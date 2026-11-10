@@ -22,7 +22,7 @@
     <a class="gate-card" href="#" id="gate-explore">
       <span class="gc-ey">The topic in general</span>
       <div class="gc-h">Take a quick tour</div>
-      <div class="gc-sub">Tap any career and see its AI score, step by step, so you know what safe and exposed look like.</div>
+      <div class="gc-sub">Tap any career and see its {{ rating_label }}, step by step, so you know what safe and exposed look like.</div>
     </a>
     <a class="gate-card primary" href="#" id="gate-filter">
       <span class="gc-ey">Your path</span>
@@ -41,7 +41,7 @@
 
 <div class="careers-screen" id="careers-screen" hidden>
   <button type="button" class="cs-exit" id="cs-exit">Exit tour</button>
-  <div class="cs-head"><span class="cs-step">Step 1 of the tour</span><h2>Tap any career to see its AI score</h2><p>A quick demo of the read you'll get for the career you're planning.</p></div>
+  <div class="cs-head"><span class="cs-step">Step 1 of the tour</span><h2>Tap any career to see its {{ rating_label }}</h2><p>A quick demo of the read you'll get for the career you're planning.</p></div>
   <div class="cs-cols">
     <div class="cs-col">
       <div class="cs-col-h risk">More at risk</div>
@@ -118,7 +118,7 @@
 
 <div class="careers-screen" id="matches-screen" hidden>
   <button type="button" class="cs-exit" id="ms-exit">Exit</button>
-  <div class="cs-head"><span class="cs-step">Your matches</span><h2>Careers that fit what you picked</h2><p>Ranked for you. Tap any one to see its AI score and what to do.</p></div>
+  <div class="cs-head"><span class="cs-step">Your matches</span><h2>Careers that fit what you picked</h2><p>Ranked for you. Tap any one to see its {{ rating_label }} and what to do.</p></div>
   <div class="ms-grid">
     {% for c in careers %}<a class="ms-card" href="/jobs/{{ c.soc }}">
       <span class="ms-t">{{ c.title }}</span>
@@ -423,10 +423,10 @@ breakdown and sources. See <a href="/methodology">How it works</a>.</p>
     document.body.classList.remove('gated');
     if (pending) { var f = pending; pending = null; f(); }
   });
-  var ex = document.getElementById('gate-explore'); if (ex) ex.addEventListener('click', function (e) { e.preventDefault(); showScoring(showCareers, "You're about to look through real careers, and each one carries a score.", 'Start exploring'); });
+  var ex = document.getElementById('gate-explore'); if (ex) ex.addEventListener('click', function (e) { e.preventDefault(); showScoring(showCareers, "You're about to look through real careers, and each one carries a {{ rating_label }} rating.", 'Start exploring'); });
   var csx = document.getElementById('cs-exit'); if (csx) csx.addEventListener('click', function (e) { e.preventDefault(); var cs = document.getElementById('careers-screen'); if (cs) cs.hidden = true; document.body.classList.remove('gated'); });
   var fi = document.getElementById('gate-filter'); if (fi) fi.addEventListener('click', function (e) { e.preventDefault(); showScoring(function () { if (startFlow) startFlow(); else enter(true); }, "We'll ask three quick things, then show the careers that fit you best.", 'Find my matches'); });
-  var se = document.getElementById('gate-search'); if (se) se.addEventListener('click', function (e) { e.preventDefault(); showScoring(showSearch, "Type any career, even one not on our list, and we'll score the closest match.", 'Search a career'); });
+  var se = document.getElementById('gate-search'); if (se) se.addEventListener('click', function (e) { e.preventDefault(); showScoring(showSearch, "Type any career, even one not on our list, and we'll rate the closest match.", 'Search a career'); });
   var sk = document.getElementById('gate-skip'); if (sk) sk.addEventListener('click', function (e) { e.preventDefault(); enter(false); });
   // Returning from the full-screen "find my best fit" steps: show the matches full-screen.
   if (g('jb_stmatch') === '1') {

@@ -157,7 +157,9 @@ def create_app() -> Flask:
     def _inject():
         from . import payments as pay
         return {"noindex": noindex, "stripe_enabled": pay.configured(),
-                "entitlement": session.get("jb_tier", "free")}
+                "entitlement": session.get("jb_tier", "free"),
+                # Consumer-facing name for the 0-100 rating. One place to change it.
+                "rating_label": "Job Extinction Risk"}
 
     @app.after_request
     def _track(resp):

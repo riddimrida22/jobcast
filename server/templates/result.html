@@ -24,7 +24,7 @@
   </div>
   <div class="rv-done" id="rv-done" hidden>
     <div class="rv-badge" id="rv-badge"></div>
-    <div class="rv-num"><b id="rv-num">0</b><small>of 100 exposed to AI &amp; automation</small></div>
+    <div class="rv-num"><b id="rv-num">0</b><small>{{ rating_label }} &middot; of 100</small></div>
     <div class="rv-msg" id="rv-msg"></div>
     <button type="button" class="rv-go" id="rv-go">See the full breakdown</button>
   </div>
@@ -48,11 +48,12 @@
   </section>
   <section class="up-step" data-up="plans">
     <h2 class="up-q">Pick your plan</h2>
-    <p class="up-sub">Cancel any time.</p>
+    <p class="up-sub">Apple Pay, Google Pay, card or Link. Cancel any time.</p>
     <div class="up-plans">
       <label class="up-plan"><input type="radio" name="up_plan" value="monthly" checked><span class="up-pn">Monthly</span><span class="up-price">$3.99<small>/mo</small></span></label>
       <label class="up-plan feat"><input type="radio" name="up_plan" value="yearly"><span class="up-pn">Yearly</span><span class="up-price">$29<small>/yr</small></span><span class="up-save">save 39%</span></label>
     </div>
+    <div class="pay-badges"><span class="pb">Apple Pay</span><span class="pb">Google Pay</span><span class="pb">Card</span><span class="pb">Link</span></div>
     <button type="button" class="up-cta" data-up-next>Continue</button>
   </section>
   <section class="up-step" data-up="order">
@@ -77,8 +78,8 @@
 <!-- Paywall gate: for employees the breakdown stays locked behind the teaser until unlocked -->
 <div id="rlock" hidden aria-hidden="true">
   <div class="rl-card">
-    <span class="rl-ey">Your headline number</span>
-    <div class="rl-score"><b id="rl-num">0</b><small>of 100 exposed to AI &amp; automation</small></div>
+    <span class="rl-ey">Your {{ rating_label }}</span>
+    <div class="rl-score"><b id="rl-num">0</b><small>of 100</small></div>
     <h2 class="rl-h">The full breakdown is locked</h2>
     <p class="rl-sub">You've seen where <span id="rl-role">this role</span> stands. Unlock every exposed task, the timeline, and a researched plan on what to do next.</p>
     <ul class="rl-list">
@@ -88,6 +89,7 @@
       <li>Safer adjacent roles and local pay</li>
     </ul>
     <button type="button" class="rl-go" id="rl-go">Unlock the full breakdown</button>
+    <div class="pay-badges"><span class="pb">Apple Pay</span><span class="pb">Google Pay</span><span class="pb">Card</span><span class="pb">Link</span></div>
     <a class="rl-alt" href="/">Try another career</a>
   </div>
 </div>
@@ -105,6 +107,12 @@
    else 'and a near-term shift looks unlikely') %}
 <p class="verdict"><strong>The short version:</strong> this role is {{ vlvl }} to automation, {{ vtim }}.
 It is a sourced range, not a verdict, and the detail is below.</p>
+{% if seo %}
+<div class="tour-localize">
+  <div class="tl-txt"><b>This is the national picture for {{ r.occupation.title }}.</b> See <em>your</em> {{ rating_label }}: add your state and situation and we'll localize and personalize it.</div>
+  <a class="tl-go" href="/?flow=1&amp;title={{ r.occupation.title | urlencode }}">See my real number &#8250;</a>
+</div>
+{% endif %}
 <div class="trust">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.2-3 7.2-7 9-4-1.8-7-4.8-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
   <span>Built on O*NET tasks, BLS pay and projections, and peer-reviewed AI-exposure research. Sources shown.
@@ -143,7 +151,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   {% if r.key_drivers %}<button class="tab" data-panel="p-drivers">What drives it</button>{% endif %}
   {% if not seo %}<button class="tab" data-panel="p-pay">Pay &amp; place</button>{% endif %}
   {% if r.adjacent_lower_risk %}<button class="tab" data-panel="p-paths">Safer paths</button>{% endif %}
-  <button class="tab" data-panel="p-scored">How it's scored</button>
+  <button class="tab" data-panel="p-scored">How it's worked out</button>
 </div>
 
 <!-- OVERVIEW -->
@@ -393,7 +401,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
       <div class="plan-price">$0</div>
       <div class="plan-tag">See exactly where you stand.</div>
       <ul>
-        <li>{{ check }}Full job-risk score &amp; timeline</li>
+        <li>{{ check }}Full {{ rating_label }} &amp; timeline</li>
         <li>{{ check }}Task-by-task exposure breakdown</li>
         <li>{{ check }}One starter strategy</li>
         <li class="off">{{ check }}AI-researched personal plan</li>
@@ -505,7 +513,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
 
 <!-- HOW IT'S SCORED -->
 <div id="p-scored" class="panel card">
-  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><h2 style="margin:0">How this score is calculated</h2></div>
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><h2 style="margin:0">How your {{ rating_label }} is worked out</h2></div>
   <div class="calc-flow">
     <div class="calc-step"><span class="cs-n">1</span><div class="cs-body"><b>Map tasks</b><span>{{ r.tasks|length }} O*NET tasks</span></div></div>
     <div class="calc-step"><span class="cs-n">2</span><div class="cs-body"><b>Score each</b><span>AI + robotics, 0&ndash;100</span></div></div>
@@ -781,6 +789,10 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   try { sessionStorage.removeItem('jb_reveal'); } catch (e) {}
   var data = {}; try { data = JSON.parse(document.getElementById('reveal-data').textContent) || {}; } catch (e) {}
   var exp = Math.round(+data.exposure || 0);
+  // Payment state: when Stripe is live the paywall goes to real checkout; subscribers skip it.
+  var STRIPE = {{ stripe_enabled|tojson }}, ENT = {{ entitlement|tojson }};
+  // Tour (generic) funnels to "localize & personalize"; personal result goes to the paywall.
+  var SEO = {{ seo|default(false)|tojson }}, OCC_TITLE = {{ r.occupation.title|tojson }}, RATING = {{ rating_label|tojson }};
   ov.hidden = false; ov.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
   var steps = ['{{ "Mapping the tasks..." if seo else "Mapping your tasks..." }}', 'Scoring AI exposure...', 'Checking the robots...', '{{ "Reading the timeline..." if seo else "Reading your timeline..." }}', 'Comparing to the labor data...', 'Almost there...'];
   var stepEl = document.getElementById('rv-step'), bar = document.getElementById('rv-barfill');
@@ -798,7 +810,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     else if (tier === 'storm') { badge.textContent = 'Heads up'; msg.textContent = 'A lot of this role is exposed to AI and automation. The good news: there is time to get ahead of it.'; storm(); }
     else { badge.textContent = 'Mixed'; msg.textContent = 'Parts of this role are exposed, parts are safe. Where you focus next is what matters.'; }
     var gobtn = document.getElementById('rv-go');
-    if (gobtn) { var isStu; try { isStu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {} gobtn.textContent = isStu ? 'See the full breakdown' : 'Unlock the full breakdown'; }
+    if (gobtn) { var isStu; try { isStu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {} gobtn.textContent = isStu ? 'See the full breakdown' : 'See my breakdown'; }
     countTo(document.getElementById('rv-num'), exp, 1200);
   }
   function countTo(el, target, ms) {
@@ -905,36 +917,57 @@ It is a sourced range, not a verdict, and the detail is below.</p>
       ov.remove(); document.body.style.overflow = '';
     });
   }
+  var _upInit = false;
   function openUpsell(onComplete) {
     var up = document.getElementById('upsell'); if (!up) return;
-    var steps = Array.prototype.slice.call(up.querySelectorAll('.up-step'));
-    var back = document.getElementById('up-back'), dots = document.getElementById('up-dots'), nav = up.querySelector('.up-nav');
-    var ui = 0;
-    dots.innerHTML = steps.map(function () { return '<i></i>'; }).join('');
-    function closeUp() { up.hidden = true; up.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; }
-    function show(n) {
-      ui = Math.max(0, Math.min(steps.length - 1, n));
-      steps.forEach(function (s, k) { s.classList.toggle('active', k === ui); });
-      dots.querySelectorAll('i').forEach(function (d, k) { d.classList.toggle('on', k === ui); });
-      nav.classList.toggle('first', ui === 0);
-      up.scrollTop = 0;
-      if (steps[ui].getAttribute('data-up') === 'order') {
-        var y = up.querySelector('input[name=up_plan]:checked'), pl = document.getElementById('up-ord-plan');
-        if (pl) pl.textContent = (y && y.value === 'yearly') ? '$29 / year' : '$3.99 / month';
+    up._onComplete = onComplete || null;
+    // Build and wire the paywall once; openUpsell can be called again from the lock gate.
+    if (!_upInit) {
+      _upInit = true;
+      var steps = Array.prototype.slice.call(up.querySelectorAll('.up-step'));
+      var back = document.getElementById('up-back'), dots = document.getElementById('up-dots'), nav = up.querySelector('.up-nav');
+      var ui = 0;
+      dots.innerHTML = steps.map(function () { return '<i></i>'; }).join('');
+      function closeUp() { up.hidden = true; up.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; }
+      function show(n) {
+        ui = Math.max(0, Math.min(steps.length - 1, n));
+        steps.forEach(function (s, k) { s.classList.toggle('active', k === ui); });
+        dots.querySelectorAll('i').forEach(function (d, k) { d.classList.toggle('on', k === ui); });
+        nav.classList.toggle('first', ui === 0);
+        up.scrollTop = 0;
+        if (steps[ui].getAttribute('data-up') === 'order') {
+          var y = up.querySelector('input[name=up_plan]:checked'), pl = document.getElementById('up-ord-plan');
+          if (pl) pl.textContent = (y && y.value === 'yearly') ? '$29 / year' : '$3.99 / month';
+        }
       }
-    }
-    // Bind the controls once; openUpsell can be called again from the lock gate.
-    if (!up._wired) {
-      up._wired = true;
-      up.querySelectorAll('[data-up-next]').forEach(function (b) { b.addEventListener('click', function () { show(ui + 1); }); });
+      // Real Stripe hosted Checkout: Apple Pay, Google Pay, card and Link all appear there.
+      function upCheckout(btn) {
+        var y = up.querySelector('input[name=up_plan]:checked');
+        var period = (y && y.value === 'yearly') ? 'yearly' : 'monthly';
+        var old = btn ? btn.textContent : '';
+        if (btn) { btn.textContent = 'Opening secure checkout...'; btn.style.pointerEvents = 'none'; }
+        fetch('/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tier: 'tier2', period: period }) })
+          .then(function (r) { return r.json(); }).then(function (d) {
+            if (d.ok && d.url) { window.location.href = d.url; }
+            else { if (btn) { btn.textContent = old; btn.style.pointerEvents = ''; } alert('Checkout is unavailable right now. Please try again.'); }
+          }).catch(function () { if (btn) { btn.textContent = old; btn.style.pointerEvents = ''; } });
+      }
+      up.querySelectorAll('[data-up-next]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var step = b.closest('.up-step');
+          // With Stripe live, the plan step goes straight to real checkout, not the preview order steps.
+          if (STRIPE && step && step.getAttribute('data-up') === 'plans') { upCheckout(b); return; }
+          show(ui + 1);
+        });
+      });
       if (back) back.addEventListener('click', function () { show(ui - 1); });
-      // Exit leaves the breakdown locked; finishing the flow unlocks it.
+      // Exit leaves the breakdown locked; finishing the preview flow (Stripe off) unlocks it.
       document.getElementById('up-x').addEventListener('click', function () { closeUp(); });
       document.getElementById('up-finish').addEventListener('click', function () { closeUp(); if (up._onComplete) up._onComplete(); });
+      up._show = show;
     }
-    up._onComplete = onComplete || null;
     up.hidden = false; up.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
-    show(0);
+    up._show(0);
   }
   // Paywall gate for employees: the reveal is the free teaser (headline score + one-line
   // read). The full breakdown stays locked behind the paywall until they pass it.
@@ -952,12 +985,56 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     document.body.style.overflow = '';
     startResultTour();
   }
+  // Employees get the headline teaser PLUS one real slide (the Overview); the rest of the
+  // breakdown sits masked beneath it, behind the paywall.
+  function startFreeSlide() {
+    var tabs = document.querySelectorAll('.tabs .tab');
+    var overview = document.getElementById('p-overview');
+    if (!tabs.length || !overview) { showLock(); openUpsell(unlockBreakdown); return; }
+    document.body.classList.add('rstage');
+    tabs[0].click();                 // Overview is the one free slide
+    overview.scrollTop = 0;
+    // Tour (generic) nudges the curious to personalize; personal result goes to the paywall.
+    var goLabel = SEO ? 'See my real number ›' : 'Unlock to uncover ›';
+    var ghostTitle = SEO ? ('Add your state and situation to see this for you')
+                         : ('The rest of your ' + RATING + ' is locked');
+    var barLab = SEO ? ('Generic number. Localize it for your real ' + RATING + '.')
+                     : '1 slide of your full breakdown';
+    if (!document.getElementById('jlp-ghost')) {
+      var g = document.createElement('div'); g.id = 'jlp-ghost'; g.className = 'jlp-ghost';
+      g.innerHTML = '<div class="jlp-grows" aria-hidden="true">'
+        + '<div class="jgr"><span>Which tasks are exposed</span><i></i><i></i><i></i></div>'
+        + '<div class="jgr"><span>What drives your result</span><i></i><i></i></div>'
+        + '<div class="jgr"><span>What to do about it</span><i></i><i></i><i></i></div>'
+        + '<div class="jgr"><span>Safer adjacent roles</span><i></i><i></i></div></div>'
+        + '<div class="jlp-glock">'
+        + '<svg viewBox="0 0 24 24" class="jgl-ic" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
+        + '<b>' + ghostTitle + '</b>'
+        + '<button type="button" class="jgl-go" id="jlp-ghost-go">' + goLabel + '</button></div>';
+      overview.appendChild(g);
+    }
+    var bar = document.createElement('div'); bar.className = 'rtour jlp-bar'; bar.id = 'jlp-bar';
+    bar.innerHTML = '<span class="rt-step">Free preview</span><b class="rt-lab">' + barLab + '</b>'
+      + '<button type="button" class="rt-next" id="jlp-unlock">' + goLabel + '</button>'
+      + '<button type="button" class="rt-x" id="jlp-x">Exit</button>';
+    document.body.appendChild(bar);
+    function advance() {
+      bar.remove(); document.body.classList.remove('rstage');
+      var gh = document.getElementById('jlp-ghost'); if (gh) gh.remove();
+      // Tour: funnel to the personal flow, prefilled with this job. Personal: the paywall.
+      if (SEO) { window.location.href = '/?flow=1&title=' + encodeURIComponent(OCC_TITLE); return; }
+      showLock(); openUpsell(unlockBreakdown);
+    }
+    document.getElementById('jlp-unlock').addEventListener('click', advance);
+    document.getElementById('jlp-x').addEventListener('click', advance);
+    var gg = document.getElementById('jlp-ghost-go'); if (gg) gg.addEventListener('click', advance);
+  }
   var go = document.getElementById('rv-go');
   if (go) go.addEventListener('click', function () {
     ov.hidden = true; document.body.style.overflow = '';
     var stu; try { stu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {}
-    if (stu) { startResultTour(); }            // students: full free breakdown
-    else { showLock(); openUpsell(unlockBreakdown); }  // employees: teaser done, paywall now
+    if (stu || (ENT && ENT !== 'free')) { startResultTour(); }  // students & subscribers: full breakdown
+    else { startFreeSlide(); }                                  // employees: one free slide, then paywall
   });
 })();
 </script>

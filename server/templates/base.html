@@ -340,6 +340,32 @@
     #rlock .rl-go { font:inherit; font-weight:800; font-size:17px; cursor:pointer; border:0; border-radius:12px; padding:15px 38px;
       color:#2a1708; background:var(--accent); box-shadow:0 12px 34px rgba(243,163,95,.32); }
     #rlock .rl-alt { display:block; margin-top:16px; color:#9db0c6; font-size:14px; text-decoration:underline; }
+    .pay-badges { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:16px 0 0; }
+    #upsell .pay-badges { margin:0 0 20px; }
+    .pay-badges .pb { font-size:12px; font-weight:700; letter-spacing:.02em; color:#dfe8f3;
+      background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.22); border-radius:8px; padding:6px 11px; }
+    /* Masked peek of the locked breakdown under the one free slide */
+    .jlp-ghost { margin-top:30px; position:relative; border-top:1px solid var(--line); padding-top:26px; min-height:230px; }
+    .jlp-grows { filter:blur(5px); opacity:.5; pointer-events:none; user-select:none; }
+    .jlp-grows .jgr { display:flex; align-items:center; gap:10px; margin:16px 0; }
+    .jlp-grows .jgr span { flex:0 0 44%; font-weight:700; color:var(--ink); }
+    .jlp-grows .jgr i { height:13px; border-radius:7px; background:var(--primary); opacity:.6; }
+    .jlp-grows .jgr i:nth-child(2){ flex:1; } .jlp-grows .jgr i:nth-child(3){ flex:.6; } .jlp-grows .jgr i:nth-child(4){ flex:.3; }
+    .jlp-glock { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center;
+      background:linear-gradient(180deg, rgba(0,0,0,0), var(--bg-a) 52%); }
+    .jlp-glock .jgl-ic { width:30px; height:30px; fill:none; stroke:var(--accent); stroke-width:2; }
+    .jlp-glock b { font-size:17px; color:var(--ink); }
+    .jlp-glock .jgl-go { font:inherit; font-weight:800; font-size:16px; cursor:pointer; border:0; border-radius:12px; padding:13px 30px;
+      color:#2a1708; background:var(--accent); box-shadow:0 12px 30px rgba(243,163,95,.32); }
+    .jlp-bar .rt-lab { color:#fff; }
+    /* Tour -> personal "localize & customize" hook */
+    .tour-localize { display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:space-between;
+      margin:0 0 16px; padding:14px 16px; border-radius:14px; border:1px solid var(--accent);
+      background:linear-gradient(180deg, rgba(243,163,95,.1), rgba(243,163,95,.03)); }
+    .tour-localize .tl-txt { flex:1 1 300px; font-size:14.5px; line-height:1.4; color:var(--ink); }
+    .tour-localize .tl-txt em { font-style:normal; color:var(--accent); font-weight:800; }
+    .tour-localize .tl-go { flex:none; font-weight:800; font-size:15px; text-decoration:none; border-radius:11px; padding:12px 22px;
+      color:#2a1708; background:var(--accent); box-shadow:0 10px 26px rgba(243,163,95,.28); white-space:nowrap; }
     #stu-end { position:fixed; inset:0; z-index:1700; display:flex; flex-direction:column; align-items:center; justify-content:center;
       text-align:center; padding:48px 24px; color:#eaf1f9; overflow-y:auto; opacity:1;
       background:radial-gradient(1100px 650px at 50% -6%, #123a24, var(--shell-dark)); }

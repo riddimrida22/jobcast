@@ -29,7 +29,7 @@
     <a class="gate-card" href="#" id="gate-tour">
       <span class="gc-ey">The topic in general</span>
       <div class="gc-h">Take a quick tour</div>
-      <div class="gc-sub">Click any job and see its AI score, step by step, so you know what your own read looks like.</div>
+      <div class="gc-sub">Click any job and see its {{ rating_label }}, step by step, so you know what your own read looks like.</div>
     </a>
     <a class="gate-card primary" href="#assess" id="gate-mine">
       <span class="gc-ey">Your career</span>
@@ -56,7 +56,7 @@
 
 <div class="careers-screen" id="careers-screen" hidden>
   <button type="button" class="cs-exit" id="cs-exit">Exit tour</button>
-  <div class="cs-head"><span class="cs-step">Step 1 of the tour</span><h2>Tap any career to see its AI score</h2><p>A quick demo of the read you'll get for your own job.</p></div>
+  <div class="cs-head"><span class="cs-step">Step 1 of the tour</span><h2>Tap any career to see its {{ rating_label }}</h2><p>A quick demo of the read you'll get for your own job.</p></div>
   <div class="cs-cols">
     <div class="cs-col">
       <div class="cs-col-h risk">More at risk</div>
@@ -78,7 +78,7 @@
 <div class="home-layout">
   <aside class="side">
     <div class="side-title risk">Careers more at risk</div>
-    <div class="side-sub">Live scores &mdash; tap any job</div>
+    <div class="side-sub">Live ratings &mdash; tap any job</div>
     <div class="ticker"><div class="ticker-inner">
       {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.base }}</span></a>{% endfor %}
       {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.base }}</span></a>{% endfor %}
@@ -279,7 +279,7 @@
   </div>
   <aside class="side">
     <div class="side-title safe">Careers more resilient</div>
-    <div class="side-sub">Live scores &mdash; tap any job</div>
+    <div class="side-sub">Live ratings &mdash; tap any job</div>
     <div class="ticker rev"><div class="ticker-inner">
       {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}
       {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}
@@ -648,12 +648,12 @@
   var mine = document.getElementById('gate-mine');
   if (mine) mine.addEventListener('click', function (e) {
     e.preventDefault(); del(TOUR); set(ENTERED, '1'); hideGate();
-    showScoring(function () { if (window.jobcastStartFlow) window.jobcastStartFlow(); }, 'In a moment, we will give your job a score.', 'Start my questions');
+    showScoring(function () { if (window.jobcastStartFlow) window.jobcastStartFlow(); }, 'In a moment, we will rate your job.', 'Start my questions');
   });
   var tour = document.getElementById('gate-tour');
   if (tour) tour.addEventListener('click', function (e) {
     e.preventDefault(); set(TOUR, '1'); set(ENTERED, '1'); hideGate();
-    showScoring(showCareers, "You're about to look through real careers, and each one carries a score.", 'Start exploring');
+    showScoring(showCareers, "You're about to look through real careers, and each one carries a {{ rating_label }} rating.", 'Start exploring');
   });
   var csExit = document.getElementById('cs-exit');
   if (csExit) csExit.addEventListener('click', function () {
@@ -669,7 +669,7 @@
     if (document.querySelector('.tour-banner')) return;
     document.body.classList.add('tour-on');
     var b = document.createElement('div'); b.className = 'tour-banner';
-    b.innerHTML = '<span class="tb-step">Step 1</span><span class="tb-txt">Click any scrolling career to see its AI score.</span>'
+    b.innerHTML = '<span class="tb-step">Step 1</span><span class="tb-txt">Click any scrolling career to see its {{ rating_label }}.</span>'
       + '<button type="button" class="tb-x" id="tour-exit">Exit tour</button>';
     document.body.appendChild(b);
     document.getElementById('tour-exit').addEventListener('click', function () {
@@ -769,7 +769,19 @@
     e.preventDefault(); if (nextB) nextB.click();
   });
   window.jobcastStartFlow = function () { document.body.classList.add('flow-active'); show(0); };
-  try { if (/[?&]flow=1/.test(location.search)) window.jobcastStartFlow(); } catch (e) {}
+  try {
+    if (/[?&]flow=1/.test(location.search)) {
+      // Deep-link from a tour result ("localize & customize"): skip the gates, prefill the job.
+      var ga = document.getElementById('gate-aud'); if (ga) ga.classList.add('is-hidden');
+      var gm = document.getElementById('gate'); if (gm) gm.classList.add('is-hidden');
+      document.body.classList.remove('gated');
+      var mt = location.search.match(/[?&]title=([^&]+)/);
+      if (mt) { var tt = decodeURIComponent(mt[1].replace(/\+/g, ' '));
+        var tsel = document.getElementById('title');
+        if (titleSearch) titleSearch.value = tt; if (tsel) tsel.value = tt; }
+      window.jobcastStartFlow();
+    }
+  } catch (e) {}
 })();
 </script>
 {% endblock %}
