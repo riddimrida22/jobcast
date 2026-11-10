@@ -800,8 +800,16 @@ It is a sourced range, not a verdict, and the detail is below.</p>
       bn.querySelector('.rt-lab').textContent = lab;
       bn.querySelector('.rt-next').textContent = idx === tabs.length - 1 ? 'Done' : 'Next ›';
       bn.classList.toggle('first', idx === 0);
-      // "What to do" plays as a full-screen slideshow.
-      if (/what to do/i.test(lab)) { var show = document.getElementById('deck-show-btn'); if (show) setTimeout(function () { show.click(); }, 350); }
+      // "What to do" plays as a full-screen slideshow; hide the step bar while it is open
+      // so the slideshow's own arrows cannot be confused with the step controls.
+      if (/what to do/i.test(lab)) {
+        var show = document.getElementById('deck-show-btn');
+        if (show) setTimeout(function () {
+          show.click(); bn.style.display = 'none';
+          var ss = document.getElementById('sshow');
+          var iv = setInterval(function () { if (!ss || ss.hidden) { bn.style.display = ''; clearInterval(iv); } }, 250);
+        }, 350);
+      } else { bn.style.display = ''; }
     }
     document.getElementById('rt-next').addEventListener('click', function () {
       if (idx === tabs.length - 1) { finish(); return; }

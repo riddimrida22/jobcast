@@ -21,6 +21,7 @@
   </div>
   <div class="gate-skip"><a id="gate-skip">Skip and browse</a></div>
 </div>
+{% include "_scoring.html" %}
 
 {% include "_hero_race.html" %}
 
@@ -166,8 +167,16 @@ breakdown and sources. See <a href="/methodology">How it works</a>.</p>
     s(E, '1'); s(T, '1'); hide();
     if (toFilter) { var f = document.querySelector('.stu-filter'); if (f) setTimeout(function () { f.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }
   }
-  var ex = document.getElementById('gate-explore'); if (ex) ex.addEventListener('click', function (e) { e.preventDefault(); enter(false); });
-  var fi = document.getElementById('gate-filter'); if (fi) fi.addEventListener('click', function (e) { e.preventDefault(); enter(true); });
+  var pending = null;
+  function showScoring(fn) { var sc = document.getElementById('scoring'); if (sc) { pending = fn; sc.hidden = false; document.body.classList.add('gated'); } else { fn(); } }
+  var scGo = document.getElementById('sc-go');
+  if (scGo) scGo.addEventListener('click', function () {
+    var sc = document.getElementById('scoring'); if (sc) sc.hidden = true;
+    document.body.classList.remove('gated');
+    if (pending) { var f = pending; pending = null; f(); }
+  });
+  var ex = document.getElementById('gate-explore'); if (ex) ex.addEventListener('click', function (e) { e.preventDefault(); showScoring(function () { enter(false); }); });
+  var fi = document.getElementById('gate-filter'); if (fi) fi.addEventListener('click', function (e) { e.preventDefault(); showScoring(function () { enter(true); }); });
   var sk = document.getElementById('gate-skip'); if (sk) sk.addEventListener('click', function (e) { e.preventDefault(); enter(false); });
   document.addEventListener('click', function (e) {
     var a = e.target && e.target.closest ? e.target.closest('a.stu-card, a.jobcard') : null;

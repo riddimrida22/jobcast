@@ -18,6 +18,7 @@
   </div>
   <div class="gate-skip"><a id="gate-skip">Skip and browse the site</a></div>
 </div>
+{% include "_scoring.html" %}
 {# Color by broad discipline: blue-collar/trades = light blue, business = navy, tech = indigo, etc. #}
 {% set famcol = {
   '11':'#2f4f73','13':'#2f4f73','41':'#2f4f73','43':'#2f4f73',
@@ -556,16 +557,24 @@
   // The intro gate is always the first page; it clears only when a path is chosen.
   document.body.classList.add('gated');
 
+  function showCareers() { var cs = document.getElementById('careers-screen'); if (cs) { cs.hidden = false; document.body.classList.add('gated'); } }
+  // After a path is chosen, explain the scoring full-screen, then run the path.
+  var pending = null;
+  function showScoring(fn) { var sc = document.getElementById('scoring'); if (sc) { pending = fn; sc.hidden = false; document.body.classList.add('gated'); } else { fn(); } }
+  var scGo = document.getElementById('sc-go');
+  if (scGo) scGo.addEventListener('click', function () {
+    var sc = document.getElementById('scoring'); if (sc) sc.hidden = true;
+    document.body.classList.remove('gated');
+    if (pending) { var f = pending; pending = null; f(); }
+  });
   var mine = document.getElementById('gate-mine');
   if (mine) mine.addEventListener('click', function (e) {
     e.preventDefault(); del(TOUR); set(ENTERED, '1'); hideGate();
-    if (window.jobcastStartFlow) window.jobcastStartFlow();
+    showScoring(function () { if (window.jobcastStartFlow) window.jobcastStartFlow(); });
   });
-
-  function showCareers() { var cs = document.getElementById('careers-screen'); if (cs) { cs.hidden = false; document.body.classList.add('gated'); } }
   var tour = document.getElementById('gate-tour');
   if (tour) tour.addEventListener('click', function (e) {
-    e.preventDefault(); set(TOUR, '1'); set(ENTERED, '1'); hideGate(); showCareers();
+    e.preventDefault(); set(TOUR, '1'); set(ENTERED, '1'); hideGate(); showScoring(showCareers);
   });
   var csExit = document.getElementById('cs-exit');
   if (csExit) csExit.addEventListener('click', function () {
@@ -617,6 +626,16 @@
     }
   });
   var VIBES = ["Let's go", "Keep going", "Nice", "Halfway there", "Almost there", "Two to go", "Last stretch", "Last one"];
+  var splash = document.createElement('div'); splash.className = 'wz-splash'; splash.setAttribute('aria-hidden', 'true');
+  splash.innerHTML = '<div class="ws-n"></div><div class="ws-t"></div>';
+  document.body.appendChild(splash);
+  var splashTimer = null;
+  function stepSplash(n, title) {
+    splash.querySelector('.ws-n').textContent = (n === steps.length - 1) ? 'Last step' : ('Step ' + (n + 1));
+    splash.querySelector('.ws-t').textContent = title || '';
+    splash.classList.add('show'); clearTimeout(splashTimer);
+    splashTimer = setTimeout(function () { splash.classList.remove('show'); }, 900);
+  }
   var i = 0;
   function show(n, dir) {
     var prev = i;
@@ -635,6 +654,7 @@
     if (nEl) nEl.textContent = last ? 'LAST ONE' : ('STEP ' + (i + 1) + ' OF ' + steps.length + '  ·  ' + (VIBES[i] || '').toUpperCase());
     var ic = steps[i].querySelector('.wz-ico');
     if (ic) { ic.style.animation = 'none'; void ic.offsetWidth; ic.style.animation = ''; }
+    var qEl = steps[i].querySelector('.wz-q'); stepSplash(i, qEl ? qEl.textContent : '');
     var ds = steps[i].getAttribute('data-step');
     var f = ds === 'job' ? document.getElementById('title-search')
                          : steps[i].querySelector('input:not([type=hidden]):not([type=file]), select');

@@ -100,6 +100,21 @@
     .gate-skip a { color:#9db0c6; font-size:13px; text-decoration:underline; cursor:pointer; }
     body.gated { overflow:hidden; }
 
+    /* ---- Full-screen scoring explainer (after a path is chosen) ---- */
+    .scoring { position:fixed; inset:0; z-index:1100; display:flex; align-items:center; justify-content:center; padding:44px 22px; overflow-y:auto;
+      background:radial-gradient(1100px 650px at 50% -5%, var(--shell), var(--shell-dark)); color:#eaf1f9; }
+    .scoring[hidden] { display:none !important; }
+    .sc-wrap { max-width:520px; text-align:center; }
+    .sc-ey { font-size:12px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--accent); }
+    .sc-h { font-size:clamp(28px,5.2vw,40px); font-weight:800; color:#fff; margin:8px 0 10px; }
+    .sc-sub { color:#b9c7d8; font-size:16.5px; line-height:1.5; margin:0 0 24px; }
+    .sc-scale { display:flex; align-items:center; gap:12px; font-size:12px; font-weight:600; color:#b9c7d8; margin:0 0 24px; }
+    .sc-bar { flex:1; height:12px; border-radius:7px; background:linear-gradient(90deg,var(--green),#c88a2e,var(--red)); }
+    .sc-points { list-style:none; padding:0; margin:0 auto 28px; text-align:left; display:inline-block; }
+    .sc-points li { position:relative; padding:9px 0 9px 28px; font-size:15px; line-height:1.4; border-bottom:1px solid rgba(255,255,255,.1); }
+    .sc-points li::before { content:""; position:absolute; left:3px; top:13px; width:9px; height:5px; border-left:2.5px solid var(--accent); border-bottom:2.5px solid var(--accent); transform:rotate(-45deg); }
+    .sc-go { font:inherit; font-weight:800; font-size:17px; cursor:pointer; border:0; border-radius:12px; padding:15px 40px; color:#2a1708; background:linear-gradient(180deg,var(--accent),#e8863a); box-shadow:0 10px 26px rgba(243,163,95,.45); }
+
     /* ---- Guided tour: step banner + spotlight on the scrolling rails ---- */
     .tour-banner { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:900;
                    display:flex; align-items:center; gap:14px; max-width:92vw;
@@ -211,6 +226,15 @@
     @keyframes progFlash { 0%{ filter:brightness(1); } 40%{ filter:brightness(1.8); } 100%{ filter:brightness(1); } }
     .flow-active .stepform .wz-nav .wz-next { animation:ctaPulse 2.2s ease-in-out infinite; }
     @keyframes ctaPulse { 0%,100%{ box-shadow:0 10px 26px rgba(243,163,95,.42); } 50%{ box-shadow:0 12px 34px rgba(243,163,95,.72); } }
+
+    /* ---- Step intro: a full-screen "Step N" splash before each step's content ---- */
+    .wz-splash { position:fixed; inset:0; z-index:1050; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+      text-align:center; padding:24px; pointer-events:none; opacity:0; visibility:hidden; transition:opacity .28s ease, visibility .28s;
+      background:radial-gradient(900px 600px at 50% 42%, #173253, var(--shell-dark)); color:#fff; }
+    .wz-splash.show { opacity:1; visibility:visible; }
+    .wz-splash .ws-n { font-size:clamp(42px,11vw,96px); font-weight:900; color:var(--accent); line-height:1; letter-spacing:.01em;
+      text-shadow:0 8px 34px rgba(0,0,0,.4); animation:wzPop .5s cubic-bezier(.2,1.35,.4,1); }
+    .wz-splash .ws-t { font-size:clamp(18px,3.2vw,26px); font-weight:700; color:#eaf1f9; max-width:560px; }
 
     /* ---- Dramatic result reveal: crunch, then celebration or storm ---- */
     .rv { position:fixed; inset:0; z-index:2000; display:flex; align-items:center; justify-content:center; text-align:center;
