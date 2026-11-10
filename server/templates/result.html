@@ -788,8 +788,18 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     var bn = document.createElement('div'); bn.className = 'rtour';
     bn.innerHTML = '<span class="rt-step"></span><b class="rt-lab"></b><button type="button" class="rt-back" id="rt-back">Back</button><button type="button" class="rt-next" id="rt-next">Next</button><button type="button" class="rt-x" id="rt-x">Exit</button>';
     document.body.appendChild(bn);
+    var rsplash = document.createElement('div'); rsplash.className = 'wz-splash'; rsplash.setAttribute('aria-hidden', 'true');
+    rsplash.innerHTML = '<div class="ws-n"></div><div class="ws-t"></div>';
+    document.body.appendChild(rsplash);
+    var rsTimer = null;
+    function rsSplash(n, title) {
+      rsplash.querySelector('.ws-n').textContent = 'Step ' + (n + 1);
+      rsplash.querySelector('.ws-t').textContent = title || '';
+      rsplash.classList.add('show'); clearTimeout(rsTimer);
+      rsTimer = setTimeout(function () { rsplash.classList.remove('show'); }, 900);
+    }
     function closeShow() { var ss = document.getElementById('sshow'); if (ss && !ss.hidden) { var c = document.getElementById('ss-close'); if (c) c.click(); } }
-    function finish() { document.body.classList.remove('rstage'); closeShow(); bn.remove(); openUpsell(); }
+    function finish() { document.body.classList.remove('rstage'); closeShow(); bn.remove(); rsplash.remove(); openUpsell(); }
     function go2(k) {
       idx = Math.max(0, Math.min(tabs.length - 1, k));
       closeShow();
@@ -798,6 +808,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
       bn.querySelector('.rt-step').textContent = 'Step ' + (idx + 1) + ' of ' + tabs.length;
       var lab = tabs[idx].textContent;
       bn.querySelector('.rt-lab').textContent = lab;
+      rsSplash(idx, lab);
       bn.querySelector('.rt-next').textContent = idx === tabs.length - 1 ? 'Done' : 'Next ›';
       bn.classList.toggle('first', idx === 0);
       // "What to do" plays as a full-screen slideshow; hide the step bar while it is open
@@ -808,7 +819,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
           show.click(); bn.style.display = 'none';
           var ss = document.getElementById('sshow');
           var iv = setInterval(function () { if (!ss || ss.hidden) { bn.style.display = ''; clearInterval(iv); } }, 250);
-        }, 350);
+        }, 950);
       } else { bn.style.display = ''; }
     }
     document.getElementById('rt-next').addEventListener('click', function () {
