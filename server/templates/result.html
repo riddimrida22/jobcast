@@ -508,6 +508,9 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   var HZ = ['Now', '0-6 months', '6-18 months', '1-3 years'];
   var HL = ['Now', '6 mo', '18 mo', '1-3 yr'];
   var LVL = { High: 3, Medium: 2, Low: 1 };
+  var LVLW = { 3: 'High', 2: 'Medium', 1: 'Low', 0: '' };
+  // Visual-first: keep only the first sentence as the quiet "why" under the figures.
+  function firstSentence(s) { s = String(s || ''); var i = s.search(/\.\s/); return i >= 0 ? s.slice(0, i + 1) : s; }
   var ICONS = { skill:1, pivot:1, buffer:1, network:1, credential:1, automate:1, dna:1 };
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function guessIcon(t) {
@@ -522,7 +525,8 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   }
   function bars(n, cls) {
     var s = ''; for (var k = 0; k < 3; k++) s += '<i class="' + (k < n ? 'on' : '') + '"></i>';
-    return '<span class="meter ' + cls + '">' + cls + '<span class="bars">' + s + '</span></span>';
+    return '<span class="meter ' + cls + '"><span class="m-top">' + cls + '<b>' + (LVLW[n] || '') + '</b></span>' +
+      '<span class="bars">' + s + '</span></span>';
   }
   function card(st, i) {
     var head = st.headline || st.title || ('Step ' + (i + 1));
@@ -545,10 +549,10 @@ It is a sourced range, not a verdict, and the detail is below.</p>
       '<div class="deck-top"><span class="deck-num">' + (i + 1) + '</span><span class="deck-hz">' + esc(HZ[hi]) + '</span></div>' +
       '<svg class="deck-illus"><use href="#mo-' + icon + '"></use></svg>' +
       '<div class="deck-head">' + esc(head) + '</div>' +
-      '<div class="deck-act">' + esc(act) + '</div>' +
-      ev +
       '<div class="deck-meters">' + bars(imp, 'impact') + bars(eff, 'effort') + '</div>' +
       '<div class="htrack"><div class="rail">' + rail + '</div><div class="labs">' + labs + '</div></div>' +
+      '<div class="deck-act">' + esc(firstSentence(act)) + '</div>' +
+      ev +
       '</div>';
   }
   // Real opportunity data (safer adjacent roles, their exposure and BLS growth).

@@ -1003,11 +1003,12 @@
     .opp-bar.safe { background:linear-gradient(90deg,#3f9d6a,#6bbf59); }
     .opp-bar.risk { background:linear-gradient(90deg,#e8a23a,#d9533a); }
     .opp-note { font-size:10px; color:var(--muted); line-height:1.4; margin-top:2px; }
-    .deck-meters { display:flex; gap:16px; margin-top:auto; }
-    .deck-meters { display:flex; gap:16px; }
-    .meter { font-size:9.5px; font-weight:800; letter-spacing:.4px; text-transform:uppercase; color:var(--muted); }
-    .meter .bars { display:flex; gap:3px; margin-top:4px; }
-    .meter .bars i { width:15px; height:5px; border-radius:2px; background:var(--line); display:block; }
+    .deck-meters { display:flex; gap:20px; }
+    .meter { display:flex; flex-direction:column; gap:5px; }
+    .meter .m-top { font-size:9.5px; font-weight:800; letter-spacing:.4px; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:6px; }
+    .meter .m-top b { font-size:12px; color:var(--ink); text-transform:none; letter-spacing:0; }
+    .meter .bars { display:flex; gap:4px; }
+    .meter .bars i { width:19px; height:7px; border-radius:3px; background:var(--line); display:block; }
     .meter.impact .bars i.on { background:var(--accent); }
     .meter.effort .bars i.on { background:var(--primary); }
     .htrack .rail { display:flex; align-items:center; }
@@ -1029,8 +1030,10 @@
     .ss-scale .ssc-row { display:flex; align-items:center; gap:9px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#9db0c6; }
     .ss-scale .ssc-track { position:relative; flex:1; height:8px; border-radius:6px; background:linear-gradient(90deg,var(--green),#c88a2e,var(--red)); }
     .ss-scale .ssc-mark { position:absolute; top:50%; width:15px; height:15px; border-radius:50%; background:#fff; border:3px solid #0e1620; transform:translate(-50%,-50%); box-shadow:0 1px 5px rgba(0,0,0,.55); }
-    .ss-stage .deck-card { flex:none; width:100%; box-shadow:0 18px 50px rgba(0,0,0,.5); animation:ssin .32s ease; gap:12px; padding:22px; }
-    .ss-stage .deck-head { font-size:23px; } .ss-stage .deck-act { font-size:15px; }
+    .ss-stage .deck-card { flex:none; width:100%; box-shadow:0 18px 50px rgba(0,0,0,.5); animation:ssin .32s ease; gap:14px; padding:24px; }
+    .ss-stage .deck-head { font-size:23px; } .ss-stage .deck-act { font-size:13px; color:var(--muted); }
+    .ss-stage .deck-meters { gap:28px; } .ss-stage .meter .bars i { width:26px; height:9px; }
+    .ss-stage .meter .m-top { font-size:11px; } .ss-stage .meter .m-top b { font-size:15px; }
     .ss-stage .deck-ic { width:48px; height:48px; } .ss-stage .deck-num { width:30px; height:30px; font-size:15px; }
     .ss-stage .deck-hz { font-size:12px; }
     @keyframes ssin { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
