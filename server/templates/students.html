@@ -160,7 +160,8 @@ breakdown and sources. See <a href="/methodology">How it works</a>.</p>
   function g(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
   function s(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
   function hide() { gate.classList.add('is-hidden'); document.body.classList.remove('gated'); }
-  if (g(E) === '1') hide(); else document.body.classList.add('gated');
+  // The intro gate is always the first page; it clears only when a path is chosen.
+  document.body.classList.add('gated');
   function enter(toFilter) {
     s(E, '1'); s(T, '1'); hide();
     if (toFilter) { var f = document.querySelector('.stu-filter'); if (f) setTimeout(function () { f.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }

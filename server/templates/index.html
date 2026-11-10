@@ -553,7 +553,8 @@
   function set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
   function del(k) { try { sessionStorage.removeItem(k); } catch (e) {} }
   function hideGate() { gate.classList.add('is-hidden'); document.body.classList.remove('gated'); }
-  if (get(ENTERED) === '1') hideGate(); else document.body.classList.add('gated');
+  // The intro gate is always the first page; it clears only when a path is chosen.
+  document.body.classList.add('gated');
 
   var mine = document.getElementById('gate-mine');
   if (mine) mine.addEventListener('click', function (e) {
@@ -594,7 +595,6 @@
     var a = e.target && e.target.closest ? e.target.closest('a.jobcard, a.cs-card') : null;
     if (a && get(TOUR) === '1') set('jb_reveal', '1');
   }, true);
-  if (get(TOUR) === '1' && get(ENTERED) === '1') showCareers();
 })();
 
 // Full-screen stepped wizard for the personal ("your career") flow.
