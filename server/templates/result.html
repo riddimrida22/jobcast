@@ -18,8 +18,8 @@
   <div class="rv-fx" id="rv-fx" aria-hidden="true"></div>
   <div class="rv-crunch" id="rv-crunch">
     <div class="rv-core"><i></i><i></i><i></i><b>AI</b></div>
-    <div class="rv-h">Analyzing your role</div>
-    <div class="rv-step" id="rv-step">Mapping your tasks...</div>
+    <div class="rv-h">{{ 'Analyzing this role' if seo else 'Analyzing your role' }}</div>
+    <div class="rv-step" id="rv-step">{{ 'Mapping the tasks...' if seo else 'Mapping your tasks...' }}</div>
     <div class="rv-bar"><span id="rv-barfill"></span></div>
   </div>
   <div class="rv-done" id="rv-done" hidden>
@@ -121,7 +121,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
 <div class="tabs" role="tablist">
   <button class="tab active" data-panel="p-overview">Overview</button>
   {% if r.strategies %}<button class="tab" data-panel="p-strategy">What to do</button>{% endif %}
-  <button class="tab" data-panel="p-tasks">My tasks</button>
+  <button class="tab" data-panel="p-tasks">{{ 'Tasks' if seo else 'My tasks' }}</button>
   {% if r.key_drivers %}<button class="tab" data-panel="p-drivers">What drives it</button>{% endif %}
   {% if not seo %}<button class="tab" data-panel="p-pay">Pay &amp; place</button>{% endif %}
   {% if r.adjacent_lower_risk %}<button class="tab" data-panel="p-paths">Safer paths</button>{% endif %}
@@ -312,9 +312,23 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     </symbol>
     <symbol id="ic-dna" viewBox="0 0 24 24"><path d="M8 3C15 6 15 9 12 12 9 15 9 18 16 21"/><path d="M16 3C9 6 9 9 12 12 15 15 15 18 8 21"/><path d="M10 6h4M10.5 9h3M10.5 15h3M10 18h4"/></symbol>
     <symbol id="mo-dna" viewBox="0 0 48 48">
-      <path d="M17 7 C31 13 31 19 24 24 C17 29 17 35 31 41" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round"/>
-      <path d="M31 7 C17 13 17 19 24 24 C31 29 31 35 17 41" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round"/>
-      <path d="M20 12 H28 M22 18 H26 M22 30 H26 M20 36 H28" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;opacity:.72"/>
+      <!-- two sugar-phosphate backbones, a full double-helix twist (3 crossings) -->
+      <path d="M15 5 C33 11 33 16 24 20 C15 24 15 24 24 28 C33 32 33 37 15 43" style="fill:none;stroke:currentColor;stroke-width:2.7;stroke-linecap:round"/>
+      <path d="M33 5 C15 11 15 16 24 20 C33 24 33 24 24 28 C15 32 15 37 33 43" style="fill:none;stroke:currentColor;stroke-width:2.7;stroke-linecap:round"/>
+      <!-- base-pair rungs: wide where strands spread, short near the pinch points -->
+      <g style="stroke:currentColor;stroke-width:1.9;stroke-linecap:round;opacity:.78">
+        <line x1="18.5" y1="8" x2="29.5" y2="8"/>
+        <line x1="21" y1="12" x2="27" y2="12"/>
+        <line x1="18.5" y1="16" x2="29.5" y2="16"/>
+        <line x1="18.5" y1="32" x2="29.5" y2="32"/>
+        <line x1="21" y1="36" x2="27" y2="36"/>
+        <line x1="18.5" y1="40" x2="29.5" y2="40"/>
+      </g>
+      <!-- base-pair nodes for a more lifelike look -->
+      <g style="fill:currentColor;opacity:.9">
+        <circle cx="18.5" cy="8" r="1.5"/><circle cx="29.5" cy="8" r="1.5"/>
+        <circle cx="18.5" cy="40" r="1.5"/><circle cx="29.5" cy="40" r="1.5"/>
+      </g>
     </symbol>
   </defs></svg>
   <script id="opportunity-data" type="application/json">{{ {"current_title": r.occupation.title, "current_exposure": r.base_exposure, "roles": r.adjacent_lower_risk[:6]} | tojson }}</script>
@@ -396,7 +410,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
 
 <!-- TASKS -->
 <div id="p-tasks" class="panel card">
-  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg><h2 style="margin:0">Which of my tasks are exposed</h2></div>
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg><h2 style="margin:0">{{ 'Which tasks are exposed' if seo else 'Which of my tasks are exposed' }}</h2></div>
   {% for t in r.tasks %}
   {% set mx = t.ai if t.ai >= t.robo else t.robo %}
   <div class="hrow">
@@ -411,7 +425,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
 <!-- DRIVERS -->
 {% if r.key_drivers %}
 <div id="p-drivers" class="panel card">
-  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M3 12h7M14 12h7M12 5l-3 7 3 7"/></svg><h2 style="margin:0">What is driving my result</h2></div>
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M3 12h7M14 12h7M12 5l-3 7 3 7"/></svg><h2 style="margin:0">{{ 'What drives the result' if seo else 'What is driving my result' }}</h2></div>
   <div class="muted" style="display:grid;grid-template-columns:1fr 14px 1fr;font-size:12px;margin-bottom:6px">
     <div style="text-align:right;padding-right:12px">lowers risk</div><div></div><div style="padding-left:12px">raises risk</div>
   </div>
@@ -546,14 +560,14 @@ It is a sourced range, not a verdict, and the detail is below.</p>
       ev = '<div class="deck-ev"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.3 1 2.1h6c0-.8.4-1.5 1-2.1A6 6 0 0 0 12 3z"/></svg>' +
         '<span>' + esc(st.evidence) + (st.source ? ' <b class="deck-src">' + esc(st.source) + '</b>' : '') + '</span></div>';
     }
+    var src = st.source ? '<div class="deck-src-chip">' + esc(st.source) + '</div>' : '';
     return '<div class="deck-card">' +
       '<div class="deck-top"><span class="deck-num">' + (i + 1) + '</span><span class="deck-hz">' + esc(HZ[hi]) + '</span></div>' +
       '<svg class="deck-illus"><use href="#mo-' + icon + '"></use></svg>' +
       '<div class="deck-head">' + esc(head) + '</div>' +
       '<div class="deck-meters">' + bars(imp, 'impact') + bars(eff, 'effort') + '</div>' +
       '<div class="htrack"><div class="rail">' + rail + '</div><div class="labs">' + labs + '</div></div>' +
-      '<div class="deck-act">' + esc(firstSentence(act)) + '</div>' +
-      ev +
+      src +
       '</div>';
   }
   // Real opportunity data (safer adjacent roles, their exposure and BLS growth).
@@ -568,13 +582,13 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   }
   function chartCard() {
     if (!hasOpp()) return '';
-    var rows = oppRow((OPP.current_title || 'Your job') + ' (you)', OPP.current_exposure, 'risk');
+    var rows = oppRow((OPP.current_title || '{{ "This role" if seo else "Your job" }}') + '{{ "" if seo else " (you)" }}', OPP.current_exposure, 'risk');
     OPP.roles.slice(0, 5).forEach(function (r) {
       rows += oppRow(r.title, r.max_exposure, 'safe', (typeof r.projection_pct === 'number' ? r.projection_pct : undefined));
     });
     return '<div class="deck-card opp-card">' +
       '<div class="deck-top"><span class="deck-num star">&#9733;</span><span class="deck-hz">Opportunity</span></div>' +
-      '<div class="deck-head">Safer paths from your job</div>' +
+      '<div class="deck-head">{{ "Safer paths from this role" if seo else "Safer paths from your job" }}</div>' +
       '<div class="opp-chart">' + rows + '</div>' +
       '<div class="opp-note">Bar = automation exposure (shorter is safer). Green = BLS projected demand growth to 2030.</div>' +
       '</div>';
@@ -750,7 +764,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   var data = {}; try { data = JSON.parse(document.getElementById('reveal-data').textContent) || {}; } catch (e) {}
   var exp = Math.round(+data.exposure || 0);
   ov.hidden = false; ov.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
-  var steps = ['Mapping your tasks...', 'Scoring AI exposure...', 'Checking the robots...', 'Reading your timeline...', 'Comparing to the labor data...', 'Almost there...'];
+  var steps = [{{ "'Mapping the tasks...'" if seo else "'Mapping your tasks...'" }}, 'Scoring AI exposure...', 'Checking the robots...', {{ "'Reading the timeline...'" if seo else "'Reading your timeline...'" }}, 'Comparing to the labor data...', 'Almost there...'];
   var stepEl = document.getElementById('rv-step'), bar = document.getElementById('rv-barfill');
   var si = 0; if (stepEl) stepEl.textContent = steps[0];
   if (bar) requestAnimationFrame(function () { bar.style.transition = 'width 3.2s ease'; bar.style.width = '100%'; });
@@ -762,7 +776,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     var tier = exp >= 62 ? 'storm' : (exp < 45 ? 'safe' : 'mixed');
     ov.classList.add(tier);
     var badge = document.getElementById('rv-badge'), msg = document.getElementById('rv-msg');
-    if (tier === 'safe') { badge.textContent = 'Good news'; msg.textContent = 'Most of your work still needs a person. AI reshapes this role more than it replaces it.'; party(); }
+    if (tier === 'safe') { badge.textContent = 'Good news'; msg.textContent = '{{ "Most of this work still needs a person. AI reshapes this role more than it replaces it." if seo else "Most of your work still needs a person. AI reshapes this role more than it replaces it." }}'; party(); }
     else if (tier === 'storm') { badge.textContent = 'Heads up'; msg.textContent = 'A lot of this role is exposed to AI and automation. The good news: there is time to get ahead of it.'; storm(); }
     else { badge.textContent = 'Mixed'; msg.textContent = 'Parts of this role are exposed, parts are safe. Where you focus next is what matters.'; }
     countTo(document.getElementById('rv-num'), exp, 1200);
