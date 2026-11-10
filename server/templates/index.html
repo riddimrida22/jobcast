@@ -602,9 +602,13 @@
     gate.classList.remove('is-hidden');
   }
   if (audEmp) audEmp.addEventListener('click', function (e) { e.preventDefault(); toEmployee(); });
-  // The "For Workers" menu link lands straight in the employee experience, past the
-  // Employee/Student audience gate (which stays the home page for everyone else).
-  if (/[?&]view=workers\b/.test(location.search)) toEmployee();
+  // The "More information" menu link opens the full browse page (hero, scrolling careers,
+  // the assessment form) directly, past both gates. The gate stays the home page otherwise.
+  if (/[?&]view=info\b/.test(location.search)) {
+    if (aud) aud.classList.add('is-hidden');
+    gate.classList.add('is-hidden');
+    document.body.classList.remove('gated');
+  }
 
   function showCareers() { var cs = document.getElementById('careers-screen'); if (cs) { cs.hidden = false; document.body.classList.add('gated'); } }
   // After a path is chosen, explain the scoring full-screen, then run the path.
