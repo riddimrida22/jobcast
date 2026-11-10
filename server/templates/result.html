@@ -37,7 +37,7 @@
   <section class="up-step" data-up="ad">
     <div class="up-ico" aria-hidden="true">&#129504;</div>
     <h2 class="up-q">Unlock the full breakdown</h2>
-    <p class="up-sub">You've seen the headline number. <b>JobBreak Monitor</b> unlocks every exposed task and your timeline, plus a researched, cited plan built for this role, and keeps watching.</p>
+    <p class="up-sub">You've seen your {{ rating_label }}. <b>JobBreak Monitor</b> unlocks every exposed task and your timeline, plus a researched, cited plan built for this role, and keeps watching.</p>
     <ul class="up-list">
       <li>A full, step-by-step plan, researched and sourced for your job</li>
       <li>Personalised to your skills, pay, and location</li>
@@ -516,7 +516,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><h2 style="margin:0">How your {{ rating_label }} is worked out</h2></div>
   <div class="calc-flow">
     <div class="calc-step"><span class="cs-n">1</span><div class="cs-body"><b>Map tasks</b><span>{{ r.tasks|length }} O*NET tasks</span></div></div>
-    <div class="calc-step"><span class="cs-n">2</span><div class="cs-body"><b>Score each</b><span>AI + robotics, 0&ndash;100</span></div></div>
+    <div class="calc-step"><span class="cs-n">2</span><div class="cs-body"><b>Rate each</b><span>AI + robotics, 0&ndash;100</span></div></div>
     <div class="calc-step"><span class="cs-n">3</span><div class="cs-body"><b>Average</b><span>AI {{ r.exposure.ai_software }} &middot; robo {{ r.exposure.physical_robotics }}</span></div></div>
     <div class="calc-step"><span class="cs-n">4</span><div class="cs-body"><b>Timeline</b><span>from {{ r.base_exposure }}, demand {{ r.timeline.local_demand_trend }}</span></div></div>
     <div class="calc-step"><span class="cs-n">5</span><div class="cs-body"><b>Range</b><span>&plusmn;{{ r.exposure_range.half_width }} pts, not a verdict</span></div></div>
