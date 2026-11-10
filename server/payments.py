@@ -15,11 +15,10 @@ import json
 import time
 from pathlib import Path
 
-# Persist on the mounted disk (JOBCAST_DATA_DIR) in production, so subscriber records
-# survive deploys; fall back to the repo data dir for local dev.
-_DATA_DIR = Path(os.environ["JOBCAST_DATA_DIR"]) if os.environ.get("JOBCAST_DATA_DIR") \
-    else (Path(__file__).resolve().parents[1] / "data")
-SUBS_FILE = _DATA_DIR / "subscriptions.jsonl"
+# Persist on the mounted disk in production (auto-detected), so subscriber records
+# survive deploys; falls back to the repo data dir for local dev.
+from .datadir import data_dir as _data_dir
+SUBS_FILE = _data_dir() / "subscriptions.jsonl"
 
 TIER_RANK = {"free": 0, "tier1": 1, "tier2": 2, "tier3": 3}
 

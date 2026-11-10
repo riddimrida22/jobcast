@@ -21,10 +21,8 @@ _REPO_DATA = Path(__file__).resolve().parents[1] / "data"
 
 
 def _db_path() -> Path:
-    base = os.environ.get("JOBCAST_DATA_DIR")
-    d = Path(base) if base else _REPO_DATA
-    d.mkdir(parents=True, exist_ok=True)
-    return d / "analytics.db"
+    from .datadir import data_dir
+    return data_dir() / "analytics.db"
 
 
 def _conn() -> sqlite3.Connection:
