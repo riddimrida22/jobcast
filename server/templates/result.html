@@ -431,18 +431,19 @@ It is a sourced range, not a verdict, and the detail is below.</p>
 {% if not seo %}
 <div id="p-pay" class="panel card">
   <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><h2 style="margin:0">Pay and local market</h2></div>
-  {% if r.wages.occupation_median_wage %}
-  <p>Median pay for this role in {{ r.location.metro }}: <strong>${{ "{:,.0f}".format(r.wages.occupation_median_wage) }}</strong>
-     <span class="muted">(local demand {{ r.timeline.local_demand_trend }})</span></p>
-  {% endif %}
-  {% if r.wages.available %}
-  <p>My real pay change over five years: <strong>{{ r.wages.real_change_pct }}%</strong>
-     <span class="muted">(nominal {{ r.wages.nominal_change_pct }}%)</span></p>
-  {% if r.wages.pay_vs_median_pct is not none %}<p class="muted">I am {{ r.wages.pay_vs_median_pct }}% versus the local median.</p>{% endif %}
-  {% if r.wages.signal %}<p>{{ r.wages.signal }}</p>{% endif %}
-  {% else %}
-  <p class="muted">Add your current pay and pay five years ago on the home page to see your wage trajectory.</p>
-  {% endif %}
+  <div class="stat-tiles">
+    {% if r.wages.occupation_median_wage %}
+    <div class="stile"><div class="st-val">${{ "{:,.0f}".format(r.wages.occupation_median_wage) }}</div><div class="st-lab">Median pay, {{ r.location.metro }}</div></div>
+    {% endif %}
+    <div class="stile"><div class="st-val">{{ r.timeline.local_demand_trend }}</div><div class="st-lab">Local demand</div></div>
+    {% if r.wages.available %}
+    <div class="stile"><div class="st-val {{ 'pos' if r.wages.real_change_pct >= 0 else 'neg' }}">{{ '+' if r.wages.real_change_pct >= 0 else '' }}{{ r.wages.real_change_pct }}%</div><div class="st-lab">Your real pay, 5 yrs</div></div>
+    {% if r.wages.pay_vs_median_pct is not none %}
+    <div class="stile"><div class="st-val {{ 'pos' if r.wages.pay_vs_median_pct >= 0 else 'neg' }}">{{ '+' if r.wages.pay_vs_median_pct >= 0 else '' }}{{ r.wages.pay_vs_median_pct }}%</div><div class="st-lab">vs local median</div></div>
+    {% endif %}
+    {% endif %}
+  </div>
+  {% if not r.wages.available %}<p class="muted" style="margin-top:12px">Add your current pay and pay five years ago on the home page to see your wage trajectory.</p>{% endif %}
 </div>
 {% endif %}
 
@@ -473,15 +474,15 @@ It is a sourced range, not a verdict, and the detail is below.</p>
 <!-- HOW IT'S SCORED -->
 <div id="p-scored" class="panel card">
   <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><h2 style="margin:0">How this score is calculated</h2></div>
-  <ol class="ol-steps">
-    <li>Map <strong>{{ r.occupation.title }}</strong> to its standard O*NET task list ({{ r.tasks|length }} core tasks).</li>
-    <li>Score each task for AI/software exposure (Eloundou et al. 2023) and physical/robotics exposure (an O*NET work-context proxy), each 0 to 100.</li>
-    <li>The two axis scores are the task averages: AI <strong>{{ r.exposure.ai_software }}</strong>, robotics <strong>{{ r.exposure.physical_robotics }}</strong>.</li>
-    <li>The timeline comes from the higher axis ({{ r.base_exposure }}), shifted for local demand ({{ r.timeline.local_demand_trend }}){% if r.timeline.union_protected %}, union coverage{% endif %}, and seniority. It is read against your remaining working years.</li>
-    <li>Ranges are about &plusmn;{{ r.exposure_range.half_width }} points. A backtest against real BLS employment change shows the risk ranking holds in aggregate, but individual outcomes are predicted weakly, so results are ranges, never a flat verdict.</li>
-  </ol>
-  <p class="muted">Sources: {% for s in r.sources %}{{ s.name }}{% if not loop.last %}, {% endif %}{% endfor %}.
-     Snapshot {{ r.snapshot.id }}. Full method and backtest on <a href="/methodology">How it works</a>.</p>
+  <div class="calc-flow">
+    <div class="calc-step"><span class="cs-n">1</span><div class="cs-body"><b>Map tasks</b><span>{{ r.tasks|length }} O*NET tasks</span></div></div>
+    <div class="calc-step"><span class="cs-n">2</span><div class="cs-body"><b>Score each</b><span>AI + robotics, 0&ndash;100</span></div></div>
+    <div class="calc-step"><span class="cs-n">3</span><div class="cs-body"><b>Average</b><span>AI {{ r.exposure.ai_software }} &middot; robo {{ r.exposure.physical_robotics }}</span></div></div>
+    <div class="calc-step"><span class="cs-n">4</span><div class="cs-body"><b>Timeline</b><span>from {{ r.base_exposure }}, demand {{ r.timeline.local_demand_trend }}</span></div></div>
+    <div class="calc-step"><span class="cs-n">5</span><div class="cs-body"><b>Range</b><span>&plusmn;{{ r.exposure_range.half_width }} pts, not a verdict</span></div></div>
+  </div>
+  <div class="src-chips">{% for s in r.sources %}<span class="chip">{{ s.name }}</span>{% endfor %}</div>
+  <p class="muted" style="margin-top:10px">Snapshot {{ r.snapshot.id }}. Full method and backtest on <a href="/methodology">How it works</a>.</p>
 </div>
 
 <p style="margin-top:16px"><a href="/">Check another job</a></p>
