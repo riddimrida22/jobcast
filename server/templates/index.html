@@ -577,6 +577,7 @@
   var audEmp = document.getElementById('aud-employee');
   if (audEmp) audEmp.addEventListener('click', function (e) {
     e.preventDefault();
+    try { sessionStorage.setItem('jb_aud', 'emp'); } catch (err) {}
     if (aud) aud.classList.add('is-hidden');
     gate.classList.remove('is-hidden');
   });

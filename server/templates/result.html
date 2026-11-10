@@ -799,7 +799,11 @@ It is a sourced range, not a verdict, and the detail is below.</p>
       rsTimer = setTimeout(function () { rsplash.classList.remove('show'); }, 900);
     }
     function closeShow() { var ss = document.getElementById('sshow'); if (ss && !ss.hidden) { var c = document.getElementById('ss-close'); if (c) c.click(); } }
-    function finish() { document.body.classList.remove('rstage'); closeShow(); bn.remove(); rsplash.remove(); openUpsell(); }
+    function finish() {
+      document.body.classList.remove('rstage'); closeShow(); bn.remove(); rsplash.remove();
+      var stu; try { stu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {}
+      if (stu) { endFree(); } else { openUpsell(); }
+    }
     function go2(k) {
       idx = Math.max(0, Math.min(tabs.length - 1, k));
       closeShow();
@@ -829,6 +833,21 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     document.getElementById('rt-back').addEventListener('click', function () { if (idx > 0) go2(idx - 1); });
     document.getElementById('rt-x').addEventListener('click', finish);
     go2(0);
+  }
+  // Students are the free tier: close the tour with a free message, never the paid upsell.
+  function endFree() {
+    if (document.getElementById('stu-end')) return;
+    var ov = document.createElement('div'); ov.id = 'stu-end';
+    ov.innerHTML = '<button type="button" class="se-x" id="se-x">Close</button>'
+      + '<div class="se-ey">All yours, free</div>'
+      + "<h2>That's your plan. No sign-up, no fee.</h2>"
+      + '<p>Students get the full read and the what-to-do steps free. Explore as many careers as you like.</p>'
+      + '<a class="se-go" href="/students">Explore more careers</a>';
+    document.body.appendChild(ov);
+    document.body.style.overflow = 'hidden';
+    document.getElementById('se-x').addEventListener('click', function () {
+      ov.remove(); document.body.style.overflow = '';
+    });
   }
   function openUpsell() {
     var up = document.getElementById('upsell'); if (!up) return;

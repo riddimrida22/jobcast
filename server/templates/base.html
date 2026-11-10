@@ -170,7 +170,7 @@
       background:radial-gradient(1100px 650px at 50% -8%, var(--bg-b), var(--bg-a));
       display:flex; flex-direction:column; align-items:center; justify-content:center; padding:78px 22px 104px; overflow-y:auto; }
     .flow-active .stepform .wz-step { display:none; width:100%; max-width:520px; margin:0; }
-    .flow-active .stepform .wz-step.active { display:block; animation:wzIn .35s ease; }
+    .flow-active .stepform .wz-step.active { display:block; animation:wzIn .35s ease; position:relative; z-index:20; }
     @keyframes wzIn { from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
     .flow-active .stepform .wz-n { font-size:12.5px; }
     .flow-active .stepform .wz-q { font-size:clamp(26px,5.2vw,38px); margin-bottom:6px; }
@@ -299,6 +299,24 @@
       text-align:center; padding:72px 22px 92px; color:#eaf1f9; overflow-y:auto;
       background:radial-gradient(1100px 650px at 50% -6%, #173253, var(--shell-dark)); }
     #upsell[hidden] { display:none !important; }
+    #stu-end { position:fixed; inset:0; z-index:1700; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; padding:48px 24px; color:#eaf1f9; overflow-y:auto; opacity:1;
+      background:radial-gradient(1100px 650px at 50% -6%, #123a24, var(--shell-dark)); }
+    #stu-end .se-card-anim { animation:wzIn .4s ease; }
+    #stu-end .se-x { position:absolute; top:16px; right:18px; background:none; border:0; color:#9db0c6; font:inherit; font-size:13px; text-decoration:underline; cursor:pointer; }
+    #stu-end .se-ey { font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--green); margin-bottom:12px; }
+    #stu-end h2 { font-size:clamp(26px,5vw,38px); font-weight:800; color:#fff; margin:0 0 10px; max-width:620px; }
+    #stu-end p { color:#b9c7d8; font-size:16px; line-height:1.5; margin:0 0 26px; max-width:460px; }
+    #stu-end .se-go { font:inherit; font-weight:800; font-size:17px; cursor:pointer; border:0; border-radius:12px; padding:15px 38px;
+      color:#06230f; background:var(--green); text-decoration:none; box-shadow:0 10px 30px rgba(63,191,127,.3); }
+    .home-fab { position:fixed; top:14px; left:14px; z-index:3000; display:inline-flex; align-items:center; gap:7px;
+      padding:9px 15px 9px 12px; border-radius:999px; text-decoration:none; font-size:14px; font-weight:700;
+      background:rgba(12,22,38,.72); color:#eaf1f9; border:1px solid rgba(255,255,255,.18);
+      -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); box-shadow:0 6px 20px rgba(0,0,0,.35);
+      transition:background .15s ease, transform .15s ease; }
+    .home-fab:hover { background:rgba(20,38,64,.95); transform:translateY(-1px); }
+    .home-fab svg { width:18px; height:18px; }
+    @media (max-width:560px){ .home-fab span { display:none; } .home-fab { padding:10px; } }
     .up-x { position:absolute; top:16px; right:18px; background:none; border:0; color:#9db0c6; font:inherit; font-size:13px; text-decoration:underline; cursor:pointer; }
     .up-step { display:none; width:100%; max-width:480px; }
     .up-step.active { display:block; animation:wzIn .35s ease; }
@@ -1029,6 +1047,11 @@
   </style>
 </head>
 <body class="{% block body_class %}{% endblock %}">
+  <a class="home-fab" id="home-fab" href="/" aria-label="Back to home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg>
+    <span>Home</span>
+  </a>
+  <script>if(location.pathname==='/'){var _hf=document.getElementById('home-fab');if(_hf)_hf.style.display='none';}</script>
   {% if not licensed %}
   <div class="dev-banner">Development data. Illustrative values, not published figures. Not for public use.</div>
   {% elif noindex %}
