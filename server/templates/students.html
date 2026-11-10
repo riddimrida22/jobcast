@@ -168,15 +168,22 @@ breakdown and sources. See <a href="/methodology">How it works</a>.</p>
     if (toFilter) { var f = document.querySelector('.stu-filter'); if (f) setTimeout(function () { f.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }
   }
   var pending = null;
-  function showScoring(fn) { var sc = document.getElementById('scoring'); if (sc) { pending = fn; sc.hidden = false; document.body.classList.add('gated'); } else { fn(); } }
+  function showScoring(fn, introText, ctaText) {
+    var sc = document.getElementById('scoring'); if (!sc) { fn(); return; }
+    pending = fn;
+    var intro = document.getElementById('sc-intro'), goBtn = document.getElementById('sc-go');
+    if (intro && introText) intro.textContent = introText;
+    if (goBtn && ctaText) goBtn.textContent = ctaText;
+    sc.hidden = false; document.body.classList.add('gated');
+  }
   var scGo = document.getElementById('sc-go');
   if (scGo) scGo.addEventListener('click', function () {
     var sc = document.getElementById('scoring'); if (sc) sc.hidden = true;
     document.body.classList.remove('gated');
     if (pending) { var f = pending; pending = null; f(); }
   });
-  var ex = document.getElementById('gate-explore'); if (ex) ex.addEventListener('click', function (e) { e.preventDefault(); showScoring(function () { enter(false); }); });
-  var fi = document.getElementById('gate-filter'); if (fi) fi.addEventListener('click', function (e) { e.preventDefault(); showScoring(function () { enter(true); }); });
+  var ex = document.getElementById('gate-explore'); if (ex) ex.addEventListener('click', function (e) { e.preventDefault(); showScoring(function () { enter(false); }, "You're about to look through careers, and each one carries a score.", 'Start exploring'); });
+  var fi = document.getElementById('gate-filter'); if (fi) fi.addEventListener('click', function (e) { e.preventDefault(); showScoring(function () { enter(true); }, "We'll match careers to what you're into, each with a score.", 'Find my matches'); });
   var sk = document.getElementById('gate-skip'); if (sk) sk.addEventListener('click', function (e) { e.preventDefault(); enter(false); });
   document.addEventListener('click', function (e) {
     var a = e.target && e.target.closest ? e.target.closest('a.stu-card, a.jobcard') : null;

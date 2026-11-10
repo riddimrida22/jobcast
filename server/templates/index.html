@@ -560,7 +560,14 @@
   function showCareers() { var cs = document.getElementById('careers-screen'); if (cs) { cs.hidden = false; document.body.classList.add('gated'); } }
   // After a path is chosen, explain the scoring full-screen, then run the path.
   var pending = null;
-  function showScoring(fn) { var sc = document.getElementById('scoring'); if (sc) { pending = fn; sc.hidden = false; document.body.classList.add('gated'); } else { fn(); } }
+  function showScoring(fn, introText, ctaText) {
+    var sc = document.getElementById('scoring'); if (!sc) { fn(); return; }
+    pending = fn;
+    var intro = document.getElementById('sc-intro'), goBtn = document.getElementById('sc-go');
+    if (intro && introText) intro.textContent = introText;
+    if (goBtn && ctaText) goBtn.textContent = ctaText;
+    sc.hidden = false; document.body.classList.add('gated');
+  }
   var scGo = document.getElementById('sc-go');
   if (scGo) scGo.addEventListener('click', function () {
     var sc = document.getElementById('scoring'); if (sc) sc.hidden = true;
@@ -570,11 +577,12 @@
   var mine = document.getElementById('gate-mine');
   if (mine) mine.addEventListener('click', function (e) {
     e.preventDefault(); del(TOUR); set(ENTERED, '1'); hideGate();
-    showScoring(function () { if (window.jobcastStartFlow) window.jobcastStartFlow(); });
+    showScoring(function () { if (window.jobcastStartFlow) window.jobcastStartFlow(); }, 'In a moment, we will give your job a score.', 'Start my questions');
   });
   var tour = document.getElementById('gate-tour');
   if (tour) tour.addEventListener('click', function (e) {
-    e.preventDefault(); set(TOUR, '1'); set(ENTERED, '1'); hideGate(); showScoring(showCareers);
+    e.preventDefault(); set(TOUR, '1'); set(ENTERED, '1'); hideGate();
+    showScoring(showCareers, "You're about to look through real careers, and each one carries a score.", 'Start exploring');
   });
   var csExit = document.getElementById('cs-exit');
   if (csExit) csExit.addEventListener('click', function () {
