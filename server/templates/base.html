@@ -147,13 +147,10 @@
     .cs-col { display:flex; flex-direction:column; min-height:0; }
     .cs-col-h { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; text-align:center; padding:8px; border-radius:10px; margin-bottom:8px; }
     .cs-col-h.risk { color:#f2ab91; background:rgba(224,117,89,.16); } .cs-col-h.safe { color:#80e3cb; background:rgba(63,182,168,.16); }
-    .cs-scroll { flex:1; overflow:hidden; min-height:0;
+    .cs-scroll { flex:1; overflow-y:auto; min-height:0; scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.3) transparent;
       -webkit-mask-image:linear-gradient(180deg,transparent,#000 7%,#000 93%,transparent); mask-image:linear-gradient(180deg,transparent,#000 7%,#000 93%,transparent); }
-    .cs-track { display:flex; flex-direction:column; gap:8px; animation:csUp 34s linear infinite; }
-    .cs-track.down { animation-name:csDown; }
-    .cs-scroll:hover .cs-track { animation-play-state:paused; }
-    @keyframes csUp { from{ transform:translateY(0); } to{ transform:translateY(-50%); } }
-    @keyframes csDown { from{ transform:translateY(-50%); } to{ transform:translateY(0); } }
+    .cs-scroll::-webkit-scrollbar { width:7px; } .cs-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,.28); border-radius:7px; }
+    .cs-track { display:flex; flex-direction:column; gap:8px; }
     .cs-card { display:flex; justify-content:space-between; align-items:center; gap:10px; text-decoration:none; color:#eaf1f9;
       background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); border-radius:10px; padding:11px 13px; }
     .cs-card:hover { background:rgba(255,255,255,.12); border-color:var(--accent); }
@@ -504,13 +501,11 @@
     .side-title.safe { color:var(--green); background:rgba(20,123,116,.13); border:1px solid rgba(20,123,116,.36); }
     [data-theme="dark"] .side-title.risk { color:#f2ab91; background:rgba(224,117,89,.16); border-color:rgba(224,117,89,.38); }
     [data-theme="dark"] .side-title.safe { color:#80e3cb; background:rgba(63,182,168,.16); border-color:rgba(63,182,168,.38); }
-    .ticker { height:520px; overflow:hidden; -webkit-mask-image:linear-gradient(180deg,transparent,#000 7%,#000 93%,transparent);
+    .ticker { height:520px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--line) transparent;
+              -webkit-mask-image:linear-gradient(180deg,transparent,#000 7%,#000 93%,transparent);
               mask-image:linear-gradient(180deg,transparent,#000 7%,#000 93%,transparent); }
-    .ticker:hover .ticker-inner { animation-play-state:paused; }
-    .ticker-inner { display:flex; flex-direction:column; gap:8px; animation:tickerUp 48s linear infinite; }
-    .ticker.rev .ticker-inner { animation-name:tickerDown; }
-    @keyframes tickerUp { from { transform:translateY(0); } to { transform:translateY(-50%); } }
-    @keyframes tickerDown { from { transform:translateY(-50%); } to { transform:translateY(0); } }
+    .ticker::-webkit-scrollbar { width:7px; } .ticker::-webkit-scrollbar-thumb { background:var(--line); border-radius:7px; }
+    .ticker-inner { display:flex; flex-direction:column; gap:8px; }
     .jobcard { display:flex; justify-content:space-between; align-items:center; gap:10px; text-decoration:none;
                background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 12px;
                font-size:13px; color:var(--ink); box-shadow:0 2px 8px rgba(31,63,96,.05); }
@@ -529,11 +524,10 @@
       /* let the 1-col grid items shrink so the wide rolling track does not blow out page width */
       .home-layout .center, .home-layout .side { min-width:0; }
       .home-layout .side { order:1; position:static; top:auto; margin:14px 0 0; overflow:hidden; }
-      .ticker { height:auto; width:100%; overflow:hidden;
+      .ticker { height:auto; width:100%; overflow-x:auto; overflow-y:hidden;
                 -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
                 mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent); }
-      .ticker-inner { flex-direction:row; width:max-content; animation-name:tickerLeft; animation-duration:40s; }
-      .ticker.rev .ticker-inner { animation-name:tickerRight; }
+      .ticker-inner { flex-direction:row; width:max-content; }
       .jobcard { width:190px; flex:0 0 auto; }
     }
     .score-explain { display:flex; flex-wrap:wrap; gap:10px 26px; align-items:center; justify-content:center;
@@ -1228,5 +1222,26 @@
       <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a> &middot; JobBreak is informational only, not career or financial advice.
     </footer>
   </div>
+  <script>
+  // Career lists scroll on their own, but yield instantly to manual scroll/drag/wheel
+  // (feedback: the auto-scroll alone was too slow to find a specific job).
+  (function(){
+    function autoScroll(el){
+      var paused=false, resumeT=null;
+      function horiz(){ return (el.scrollWidth-el.clientWidth) > (el.scrollHeight-el.clientHeight)+4; }
+      function pause(){ paused=true; clearTimeout(resumeT); resumeT=setTimeout(function(){ paused=false; },2200); }
+      ['wheel','touchstart','pointerdown','mouseenter'].forEach(function(ev){ el.addEventListener(ev,pause,{passive:true}); });
+      (function tick(){
+        if(!paused){
+          var h=horiz(), sz=h?el.scrollWidth:el.scrollHeight, client=h?el.clientWidth:el.clientHeight, half=sz/2, prop=h?'scrollLeft':'scrollTop';
+          if(half-client>6){ var nv=el[prop]+0.5; if(nv>=half) nv-=half; el[prop]=nv; }
+        }
+        requestAnimationFrame(tick);
+      })();
+    }
+    function init(){ var l=document.querySelectorAll('.cs-scroll, .ticker'); for(var i=0;i<l.length;i++) autoScroll(l[i]); }
+    if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded', init);
+  })();
+  </script>
 </body>
 </html>
