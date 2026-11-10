@@ -429,6 +429,15 @@ class Engine:
 def load_default_engine() -> Engine:
     snapshot_path = os.environ.get("JOBCAST_SNAPSHOT") or str(DEFAULT_SNAPSHOT)
     snapshot = Snapshot.from_file(snapshot_path)
+    # Curated colloquial job names -> real occupation, so the career search recognises them.
+    extra_aliases = REPO_ROOT / "data" / "aliases_extra.json"
+    if extra_aliases.exists():
+        try:
+            with open(extra_aliases, "r", encoding="utf-8") as fh:
+                overlay = {k: v for k, v in json.load(fh).items() if not k.startswith("_")}
+            snapshot.add_aliases(overlay)
+        except (OSError, ValueError):
+            pass
     def _load(name):
         with open(DEFAULT_CONFIG_DIR / name, "r", encoding="utf-8") as fh:
             return json.load(fh)

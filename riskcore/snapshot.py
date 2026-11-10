@@ -22,6 +22,17 @@ class Snapshot:
             for name in occ.get("aliases", []):
                 self._alias_index.append((name.lower().strip(), occ["soc"], False))
 
+    def add_aliases(self, mapping: Dict[str, List[str]]) -> None:
+        """Merge a curated {soc: [alias, ...]} overlay into the search index, so colloquial
+        job names resolve to the real occupation that covers them (scored by its real data)."""
+        for soc, names in (mapping or {}).items():
+            if soc not in self._occ_by_soc:
+                continue
+            for name in names or []:
+                n = (name or "").lower().strip()
+                if n:
+                    self._alias_index.append((n, soc, False))
+
     # ---- loading ---------------------------------------------------------
     @classmethod
     def from_file(cls, path: str) -> "Snapshot":

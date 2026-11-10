@@ -1,0 +1,7 @@
+{
+  "_comment": "Curated colloquial job terms mapped to the real O*NET occupation that covers them, so they resolve and appear in the career search. Each term is scored by the mapped occupation's real data - no invented numbers. Keyed by SOC code.",
+  "31-9011.00": ["reflexology", "reflexologist", "bodyworker", "bodywork", "shiatsu therapist", "spa therapist", "masseur", "masseuse"],
+  "13-2011.00": ["accounting"],
+  "41-9022.00": ["realtor"],
+  "27-1012.00": ["tattoo artist", "tattooist"]
+}
