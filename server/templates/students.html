@@ -32,6 +32,11 @@
   </div>
   <div class="gate-skip"><a id="gate-search">Look up a specific career</a> &middot; <a id="gate-skip">Skip and browse</a></div>
 </div>
+<div class="welcome" id="welcome" hidden role="dialog" aria-label="Welcome">
+  <div class="wel-head"><h2>Here's the race</h2><p>AI is changing which careers last. Watch, then find the ones that fit you.</p></div>
+  {% include "_hero_gif.html" %}
+  <button type="button" class="wel-go" id="wel-go">Find my path &#8250;</button>
+</div>
 {% include "_scoring.html" %}
 
 <div class="careers-screen" id="careers-screen" hidden>
@@ -268,7 +273,17 @@ breakdown and sources. See <a href="/methodology">How it works</a>.</p>
   // (the filter selects auto-submit, reloading /students with query params).
   var pastGate = g(E) === '1' || /[?&](field|education|priority)=/.test(location.search);
   if (pastGate) { s(T, '1'); gate.classList.add('is-hidden'); }
-  else { document.body.classList.add('gated'); }
+  else {
+    document.body.classList.add('gated');
+    // Fresh visit: a welcome page with the race animation plays before the choice.
+    var wel = document.getElementById('welcome');
+    if (wel) {
+      gate.classList.add('is-hidden');
+      wel.hidden = false;
+      var welGo = document.getElementById('wel-go');
+      if (welGo) welGo.addEventListener('click', function () { wel.hidden = true; gate.classList.remove('is-hidden'); });
+    }
+  }
   function enter(toFilter) {
     s(E, '1'); s(T, '1'); hide();
     if (toFilter) { var f = document.querySelector('.stu-filter'); if (f) setTimeout(function () { f.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }

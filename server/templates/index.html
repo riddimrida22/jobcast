@@ -17,6 +17,11 @@
     </a>
   </div>
 </div>
+<div class="welcome" id="welcome" hidden role="dialog" aria-label="Welcome">
+  <div class="wel-head"><h2>Here's the race</h2><p>Automation is taking some work faster than others. Watch, then see where you land.</p></div>
+  {% include "_hero_gif.html" %}
+  <button type="button" class="wel-go" id="wel-go">See where you land &#8250;</button>
+</div>
 <div class="gate is-hidden" id="gate" role="dialog" aria-label="How to start">
   <div class="gate-q">How do you want to start?</div>
   <p class="gate-sub">Not hype, not fear. How much of your work still needs a person, and when?</p>
@@ -596,10 +601,23 @@
   // Audience gate first: Employee reveals the employee paths; Student is a link to /students.
   var aud = document.getElementById('gate-aud');
   var audEmp = document.getElementById('aud-employee');
+  // After the audience choice, a welcome page plays the "race" animation, then the
+  // general-vs-personal choice. The gif is the thing people enjoy, so it gets a moment.
+  var welNext = null;
+  function showWelcome(next) {
+    var w = document.getElementById('welcome');
+    if (!w) { next(); return; }
+    welNext = next; w.hidden = false;
+  }
+  var welGo = document.getElementById('wel-go');
+  if (welGo) welGo.addEventListener('click', function () {
+    var w = document.getElementById('welcome'); if (w) w.hidden = true;
+    if (welNext) { var f = welNext; welNext = null; f(); }
+  });
   function toEmployee() {
     try { sessionStorage.setItem('jb_aud', 'emp'); } catch (err) {}
     if (aud) aud.classList.add('is-hidden');
-    gate.classList.remove('is-hidden');
+    showWelcome(function () { gate.classList.remove('is-hidden'); });
   }
   if (audEmp) audEmp.addEventListener('click', function (e) { e.preventDefault(); toEmployee(); });
   // The "More information" menu link opens the full browse page (hero, scrolling careers,

@@ -333,6 +333,17 @@
       transition:background .15s ease, transform .15s ease; }
     .home-fab:hover { background:rgba(20,38,64,.95); transform:translateY(-1px); }
     body.ssh-open .home-fab { display:none !important; }
+    .welcome { position:fixed; inset:0; z-index:1050; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:26px; padding:34px 20px; text-align:center; overflow:auto;
+      background:radial-gradient(1100px 650px at 50% -5%, var(--shell), var(--shell-dark)); }
+    .welcome[hidden] { display:none !important; }
+    .welcome .wel-head h2 { color:#fff; font-size:clamp(26px,5vw,40px); font-weight:800; margin:0 0 8px; }
+    .welcome .wel-head p { color:#b9c7d8; font-size:16px; line-height:1.5; margin:0 auto; max-width:460px; }
+    .welcome .slogan-banner { margin:0; }
+    .wel-go { font:inherit; font-weight:800; font-size:17px; cursor:pointer; border:0; border-radius:12px; padding:15px 40px;
+      color:#2a1708; background:linear-gradient(180deg,var(--accent),#e8863a); box-shadow:0 10px 30px rgba(243,163,95,.42);
+      animation:ctaPulse 2.2s ease-in-out infinite; }
+    .wel-go:hover { filter:brightness(1.05); }
     .home-fab svg { width:18px; height:18px; }
     @media (max-width:560px){ .home-fab span { display:none; } .home-fab { padding:10px; } }
     .up-x { position:absolute; top:16px; right:18px; background:none; border:0; color:#9db0c6; font:inherit; font-size:13px; text-decoration:underline; cursor:pointer; }
