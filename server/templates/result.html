@@ -333,11 +333,16 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   <!-- fullscreen slideshow of the plan -->
   <div id="sshow" class="sshow" hidden aria-modal="true" role="dialog" aria-label="Plan slideshow">
     <button type="button" class="ss-close" id="ss-close" aria-label="Close slideshow">&times;</button>
+    <div class="ss-scale" aria-hidden="true">
+      <div class="ssc-job"><b>{{ r.occupation.title }}</b><span>exposure {{ r.base_exposure|round|int }} of 100</span></div>
+      <div class="ssc-row"><span>safe</span><div class="ssc-track"><i class="ssc-mark" style="left:{{ r.base_exposure|round|int }}%"></i></div><span>exposed</span></div>
+    </div>
     <div class="ss-count" id="ss-count"></div>
     <button type="button" class="ss-arrow prev" id="ss-prev" aria-label="Previous step">&#8249;</button>
     <div class="ss-stage" id="ss-stage"></div>
     <button type="button" class="ss-arrow next" id="ss-next" aria-label="Next step">&#8250;</button>
     <div class="ss-dots" id="ss-dots"></div>
+    <button type="button" class="ss-done" id="ss-done" hidden>Next step &#8250;</button>
   </div>
 
   <div id="sub-options" hidden>
@@ -682,8 +687,8 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     }
     function schedule() { clearTimeout(stimer); if (ssTotal() > 1) stimer = setTimeout(function () { go(sidx >= ssTotal() - 1 ? 0 : sidx + 1); }, 6000); }
     function go(i) { sidx = Math.max(0, Math.min(ssTotal() - 1, i)); renderSlide(); schedule(); }
-    function openShow() { if (!ssTotal()) return; sidx = 0; showEl.hidden = false; document.body.style.overflow = 'hidden'; renderSlide(); schedule(); }
-    function closeShow() { showEl.hidden = true; clearTimeout(stimer); document.body.style.overflow = ''; }
+    function openShow() { if (!ssTotal()) return; sidx = 0; showEl.hidden = false; document.body.style.overflow = 'hidden'; document.body.classList.add('ssh-open'); renderSlide(); schedule(); }
+    function closeShow() { showEl.hidden = true; clearTimeout(stimer); document.body.style.overflow = ''; document.body.classList.remove('ssh-open'); }
     showBtn.addEventListener('click', openShow);
     prevB.addEventListener('click', function () { go(sidx - 1); });
     nextB.addEventListener('click', function () { go(sidx + 1); });
@@ -820,10 +825,19 @@ It is a sourced range, not a verdict, and the detail is below.</p>
       // so the slideshow's own arrows cannot be confused with the step controls.
       if (/what to do/i.test(lab)) {
         var show = document.getElementById('deck-show-btn');
+        var done = document.getElementById('ss-done');
         if (show) setTimeout(function () {
           show.click(); bn.style.display = 'none';
+          if (done) {
+            done.hidden = false;
+            // A clear way forward from the slideshow: close it and move the tour on.
+            done.onclick = function () {
+              done.hidden = true;
+              if (idx < tabs.length - 1) go2(idx + 1); else finish();
+            };
+          }
           var ss = document.getElementById('sshow');
-          var iv = setInterval(function () { if (!ss || ss.hidden) { bn.style.display = ''; clearInterval(iv); } }, 250);
+          var iv = setInterval(function () { if (!ss || ss.hidden) { bn.style.display = ''; if (done) done.hidden = true; clearInterval(iv); } }, 250);
         }, 950);
       } else { bn.style.display = ''; }
     }

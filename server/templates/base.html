@@ -332,6 +332,7 @@
       -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); box-shadow:0 6px 20px rgba(0,0,0,.35);
       transition:background .15s ease, transform .15s ease; }
     .home-fab:hover { background:rgba(20,38,64,.95); transform:translateY(-1px); }
+    body.ssh-open .home-fab { display:none !important; }
     .home-fab svg { width:18px; height:18px; }
     @media (max-width:560px){ .home-fab span { display:none; } .home-fab { padding:10px; } }
     .up-x { position:absolute; top:16px; right:18px; background:none; border:0; color:#9db0c6; font:inherit; font-size:13px; text-decoration:underline; cursor:pointer; }
@@ -1006,9 +1007,17 @@
     .htrack .labs span.on { color:var(--accent); font-weight:800; }
     /* plan slideshow */
     .sshow { position:fixed; inset:0; z-index:200; background:rgba(14,22,32,.92); backdrop-filter:blur(3px);
-             display:flex; align-items:center; justify-content:center; padding:20px; }
+             display:flex; align-items:center; justify-content:center; padding:104px 20px 96px; }
     .sshow[hidden] { display:none; }
     .ss-stage { width:min(92vw,560px); }
+    /* Scoring-scale reminder + the career being assessed, pinned to the top of every slide. */
+    .ss-scale { position:absolute; top:16px; left:50%; transform:translateX(-50%); width:min(92vw,520px); z-index:2;
+      display:flex; flex-direction:column; gap:6px; text-align:center; pointer-events:none; }
+    .ss-scale .ssc-job b { color:#fff; font-size:15px; font-weight:800; }
+    .ss-scale .ssc-job span { color:#9db0c6; font-size:12px; margin-left:8px; }
+    .ss-scale .ssc-row { display:flex; align-items:center; gap:9px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#9db0c6; }
+    .ss-scale .ssc-track { position:relative; flex:1; height:8px; border-radius:6px; background:linear-gradient(90deg,var(--green),#c88a2e,var(--red)); }
+    .ss-scale .ssc-mark { position:absolute; top:50%; width:15px; height:15px; border-radius:50%; background:#fff; border:3px solid #0e1620; transform:translate(-50%,-50%); box-shadow:0 1px 5px rgba(0,0,0,.55); }
     .ss-stage .deck-card { flex:none; width:100%; box-shadow:0 18px 50px rgba(0,0,0,.5); animation:ssin .32s ease; gap:12px; padding:22px; }
     .ss-stage .deck-head { font-size:23px; } .ss-stage .deck-act { font-size:15px; }
     .ss-stage .deck-ic { width:48px; height:48px; } .ss-stage .deck-num { width:30px; height:30px; font-size:15px; }
@@ -1017,19 +1026,24 @@
     .ss-close { position:absolute; top:16px; right:18px; background:rgba(255,255,255,.12); color:#fff; border:none;
                 width:40px; height:40px; border-radius:50%; font-size:24px; line-height:1; cursor:pointer; margin:0; }
     .ss-close:hover { background:rgba(255,255,255,.22); filter:none; }
-    .ss-count { position:absolute; top:24px; left:50%; transform:translateX(-50%); color:#cdd8e6; font-size:13px; font-weight:700; letter-spacing:.6px; }
+    .ss-count { position:absolute; top:78px; left:50%; transform:translateX(-50%); color:#9db0c6; font-size:12px; font-weight:700; letter-spacing:.6px; }
     .ss-arrow { position:absolute; top:50%; transform:translateY(-50%); background:#3d7ad6; color:#fff;
                 border:none; width:66px; height:66px; border-radius:50%; font-size:38px; line-height:1; cursor:pointer; margin:0;
                 box-shadow:0 8px 22px rgba(0,0,0,.45); }
     .ss-arrow.prev { left:max(12px,4vw); } .ss-arrow.next { right:max(12px,4vw); }
     .ss-arrow:hover { background:#2f63b5; filter:none; } .ss-arrow:disabled { opacity:.3; cursor:default; }
+    .ss-done { position:absolute; bottom:60px; left:50%; transform:translateX(-50%); margin:0; z-index:2;
+      font-weight:800; font-size:15px; padding:12px 30px; border-radius:999px; border:0; cursor:pointer; color:#2a1708;
+      background:linear-gradient(180deg,var(--accent),#e8863a); box-shadow:0 8px 24px rgba(243,163,95,.5); animation:ctaPulse 2.2s ease-in-out infinite; }
+    .ss-done[hidden] { display:none !important; }
+    .ss-done:hover { filter:brightness(1.05); }
     .ss-dots { position:absolute; bottom:26px; left:0; right:0; display:flex; gap:9px; justify-content:center; }
     .ss-dots i { width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,.3); cursor:pointer; display:block; }
     .ss-dots i.on { background:var(--accent); }
     /* On phones the card fills almost the whole width, so side arrows would sit on top of
        the text. Move them to the bottom corners, below the card, with the dots between. */
     @media (max-width:560px) {
-      .sshow { padding:16px 12px 92px; }
+      .sshow { padding:104px 12px 96px; }
       .ss-stage { width:94vw; }
       .ss-arrow { top:auto; bottom:18px; transform:none; width:48px; height:48px; font-size:27px; box-shadow:0 5px 16px rgba(0,0,0,.4); }
       .ss-arrow.prev { left:22px; } .ss-arrow.next { right:22px; }
