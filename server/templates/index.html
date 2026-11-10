@@ -1,6 +1,23 @@
 {% extends "base.html" %}
 {% block body_class %}wide{% endblock %}
 {% block content %}
+<div class="gate" id="gate" role="dialog" aria-label="Welcome to JobBreak">
+  <div class="gate-q">Will <span class="hot">AI</span> replace your job?</div>
+  <p class="gate-sub">Not hype, not fear. How much of your work still needs a person, and when? Pick where to start.</p>
+  <div class="gate-paths">
+    <a class="gate-card" href="#" id="gate-tour">
+      <span class="gc-ey">The topic in general</span>
+      <div class="gc-h">Take a quick tour</div>
+      <div class="gc-sub">Click any job and see its AI score, step by step, so you know what your own read looks like.</div>
+    </a>
+    <a class="gate-card primary" href="#assess" id="gate-mine">
+      <span class="gc-ey">Your career</span>
+      <div class="gc-h">Check my own job</div>
+      <div class="gc-sub">Answer a few questions, one at a time, and get your personal result. Free, no sign-up.</div>
+    </a>
+  </div>
+  <div class="gate-skip"><a id="gate-skip">Skip and browse the site</a></div>
+</div>
 {# Color by broad discipline: blue-collar/trades = light blue, business = navy, tech = indigo, etc. #}
 {% set famcol = {
   '11':'#2f4f73','13':'#2f4f73','41':'#2f4f73','43':'#2f4f73',
@@ -14,6 +31,27 @@
   '55':'#5a6a4a' } %}
 {% set disc_legend = [('#6cb4e0','Trades & manual'),('#2f4f73','Business & office'),('#5a6fc0','Tech & science'),('#159e8c','Healthcare'),('#7a5aa0','Legal'),('#c08a3a','Education & social'),('#c0607a','Arts & media'),('#d07a3a','Service')] %}
 {% include "_hero_gif.html" %}
+
+<div class="careers-screen" id="careers-screen" hidden>
+  <button type="button" class="cs-exit" id="cs-exit">Exit tour</button>
+  <div class="cs-head"><span class="cs-step">Step 1 of the tour</span><h2>Tap any career to see its AI score</h2><p>A quick demo of the read you'll get for your own job.</p></div>
+  <div class="cs-cols">
+    <div class="cs-col">
+      <div class="cs-col-h risk">More at risk</div>
+      <div class="cs-scroll"><div class="cs-track">
+        {% for o in most_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="exp">{{ o.base }}</b></a>{% endfor %}
+        {% for o in most_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="exp">{{ o.base }}</b></a>{% endfor %}
+      </div></div>
+    </div>
+    <div class="cs-col">
+      <div class="cs-col-h safe">More resilient</div>
+      <div class="cs-scroll"><div class="cs-track down">
+        {% for o in least_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="safe">{{ o.base }}</b></a>{% endfor %}
+        {% for o in least_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="safe">{{ o.base }}</b></a>{% endfor %}
+      </div></div>
+    </div>
+  </div>
+</div>
 
 <div class="home-layout">
   <aside class="side">
@@ -34,7 +72,10 @@
 </div>
 {% endif %}
 
-<form class="card form-grid" method="post" action="/assess">
+<form class="card stepform" id="assess" method="post" action="/assess">
+  <div class="wz-top" aria-hidden="true"><div class="wz-prog"><span id="wz-fill"></span></div><button type="button" class="wz-quit" id="wz-quit">Exit</button></div>
+  <section class="wz-step" data-step="job">
+    <span class="wz-n">Step 1</span><h2 class="wz-q">What's your job?</h2><p class="wz-sub">Type to find it. This is the only thing we really need.</p>
   <div class="full" style="margin-bottom:4px">
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <button type="button" id="resume-btn" class="secondary" style="margin:0">Upload resume to auto-fill <span style="opacity:.7;font-weight:400">(optional)</span></button>
@@ -66,11 +107,17 @@
     </select>
   </div>
 
+  </section>
+  <section class="wz-step" data-step="loc">
+    <span class="wz-n">Step 2</span><h2 class="wz-q">Where do you work?</h2><p class="wz-sub">For local pay and demand. Optional.</p>
   <div>
     <label for="zip">ZIP, or city and state</label>
     <input id="zip" name="zip" type="text" maxlength="40"
            placeholder="e.g. 10001 or Austin, TX (optional)" autocomplete="postal-code">
   </div>
+  </section>
+  <section class="wz-step" data-step="you">
+    <span class="wz-n">Step 3</span><h2 class="wz-q">A bit about you</h2><p class="wz-sub">This sharpens your timeline. Optional.</p>
   <div>
     <label for="age">Age</label>
     <select id="age" name="age"><option value="">Prefer not to say</option>{% for a in range(18, 71) %}<option value="{{ a }}">{{ a }}</option>{% endfor %}</select>
@@ -87,6 +134,9 @@
       <option value="25">More than 20 years</option>
     </select>
   </div>
+  </section>
+  <section class="wz-step" data-step="edu">
+    <span class="wz-n">Step 4</span><h2 class="wz-q">Your education</h2><p class="wz-sub">Optional.</p>
   <div>
     <label for="education">Degree level</label>
     <select id="education" name="education">
@@ -125,6 +175,9 @@
     </select>
   </div>
 
+  </section>
+  <section class="wz-step" data-step="work">
+    <span class="wz-n">Step 5</span><h2 class="wz-q">Your work</h2><p class="wz-sub">Union coverage and employer type can shift the timeline. Optional.</p>
   <div>
     <label for="union_status">Union status</label>
     <select id="union_status" name="union_status">
@@ -144,6 +197,9 @@
       <option>Other</option>
     </select>
   </div>
+  </section>
+  <section class="wz-step" data-step="pay">
+    <span class="wz-n">Step 6</span><h2 class="wz-q">Your pay</h2><p class="wz-sub">Read only as a banded trajectory, never stored. Optional.</p>
   <div>
     <label for="pay_current">Current annual gross pay</label>
     <select id="pay_current" name="pay_current">
@@ -169,6 +225,9 @@
       <option value="1500000">$1,000,000 or more</option>
     </select>
   </div>
+  </section>
+  <section class="wz-step" data-step="skills">
+    <span class="wz-n">Step 7</span><h2 class="wz-q">Your skills</h2><p class="wz-sub">Optional. Type a skill and press Enter.</p>
   <div class="full">
     <label for="skill-input">Skills <span class="muted" style="text-transform:none;font-weight:400;letter-spacing:0">(optional, type a skill and press Enter)</span></label>
     <div class="skill-box" id="skill-box">
@@ -176,14 +235,22 @@
     </div>
     <input type="hidden" id="skills" name="skills">
   </div>
+  </section>
+  <section class="wz-step" data-step="go">
+    <span class="wz-n">Last step</span><h2 class="wz-q">Ready to see your future?</h2><p class="wz-sub">We'll crunch the data and reveal where you stand.</p>
   <div class="full save-row">
     <span class="q">Save my profile on this device?</span>
     <label><input type="radio" name="save_profile" value="yes"> Yes</label>
     <label><input type="radio" name="save_profile" value="no" checked> No</label>
     <span class="note">Stored only in this browser to pre-fill next time, never on our servers.</span>
   </div>
-  <div class="full submit-row">
-    <button type="submit" style="width:100%">Show my future</button>
+  </section>
+  <div class="submit-row">
+    <button type="submit" id="wz-submit" style="width:100%">Show my future</button>
+  </div>
+  <div class="wz-nav" aria-hidden="true">
+    <button type="button" class="secondary wz-back" id="wz-back">Back</button>
+    <button type="button" class="wz-next" id="wz-next">Next</button>
   </div>
 </form>
 <p class="muted" style="margin-top:8px;font-size:12px">No gender, race, or other protected characteristics in the score; pay is read only as a banded trajectory. Sourced from O*NET, BLS OEWS (393 metros), and peer-reviewed exposure research. <a href="/jobs">Browse all jobs</a>.</p>
@@ -475,6 +542,134 @@
       }
     } catch (e) {}
   });
+})();
+
+// Guided entry gate: full-screen "Will AI take your job?" with two paths.
+(function () {
+  var gate = document.getElementById('gate');
+  if (!gate) return;
+  var ENTERED = 'jb_entered', TOUR = 'jb_tour';
+  function get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+  function set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
+  function del(k) { try { sessionStorage.removeItem(k); } catch (e) {} }
+  function hideGate() { gate.classList.add('is-hidden'); document.body.classList.remove('gated'); }
+  if (get(ENTERED) === '1') hideGate(); else document.body.classList.add('gated');
+
+  var mine = document.getElementById('gate-mine');
+  if (mine) mine.addEventListener('click', function (e) {
+    e.preventDefault(); del(TOUR); set(ENTERED, '1'); hideGate();
+    if (window.jobcastStartFlow) window.jobcastStartFlow();
+  });
+
+  function showCareers() { var cs = document.getElementById('careers-screen'); if (cs) { cs.hidden = false; document.body.classList.add('gated'); } }
+  var tour = document.getElementById('gate-tour');
+  if (tour) tour.addEventListener('click', function (e) {
+    e.preventDefault(); set(TOUR, '1'); set(ENTERED, '1'); hideGate(); showCareers();
+  });
+  var csExit = document.getElementById('cs-exit');
+  if (csExit) csExit.addEventListener('click', function () {
+    var cs = document.getElementById('careers-screen'); if (cs) cs.hidden = true;
+    document.body.classList.remove('gated'); del(TOUR);
+  });
+
+  var skip = document.getElementById('gate-skip');
+  if (skip) skip.addEventListener('click', function (e) { e.preventDefault(); del(TOUR); set(ENTERED, '1'); hideGate(); });
+
+  // Step 1 of the general tour: prompt to click a scrolling career (no data entry).
+  function step1() {
+    if (document.querySelector('.tour-banner')) return;
+    document.body.classList.add('tour-on');
+    var b = document.createElement('div'); b.className = 'tour-banner';
+    b.innerHTML = '<span class="tb-step">Step 1</span><span class="tb-txt">Click any scrolling career to see its AI score.</span>'
+      + '<button type="button" class="tb-x" id="tour-exit">Exit tour</button>';
+    document.body.appendChild(b);
+    document.getElementById('tour-exit').addEventListener('click', function () {
+      del(TOUR); document.body.classList.remove('tour-on'); b.remove();
+    });
+    var side = document.querySelector('.side');
+    if (side) setTimeout(function () { side.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 120);
+  }
+  // In tour mode, clicking any career (rail or full-screen) plays the full reveal on its result page.
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a.jobcard, a.cs-card') : null;
+    if (a && get(TOUR) === '1') set('jb_reveal', '1');
+  }, true);
+  if (get(TOUR) === '1' && get(ENTERED) === '1') showCareers();
+})();
+
+// Full-screen stepped wizard for the personal ("your career") flow.
+(function () {
+  var form = document.getElementById('assess');
+  if (!form || !form.classList.contains('stepform')) return;
+  var steps = Array.prototype.slice.call(form.querySelectorAll('.wz-step'));
+  var fill = document.getElementById('wz-fill');
+  var nextB = document.getElementById('wz-next');
+  var backB = document.getElementById('wz-back');
+  var quitB = document.getElementById('wz-quit');
+  var nav = form.querySelector('.wz-nav');
+  var titleSel = document.getElementById('title');
+  var ICONS = { job:'💼', loc:'📍', you:'🧑', edu:'🎓', work:'🏢', pay:'💰', skills:'🛠️', go:'🚀' };
+  steps.forEach(function (s) {
+    var ds = s.getAttribute('data-step');
+    if (ICONS[ds] && !s.querySelector('.wz-ico')) {
+      var ic = document.createElement('span'); ic.className = 'wz-ico'; ic.setAttribute('aria-hidden', 'true');
+      ic.textContent = ICONS[ds]; s.insertBefore(ic, s.firstChild);
+    }
+  });
+  var VIBES = ["Let's go", "Keep going", "Nice", "Halfway there", "Almost there", "Two to go", "Last stretch", "Last one"];
+  var i = 0;
+  function show(n, dir) {
+    var prev = i;
+    i = Math.max(0, Math.min(steps.length - 1, n));
+    dir = dir || (i >= prev ? 'next' : 'back');
+    steps.forEach(function (s, k) {
+      var on = k === i; s.classList.toggle('active', on);
+      if (on) { s.classList.remove('dir-next', 'dir-back'); void s.offsetWidth; s.classList.add(dir === 'back' ? 'dir-back' : 'dir-next'); }
+    });
+    if (fill) { fill.style.width = ((i + 1) / steps.length * 100) + '%';
+      var pr = fill.parentNode; pr.classList.remove('pulse'); void pr.offsetWidth; pr.classList.add('pulse'); }
+    var last = i === steps.length - 1;
+    if (nextB) nextB.textContent = last ? 'See my result ✨' : 'Next';
+    if (nav) nav.classList.toggle('first', i === 0);
+    var nEl = steps[i].querySelector('.wz-n');
+    if (nEl) nEl.textContent = last ? 'LAST ONE' : ('STEP ' + (i + 1) + ' OF ' + steps.length + '  ·  ' + (VIBES[i] || '').toUpperCase());
+    var ic = steps[i].querySelector('.wz-ico');
+    if (ic) { ic.style.animation = 'none'; void ic.offsetWidth; ic.style.animation = ''; }
+    var ds = steps[i].getAttribute('data-step');
+    var f = ds === 'job' ? document.getElementById('title-search')
+                         : steps[i].querySelector('input:not([type=hidden]):not([type=file]), select');
+    if (f) setTimeout(function () { try { f.focus(); } catch (e) {} }, 90);
+    form.scrollTop = 0;
+  }
+  function okStep() {
+    if (steps[i].getAttribute('data-step') === 'job' && (!titleSel || !titleSel.value)) {
+      var s = document.getElementById('title-search');
+      if (s) { s.focus(); s.classList.add('nudge'); setTimeout(function () { s.classList.remove('nudge'); }, 700); }
+      return false;
+    }
+    return true;
+  }
+  if (nextB) nextB.addEventListener('click', function () {
+    if (!okStep()) return;
+    if (i === steps.length - 1) { try { sessionStorage.setItem('jb_reveal', '1'); } catch (e) {} if (form.requestSubmit) form.requestSubmit(); else form.submit(); return; }
+    show(i + 1, 'next');
+  });
+  if (backB) backB.addEventListener('click', function () { show(i - 1, 'back'); });
+  // Auto-advance the instant a job is picked, to keep the momentum going.
+  var jlist = document.getElementById('title-list');
+  if (jlist) jlist.addEventListener('mousedown', function () {
+    setTimeout(function () {
+      if (document.body.classList.contains('flow-active') && steps[i].getAttribute('data-step') === 'job' && titleSel && titleSel.value) show(i + 1, 'next');
+    }, 340);
+  });
+  if (quitB) quitB.addEventListener('click', function () { document.body.classList.remove('flow-active'); });
+  form.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || !document.body.classList.contains('flow-active')) return;
+    if (e.target && (e.target.id === 'skill-input' || e.target.id === 'title-search')) return;
+    e.preventDefault(); if (nextB) nextB.click();
+  });
+  window.jobcastStartFlow = function () { document.body.classList.add('flow-active'); show(0); };
+  try { if (/[?&]flow=1/.test(location.search)) window.jobcastStartFlow(); } catch (e) {}
 })();
 </script>
 {% endblock %}

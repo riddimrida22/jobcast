@@ -4,6 +4,24 @@
 {% block description %}Choosing a career or major? See which paths AI and robots can't easily automate, with pay and years of school, ranked from real government data.{% endblock %}
 {% block content %}
 
+<div class="gate" id="gate" role="dialog" aria-label="Welcome to JobBreak">
+  <div class="gate-q">Will <span class="hot">AI</span> replace the career you're planning?</div>
+  <p class="gate-sub">Find paths that pay well and are hard for AI and machines to automate. Pick where to start.</p>
+  <div class="gate-paths">
+    <a class="gate-card" href="#" id="gate-explore">
+      <span class="gc-ey">The big picture</span>
+      <div class="gc-h">Explore careers</div>
+      <div class="gc-sub">Tap any career and see its AI score, so you know what safe and exposed look like.</div>
+    </a>
+    <a class="gate-card primary" href="#" id="gate-filter">
+      <span class="gc-ey">Your path</span>
+      <div class="gc-h">Find my best fit</div>
+      <div class="gc-sub">Pick what you're into and how long you'll study, and see your top matches.</div>
+    </a>
+  </div>
+  <div class="gate-skip"><a id="gate-skip">Skip and browse</a></div>
+</div>
+
 {% include "_hero_race.html" %}
 
 <section class="stu-hero">
@@ -133,6 +151,27 @@ breakdown and sources. See <a href="/methodology">How it works</a>.</p>
   if (copy) copy.addEventListener("click", function () {
     if (navigator.clipboard) { navigator.clipboard.writeText(url); copy.textContent = "Copied"; setTimeout(function () { copy.textContent = "Copy link"; }, 1600); }
   });
+})();
+
+// Guided entry gate for students + reveal on any career tap.
+(function () {
+  var gate = document.getElementById('gate'); if (!gate) return;
+  var E = 'jb_entered_stu', T = 'jb_stour';
+  function g(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+  function s(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
+  function hide() { gate.classList.add('is-hidden'); document.body.classList.remove('gated'); }
+  if (g(E) === '1') hide(); else document.body.classList.add('gated');
+  function enter(toFilter) {
+    s(E, '1'); s(T, '1'); hide();
+    if (toFilter) { var f = document.querySelector('.stu-filter'); if (f) setTimeout(function () { f.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }
+  }
+  var ex = document.getElementById('gate-explore'); if (ex) ex.addEventListener('click', function (e) { e.preventDefault(); enter(false); });
+  var fi = document.getElementById('gate-filter'); if (fi) fi.addEventListener('click', function (e) { e.preventDefault(); enter(true); });
+  var sk = document.getElementById('gate-skip'); if (sk) sk.addEventListener('click', function (e) { e.preventDefault(); enter(false); });
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a.stu-card, a.jobcard') : null;
+    if (a && g(T) === '1') s('jb_reveal', '1');
+  }, true);
 })();
 </script>
 {% endblock %}

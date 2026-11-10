@@ -13,6 +13,24 @@
 {% if seo %}<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":{{ ("Will AI or robots replace " ~ r.occupation.title ~ "?") | tojson }},"acceptedAnswer":{"@type":"Answer","text":{{ (r.occupation.title ~ " scores " ~ r.base_exposure ~ " of 100 for automation exposure, from O*NET task data and peer-reviewed AI-exposure research - higher means more of the role's tasks are automatable. JobBreak shows the full sourced breakdown and a timeline.") | tojson }}}}]}</script>{% endif %}
 {% set check %}<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>{% endset %}
 
+<!-- Dramatic reveal: plays only when arriving from the guided flow or tour -->
+<div id="reveal" class="rv" hidden aria-hidden="true">
+  <div class="rv-fx" id="rv-fx" aria-hidden="true"></div>
+  <div class="rv-crunch" id="rv-crunch">
+    <div class="rv-core"><i></i><i></i><i></i><b>AI</b></div>
+    <div class="rv-h">Analyzing your role</div>
+    <div class="rv-step" id="rv-step">Mapping your tasks...</div>
+    <div class="rv-bar"><span id="rv-barfill"></span></div>
+  </div>
+  <div class="rv-done" id="rv-done" hidden>
+    <div class="rv-badge" id="rv-badge"></div>
+    <div class="rv-num"><b id="rv-num">0</b><small>of 100 exposed to AI &amp; automation</small></div>
+    <div class="rv-msg" id="rv-msg"></div>
+    <button type="button" class="rv-go" id="rv-go">See the full breakdown</button>
+  </div>
+</div>
+<script id="reveal-data" type="application/json">{{ {"exposure": r.base_exposure, "band": r.timeline.band.id, "title": r.occupation.title} | tojson }}</script>
+
 <p class="muted">{{ r.occupation.family }} &middot; {{ r.location.metro }}</p>
 <h1 style="margin-bottom:2px">{{ r.occupation.title }}</h1>
 <p class="lead" style="margin-top:0">How exposed this work is to automation, shown as ranges with the reasoning and sources.</p>
@@ -667,4 +685,82 @@ It is a sourced range, not a verdict, and the detail is below.</p>
 })();
 </script>
 {% endif %}
+
+<script>
+(function () {
+  var ov = document.getElementById('reveal');
+  if (!ov) return;
+  var flag; try { flag = sessionStorage.getItem('jb_reveal'); } catch (e) {}
+  if (flag !== '1') return;
+  try { sessionStorage.removeItem('jb_reveal'); } catch (e) {}
+  var data = {}; try { data = JSON.parse(document.getElementById('reveal-data').textContent) || {}; } catch (e) {}
+  var exp = Math.round(+data.exposure || 0);
+  ov.hidden = false; ov.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
+  var steps = ['Mapping your tasks...', 'Scoring AI exposure...', 'Checking the robots...', 'Reading your timeline...', 'Comparing to the labor data...', 'Almost there...'];
+  var stepEl = document.getElementById('rv-step'), bar = document.getElementById('rv-barfill');
+  var si = 0; if (stepEl) stepEl.textContent = steps[0];
+  if (bar) requestAnimationFrame(function () { bar.style.transition = 'width 3.2s ease'; bar.style.width = '100%'; });
+  var stepTimer = setInterval(function () { si = (si + 1) % steps.length; if (stepEl) stepEl.textContent = steps[si]; }, 560);
+  setTimeout(function () { clearInterval(stepTimer); reveal(); }, 3300);
+  function reveal() {
+    var cr = document.getElementById('rv-crunch'); if (cr) cr.hidden = true;
+    var done = document.getElementById('rv-done'); if (done) done.hidden = false;
+    var tier = exp >= 62 ? 'storm' : (exp < 45 ? 'safe' : 'mixed');
+    ov.classList.add(tier);
+    var badge = document.getElementById('rv-badge'), msg = document.getElementById('rv-msg');
+    if (tier === 'safe') { badge.textContent = 'Good news'; msg.textContent = 'Most of your work still needs a person. AI reshapes this role more than it replaces it.'; party(); }
+    else if (tier === 'storm') { badge.textContent = 'Heads up'; msg.textContent = 'A lot of this role is exposed to AI and automation. The good news: there is time to get ahead of it.'; storm(); }
+    else { badge.textContent = 'Mixed'; msg.textContent = 'Parts of this role are exposed, parts are safe. Where you focus next is what matters.'; }
+    countTo(document.getElementById('rv-num'), exp, 1200);
+  }
+  function countTo(el, target, ms) {
+    if (!el) return; var start = null;
+    function tick(t) { if (!start) start = t; var p = Math.min(1, (t - start) / ms);
+      el.textContent = Math.round(target * (0.5 - Math.cos(p * Math.PI) / 2)); if (p < 1) requestAnimationFrame(tick); }
+    requestAnimationFrame(tick);
+    setTimeout(function () { el.textContent = Math.round(target); }, ms + 90);
+  }
+  function party() {
+    var fx = document.getElementById('rv-fx'); if (!fx) return;
+    var cols = ['#f3a35f', '#5ec98c', '#5d8ac4', '#ffd9a8', '#ffffff'];
+    for (var k = 0; k < 90; k++) {
+      var c = document.createElement('span'); c.className = 'rv-confetti';
+      c.style.left = (Math.random() * 100) + 'vw'; c.style.background = cols[k % cols.length];
+      c.style.animationDuration = (2.6 + Math.random() * 2.2) + 's'; c.style.animationDelay = (Math.random() * 0.8) + 's';
+      fx.appendChild(c);
+    }
+  }
+  function storm() {
+    var fx = document.getElementById('rv-fx'); if (!fx) return;
+    for (var k = 0; k < 5; k++) { var cl = document.createElement('div'); cl.className = 'rv-cloud';
+      var w = 170 + Math.random() * 200; cl.style.width = w + 'px'; cl.style.height = (w * 0.44) + 'px';
+      cl.style.left = (-5 + Math.random() * 95) + 'vw'; cl.style.top = (-4 + Math.random() * 22) + 'vh'; fx.appendChild(cl); }
+    var fl = document.createElement('div'); fl.className = 'rv-flash'; fx.appendChild(fl);
+  }
+  function startResultTour() {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.tabs .tab'));
+    if (!tabs.length) return;
+    var idx = 0;
+    var bn = document.createElement('div'); bn.className = 'rtour';
+    bn.innerHTML = '<span class="rt-step"></span><b class="rt-lab"></b><button type="button" class="rt-next" id="rt-next">Next</button><button type="button" class="rt-x" id="rt-x">Exit</button>';
+    document.body.appendChild(bn);
+    function go2(k) {
+      idx = Math.max(0, Math.min(tabs.length - 1, k));
+      tabs[idx].click();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      bn.querySelector('.rt-step').textContent = 'Step ' + (idx + 1) + ' of ' + tabs.length;
+      bn.querySelector('.rt-lab').textContent = tabs[idx].textContent;
+      bn.querySelector('.rt-next').textContent = idx === tabs.length - 1 ? 'Done' : 'Next ›';
+    }
+    document.getElementById('rt-next').addEventListener('click', function () {
+      if (idx === tabs.length - 1) { bn.remove(); return; }
+      go2(idx + 1);
+    });
+    document.getElementById('rt-x').addEventListener('click', function () { bn.remove(); });
+    go2(0);
+  }
+  var go = document.getElementById('rv-go');
+  if (go) go.addEventListener('click', function () { ov.hidden = true; document.body.style.overflow = ''; startResultTour(); });
+})();
+</script>
 {% endblock %}
