@@ -295,10 +295,10 @@
     .rstage #sshow { z-index:2600 !important; }
 
     /* ---- Full-screen upsell / demo order ---- */
-    .up { position:fixed; inset:0; z-index:1700; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    #upsell { position:fixed; inset:0; z-index:1700; display:flex; flex-direction:column; align-items:center; justify-content:center;
       text-align:center; padding:72px 22px 92px; color:#eaf1f9; overflow-y:auto;
       background:radial-gradient(1100px 650px at 50% -6%, #173253, var(--shell-dark)); }
-    .up[hidden] { display:none !important; }
+    #upsell[hidden] { display:none !important; }
     .up-x { position:absolute; top:16px; right:18px; background:none; border:0; color:#9db0c6; font:inherit; font-size:13px; text-decoration:underline; cursor:pointer; }
     .up-step { display:none; width:100%; max-width:480px; }
     .up-step.active { display:block; animation:wzIn .35s ease; }

@@ -4,6 +4,17 @@
 {% block description %}Choosing a career or major? See which paths AI and robots can't easily automate, with pay and years of school, ranked from real government data.{% endblock %}
 {% block content %}
 
+{% set famcol = {
+  '11':'#2f4f73','13':'#2f4f73','41':'#2f4f73','43':'#2f4f73',
+  '15':'#5a6fc0','17':'#5a6fc0','19':'#5a6fc0',
+  '29':'#159e8c','31':'#159e8c',
+  '23':'#7a5aa0',
+  '21':'#c08a3a','25':'#c08a3a',
+  '27':'#c0607a',
+  '35':'#d07a3a','39':'#d07a3a',
+  '33':'#6cb4e0','37':'#6cb4e0','45':'#6cb4e0','47':'#6cb4e0','49':'#6cb4e0','51':'#6cb4e0','53':'#6cb4e0',
+  '55':'#5a6a4a' } %}
+
 <div class="gate" id="gate" role="dialog" aria-label="Welcome to JobBreak">
   <div class="gate-q">Will <span class="hot">AI</span> replace the career you're planning?</div>
   <p class="gate-sub">Find paths that pay well and are hard for AI and machines to automate. Pick where to start.</p>
@@ -22,6 +33,27 @@
   <div class="gate-skip"><a id="gate-skip">Skip and browse</a></div>
 </div>
 {% include "_scoring.html" %}
+
+<div class="careers-screen" id="careers-screen" hidden>
+  <button type="button" class="cs-exit" id="cs-exit">Exit tour</button>
+  <div class="cs-head"><span class="cs-step">Step 1 of the tour</span><h2>Tap any career to see its AI score</h2><p>A quick demo of the read you'll get for the career you're planning.</p></div>
+  <div class="cs-cols">
+    <div class="cs-col">
+      <div class="cs-col-h risk">More at risk</div>
+      <div class="cs-scroll"><div class="cs-track">
+        {% for o in most_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="exp">{{ o.base }}</b></a>{% endfor %}
+        {% for o in most_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="exp">{{ o.base }}</b></a>{% endfor %}
+      </div></div>
+    </div>
+    <div class="cs-col">
+      <div class="cs-col-h safe">More resilient</div>
+      <div class="cs-scroll"><div class="cs-track down">
+        {% for o in least_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="safe">{{ o.base }}</b></a>{% endfor %}
+        {% for o in least_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="safe">{{ o.base }}</b></a>{% endfor %}
+      </div></div>
+    </div>
+  </div>
+</div>
 
 {% include "_hero_race.html" %}
 
@@ -167,6 +199,13 @@ breakdown and sources. See <a href="/methodology">How it works</a>.</p>
     s(E, '1'); s(T, '1'); hide();
     if (toFilter) { var f = document.querySelector('.stu-filter'); if (f) setTimeout(function () { f.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }
   }
+  // Explore path: a full-screen guided careers browser (same as the home tour), not the grid.
+  function showCareers() {
+    s(E, '1'); s(T, '1'); hide();
+    var cs = document.getElementById('careers-screen');
+    if (cs) { cs.hidden = false; document.body.classList.add('gated'); }
+    else { enter(false); }
+  }
   var pending = null;
   function showScoring(fn, introText, ctaText) {
     var sc = document.getElementById('scoring'); if (!sc) { fn(); return; }
@@ -182,11 +221,12 @@ breakdown and sources. See <a href="/methodology">How it works</a>.</p>
     document.body.classList.remove('gated');
     if (pending) { var f = pending; pending = null; f(); }
   });
-  var ex = document.getElementById('gate-explore'); if (ex) ex.addEventListener('click', function (e) { e.preventDefault(); showScoring(function () { enter(false); }, "You're about to look through careers, and each one carries a score.", 'Start exploring'); });
+  var ex = document.getElementById('gate-explore'); if (ex) ex.addEventListener('click', function (e) { e.preventDefault(); showScoring(showCareers, "You're about to look through real careers, and each one carries a score.", 'Start exploring'); });
+  var csx = document.getElementById('cs-exit'); if (csx) csx.addEventListener('click', function (e) { e.preventDefault(); var cs = document.getElementById('careers-screen'); if (cs) cs.hidden = true; document.body.classList.remove('gated'); });
   var fi = document.getElementById('gate-filter'); if (fi) fi.addEventListener('click', function (e) { e.preventDefault(); showScoring(function () { enter(true); }, "We'll match careers to what you're into, each with a score.", 'Find my matches'); });
   var sk = document.getElementById('gate-skip'); if (sk) sk.addEventListener('click', function (e) { e.preventDefault(); enter(false); });
   document.addEventListener('click', function (e) {
-    var a = e.target && e.target.closest ? e.target.closest('a.stu-card, a.jobcard') : null;
+    var a = e.target && e.target.closest ? e.target.closest('a.stu-card, a.jobcard, a.cs-card') : null;
     if (a && g(T) === '1') s('jb_reveal', '1');
   }, true);
 })();

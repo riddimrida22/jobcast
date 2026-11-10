@@ -399,10 +399,12 @@ def create_app() -> Flask:
             return out[:16]
         rail_early = _rail({2, 3})      # high school / some college or training
         rail_degree = _rail({4, 5})     # bachelor's / graduate
+        most, least = _rankings()       # shared full-screen careers browser (same as home)
         return render_template("students.html", version=VERSION, licensed=engine.snapshot.licensed,
                                careers=careers, families=engine.snapshot.families(),
                                sel_field=fam, sel_zone=z, sel_priority=priority,
-                               rail_early=rail_early, rail_degree=rail_degree)
+                               rail_early=rail_early, rail_degree=rail_degree,
+                               most_exposed=most, least_exposed=least)
 
     @app.post("/subscribe")
     def subscribe():
