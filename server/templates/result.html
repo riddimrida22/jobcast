@@ -764,7 +764,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   var data = {}; try { data = JSON.parse(document.getElementById('reveal-data').textContent) || {}; } catch (e) {}
   var exp = Math.round(+data.exposure || 0);
   ov.hidden = false; ov.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
-  var steps = [{{ "'Mapping the tasks...'" if seo else "'Mapping your tasks...'" }}, 'Scoring AI exposure...', 'Checking the robots...', {{ "'Reading the timeline...'" if seo else "'Reading your timeline...'" }}, 'Comparing to the labor data...', 'Almost there...'];
+  var steps = ['{{ "Mapping the tasks..." if seo else "Mapping your tasks..." }}', 'Scoring AI exposure...', 'Checking the robots...', '{{ "Reading the timeline..." if seo else "Reading your timeline..." }}', 'Comparing to the labor data...', 'Almost there...'];
   var stepEl = document.getElementById('rv-step'), bar = document.getElementById('rv-barfill');
   var si = 0; if (stepEl) stepEl.textContent = steps[0];
   if (bar) requestAnimationFrame(function () { bar.style.transition = 'width 3.2s ease'; bar.style.width = '100%'; });
