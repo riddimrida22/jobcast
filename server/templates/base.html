@@ -46,7 +46,8 @@
       --sand:#e4b85e; --sand-d:#c98f32; --wood-a:#b0885a; --wood-b:#7c5c38; --glass:rgba(150,185,210,.12); --eye:#4fe3ee;
     }
     * { box-sizing:border-box; }
-    body { margin:0; color:var(--ink); min-height:100vh;
+    html { overflow-x:hidden; }
+    body { margin:0; color:var(--ink); min-height:100vh; overflow-x:hidden;
            font-family:"Poppins","Trebuchet MS","Gill Sans",sans-serif;
            background:radial-gradient(1200px 700px at 20% -10%, var(--bg-b), var(--bg-a)) fixed; }
     a { color:var(--primary); }
@@ -97,6 +98,7 @@
     .gate-card.primary .gc-h { color:#2a1708; }
     .gate-card.primary .gc-sub { color:#5a3410; }
     .gate-skip { margin-top:22px; }
+    @media (max-width:560px) { .gate-card { flex-basis:100%; max-width:360px; } .gate-paths { max-width:100%; } }
     .gate-skip a { color:#9db0c6; font-size:13px; text-decoration:underline; cursor:pointer; }
     body.gated { overflow:hidden; }
 
@@ -334,8 +336,9 @@
     .home-fab:hover { background:rgba(20,38,64,.95); transform:translateY(-1px); }
     body.ssh-open .home-fab { display:none !important; }
     .welcome { position:fixed; inset:0; z-index:1050; display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:26px; padding:34px 20px; text-align:center; overflow:auto;
+      gap:26px; padding:34px 20px; text-align:center; overflow-x:hidden; overflow-y:auto;
       background:radial-gradient(1100px 650px at 50% -5%, var(--shell), var(--shell-dark)); }
+    .welcome .slogan-banner { max-width:100%; }
     .welcome[hidden] { display:none !important; }
     .welcome .wel-head h2 { color:#fff; font-size:clamp(26px,5vw,40px); font-weight:800; margin:0 0 8px; }
     .welcome .wel-head p { color:#b9c7d8; font-size:16px; line-height:1.5; margin:0 auto; max-width:460px; }

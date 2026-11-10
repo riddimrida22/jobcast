@@ -27,7 +27,8 @@
 <script>(function(){var S=document.currentScript,root=S&&S.previousElementSibling;
 while(root&&!(root.classList&&root.classList.contains('slogan-banner')))root=root.previousElementSibling;
 if(!root)return;var w=root.querySelector('.gob-wrap');if(!w)return;var g=w.querySelector('.gob');var DH=120;
-function fit(){var avail=(w.parentElement?w.parentElement.clientWidth:w.clientWidth)||940;var s=Math.min(1,avail/940);
+function fit(){var pw=(w.parentElement?w.parentElement.clientWidth:w.clientWidth)||940;
+var cap=(document.documentElement.clientWidth||940)-44;var avail=Math.min(pw,cap);var s=Math.min(1,avail/940);
 g.style.transform='scale('+s+')';w.style.width=(940*s)+'px';w.style.height=(DH*s)+'px';}
 if(window.ResizeObserver){new ResizeObserver(fit).observe(w.parentElement||w);}addEventListener('resize',fit);fit();})();</script>
 <script>(function(){
