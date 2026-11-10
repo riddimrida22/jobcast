@@ -311,8 +311,15 @@ def create_app() -> Flask:
         soc = (result.get("occupation") or {}).get("soc")
         if soc:
             session["jb_soc"] = soc          # so a later "notify me" / checkout watches this job
+        # Off-list careers: when the typed title clearly isn't the matched occupation name,
+        # tell the user we scored the closest career we track (keeps the number defensible).
+        typed = (profile.title or "").strip()
+        occ_title = (result.get("occupation") or {}).get("title", "")
+        tl, ol = typed.lower(), occ_title.lower()
+        closest_match = occ_title if (typed and tl not in ol and ol not in tl) else None
         return render_template("result.html", r=result, profile=profile,
                                profile_json=json.dumps(asdict(profile)), version=VERSION,
+                               closest_match=closest_match, typed_title=typed,
                                licensed=engine.snapshot.licensed)
 
     @app.get("/jobs")

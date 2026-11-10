@@ -399,6 +399,11 @@
   select.style.display = 'none';
   select.removeAttribute('required');
   search.setAttribute('required', 'required');
+  // The typed text is what gets submitted, so any career works - on-list or not.
+  // The server maps it to the closest tracked occupation. The native <select> stays
+  // as the no-JavaScript fallback, so only one of them carries the name at a time.
+  search.setAttribute('name', 'title');
+  select.removeAttribute('name');
 
   function pool() {
     var f = field ? field.value : '';
@@ -407,7 +412,22 @@
 
   function render(matches) {
     list.innerHTML = '';
-    if (!matches.length) { list.hidden = true; return; }
+    var q = search.value.trim();
+    var exact = matches.some(function (it) { return it.title.toLowerCase() === q.toLowerCase(); });
+    // Off-list careers: let the user keep exactly what they typed.
+    if (q && !exact) {
+      var cust = document.createElement('div');
+      cust.className = 'combo-item combo-custom';
+      cust.setAttribute('role', 'option');
+      cust.innerHTML = 'Use “<b></b>”<span class="cc-tag">my own</span>';
+      cust.querySelector('b').textContent = q;
+      cust.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+        search.value = q; select.value = '';
+        list.hidden = true; search.setAttribute('aria-expanded', 'false');
+      });
+      list.appendChild(cust);
+    }
     matches.slice(0, 50).forEach(function (it) {
       var el = document.createElement('div');
       el.className = 'combo-item';
@@ -420,6 +440,7 @@
       });
       list.appendChild(el);
     });
+    if (!list.children.length) { list.hidden = true; return; }
     list.hidden = false; search.setAttribute('aria-expanded', 'true');
   }
 
@@ -650,6 +671,7 @@
   var quitB = document.getElementById('wz-quit');
   var nav = form.querySelector('.wz-nav');
   var titleSel = document.getElementById('title');
+  var titleSearch = document.getElementById('title-search');
   var ICONS = { job:'💼', loc:'📍', you:'🧑', edu:'🎓', work:'🏢', pay:'💰', skills:'🛠️', go:'🚀' };
   steps.forEach(function (s) {
     var ds = s.getAttribute('data-step');
@@ -695,7 +717,7 @@
     form.scrollTop = 0;
   }
   function okStep() {
-    if (steps[i].getAttribute('data-step') === 'job' && (!titleSel || !titleSel.value)) {
+    if (steps[i].getAttribute('data-step') === 'job' && (!titleSearch || !titleSearch.value.trim())) {
       var s = document.getElementById('title-search');
       if (s) { s.focus(); s.classList.add('nudge'); setTimeout(function () { s.classList.remove('nudge'); }, 700); }
       return false;
@@ -712,7 +734,7 @@
   var jlist = document.getElementById('title-list');
   if (jlist) jlist.addEventListener('mousedown', function () {
     setTimeout(function () {
-      if (document.body.classList.contains('flow-active') && steps[i].getAttribute('data-step') === 'job' && titleSel && titleSel.value) show(i + 1, 'next');
+      if (document.body.classList.contains('flow-active') && steps[i].getAttribute('data-step') === 'job' && titleSearch && titleSearch.value.trim()) show(i + 1, 'next');
     }, 340);
   });
   if (quitB) quitB.addEventListener('click', function () { document.body.classList.remove('flow-active'); });

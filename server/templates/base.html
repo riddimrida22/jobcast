@@ -375,6 +375,30 @@
                   box-shadow:0 10px 26px rgba(31,63,96,.16); }
     .combo-item { padding:10px 13px; cursor:pointer; font-size:15px; }
     .combo-item:hover { background:var(--primary-soft); }
+    .closest-note { background:rgba(243,163,95,.12); border:1px solid rgba(243,163,95,.38); border-radius:10px;
+      padding:10px 14px; font-size:14px; line-height:1.45; margin:4px 0 12px; }
+    .combo-custom { display:flex; align-items:center; gap:8px; font-weight:600; }
+    .combo-custom b { font-weight:800; }
+    .combo-custom .cc-tag { margin-left:auto; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.05em;
+      color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:2px 8px; }
+    .flow-active .stepform .combo-custom { color:#eaf1f9; }
+    .stu-search { position:fixed; inset:0; z-index:1100; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; padding:40px 22px; color:#eaf1f9; overflow-y:auto;
+      background:radial-gradient(1100px 650px at 50% -5%, var(--shell), var(--shell-dark)); }
+    .stu-search[hidden] { display:none !important; }
+    .stu-search .ss-exit { position:absolute; top:16px; left:16px; background:none; border:0; color:#9db0c6; font:inherit; font-size:13px; text-decoration:underline; cursor:pointer; }
+    .stu-search .ss-ey { display:inline-block; font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:12px; }
+    .stu-search .ss-head, .stu-search .ss-combo { animation:wzIn .45s ease; }
+    .stu-search .ss-head h2 { font-size:clamp(28px,6vw,46px); font-weight:800; color:#fff; margin:0 0 10px; }
+    .stu-search .ss-head p { color:#b9c7d8; font-size:16px; line-height:1.5; margin:0 auto 26px; max-width:470px; }
+    .stu-search .ss-combo { position:relative; width:100%; max-width:520px; }
+    .stu-search #stu-q { width:100%; box-sizing:border-box; font:inherit; font-size:19px; padding:16px 18px; border-radius:14px;
+      border:2px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:#fff; outline:none; }
+    .stu-search #stu-q:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(243,163,95,.22); }
+    .stu-search #stu-q::placeholder { color:#9db0c6; }
+    .stu-search .combo-list { background:var(--shell); border:1px solid rgba(255,255,255,.2); text-align:left; border-radius:0 0 12px 12px; max-height:46vh; }
+    .stu-search .combo-item { color:#eaf1f9; }
+    .stu-search .combo-item:hover { background:rgba(255,255,255,.1); }
 
     button { margin-top:20px; border:1px solid var(--primary-dark); border-radius:11px;
              padding:12px 22px; font:inherit; font-size:16px; font-weight:600; color:#fff; cursor:pointer;
@@ -985,7 +1009,16 @@
     .ss-dots { position:absolute; bottom:26px; left:0; right:0; display:flex; gap:9px; justify-content:center; }
     .ss-dots i { width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,.3); cursor:pointer; display:block; }
     .ss-dots i.on { background:var(--accent); }
-    @media (max-width:560px) { .ss-arrow { width:54px; height:54px; font-size:30px; } .ss-stage .deck-head { font-size:20px; } }
+    /* On phones the card fills almost the whole width, so side arrows would sit on top of
+       the text. Move them to the bottom corners, below the card, with the dots between. */
+    @media (max-width:560px) {
+      .sshow { padding:16px 12px 92px; }
+      .ss-stage { width:94vw; }
+      .ss-arrow { top:auto; bottom:18px; transform:none; width:48px; height:48px; font-size:27px; box-shadow:0 5px 16px rgba(0,0,0,.4); }
+      .ss-arrow.prev { left:22px; } .ss-arrow.next { right:22px; }
+      .ss-dots { bottom:34px; }
+      .ss-stage .deck-head { font-size:20px; }
+    }
     @media (max-width:860px) { .plans { grid-template-columns:repeat(2,1fr); } }
     @media (max-width:520px) { .plans { grid-template-columns:1fr; } }
     /* Mobile header + form */

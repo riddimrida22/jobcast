@@ -29,6 +29,11 @@
       <div class="gc-h">Find my best fit</div>
       <div class="gc-sub">Pick what you're into and how long you'll study, and see your top matches.</div>
     </a>
+    <a class="gate-card" href="#" id="gate-search">
+      <span class="gc-ey">A specific one</span>
+      <div class="gc-h">Look up a career</div>
+      <div class="gc-sub">Type any job, even one not on our list, and see its AI score.</div>
+    </a>
   </div>
   <div class="gate-skip"><a id="gate-skip">Skip and browse</a></div>
 </div>
@@ -53,6 +58,21 @@
       </div></div>
     </div>
   </div>
+</div>
+
+<div class="stu-search" id="stu-search" hidden>
+  <button type="button" class="ss-exit" id="ssq-exit">Back</button>
+  <div class="ss-head">
+    <span class="ss-ey">Any career</span>
+    <h2>What career are you thinking about?</h2>
+    <p>Type any job. If it's not on our list, we'll use the closest match we track and tell you.</p>
+  </div>
+  <div class="ss-combo">
+    <input id="stu-q" type="text" autocomplete="off" placeholder="e.g. nurse, electrician, game designer"
+           role="combobox" aria-expanded="false" aria-controls="stu-qlist">
+    <div id="stu-qlist" class="combo-list" role="listbox" hidden></div>
+  </div>
+  <form id="stu-free-form" method="post" action="/assess" style="display:none"><input type="hidden" name="title" id="stu-free-title"></form>
 </div>
 
 {% include "_hero_race.html" %}
@@ -212,6 +232,59 @@ breakdown and sources. See <a href="/methodology">How it works</a>.</p>
     if (cs) { cs.hidden = false; document.body.classList.add('gated'); }
     else { enter(false); }
   }
+  // Full-screen "search any career" entry: same idea as the employee job box, and it
+  // accepts careers that are not on our list (the server scores the closest match).
+  function showSearch() {
+    s(E, '1'); s(T, '1'); hide();
+    var ov = document.getElementById('stu-search');
+    if (!ov) { enter(false); return; }
+    ov.hidden = false; document.body.classList.add('gated');
+    var q = document.getElementById('stu-q');
+    setTimeout(function () { try { q.focus(); } catch (e) {} }, 90);
+  }
+  (function () {
+    var ov = document.getElementById('stu-search'); if (!ov) return;
+    var q = document.getElementById('stu-q'), list = document.getElementById('stu-qlist');
+    var tmr = null, lastQ = null;
+    function goSoc(soc) { s('jb_reveal', '1'); s(T, '1'); s('jb_aud', 'stu'); location.href = '/jobs/' + soc; }
+    function goFree(text) {
+      s('jb_reveal', '1'); s(T, '1'); s('jb_aud', 'stu');
+      document.getElementById('stu-free-title').value = text;
+      document.getElementById('stu-free-form').submit();
+    }
+    function render(items) {
+      list.innerHTML = '';
+      var val = q.value.trim();
+      var exact = items.some(function (it) { return it.title.toLowerCase() === val.toLowerCase(); });
+      if (val && !exact) {
+        var c = document.createElement('div'); c.className = 'combo-item combo-custom'; c.setAttribute('role', 'option');
+        c.innerHTML = 'Use “<b></b>”<span class="cc-tag">my own</span>'; c.querySelector('b').textContent = val;
+        c.addEventListener('mousedown', function (e) { e.preventDefault(); goFree(val); });
+        list.appendChild(c);
+      }
+      items.slice(0, 40).forEach(function (it) {
+        var el = document.createElement('div'); el.className = 'combo-item'; el.setAttribute('role', 'option'); el.textContent = it.title;
+        el.addEventListener('mousedown', function (e) { e.preventDefault(); goSoc(it.soc); });
+        list.appendChild(el);
+      });
+      if (!list.children.length) { list.hidden = true; return; }
+      list.hidden = false;
+    }
+    function fetchSuggest() {
+      var val = q.value.trim(); if (val === lastQ) return; lastQ = val;
+      if (!val) { list.hidden = true; list.innerHTML = ''; return; }
+      fetch('/v1/suggest?q=' + encodeURIComponent(val))
+        .then(function (r) { return r.json(); })
+        .then(function (d) { render(d.suggestions || []); })
+        .catch(function () { render([]); });
+    }
+    q.addEventListener('input', function () { clearTimeout(tmr); tmr = setTimeout(fetchSuggest, 150); });
+    q.addEventListener('focus', function () { if (q.value.trim()) fetchSuggest(); });
+    q.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); var v = q.value.trim(); if (v) goFree(v); } });
+    document.addEventListener('click', function (e) { if (!list.contains(e.target) && e.target !== q) list.hidden = true; });
+    var exit = document.getElementById('ssq-exit');
+    if (exit) exit.addEventListener('click', function (e) { e.preventDefault(); ov.hidden = true; document.body.classList.remove('gated'); });
+  })();
   var pending = null;
   function showScoring(fn, introText, ctaText) {
     var sc = document.getElementById('scoring'); if (!sc) { fn(); return; }
@@ -230,6 +303,7 @@ breakdown and sources. See <a href="/methodology">How it works</a>.</p>
   var ex = document.getElementById('gate-explore'); if (ex) ex.addEventListener('click', function (e) { e.preventDefault(); showScoring(showCareers, "You're about to look through real careers, and each one carries a score.", 'Start exploring'); });
   var csx = document.getElementById('cs-exit'); if (csx) csx.addEventListener('click', function (e) { e.preventDefault(); var cs = document.getElementById('careers-screen'); if (cs) cs.hidden = true; document.body.classList.remove('gated'); });
   var fi = document.getElementById('gate-filter'); if (fi) fi.addEventListener('click', function (e) { e.preventDefault(); showScoring(function () { enter(true); }, "We'll match careers to what you're into, each with a score.", 'Find my matches'); });
+  var se = document.getElementById('gate-search'); if (se) se.addEventListener('click', function (e) { e.preventDefault(); showScoring(showSearch, "Type any career, even one not on our list, and we'll score the closest match.", 'Search a career'); });
   var sk = document.getElementById('gate-skip'); if (sk) sk.addEventListener('click', function (e) { e.preventDefault(); enter(false); });
   document.addEventListener('click', function (e) {
     var a = e.target && e.target.closest ? e.target.closest('a.stu-card, a.jobcard, a.cs-card') : null;

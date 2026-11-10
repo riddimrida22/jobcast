@@ -75,6 +75,7 @@
 </div>
 
 <p class="muted">{{ r.occupation.family }} &middot; {{ r.location.metro }}</p>
+{% if closest_match %}<p class="closest-note">You entered <strong>{{ typed_title }}</strong>. It's not on our list yet, so this is the closest career we track: <strong>{{ closest_match }}</strong>.</p>{% endif %}
 <h1 style="margin-bottom:2px">{{ r.occupation.title }}</h1>
 <p class="lead" style="margin-top:0">How exposed this work is to automation, shown as ranges with the reasoning and sources.</p>
 
