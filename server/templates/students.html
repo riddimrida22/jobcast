@@ -75,6 +75,59 @@
   <form id="stu-free-form" method="post" action="/assess" style="display:none"><input type="hidden" name="title" id="stu-free-title"></form>
 </div>
 
+<form class="card stepform" id="stu-assess" method="get" action="/students" hidden>
+  <div class="wz-top" aria-hidden="true"><div class="wz-prog"><span id="sw-fill"></span></div><button type="button" class="wz-quit" id="sw-quit">Exit</button></div>
+  <section class="wz-step" data-step="into">
+    <span class="wz-n">Step 1</span><h2 class="wz-q">What are you into?</h2><p class="wz-sub">Pick the kind of work that interests you. We'll rank careers in it.</p>
+    <div>
+      <label for="sw-field">Field</label>
+      <select id="sw-field" name="field">
+        <option value="">Anything</option>
+        {% for f in families %}<option value="{{ f.code }}"{{ ' selected' if sel_field == f.code else '' }}>{{ f.name }}</option>{% endfor %}
+      </select>
+    </div>
+  </section>
+  <section class="wz-step" data-step="study">
+    <span class="wz-n">Step 2</span><h2 class="wz-q">How long will you study?</h2><p class="wz-sub">We'll keep the picks within the schooling you're up for.</p>
+    <div>
+      <label for="sw-education">Schooling</label>
+      <select id="sw-education" name="education">
+        <option value="">Any length</option>
+        <option value="2"{{ ' selected' if sel_zone == '2' else '' }}>Just high school</option>
+        <option value="3"{{ ' selected' if sel_zone == '3' else '' }}>A year or two after</option>
+        <option value="4"{{ ' selected' if sel_zone == '4' else '' }}>Up to a 4-year degree</option>
+        <option value="5"{{ ' selected' if sel_zone == '5' else '' }}>Grad school is fine</option>
+      </select>
+    </div>
+  </section>
+  <section class="wz-step" data-step="rank">
+    <span class="wz-n">Step 3</span><h2 class="wz-q">What matters most?</h2><p class="wz-sub">We'll put your top priority first when we rank the matches.</p>
+    <div class="sf-rank">
+      <div class="seg seg-col">
+        <label class="{{ 'on' if sel_priority == 'balanced' else '' }}"><input type="radio" name="priority" value="balanced"{{ ' checked' if sel_priority == 'balanced' or not sel_priority else '' }}>Best all-round</label>
+        <label class="{{ 'on' if sel_priority == 'safe' else '' }}"><input type="radio" name="priority" value="safe"{{ ' checked' if sel_priority == 'safe' else '' }}>Safest from AI</label>
+        <label class="{{ 'on' if sel_priority == 'pay' else '' }}"><input type="radio" name="priority" value="pay"{{ ' checked' if sel_priority == 'pay' else '' }}>Best paid</label>
+      </div>
+    </div>
+  </section>
+  <div class="wz-nav" aria-hidden="true">
+    <button type="button" class="secondary wz-back" id="sw-back">Back</button>
+    <button type="button" class="wz-next" id="sw-next">Next</button>
+  </div>
+</form>
+
+<div class="careers-screen" id="matches-screen" hidden>
+  <button type="button" class="cs-exit" id="ms-exit">Exit</button>
+  <div class="cs-head"><span class="cs-step">Your matches</span><h2>Careers that fit what you picked</h2><p>Ranked for you. Tap any one to see its AI score and what to do.</p></div>
+  <div class="ms-grid">
+    {% for c in careers %}<a class="ms-card" href="/jobs/{{ c.soc }}">
+      <span class="ms-t">{{ c.title }}</span>
+      <span class="ms-meta">{{ c.school }}{% if c.median_wage %} &middot; ${{ "{:,.0f}".format(c.median_wage) }}{% endif %}</span>
+      <span class="ms-ring" style="--p:{{ c.resilience }}"><b>{{ c.resilience }}</b><small>safe</small></span>
+    </a>{% endfor %}
+  </div>
+</div>
+
 {% include "_hero_race.html" %}
 
 <section class="stu-hero">
@@ -285,6 +338,66 @@ breakdown and sources. See <a href="/methodology">How it works</a>.</p>
     var exit = document.getElementById('ssq-exit');
     if (exit) exit.addEventListener('click', function (e) { e.preventDefault(); ov.hidden = true; document.body.classList.remove('gated'); });
   })();
+  // Full-screen numbered-step wizard for "Find my best fit" - the student version of the
+  // employee personal flow, with student questions (into / schooling / priority).
+  var startFlow = null;
+  (function () {
+    var form = document.getElementById('stu-assess'); if (!form) return;
+    var steps = Array.prototype.slice.call(form.querySelectorAll('.wz-step'));
+    var fill = document.getElementById('sw-fill');
+    var nextB = document.getElementById('sw-next'), backB = document.getElementById('sw-back'), quitB = document.getElementById('sw-quit');
+    var ICONS = { into: '🎯', study: '🎓', rank: '⭐' };
+    steps.forEach(function (st) {
+      var ds = st.getAttribute('data-step');
+      if (ICONS[ds] && !st.querySelector('.wz-ico')) {
+        var ic = document.createElement('span'); ic.className = 'wz-ico'; ic.setAttribute('aria-hidden', 'true');
+        ic.textContent = ICONS[ds]; st.insertBefore(ic, st.firstChild);
+      }
+    });
+    var splash = document.createElement('div'); splash.className = 'wz-splash'; splash.setAttribute('aria-hidden', 'true');
+    splash.innerHTML = '<div class="ws-n"></div><div class="ws-t"></div>'; document.body.appendChild(splash);
+    var splashTimer = null;
+    function stepSplash(n, title) {
+      splash.querySelector('.ws-n').textContent = (n === steps.length - 1) ? 'Last step' : ('Step ' + (n + 1));
+      splash.querySelector('.ws-t').textContent = title || '';
+      splash.classList.add('show'); clearTimeout(splashTimer);
+      splashTimer = setTimeout(function () { splash.classList.remove('show'); }, 900);
+    }
+    var idx = 0;
+    function show(n, dir) {
+      idx = Math.max(0, Math.min(steps.length - 1, n));
+      steps.forEach(function (st, k) { st.classList.toggle('active', k === idx); st.classList.remove('dir-next', 'dir-back'); });
+      if (dir) steps[idx].classList.add(dir === 'back' ? 'dir-back' : 'dir-next');
+      if (fill) fill.style.width = ((idx + 1) / steps.length * 100) + '%';
+      if (backB) backB.style.visibility = idx === 0 ? 'hidden' : '';
+      if (nextB) nextB.textContent = idx === steps.length - 1 ? 'See my matches' : 'Next';
+      var qEl = steps[idx].querySelector('.wz-q'); stepSplash(idx, qEl ? qEl.textContent : '');
+      var f = steps[idx].querySelector('select, input'); if (f) setTimeout(function () { try { f.focus(); } catch (e) {} }, 90);
+    }
+    nextB.addEventListener('click', function () {
+      if (idx === steps.length - 1) {
+        s('jb_stmatch', '1'); s(E, '1'); s(T, '1'); s('jb_aud', 'stu');
+        if (form.requestSubmit) form.requestSubmit(); else form.submit();
+        return;
+      }
+      show(idx + 1, 'next');
+    });
+    backB.addEventListener('click', function () { show(idx - 1, 'back'); });
+    quitB.addEventListener('click', function () { form.hidden = true; document.body.classList.remove('flow-active', 'gated'); });
+    form.querySelectorAll('.seg-col input[type=radio]').forEach(function (r) {
+      r.addEventListener('change', function () {
+        form.querySelectorAll('.seg-col label').forEach(function (l) { l.classList.remove('on'); });
+        if (r.checked && r.closest('label')) r.closest('label').classList.add('on');
+      });
+    });
+    startFlow = function () {
+      s(E, '1'); s(T, '1'); s('jb_aud', 'stu'); hide();
+      var sc = document.getElementById('scoring'); if (sc) sc.hidden = true;
+      form.hidden = false;
+      document.body.classList.add('flow-active', 'gated');
+      show(0);
+    };
+  })();
   var pending = null;
   function showScoring(fn, introText, ctaText) {
     var sc = document.getElementById('scoring'); if (!sc) { fn(); return; }
@@ -302,11 +415,19 @@ breakdown and sources. See <a href="/methodology">How it works</a>.</p>
   });
   var ex = document.getElementById('gate-explore'); if (ex) ex.addEventListener('click', function (e) { e.preventDefault(); showScoring(showCareers, "You're about to look through real careers, and each one carries a score.", 'Start exploring'); });
   var csx = document.getElementById('cs-exit'); if (csx) csx.addEventListener('click', function (e) { e.preventDefault(); var cs = document.getElementById('careers-screen'); if (cs) cs.hidden = true; document.body.classList.remove('gated'); });
-  var fi = document.getElementById('gate-filter'); if (fi) fi.addEventListener('click', function (e) { e.preventDefault(); showScoring(function () { enter(true); }, "We'll match careers to what you're into, each with a score.", 'Find my matches'); });
+  var fi = document.getElementById('gate-filter'); if (fi) fi.addEventListener('click', function (e) { e.preventDefault(); showScoring(function () { if (startFlow) startFlow(); else enter(true); }, "We'll ask three quick things, then show the careers that fit you best.", 'Find my matches'); });
   var se = document.getElementById('gate-search'); if (se) se.addEventListener('click', function (e) { e.preventDefault(); showScoring(showSearch, "Type any career, even one not on our list, and we'll score the closest match.", 'Search a career'); });
   var sk = document.getElementById('gate-skip'); if (sk) sk.addEventListener('click', function (e) { e.preventDefault(); enter(false); });
+  // Returning from the full-screen "find my best fit" steps: show the matches full-screen.
+  if (g('jb_stmatch') === '1') {
+    try { sessionStorage.removeItem('jb_stmatch'); } catch (err) {}
+    var ms = document.getElementById('matches-screen');
+    if (ms) { hide(); gate.classList.add('is-hidden'); ms.hidden = false; document.body.classList.add('gated'); }
+  }
+  var msx = document.getElementById('ms-exit');
+  if (msx) msx.addEventListener('click', function (e) { e.preventDefault(); var m = document.getElementById('matches-screen'); if (m) m.hidden = true; document.body.classList.remove('gated'); });
   document.addEventListener('click', function (e) {
-    var a = e.target && e.target.closest ? e.target.closest('a.stu-card, a.jobcard, a.cs-card') : null;
+    var a = e.target && e.target.closest ? e.target.closest('a.stu-card, a.jobcard, a.cs-card, a.ms-card') : null;
     if (a && g(T) === '1') s('jb_reveal', '1');
   }, true);
 })();

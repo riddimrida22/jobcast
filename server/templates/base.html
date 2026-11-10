@@ -155,6 +155,23 @@
     .cs-card b { flex:none; font-weight:800; font-size:14px; padding:2px 9px; border-radius:999px; }
     .cs-card b.exp { color:#f2ab91; background:rgba(224,117,89,.2); } .cs-card b.safe { color:#80e3cb; background:rgba(63,182,168,.2); }
     @media (max-width:620px){ .cs-cols{ grid-template-columns:1fr; } }
+    /* Student "your matches" full-screen grid (reuses .careers-screen shell). */
+    .ms-grid { flex:1; min-height:0; overflow-y:auto; width:100%; max-width:960px; margin:0 auto;
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; align-content:start; padding:4px; }
+    .ms-card { display:flex; flex-direction:column; gap:3px; position:relative; text-decoration:none; color:#eaf1f9;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:14px 64px 14px 15px; }
+    .ms-card:hover { background:rgba(255,255,255,.12); border-color:var(--accent); }
+    .ms-t { font-size:15px; font-weight:700; line-height:1.2; }
+    .ms-meta { font-size:12px; color:#9db0c6; }
+    .ms-ring { position:absolute; top:50%; right:12px; transform:translateY(-50%); width:46px; height:46px; border-radius:50%;
+      display:grid; place-items:center; text-align:center; background:rgba(63,182,168,.16); border:2px solid #3fb6a8; }
+    .ms-ring b { font-size:15px; font-weight:800; color:#80e3cb; line-height:1; }
+    .ms-ring small { font-size:8px; text-transform:uppercase; letter-spacing:.04em; color:#80e3cb; }
+    #stu-assess[hidden] { display:none !important; }
+    .seg-col { flex-direction:column; gap:8px; background:none; padding:0; }
+    .seg-col label { text-align:left; font-size:15px; padding:14px 16px; border-radius:12px; border:1.5px solid rgba(255,255,255,.2); }
+    .flow-active .stepform .seg-col label { color:#eaf1f9; }
+    .flow-active .stepform .seg-col label.on { background:var(--accent); color:#2a1708; border-color:var(--accent); }
 
     /* ---- Stepped assessment: single-column normally, full-screen one step at a time in flow ---- */
     .stepform { display:block; }
