@@ -215,6 +215,7 @@
     /* ---- Dramatic result reveal: crunch, then celebration or storm ---- */
     .rv { position:fixed; inset:0; z-index:2000; display:flex; align-items:center; justify-content:center; text-align:center;
           color:#fff; overflow:hidden; background:radial-gradient(1000px 700px at 50% 28%, #16304f, #060d16); }
+    .rv[hidden] { display:none !important; }
     .rv-fx { position:absolute; inset:0; z-index:1; pointer-events:none; }
     .rv-crunch[hidden], .rv-done[hidden] { display:none !important; }
     .rv-crunch { position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; gap:16px; padding:20px; }
