@@ -31,6 +31,49 @@
 </div>
 <script id="reveal-data" type="application/json">{{ {"exposure": r.base_exposure, "band": r.timeline.band.id, "title": r.occupation.title} | tojson }}</script>
 
+<!-- Full-screen upsell: pitch the AI plan, then a demo of the order flow -->
+<div id="upsell" class="up" hidden aria-hidden="true">
+  <button type="button" class="up-x" id="up-x">Exit</button>
+  <section class="up-step" data-up="ad">
+    <div class="up-ico" aria-hidden="true">&#129504;</div>
+    <h2 class="up-q">Get your AI action plan</h2>
+    <p class="up-sub">The free read shows where you stand. <b>JobBreak Monitor</b> turns it into a researched, cited plan built for your exact role, and keeps watching.</p>
+    <ul class="up-list">
+      <li>A full, step-by-step plan, researched and sourced for your job</li>
+      <li>Personalised to your skills, pay, and location</li>
+      <li>Re-run it any time your situation changes</li>
+      <li>Alerts the moment your outlook shifts</li>
+    </ul>
+    <button type="button" class="up-cta" data-up-next>See the plans</button>
+  </section>
+  <section class="up-step" data-up="plans">
+    <h2 class="up-q">Pick your plan</h2>
+    <p class="up-sub">Cancel any time.</p>
+    <div class="up-plans">
+      <label class="up-plan"><input type="radio" name="up_plan" value="monthly" checked><span class="up-pn">Monthly</span><span class="up-price">$3.99<small>/mo</small></span></label>
+      <label class="up-plan feat"><input type="radio" name="up_plan" value="yearly"><span class="up-pn">Yearly</span><span class="up-price">$29<small>/yr</small></span><span class="up-save">save 39%</span></label>
+    </div>
+    <button type="button" class="up-cta" data-up-next>Continue</button>
+  </section>
+  <section class="up-step" data-up="order">
+    <h2 class="up-q">Your order</h2>
+    <div class="up-order">
+      <div class="up-row"><span>JobBreak Monitor</span><b id="up-ord-plan">$3.99 / month</b></div>
+      <div class="up-field"><label>Email for your plan and alerts</label><input type="email" placeholder="you@example.com"></div>
+      <div class="up-field"><label>Payment</label><input type="text" value="Secure checkout by Stripe" readonly></div>
+    </div>
+    <button type="button" class="up-cta" data-up-next>Place order</button>
+    <p class="up-note">Preview of the flow. No payment is taken here.</p>
+  </section>
+  <section class="up-step" data-up="done">
+    <div class="up-ico" aria-hidden="true">&#127881;</div>
+    <h2 class="up-q">That's the flow</h2>
+    <p class="up-sub">In the live version your AI-researched plan is written right here and emailed to you, and JobBreak keeps watching your job.</p>
+    <button type="button" class="up-cta" id="up-finish">Done</button>
+  </section>
+  <div class="up-nav" aria-hidden="true"><button type="button" class="up-back" id="up-back">Back</button><div class="up-dots" id="up-dots"></div></div>
+</div>
+
 <p class="muted">{{ r.occupation.family }} &middot; {{ r.location.metro }}</p>
 <h1 style="margin-bottom:2px">{{ r.occupation.title }}</h1>
 <p class="lead" style="margin-top:0">How exposed this work is to automation, shown as ranges with the reasoning and sources.</p>
@@ -740,24 +783,56 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   function startResultTour() {
     var tabs = Array.prototype.slice.call(document.querySelectorAll('.tabs .tab'));
     if (!tabs.length) return;
+    document.body.classList.add('rstage');
     var idx = 0;
     var bn = document.createElement('div'); bn.className = 'rtour';
     bn.innerHTML = '<span class="rt-step"></span><b class="rt-lab"></b><button type="button" class="rt-next" id="rt-next">Next</button><button type="button" class="rt-x" id="rt-x">Exit</button>';
     document.body.appendChild(bn);
+    function closeShow() { var ss = document.getElementById('sshow'); if (ss && !ss.hidden) { var c = document.getElementById('ss-close'); if (c) c.click(); } }
+    function finish() { document.body.classList.remove('rstage'); closeShow(); bn.remove(); openUpsell(); }
     function go2(k) {
       idx = Math.max(0, Math.min(tabs.length - 1, k));
+      closeShow();
       tabs[idx].click();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      var panel = document.querySelector('.panel.active'); if (panel) panel.scrollTop = 0;
       bn.querySelector('.rt-step').textContent = 'Step ' + (idx + 1) + ' of ' + tabs.length;
-      bn.querySelector('.rt-lab').textContent = tabs[idx].textContent;
+      var lab = tabs[idx].textContent;
+      bn.querySelector('.rt-lab').textContent = lab;
       bn.querySelector('.rt-next').textContent = idx === tabs.length - 1 ? 'Done' : 'Next ›';
+      // "What to do" plays as a full-screen slideshow.
+      if (/what to do/i.test(lab)) { var show = document.getElementById('deck-show-btn'); if (show) setTimeout(function () { show.click(); }, 350); }
     }
     document.getElementById('rt-next').addEventListener('click', function () {
-      if (idx === tabs.length - 1) { bn.remove(); return; }
+      if (idx === tabs.length - 1) { finish(); return; }
       go2(idx + 1);
     });
-    document.getElementById('rt-x').addEventListener('click', function () { bn.remove(); });
+    document.getElementById('rt-x').addEventListener('click', finish);
     go2(0);
+  }
+  function openUpsell() {
+    var up = document.getElementById('upsell'); if (!up) return;
+    var steps = Array.prototype.slice.call(up.querySelectorAll('.up-step'));
+    var back = document.getElementById('up-back'), dots = document.getElementById('up-dots'), nav = up.querySelector('.up-nav');
+    var ui = 0;
+    dots.innerHTML = steps.map(function () { return '<i></i>'; }).join('');
+    function closeUp() { up.hidden = true; document.body.style.overflow = ''; }
+    function show(n) {
+      ui = Math.max(0, Math.min(steps.length - 1, n));
+      steps.forEach(function (s, k) { s.classList.toggle('active', k === ui); });
+      dots.querySelectorAll('i').forEach(function (d, k) { d.classList.toggle('on', k === ui); });
+      nav.classList.toggle('first', ui === 0);
+      up.scrollTop = 0;
+      if (steps[ui].getAttribute('data-up') === 'order') {
+        var y = up.querySelector('input[name=up_plan]:checked'), pl = document.getElementById('up-ord-plan');
+        if (pl) pl.textContent = (y && y.value === 'yearly') ? '$29 / year' : '$3.99 / month';
+      }
+    }
+    up.hidden = false; document.body.style.overflow = 'hidden';
+    up.querySelectorAll('[data-up-next]').forEach(function (b) { b.addEventListener('click', function () { show(ui + 1); }); });
+    if (back) back.addEventListener('click', function () { show(ui - 1); });
+    document.getElementById('up-x').addEventListener('click', closeUp);
+    document.getElementById('up-finish').addEventListener('click', closeUp);
+    show(0);
   }
   var go = document.getElementById('rv-go');
   if (go) go.addEventListener('click', function () { ov.hidden = true; document.body.style.overflow = ''; startResultTour(); });
