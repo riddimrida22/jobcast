@@ -1,9 +1,25 @@
 {% extends "base.html" %}
 {% block body_class %}wide{% endblock %}
 {% block content %}
-<div class="gate" id="gate" role="dialog" aria-label="Welcome to JobBreak">
+<div class="gate" id="gate-aud" role="dialog" aria-label="Welcome to JobBreak">
   <div class="gate-q">Will <span class="hot">AI</span> replace your job?</div>
-  <p class="gate-sub">Not hype, not fear. How much of your work still needs a person, and when? Pick where to start.</p>
+  <p class="gate-sub">First, which one are you?</p>
+  <div class="gate-paths">
+    <a class="gate-card primary" href="#" id="aud-employee">
+      <span class="gc-ey">Working now</span>
+      <div class="gc-h">I'm an employee</div>
+      <div class="gc-sub">See how exposed your own job is, or take a quick tour of how it works first.</div>
+    </a>
+    <a class="gate-card" href="/students" id="aud-student">
+      <span class="gc-ey">Still choosing</span>
+      <div class="gc-h">I'm a student</div>
+      <div class="gc-sub">Find careers that pay well and are hard for AI to take, ranked from real data.</div>
+    </a>
+  </div>
+</div>
+<div class="gate is-hidden" id="gate" role="dialog" aria-label="How to start">
+  <div class="gate-q">How do you want to start?</div>
+  <p class="gate-sub">Not hype, not fear. How much of your work still needs a person, and when?</p>
   <div class="gate-paths">
     <a class="gate-card" href="#" id="gate-tour">
       <span class="gc-ey">The topic in general</span>
@@ -556,6 +572,14 @@
   function hideGate() { gate.classList.add('is-hidden'); document.body.classList.remove('gated'); }
   // The intro gate is always the first page; it clears only when a path is chosen.
   document.body.classList.add('gated');
+  // Audience gate first: Employee reveals the employee paths; Student is a link to /students.
+  var aud = document.getElementById('gate-aud');
+  var audEmp = document.getElementById('aud-employee');
+  if (audEmp) audEmp.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (aud) aud.classList.add('is-hidden');
+    gate.classList.remove('is-hidden');
+  });
 
   function showCareers() { var cs = document.getElementById('careers-screen'); if (cs) { cs.hidden = false; document.body.classList.add('gated'); } }
   // After a path is chosen, explain the scoring full-screen, then run the path.
