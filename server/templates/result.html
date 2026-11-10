@@ -36,8 +36,8 @@
   <button type="button" class="up-x" id="up-x">Exit</button>
   <section class="up-step" data-up="ad">
     <div class="up-ico" aria-hidden="true">&#129504;</div>
-    <h2 class="up-q">Get your AI action plan</h2>
-    <p class="up-sub">The free read shows where you stand. <b>JobBreak Monitor</b> turns it into a researched, cited plan built for your exact role, and keeps watching.</p>
+    <h2 class="up-q">Unlock the full breakdown</h2>
+    <p class="up-sub">You've seen the headline number. <b>JobBreak Monitor</b> unlocks every exposed task and your timeline, plus a researched, cited plan built for this role, and keeps watching.</p>
     <ul class="up-list">
       <li>A full, step-by-step plan, researched and sourced for your job</li>
       <li>Personalised to your skills, pay, and location</li>
@@ -72,6 +72,24 @@
     <button type="button" class="up-cta" id="up-finish">Done</button>
   </section>
   <div class="up-nav" aria-hidden="true"><button type="button" class="up-back" id="up-back">Back</button><div class="up-dots" id="up-dots"></div></div>
+</div>
+
+<!-- Paywall gate: for employees the breakdown stays locked behind the teaser until unlocked -->
+<div id="rlock" hidden aria-hidden="true">
+  <div class="rl-card">
+    <span class="rl-ey">Your headline number</span>
+    <div class="rl-score"><b id="rl-num">0</b><small>of 100 exposed to AI &amp; automation</small></div>
+    <h2 class="rl-h">The full breakdown is locked</h2>
+    <p class="rl-sub">You've seen where <span id="rl-role">this role</span> stands. Unlock every exposed task, the timeline, and a researched plan on what to do next.</p>
+    <ul class="rl-list">
+      <li>Task-by-task exposure breakdown</li>
+      <li>When the change is likely, your timeline</li>
+      <li>A researched, cited action plan</li>
+      <li>Safer adjacent roles and local pay</li>
+    </ul>
+    <button type="button" class="rl-go" id="rl-go">Unlock the full breakdown</button>
+    <a class="rl-alt" href="/">Try another career</a>
+  </div>
 </div>
 
 <p class="muted">{{ r.occupation.family }} &middot; {{ r.location.metro }}</p>
@@ -779,6 +797,8 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     if (tier === 'safe') { badge.textContent = 'Good news'; msg.textContent = '{{ "Most of this work still needs a person. AI reshapes this role more than it replaces it." if seo else "Most of your work still needs a person. AI reshapes this role more than it replaces it." }}'; party(); }
     else if (tier === 'storm') { badge.textContent = 'Heads up'; msg.textContent = 'A lot of this role is exposed to AI and automation. The good news: there is time to get ahead of it.'; storm(); }
     else { badge.textContent = 'Mixed'; msg.textContent = 'Parts of this role are exposed, parts are safe. Where you focus next is what matters.'; }
+    var gobtn = document.getElementById('rv-go');
+    if (gobtn) { var isStu; try { isStu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {} gobtn.textContent = isStu ? 'See the full breakdown' : 'Unlock the full breakdown'; }
     countTo(document.getElementById('rv-num'), exp, 1200);
   }
   function countTo(el, target, ms) {
@@ -827,7 +847,9 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     function finish() {
       document.body.classList.remove('rstage'); closeShow(); bn.remove(); rsplash.remove();
       var stu; try { stu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {}
-      if (stu) { endFree(); } else { openUpsell(); }
+      // Students get a free closing card. Employees pass the paywall BEFORE the breakdown
+      // unlocks, so by the time the guided tour ends there is nothing left to gate.
+      if (stu) { endFree(); }
     }
     function go2(k) {
       idx = Math.max(0, Math.min(tabs.length - 1, k));
@@ -883,13 +905,13 @@ It is a sourced range, not a verdict, and the detail is below.</p>
       ov.remove(); document.body.style.overflow = '';
     });
   }
-  function openUpsell() {
+  function openUpsell(onComplete) {
     var up = document.getElementById('upsell'); if (!up) return;
     var steps = Array.prototype.slice.call(up.querySelectorAll('.up-step'));
     var back = document.getElementById('up-back'), dots = document.getElementById('up-dots'), nav = up.querySelector('.up-nav');
     var ui = 0;
     dots.innerHTML = steps.map(function () { return '<i></i>'; }).join('');
-    function closeUp() { up.hidden = true; document.body.style.overflow = ''; }
+    function closeUp() { up.hidden = true; up.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; }
     function show(n) {
       ui = Math.max(0, Math.min(steps.length - 1, n));
       steps.forEach(function (s, k) { s.classList.toggle('active', k === ui); });
@@ -901,15 +923,42 @@ It is a sourced range, not a verdict, and the detail is below.</p>
         if (pl) pl.textContent = (y && y.value === 'yearly') ? '$29 / year' : '$3.99 / month';
       }
     }
-    up.hidden = false; document.body.style.overflow = 'hidden';
-    up.querySelectorAll('[data-up-next]').forEach(function (b) { b.addEventListener('click', function () { show(ui + 1); }); });
-    if (back) back.addEventListener('click', function () { show(ui - 1); });
-    document.getElementById('up-x').addEventListener('click', closeUp);
-    document.getElementById('up-finish').addEventListener('click', closeUp);
+    // Bind the controls once; openUpsell can be called again from the lock gate.
+    if (!up._wired) {
+      up._wired = true;
+      up.querySelectorAll('[data-up-next]').forEach(function (b) { b.addEventListener('click', function () { show(ui + 1); }); });
+      if (back) back.addEventListener('click', function () { show(ui - 1); });
+      // Exit leaves the breakdown locked; finishing the flow unlocks it.
+      document.getElementById('up-x').addEventListener('click', function () { closeUp(); });
+      document.getElementById('up-finish').addEventListener('click', function () { closeUp(); if (up._onComplete) up._onComplete(); });
+    }
+    up._onComplete = onComplete || null;
+    up.hidden = false; up.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
     show(0);
   }
+  // Paywall gate for employees: the reveal is the free teaser (headline score + one-line
+  // read). The full breakdown stays locked behind the paywall until they pass it.
+  function showLock() {
+    var lk = document.getElementById('rlock'); if (!lk) return;
+    var n = document.getElementById('rl-num'); if (n) n.textContent = Math.round(exp);
+    var role = document.getElementById('rl-role');
+    if (role) role.textContent = {{ ("this role" if seo else "your role") | tojson }};
+    lk.hidden = false; lk.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
+    var gob = document.getElementById('rl-go');
+    if (gob && !gob._wired) { gob._wired = true; gob.addEventListener('click', function () { openUpsell(unlockBreakdown); }); }
+  }
+  function unlockBreakdown() {
+    var lk = document.getElementById('rlock'); if (lk) { lk.hidden = true; lk.setAttribute('aria-hidden', 'true'); }
+    document.body.style.overflow = '';
+    startResultTour();
+  }
   var go = document.getElementById('rv-go');
-  if (go) go.addEventListener('click', function () { ov.hidden = true; document.body.style.overflow = ''; startResultTour(); });
+  if (go) go.addEventListener('click', function () {
+    ov.hidden = true; document.body.style.overflow = '';
+    var stu; try { stu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {}
+    if (stu) { startResultTour(); }            // students: full free breakdown
+    else { showLock(); openUpsell(unlockBreakdown); }  // employees: teaser done, paywall now
+  });
 })();
 </script>
 {% endblock %}

@@ -319,6 +319,27 @@
       text-align:center; padding:72px 22px 92px; color:#eaf1f9; overflow-y:auto;
       background:radial-gradient(1100px 650px at 50% -6%, #173253, var(--shell-dark)); }
     #upsell[hidden] { display:none !important; }
+    #rlock { position:fixed; inset:0; z-index:1650; display:flex; align-items:center; justify-content:center;
+      text-align:center; padding:48px 22px; color:#eaf1f9; overflow-y:auto;
+      background:radial-gradient(1100px 650px at 50% -6%, #173253, var(--shell-dark)); }
+    #rlock[hidden] { display:none !important; }
+    #rlock .rl-card { width:100%; max-width:460px; animation:wzIn .4s ease; }
+    #rlock .rl-ey { font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
+    #rlock .rl-score { margin:8px 0 4px; }
+    #rlock .rl-score b { font-size:clamp(54px,13vw,82px); font-weight:900; color:#fff; line-height:1; display:block; }
+    #rlock .rl-score small { color:#b9c7d8; font-size:14px; }
+    #rlock .rl-h { font-size:clamp(22px,5vw,30px); font-weight:800; color:#fff; margin:8px 0 8px; }
+    #rlock .rl-sub { color:#b9c7d8; font-size:15.5px; line-height:1.45; margin:0 auto 18px; max-width:420px; }
+    #rlock .rl-sub span { color:#fff; }
+    #rlock .rl-list { list-style:none; padding:0; margin:0 auto 22px; text-align:left; display:inline-block; }
+    #rlock .rl-list li { position:relative; padding:8px 0 8px 32px; font-size:15px; border-bottom:1px solid rgba(255,255,255,.1); }
+    #rlock .rl-list li::before { content:""; position:absolute; left:3px; top:9px; width:18px; height:18px; border-radius:5px;
+      background:rgba(243,163,95,.16); border:1.5px solid var(--accent); }
+    #rlock .rl-list li::after { content:""; position:absolute; left:9.5px; top:11px; width:5px; height:9px;
+      border:2px solid var(--accent); border-top:0; border-left:0; transform:rotate(42deg); }
+    #rlock .rl-go { font:inherit; font-weight:800; font-size:17px; cursor:pointer; border:0; border-radius:12px; padding:15px 38px;
+      color:#2a1708; background:var(--accent); box-shadow:0 12px 34px rgba(243,163,95,.32); }
+    #rlock .rl-alt { display:block; margin-top:16px; color:#9db0c6; font-size:14px; text-decoration:underline; }
     #stu-end { position:fixed; inset:0; z-index:1700; display:flex; flex-direction:column; align-items:center; justify-content:center;
       text-align:center; padding:48px 24px; color:#eaf1f9; overflow-y:auto; opacity:1;
       background:radial-gradient(1100px 650px at 50% -6%, #123a24, var(--shell-dark)); }
