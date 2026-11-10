@@ -596,12 +596,15 @@
   // Audience gate first: Employee reveals the employee paths; Student is a link to /students.
   var aud = document.getElementById('gate-aud');
   var audEmp = document.getElementById('aud-employee');
-  if (audEmp) audEmp.addEventListener('click', function (e) {
-    e.preventDefault();
+  function toEmployee() {
     try { sessionStorage.setItem('jb_aud', 'emp'); } catch (err) {}
     if (aud) aud.classList.add('is-hidden');
     gate.classList.remove('is-hidden');
-  });
+  }
+  if (audEmp) audEmp.addEventListener('click', function (e) { e.preventDefault(); toEmployee(); });
+  // The "For Workers" menu link lands straight in the employee experience, past the
+  // Employee/Student audience gate (which stays the home page for everyone else).
+  if (/[?&]view=workers\b/.test(location.search)) toEmployee();
 
   function showCareers() { var cs = document.getElementById('careers-screen'); if (cs) { cs.hidden = false; document.body.classList.add('gated'); } }
   // After a path is chosen, explain the scoring full-screen, then run the path.
