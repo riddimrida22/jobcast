@@ -59,6 +59,11 @@
 <div class="careers-screen" id="careers-screen" hidden>
   <button type="button" class="cs-exit" id="cs-exit">Exit tour</button>
   <div class="cs-head"><span class="cs-step">Step 1 of the tour</span><h2>Tap any career to see its {{ rating_label }}</h2><p>A quick demo of the read you'll get for your own job.</p></div>
+  <div class="cs-search">
+    <input id="cs-q" type="text" autocomplete="off" placeholder="Or type your job to jump straight to it"
+           role="combobox" aria-controls="cs-qlist" aria-expanded="false">
+    <div id="cs-qlist" class="combo-list" role="listbox" hidden></div>
+  </div>
   <div class="cs-cols">
     <div class="cs-col">
       <div class="cs-col-h risk">More at risk</div>
@@ -74,6 +79,10 @@
         {% for o in least_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="safe">{{ o.base }}</b></a>{% endfor %}
       </div></div>
     </div>
+  </div>
+  <div class="cs-nav">
+    <button type="button" class="cs-back" id="cs-back">&#8249; Back</button>
+    <a class="cs-next" href="/?flow=1">See my own job &#8250;</a>
   </div>
 </div>
 
@@ -784,6 +793,52 @@
       window.jobcastStartFlow();
     }
   } catch (e) {}
+})();
+</script>
+<script>
+// Employee tour: search box + Back/Next on the careers screen.
+(function () {
+  var q = document.getElementById('cs-q'), list = document.getElementById('cs-qlist');
+  if (q && list) {
+    function sset(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
+    function goSoc(soc) { sset('jb_reveal', '1'); sset('jb_tour', '1'); sset('jb_aud', 'emp'); location.href = '/jobs/' + soc; }
+    function goFree(text) { location.href = '/?flow=1&title=' + encodeURIComponent(text); }
+    var lastQ = null, tmr = null;
+    function render(items) {
+      list.innerHTML = '';
+      var val = q.value.trim();
+      var exact = items.some(function (it) { return it.title.toLowerCase() === val.toLowerCase(); });
+      if (val && !exact) {
+        var c = document.createElement('div'); c.className = 'combo-item combo-custom'; c.setAttribute('role', 'option');
+        c.innerHTML = 'Use “<b></b>”<span class="cc-tag">my own</span>'; c.querySelector('b').textContent = val;
+        c.addEventListener('mousedown', function (e) { e.preventDefault(); goFree(val); });
+        list.appendChild(c);
+      }
+      items.slice(0, 40).forEach(function (it) {
+        var el = document.createElement('div'); el.className = 'combo-item'; el.setAttribute('role', 'option'); el.textContent = it.title;
+        el.addEventListener('mousedown', function (e) { e.preventDefault(); goSoc(it.soc); });
+        list.appendChild(el);
+      });
+      list.hidden = !list.children.length;
+    }
+    function fetchSuggest() {
+      var val = q.value.trim(); if (val === lastQ) return; lastQ = val;
+      if (!val) { list.hidden = true; list.innerHTML = ''; return; }
+      fetch('/v1/suggest?q=' + encodeURIComponent(val)).then(function (r) { return r.json(); })
+        .then(function (d) { render((d && d.suggestions) || []); }).catch(function () {});
+    }
+    q.addEventListener('input', function () { clearTimeout(tmr); tmr = setTimeout(fetchSuggest, 160); });
+    q.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      var first = list.querySelector('.combo-item');
+      if (first) first.dispatchEvent(new MouseEvent('mousedown'));
+      else { var v = q.value.trim(); if (v) goFree(v); }
+    });
+    document.addEventListener('click', function (e) { if (e.target !== q && !list.contains(e.target)) list.hidden = true; });
+  }
+  var back = document.getElementById('cs-back');
+  if (back) back.addEventListener('click', function () { location.href = '/'; });
 })();
 </script>
 {% endblock %}
