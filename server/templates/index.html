@@ -3,33 +3,20 @@
 {% block description %}Will AI or robots take your job, and when? Get your Job Extinction Risk (0 to 100) from real O*NET and BLS data, with a timeline and what to do about it. Free, no signup.{% endblock %}
 {% block body_class %}wide{% endblock %}
 {% block content %}
-<style>
-  .lp-search { position:relative; width:min(92vw,500px); margin:2px auto 14px; z-index:4; }
-  .lp-search #lp-q { width:100%; box-sizing:border-box; background:rgba(255,255,255,.1); border:1.5px solid rgba(255,255,255,.28); color:#fff; border-radius:12px; padding:15px 18px; font:inherit; font-size:clamp(16px,2.4vw,18px); }
-  .lp-search #lp-q::placeholder { color:#b9c7d8; }
-  .lp-search #lp-qlist { top:calc(100% + 4px); max-height:44vh; overflow-y:auto; text-align:left; background:#16293f; border:1px solid rgba(255,255,255,.2); }
-  .lp-search #lp-qlist .combo-item { color:#eaf1f9; border-bottom:1px solid rgba(255,255,255,.08); }
-  .lp-search #lp-qlist .combo-item:hover { background:rgba(255,255,255,.12); }
-  .lp-search #lp-qlist .combo-custom b { color:#fff; }
-  .lp-eg { color:#cdd9ea; font-size:clamp(13px,2vw,15px); margin:0 auto 20px; line-height:1.55; max-width:460px; }
-  .lp-eg b { color:#fff; }
-  .lp-alt { font-size:14px; color:#9db0c6; }
-  .lp-alt a { color:#cdd9ea; text-decoration:underline; cursor:pointer; }
-  .lp-dot { margin:0 10px; opacity:.5; }
-</style>
 <div class="gate" id="gate-aud" role="dialog" aria-label="Welcome to JobBreak">
   <div class="gate-q">Will <span class="hot">AI</span> replace your job?</div>
-  <p class="gate-sub">Type your job and get your {{ rating_label }} now. 0 to 100, from real government data, with a timeline and what to do. Free, no sign-up.</p>
-  <div class="lp-search">
-    <input id="lp-q" type="text" autocomplete="off" placeholder="Type your job, e.g. electrician, accountant, nurse"
-           role="combobox" aria-controls="lp-qlist" aria-expanded="false" aria-label="Type your job">
-    <div id="lp-qlist" class="combo-list" role="listbox" hidden></div>
-  </div>
-  <p class="lp-eg">Electricians score 18. Accountants 52. Translators 84. <b>Where do you land?</b></p>
-  <div class="lp-alt">
-    <a href="#" id="lp-full">Prefer a step-by-step personal read?</a>
-    <span class="lp-dot">&middot;</span>
-    <a href="/students" id="aud-student">I'm a student</a>
+  <p class="gate-sub">First, which one are you?</p>
+  <div class="gate-paths">
+    <a class="gate-card primary" href="#" id="aud-employee">
+      <span class="gc-ey">Working now</span>
+      <div class="gc-h">I'm an employee</div>
+      <div class="gc-sub">See how exposed your own job is, or take a quick tour of how it works first.</div>
+    </a>
+    <a class="gate-card" href="/students" id="aud-student">
+      <span class="gc-ey">Still choosing</span>
+      <div class="gc-h">I'm a student</div>
+      <div class="gc-sub">Find careers that pay well and are hard for AI to take, ranked from real data.</div>
+    </a>
   </div>
 </div>
 <div class="welcome" id="welcome" hidden role="dialog" aria-label="Welcome">
@@ -624,7 +611,7 @@
   document.body.classList.add('gated');
   // Audience gate first: Employee reveals the employee paths; Student is a link to /students.
   var aud = document.getElementById('gate-aud');
-  var audEmp = document.getElementById('lp-full');
+  var audEmp = document.getElementById('aud-employee');
   // After the audience choice, a welcome page plays the "race" animation, then the
   // general-vs-personal choice. The gif is the thing people enjoy, so it gets a moment.
   var welNext = null;
@@ -809,14 +796,13 @@
 })();
 </script>
 <script>
-// Instant job search: the landing box and the tour box both jump straight to a score.
+// Employee tour: search box + Back/Next on the careers screen.
 (function () {
-  function sset(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
-  function goSoc(soc) { sset('jb_reveal', '1'); sset('jb_tour', '1'); sset('jb_aud', 'emp'); location.href = '/jobs/' + soc; }
-  function goFree(text) { location.href = '/?flow=1&title=' + encodeURIComponent(text); }
-  function initCombo(qId, listId) {
-    var q = document.getElementById(qId), list = document.getElementById(listId);
-    if (!q || !list) return;
+  var q = document.getElementById('cs-q'), list = document.getElementById('cs-qlist');
+  if (q && list) {
+    function sset(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
+    function goSoc(soc) { sset('jb_reveal', '1'); sset('jb_tour', '1'); sset('jb_aud', 'emp'); location.href = '/jobs/' + soc; }
+    function goFree(text) { location.href = '/?flow=1&title=' + encodeURIComponent(text); }
     var lastQ = null, tmr = null;
     function render(items) {
       list.innerHTML = '';
@@ -851,8 +837,6 @@
     });
     document.addEventListener('click', function (e) { if (e.target !== q && !list.contains(e.target)) list.hidden = true; });
   }
-  initCombo('lp-q', 'lp-qlist');
-  initCombo('cs-q', 'cs-qlist');
   var back = document.getElementById('cs-back');
   if (back) back.addEventListener('click', function () { location.href = '/'; });
 })();
