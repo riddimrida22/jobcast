@@ -532,6 +532,31 @@ def create_app() -> Flask:
             return jsonify({"ok": False, "error": err or "stripe_error"}), 400
         return jsonify({"ok": True, "url": sess.url})
 
+    @app.post("/v1/ev")
+    def track_event():
+        """Record a funnel event (cookie-free, best-effort). Shows in /admin/stats under
+        /_ev/<name>, so we can see where people drop in the buy funnel."""
+        import re
+        body = request.get_json(silent=True) or {}
+        name = (body.get("name") or "").strip().lower()
+        if not re.fullmatch(r"[a-z0-9_]{1,32}", name or ""):
+            return ("", 204)
+        try:
+            ua = request.headers.get("User-Agent", "")
+            if any(b in ua.lower() for b in ("bot", "spider", "crawl", "slurp", "headless",
+                                             "python-", "curl", "wget")):
+                return ("", 204)
+            import hashlib
+            xff = request.headers.get("X-Forwarded-For", "")
+            ip = (xff.split(",")[0].strip() if xff else (request.remote_addr or ""))
+            day = time.strftime("%Y-%m-%d", time.gmtime())
+            vid = hashlib.sha256(f"{ip}|{ua}|{day}|{app.secret_key}".encode("utf-8", "ignore")).hexdigest()[:16]
+            from . import analytics_store as an
+            an.record("/_ev/" + name, "", vid)
+        except Exception:
+            pass
+        return ("", 204)
+
     @app.get("/billing/success")
     def billing_success():
         from . import payments as pay

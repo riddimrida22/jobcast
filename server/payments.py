@@ -32,6 +32,13 @@ PRICE_ENV = {
     ("tier3", "yearly"): "JOBCAST_STRIPE_PRICE_TIER3_YEARLY",
 }
 
+# Prices in cents, set right here via inline price_data - change the number to change the
+# price, no Stripe dashboard step needed. (tier2 = the "Monitor" plan.)
+PRICE_CENTS = {
+    ("tier2", "monthly"): 199,    # $1.99 / month
+    ("tier2", "yearly"): 1200,    # $12 / year  (~$1/mo)
+}
+
 
 def _secret():
     return os.environ.get("JOBCAST_STRIPE_SECRET_KEY")
@@ -57,15 +64,26 @@ def price_id(tier, period):
 
 
 def create_checkout_session(tier, period, success_url, cancel_url, email=None):
-    """Return (session, None) on success or (None, error_code)."""
-    pid = price_id(tier, period)
-    if not pid:
+    """Return (session, None) on success or (None, error_code). The price is set inline
+    (price_data from PRICE_CENTS), so it can be changed in code with no Stripe dashboard
+    step. Entitlement is carried by metadata, not the price id."""
+    cents = PRICE_CENTS.get((tier, period))
+    if not cents:
         return None, "price_not_configured"
+    interval = "year" if period == "yearly" else "month"
     try:
         stripe = _client()
         session = stripe.checkout.Session.create(
             mode="subscription",
-            line_items=[{"price": pid, "quantity": 1}],
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "unit_amount": cents,
+                    "recurring": {"interval": interval},
+                    "product_data": {"name": "JobBreak Monitor"},
+                },
+                "quantity": 1,
+            }],
             success_url=success_url,
             cancel_url=cancel_url,
             allow_promotion_codes=True,

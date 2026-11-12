@@ -50,8 +50,8 @@
     <h2 class="up-q">Pick your plan</h2>
     <p class="up-sub">Apple Pay, Google Pay, card or Link. Cancel any time.</p>
     <div class="up-plans">
-      <label class="up-plan"><input type="radio" name="up_plan" value="monthly" checked><span class="up-pn">Monthly</span><span class="up-price">$3.99<small>/mo</small></span></label>
-      <label class="up-plan feat"><input type="radio" name="up_plan" value="yearly"><span class="up-pn">Yearly</span><span class="up-price">$29<small>/yr</small></span><span class="up-save">save 39%</span></label>
+      <label class="up-plan"><input type="radio" name="up_plan" value="monthly" checked><span class="up-pn">Monthly</span><span class="up-price">$1.99<small>/mo</small></span></label>
+      <label class="up-plan feat"><input type="radio" name="up_plan" value="yearly"><span class="up-pn">Yearly</span><span class="up-price">$12<small>/yr</small></span><span class="up-save">save 50%</span></label>
     </div>
     <div class="pay-badges"><span class="pb">Apple Pay</span><span class="pb">Google Pay</span><span class="pb">Card</span><span class="pb">Link</span></div>
     <button type="button" class="up-cta" data-up-next>Continue</button>
@@ -59,7 +59,7 @@
   <section class="up-step" data-up="order">
     <h2 class="up-q">Your order</h2>
     <div class="up-order">
-      <div class="up-row"><span>JobBreak Monitor</span><b id="up-ord-plan">$3.99 / month</b></div>
+      <div class="up-row"><span>JobBreak Monitor</span><b id="up-ord-plan">$1.99 / month</b></div>
       <div class="up-field"><label>Email for your plan and alerts</label><input type="email" placeholder="you@example.com"></div>
       <div class="up-field"><label>Payment</label><input type="text" value="Secure checkout by Stripe" readonly></div>
     </div>
@@ -391,7 +391,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
 
   <div class="period-toggle" role="group" aria-label="Billing period">
     <button type="button" class="per-btn active" data-period="monthly">Monthly</button>
-    <button type="button" class="per-btn" data-period="yearly">Yearly <span class="per-save">save 39%</span></button>
+    <button type="button" class="per-btn" data-period="yearly">Yearly <span class="per-save">save 50%</span></button>
   </div>
 
   <div class="plans plans-2" data-period="monthly">
@@ -413,10 +413,10 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     <div class="plan feat">
       <div class="plan-badge">Keep ahead</div>
       <div class="plan-name">JobBreak Monitor</div>
-      <div class="plan-price per-monthly">$3.99<span>/mo</span></div>
-      <div class="plan-price per-yearly">$29<span>/yr</span></div>
-      <div class="plan-year per-monthly">or $29/yr <span class="save">save 39%</span></div>
-      <div class="plan-year per-yearly">that's about $2.42/mo, billed yearly</div>
+      <div class="plan-price per-monthly">$1.99<span>/mo</span></div>
+      <div class="plan-price per-yearly">$12<span>/yr</span></div>
+      <div class="plan-year per-monthly">or $12/yr <span class="save">save 50%</span></div>
+      <div class="plan-year per-yearly">that's $1/mo, billed yearly</div>
       <div class="plan-tag">Your full researched plan, plus a watch on your job.</div>
       <ul>
         <li>{{ check }}Everything in Free</li>
@@ -794,6 +794,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   // Tour (generic) funnels to "localize & personalize"; personal result goes to the paywall.
   var SEO = {{ seo|default(false)|tojson }}, OCC_TITLE = {{ r.occupation.title|tojson }}, RATING = {{ rating_label|tojson }};
   ov.hidden = false; ov.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
+  window.jbEv && window.jbEv('reveal');
   var steps = ['{{ "Mapping the tasks..." if seo else "Mapping your tasks..." }}', 'Scoring AI exposure...', 'Checking the robots...', '{{ "Reading the timeline..." if seo else "Reading your timeline..." }}', 'Comparing to the labor data...', 'Almost there...'];
   var stepEl = document.getElementById('rv-step'), bar = document.getElementById('rv-barfill');
   var si = 0; if (stepEl) stepEl.textContent = steps[0];
@@ -920,6 +921,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   var _upInit = false;
   function openUpsell(onComplete) {
     var up = document.getElementById('upsell'); if (!up) return;
+    window.jbEv && window.jbEv('paywall');
     up._onComplete = onComplete || null;
     // Build and wire the paywall once; openUpsell can be called again from the lock gate.
     if (!_upInit) {
@@ -937,11 +939,12 @@ It is a sourced range, not a verdict, and the detail is below.</p>
         up.scrollTop = 0;
         if (steps[ui].getAttribute('data-up') === 'order') {
           var y = up.querySelector('input[name=up_plan]:checked'), pl = document.getElementById('up-ord-plan');
-          if (pl) pl.textContent = (y && y.value === 'yearly') ? '$29 / year' : '$3.99 / month';
+          if (pl) pl.textContent = (y && y.value === 'yearly') ? '$12 / year' : '$1.99 / month';
         }
       }
       // Real Stripe hosted Checkout: Apple Pay, Google Pay, card and Link all appear there.
       function upCheckout(btn) {
+        window.jbEv && window.jbEv('checkout');
         var y = up.querySelector('input[name=up_plan]:checked');
         var period = (y && y.value === 'yearly') ? 'yearly' : 'monthly';
         var old = btn ? btn.textContent : '';
@@ -988,6 +991,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   // Employees get the headline teaser PLUS one real slide (the Overview); the rest of the
   // breakdown sits masked beneath it, behind the paywall.
   function startFreeSlide() {
+    window.jbEv && window.jbEv('free_slide');
     var tabs = document.querySelectorAll('.tabs .tab');
     var overview = document.getElementById('p-overview');
     if (!tabs.length || !overview) { showLock(); openUpsell(unlockBreakdown); return; }
