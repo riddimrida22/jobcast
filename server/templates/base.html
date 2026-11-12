@@ -7,6 +7,7 @@
   <title>{% block title %}JobBreak{% endblock %}</title>
   <meta name="description" content="{% block description %}A clear, sourced read on whether AI or robots are likely to take your job, and when.{% endblock %}">
   {% if noindex %}<meta name="robots" content="noindex, nofollow">{% endif %}
+  <link rel="canonical" href="{{ (request.host_url|replace('http://','https://'))[:-1] }}{{ request.path }}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="JobBreak">
   <meta property="og:title" content="{{ self.title() }}">

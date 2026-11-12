@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ r.occupation.title }} - AI and robot exposure | JobBreak{% endblock %}
-{% block description %}{{ r.occupation.title }}: automation exposure {{ r.base_exposure }} of 100, with a sourced timeline and what to do. See how your job compares on JobBreak.{% endblock %}
+{% block title %}Will AI replace {{ r.occupation.title }}? Risk {{ r.base_exposure|round|int }}/100 | JobBreak{% endblock %}
+{% block description %}Will AI or robots replace {{ r.occupation.title }}? Job Extinction Risk {{ r.base_exposure|round|int }} of 100 - the exposed tasks, a timeline, and what to do about it. Free check on JobBreak.{% endblock %}
 {% block og_media %}
   {% set ogcard = request.host_url ~ 'jobs/' ~ r.occupation.soc ~ '/card.png' %}
   <meta name="twitter:card" content="summary_large_image">
@@ -98,7 +98,7 @@
 <p class="muted">{{ r.occupation.family }} &middot; {{ r.location.metro }}</p>
 {% if closest_match %}<p class="closest-note">You entered <strong>{{ typed_title }}</strong>. It's not on our list yet, so this is the closest career we track: <strong>{{ closest_match }}</strong>.</p>{% endif %}
 <h1 style="margin-bottom:2px">{{ r.occupation.title }}</h1>
-<p class="lead" style="margin-top:0">How exposed this work is to automation, shown as ranges with the reasoning and sources.</p>
+<p class="lead" style="margin-top:0">{% if seo %}<strong>Will AI or robots replace {{ r.occupation.title }}?</strong> {% endif %}How exposed this work is to automation, shown as ranges with the reasoning and sources.</p>
 
 {% set be = r.base_exposure %}
 {% set bid = r.timeline.band.id %}
