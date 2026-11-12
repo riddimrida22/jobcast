@@ -35,6 +35,7 @@ PRICE_ENV = {
 # Prices in cents, set right here via inline price_data - change the number to change the
 # price, no Stripe dashboard step needed. (tier2 = the "Monitor" plan.)
 PRICE_CENTS = {
+    ("tier2", "once"): 499,       # $4.99 one-time (full plan, no subscription)
     ("tier2", "monthly"): 199,    # $1.99 / month
     ("tier2", "yearly"): 1200,    # $12 / year  (~$1/mo)
 }
@@ -70,20 +71,19 @@ def create_checkout_session(tier, period, success_url, cancel_url, email=None):
     cents = PRICE_CENTS.get((tier, period))
     if not cents:
         return None, "price_not_configured"
-    interval = "year" if period == "yearly" else "month"
+    onetime = (period == "once")
+    price_data = {
+        "currency": "usd",
+        "unit_amount": cents,
+        "product_data": {"name": "JobBreak full plan" if onetime else "JobBreak Monitor"},
+    }
+    if not onetime:
+        price_data["recurring"] = {"interval": "year" if period == "yearly" else "month"}
     try:
         stripe = _client()
         session = stripe.checkout.Session.create(
-            mode="subscription",
-            line_items=[{
-                "price_data": {
-                    "currency": "usd",
-                    "unit_amount": cents,
-                    "recurring": {"interval": interval},
-                    "product_data": {"name": "JobBreak Monitor"},
-                },
-                "quantity": 1,
-            }],
+            mode="payment" if onetime else "subscription",
+            line_items=[{"price_data": price_data, "quantity": 1}],
             success_url=success_url,
             cancel_url=cancel_url,
             allow_promotion_codes=True,

@@ -47,11 +47,12 @@
     <button type="button" class="up-cta" data-up-next>See the plans</button>
   </section>
   <section class="up-step" data-up="plans">
-    <h2 class="up-q">Pick your plan</h2>
-    <p class="up-sub">Apple Pay, Google Pay, card or Link. Cancel any time.</p>
+    <h2 class="up-q">Unlock your plan</h2>
+    <p class="up-sub">Pay once, or subscribe to keep watching your job. Apple Pay, Google Pay, card or Link.</p>
     <div class="up-plans">
-      <label class="up-plan"><input type="radio" name="up_plan" value="monthly" checked><span class="up-pn">Monthly</span><span class="up-price">$1.99<small>/mo</small></span></label>
-      <label class="up-plan feat"><input type="radio" name="up_plan" value="yearly"><span class="up-pn">Yearly</span><span class="up-price">$12<small>/yr</small></span><span class="up-save">save 50%</span></label>
+      <label class="up-plan feat"><input type="radio" name="up_plan" value="once" checked><span class="up-pn">One-time</span><span class="up-price">$4.99</span><span class="up-save">no subscription</span></label>
+      <label class="up-plan"><input type="radio" name="up_plan" value="monthly"><span class="up-pn">Monthly</span><span class="up-price">$1.99<small>/mo</small></span></label>
+      <label class="up-plan"><input type="radio" name="up_plan" value="yearly"><span class="up-pn">Yearly</span><span class="up-price">$12<small>/yr</small></span></label>
     </div>
     <div class="pay-badges"><span class="pb">Apple Pay</span><span class="pb">Google Pay</span><span class="pb">Card</span><span class="pb">Link</span></div>
     <button type="button" class="up-cta" data-up-next>Continue</button>
@@ -939,14 +940,14 @@ It is a sourced range, not a verdict, and the detail is below.</p>
         up.scrollTop = 0;
         if (steps[ui].getAttribute('data-up') === 'order') {
           var y = up.querySelector('input[name=up_plan]:checked'), pl = document.getElementById('up-ord-plan');
-          if (pl) pl.textContent = (y && y.value === 'yearly') ? '$12 / year' : '$1.99 / month';
+          if (pl) { var v = y && y.value; pl.textContent = v === 'yearly' ? '$12 / year' : (v === 'once' ? '$4.99 one-time' : '$1.99 / month'); }
         }
       }
       // Real Stripe hosted Checkout: Apple Pay, Google Pay, card and Link all appear there.
       function upCheckout(btn) {
         window.jbEv && window.jbEv('checkout');
         var y = up.querySelector('input[name=up_plan]:checked');
-        var period = (y && y.value === 'yearly') ? 'yearly' : 'monthly';
+        var period = (y && y.value) || 'once';
         var old = btn ? btn.textContent : '';
         if (btn) { btn.textContent = 'Opening secure checkout...'; btn.style.pointerEvents = 'none'; }
         fetch('/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tier: 'tier2', period: period }) })

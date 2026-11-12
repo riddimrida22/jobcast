@@ -520,7 +520,7 @@ def create_app() -> Flask:
         body = request.get_json(silent=True) or request.form
         tier = (body.get("tier") or "").strip()
         period = (body.get("period") or "monthly").strip()
-        if tier not in ("tier1", "tier2", "tier3") or period not in ("monthly", "yearly"):
+        if tier not in ("tier1", "tier2", "tier3") or period not in ("monthly", "yearly", "once"):
             return jsonify({"ok": False, "error": "bad_request"}), 400
         base = request.host_url.rstrip("/")
         sess, err = pay.create_checkout_session(
