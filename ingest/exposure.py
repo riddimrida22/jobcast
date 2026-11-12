@@ -25,18 +25,26 @@ ONET_ZIP = ROOT / "data" / "cache" / "onet_db_29_1_text.zip"
 TASK_LABELS = ROOT / "data" / "cache" / "exposure" / "task_labels.tsv"
 _LABEL_TO_AI = {"T0": 0.0, "T1": 1.0, "T2": 0.5}   # E1 direct LLM exposure; E2 exposed only with extra tools (beta weights it 0.5)
 
-# O*NET Work Context physical/manual elements (CX scale 1-5) used for the robotics proxy.
-PHYS_ELEMENTS = {
-    "4.C.2.d.1.g": "Using hands to handle, control, or feel objects",
+# O*NET Work Context elements for the robotics proxy, grouped by how they relate to robot
+# automatability (Frey & Osborne 2017 "engineering bottlenecks"). Structured, repetitive
+# physical work is robot-friendly; the need for dexterity in cramped/awkward/variable
+# positions is a bottleneck - which is why skilled trades, very physical but unstructured,
+# are hard to automate. CX scale 1-5, normalised to 0-1.
+PHYS_PRESENCE = {   # is this physical, on-your-feet work at all (vs desk work)?
     "4.C.2.d.1.b": "Spend time standing",
     "4.C.2.d.1.d": "Spend time walking and running",
+}
+PHYS_ROUTINE = {    # structured / repetitive / machine-paced work robots do well -> raises risk
     "4.C.2.d.1.i": "Spend time making repetitive motions",
-    "4.C.2.d.1.c": "Spend time climbing",
-    "4.C.2.d.1.e": "Spend time kneeling, crouching, stooping, crawling",
-    "4.C.2.d.1.h": "Spend time bending or twisting the body",
-    "4.C.2.c.1.e": "Exposed to hazardous equipment",
-    "4.C.2.e.1.d": "Wear common protective or safety equipment",
     "4.C.3.d.3": "Pace determined by speed of equipment",
+    "4.C.3.b.7": "Importance of repeating same tasks",
+    "4.C.3.b.8": "Structured versus unstructured work",
+}
+PHYS_BOTTLENECK = {  # dexterity in awkward/variable positions robots do poorly -> lowers risk
+    "4.C.2.b.1.e": "Cramped work space, awkward positions",
+    "4.C.2.d.1.c": "Spend time climbing ladders, scaffolds, or poles",
+    "4.C.2.d.1.e": "Spend time kneeling, crouching, stooping, or crawling",
+    "4.C.2.d.1.h": "Spend time bending or twisting the body",
 }
 
 
@@ -54,22 +62,37 @@ def load_ai(csv_path: Path = ELOUNDOU_CSV) -> Dict[str, float]:
 
 
 def load_robo(zip_path: Path = ONET_ZIP) -> Dict[str, float]:
-    """O*NET-SOC -> robotics proxy (0..1) from averaged physical work-context scores."""
+    """O*NET-SOC -> robotics proxy (0..1). Structured, repetitive physical work raises the
+    score; the need for dexterity in cramped/awkward/variable positions (an automation
+    bottleneck) lowers it - so skilled trades are not scored as if a robot could do them."""
     with zipfile.ZipFile(zip_path) as zf:
         raw = zf.read("db_29_1_text/Work Context.txt").decode("utf-8", "replace").splitlines()
     hdr = raw[0].split("\t")
     i = {h: n for n, h in enumerate(hdr)}
-    acc: Dict[str, list] = {}
+    wanted = set(PHYS_PRESENCE) | set(PHYS_ROUTINE) | set(PHYS_BOTTLENECK)
+    vals: Dict[str, Dict[str, float]] = {}
     for line in raw[1:]:
         c = line.split("\t")
-        if c[i["Scale ID"]] != "CX" or c[i["Element ID"]] not in PHYS_ELEMENTS:
+        if c[i["Scale ID"]] != "CX" or c[i["Element ID"]] not in wanted:
             continue
         try:
-            v = float(c[i["Data Value"]])
+            v = (float(c[i["Data Value"]]) - 1.0) / 4.0   # 1..5 -> 0..1
         except ValueError:
             continue
-        acc.setdefault(c[i["O*NET-SOC Code"]], []).append((v - 1.0) / 4.0)  # 1..5 -> 0..1
-    return {k: round(sum(vs) / len(vs), 4) for k, vs in acc.items() if vs}
+        vals.setdefault(c[i["O*NET-SOC Code"]], {})[c[i["Element ID"]]] = v
+
+    def _mean(d: Dict[str, float], els) -> float:
+        xs = [d[e] for e in els if e in d]
+        return sum(xs) / len(xs) if xs else 0.0
+
+    out: Dict[str, float] = {}
+    for soc, d in vals.items():
+        presence = _mean(d, PHYS_PRESENCE)       # on-your-feet physical work
+        routine = _mean(d, PHYS_ROUTINE)         # structured/repetitive -> robot-friendly
+        bottleneck = _mean(d, PHYS_BOTTLENECK)   # dexterity in awkward positions -> robot-hostile
+        r = (presence ** 0.5) * routine * (1 - 0.85 * bottleneck)
+        out[soc] = round(max(0.0, min(1.0, r)), 4)
+    return out
 
 
 def load_task_ai(path: Path = TASK_LABELS) -> Dict[str, float]:
