@@ -415,6 +415,33 @@ def create_app() -> Flask:
                                rail_early=rail_early, rail_degree=rail_degree,
                                most_exposed=most, least_exposed=least)
 
+    @app.after_request
+    def _attach_ref_cookie(resp):
+        # First-touch referral attribution: a friend landing on ?r=<code> is tagged for 30
+        # days, so when they later subscribe the checkout carries the referrer (see /checkout).
+        try:
+            r = request.args.get("r")
+            if r and r.isalnum() and len(r) <= 16 and not request.cookies.get("jb_ref"):
+                resp.set_cookie("jb_ref", r, max_age=60 * 60 * 24 * 30,
+                                httponly=True, samesite="Lax")
+        except Exception:
+            pass
+        return resp
+
+    @app.post("/referral")
+    def referral_link():
+        from . import referrals
+        src = request.get_json(silent=True) or request.form
+        email = (src.get("email") or "").strip()
+        if not EMAIL_RE.match(email) or len(email) > 254:
+            return jsonify({"ok": False, "error": "invalid_email"}), 400
+        st = referrals.status(email)
+        if not st.get("code"):
+            return jsonify({"ok": False, "error": "invalid_email"}), 400
+        return jsonify({"ok": True, "link": _canonical_base() + "/?r=" + st["code"],
+                        "count": st["count"], "threshold": st["threshold"],
+                        "rewarded": st["rewarded"]})
+
     @app.post("/subscribe")
     def subscribe():
         src = request.get_json(silent=True) or request.form
@@ -527,7 +554,8 @@ def create_app() -> Flask:
             tier, period,
             success_url=base + "/billing/success?session_id={CHECKOUT_SESSION_ID}",
             cancel_url=base + "/billing/cancel",
-            email=(body.get("email") or None))
+            email=(body.get("email") or None),
+            ref=request.cookies.get("jb_ref"))
         if err or not sess:
             return jsonify({"ok": False, "error": err or "stripe_error"}), 400
         return jsonify({"ok": True, "url": sess.url})
@@ -647,6 +675,28 @@ def create_app() -> Flask:
                 "subscription": pay._get(obj, "subscription"),
                 "tier": md.get("tier") if hasattr(md, "get") else None,
                 "ts": int(time.time())})
+            # Referral: a PAID conversion credits the referrer (keyed by the Stripe session
+            # id, so a webhook retry never double-counts). At the threshold, issue a one-time
+            # reward code and email it. Wrapped so a referral hiccup never fails the webhook.
+            ref = md.get("ref") if hasattr(md, "get") else None
+            if ref:
+                try:
+                    from . import referrals
+                    referrals.credit(ref, pay._get(obj, "id") or "")
+                    if referrals.needs_reward(ref):
+                        code, _err = pay.create_reward_promo_code(referrals.REWARD_PERCENT)
+                        if code and referrals.mark_rewarded(ref, code):
+                            remail = referrals.email_for_code(ref)
+                            if remail:
+                                from . import emailer
+                                emailer.send(
+                                    remail,
+                                    "You earned 50% off JobBreak Monitor",
+                                    "Five friends you referred have subscribed - thank you.\n\n"
+                                    "Here is your one-time 50% off code: " + code + "\n\n"
+                                    "Enter it at checkout: https://jobbreak.ai\n")
+                except Exception as e:
+                    print(f"[referral] credit/reward failed: {e}", file=sys.stderr, flush=True)
         return jsonify({"received": True})
 
     @app.get("/admin/stats")

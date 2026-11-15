@@ -149,6 +149,53 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   })();
 </script>
 
+<div class="refer-box" style="margin:0 0 16px;padding:14px 16px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.03)">
+  <b style="display:block;margin-bottom:4px">Refer 5 friends who subscribe, get 50% off</b>
+  <p class="muted" style="font-size:13px;margin:0 0 10px">Get your personal link. When 5 people you refer subscribe to Monitor, we email you a one-time 50% off code.</p>
+  <div id="refer-form" style="display:flex;gap:8px;flex-wrap:wrap">
+    <input type="email" id="refer-email" placeholder="you@example.com" style="flex:1;min-width:180px">
+    <button type="button" id="refer-go" class="secondary" style="margin:0">Get my link</button>
+  </div>
+  <div id="refer-out" hidden style="margin-top:10px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input type="text" id="refer-link" readonly onclick="this.select()" style="flex:1;min-width:180px">
+      <button type="button" id="refer-copy" class="secondary" style="margin:0">Copy</button>
+    </div>
+    <span id="refer-progress" class="muted" style="font-size:13px;display:block;margin-top:6px"></span>
+  </div>
+  <span id="refer-err" class="muted" style="font-size:12px"></span>
+</div>
+<script>
+  (function () {
+    var go = document.getElementById('refer-go'); if (!go) return;
+    var em = document.getElementById('refer-email'), out = document.getElementById('refer-out');
+    var form = document.getElementById('refer-form'), err = document.getElementById('refer-err');
+    function render(d) {
+      form.hidden = true; out.hidden = false;
+      document.getElementById('refer-link').value = d.link;
+      document.getElementById('refer-progress').textContent = d.rewarded
+        ? 'Reward earned - check your email for your 50% off code.'
+        : (d.count + ' of ' + d.threshold + ' referred friends have subscribed.');
+    }
+    go.addEventListener('click', function () {
+      var email = (em.value || '').trim();
+      if (!email) { em.focus(); return; }
+      err.textContent = ''; go.disabled = true;
+      fetch('/referral', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email }) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { go.disabled = false; if (d.ok) render(d); else err.textContent = 'Please enter a valid email.'; })
+        .catch(function () { go.disabled = false; err.textContent = 'Something went wrong. Try again.'; });
+    });
+    var cp = document.getElementById('refer-copy');
+    if (cp) cp.addEventListener('click', function () {
+      var l = document.getElementById('refer-link');
+      if (navigator.clipboard) { navigator.clipboard.writeText(l.value); cp.textContent = 'Copied'; }
+      else { l.select(); cp.textContent = 'Copied'; }
+    });
+  })();
+</script>
+
 <div class="tabs" role="tablist">
   <button class="tab active" data-panel="p-overview">Overview</button>
   {% if r.strategies %}<button class="tab" data-panel="p-strategy">What to do</button>{% endif %}

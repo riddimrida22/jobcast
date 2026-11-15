@@ -13,6 +13,7 @@ import os
 import sys
 import json
 import time
+import secrets
 from pathlib import Path
 
 # Persist on the mounted disk in production (auto-detected), so subscriber records
@@ -64,7 +65,7 @@ def price_id(tier, period):
     return os.environ.get(env) if env else None
 
 
-def create_checkout_session(tier, period, success_url, cancel_url, email=None):
+def create_checkout_session(tier, period, success_url, cancel_url, email=None, ref=None):
     """Return (session, None) on success or (None, error_code). The price is set inline
     (price_data from PRICE_CENTS), so it can be changed in code with no Stripe dashboard
     step. Entitlement is carried by metadata, not the price id."""
@@ -88,11 +89,28 @@ def create_checkout_session(tier, period, success_url, cancel_url, email=None):
             cancel_url=cancel_url,
             allow_promotion_codes=True,
             customer_email=email or None,
-            metadata={"tier": tier, "period": period},
+            metadata={"tier": tier, "period": period,
+                      **({"ref": ref} if ref else {})},
         )
         return session, None
     except Exception as e:
         print(f"[payments] checkout create failed: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+        return None, "stripe_error"
+
+
+def create_reward_promo_code(percent=50):
+    """Create a one-time percent-off coupon plus a single-use promotion code, for a
+    referral reward. Returns (code, None) or (None, error). Customers redeem it at
+    checkout, which already has allow_promotion_codes=True."""
+    try:
+        stripe = _client()
+        coupon = stripe.Coupon.create(percent_off=percent, duration="once",
+                                       name="JobBreak referral reward")
+        code = "REF" + secrets.token_hex(3).upper()
+        promo = stripe.PromotionCode.create(coupon=coupon.id, code=code, max_redemptions=1)
+        return _get(promo, "code") or code, None
+    except Exception as e:
+        print(f"[payments] reward promo create failed: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
         return None, "stripe_error"
 
 
