@@ -1,0 +1,180 @@
+{# First-run explainer: what AI/robots really are and why it matters, horse->car analogy,
+   then hand off to the home gate. Shows once per device (localStorage), skippable, home
+   page only. Jobo the robot mascot guides it. #}
+<style>
+  .intro { position:fixed; inset:0; z-index:1100; display:none; flex-direction:column;
+    background:radial-gradient(120% 90% at 50% 0%, #19365c 0%, #0c1f38 55%, #0a1a30 100%);
+    color:#eaf1f9; overflow:hidden; }
+  .intro.show { display:flex; }
+  body.intro-on { overflow:hidden; }
+  .intro-skip { position:absolute; top:14px; right:16px; z-index:3; background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.18); color:#cdd9ea; font:inherit; font-size:14px;
+    padding:8px 14px; border-radius:999px; cursor:pointer; }
+  .intro-skip:hover { background:rgba(255,255,255,.14); }
+  .intro-stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:48px 22px 0; max-width:620px; margin:0 auto; width:100%; }
+  /* Mascot */
+  .mascot { width:118px; height:138px; margin-bottom:6px; animation:m-float 3.4s ease-in-out infinite; }
+  @keyframes m-float { 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-9px) } }
+  .m-eye { transform-origin:center; animation:m-blink 4.2s infinite; }
+  @keyframes m-blink { 0%,94%,100%{ transform:scaleY(1) } 97%{ transform:scaleY(.1) } }
+  .m-blip { animation:m-pulse 1.8s ease-in-out infinite; }
+  @keyframes m-pulse { 0%,100%{ opacity:.5 } 50%{ opacity:1 } }
+  .m-wave { transform-origin:92px 86px; animation:m-wave 2.6s ease-in-out infinite; }
+  @keyframes m-wave { 0%,60%,100%{ transform:rotate(0) } 70%{ transform:rotate(-22deg) } 85%{ transform:rotate(-8deg) } }
+  /* Steps */
+  .in-step { display:none; animation:in-rise .5s ease both; }
+  .in-step.active { display:block; }
+  @keyframes in-rise { from{ opacity:0; transform:translateY(14px) } to{ opacity:1; transform:none } }
+  .in-ey { display:inline-block; font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    color:#f3a35f; font-weight:800; margin-bottom:10px; }
+  .in-h { font-size:clamp(26px,6.4vw,40px); font-weight:900; line-height:1.08; letter-spacing:-.5px; margin:0 0 14px; }
+  .in-h .hot { color:#f3a35f; }
+  .in-p { font-size:clamp(15px,2.5vw,18px); line-height:1.6; color:#cdd9ea; margin:0 auto; max-width:30em; }
+  .in-p b { color:#fff; }
+  /* Speech bubble */
+  .in-say { position:relative; display:inline-block; background:#fff; color:#17324f; font-weight:600;
+    padding:9px 14px; border-radius:14px; font-size:14px; margin-bottom:18px; }
+  .in-say::after { content:""; position:absolute; top:-7px; left:50%; transform:translateX(-50%);
+    border:7px solid transparent; border-bottom-color:#fff; border-top:0; }
+  /* Acceleration bars */
+  .in-accel { display:flex; align-items:flex-end; justify-content:center; gap:9px; height:118px; margin:20px 0 6px; }
+  .in-accel i { width:26px; background:linear-gradient(#f3a35f,#e07a3a); border-radius:6px 6px 0 0; height:8%;
+    animation:bar-grow .9s ease forwards; opacity:.9; }
+  .in-step.active .in-accel i { animation:bar-grow .9s ease forwards; }
+  @keyframes bar-grow { to{ height:var(--h) } }
+  .in-accel span { align-self:center; color:#8ea3bc; font-size:12px; margin-left:6px; }
+  /* Horse -> car scene */
+  .in-scene { position:relative; height:120px; margin:16px 0 4px; }
+  .in-road { position:absolute; left:6%; right:6%; bottom:34px; height:3px; background:rgba(255,255,255,.16); border-radius:2px; }
+  .in-veh { position:absolute; bottom:38px; font-size:46px; line-height:1; }
+  .in-horse { left:8%; animation:horse-out 5s ease-in-out infinite; }
+  .in-car { right:8%; animation:car-in 5s ease-in-out infinite; }
+  @keyframes horse-out { 0%,38%{ opacity:1; transform:translateX(0) } 55%,100%{ opacity:0; transform:translateX(-26px) } }
+  @keyframes car-in { 0%,38%{ opacity:0; transform:translateX(26px) } 55%,100%{ opacity:1; transform:translateX(0) } }
+  .in-yr { position:absolute; bottom:12px; font-size:12px; color:#8ea3bc; font-weight:700; }
+  .in-yr.l { left:8%; } .in-yr.r { right:8%; }
+  /* Examples */
+  .in-exs { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:18px 0 4px; }
+  .in-ex { font-size:13px; font-weight:700; padding:7px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.14); }
+  .in-ex.hi { background:rgba(224,122,58,.16); color:#f3b483; border-color:rgba(224,122,58,.4); }
+  .in-ex.lo { background:rgba(95,208,168,.14); color:#7fe0c0; border-color:rgba(95,208,168,.35); }
+  /* Nav */
+  .intro-nav { display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding:18px 22px calc(22px + env(safe-area-inset-bottom)); max-width:620px; margin:0 auto; width:100%; box-sizing:border-box; }
+  .intro-dots { display:flex; gap:7px; }
+  .intro-dots i { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.22); transition:.3s; }
+  .intro-dots i.on { background:#f3a35f; width:22px; border-radius:999px; }
+  .intro-next { background:#f3a35f; color:#13263d; font:inherit; font-weight:800; font-size:16px;
+    border:0; padding:14px 26px; border-radius:12px; cursor:pointer; box-shadow:0 6px 22px rgba(243,163,95,.3); }
+  .intro-next:hover { filter:brightness(1.05); }
+</style>
+
+<div class="intro" id="intro" role="dialog" aria-label="How AI and robots are changing work">
+  <button type="button" class="intro-skip" id="intro-skip">Skip &rsaquo;</button>
+  <div class="intro-stage">
+    <div class="mascot" id="mascot">
+      <svg viewBox="0 0 120 140" width="118" height="138" aria-hidden="true">
+        <line x1="60" y1="18" x2="60" y2="7" stroke="#f3a35f" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="60" cy="5" r="5" fill="#f3a35f" class="m-blip"/>
+        <rect x="22" y="18" width="76" height="58" rx="17" fill="#e8eef6" stroke="#9fb4cc" stroke-width="2"/>
+        <rect x="30" y="29" width="60" height="30" rx="13" fill="#13263d"/>
+        <circle cx="48" cy="44" r="6" fill="#f3a35f" class="m-eye"/>
+        <circle cx="72" cy="44" r="6" fill="#f3a35f" class="m-eye"/>
+        <path d="M50 65 q10 7 20 0" stroke="#9fb4cc" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <rect x="34" y="80" width="52" height="40" rx="11" fill="#dce6f2" stroke="#9fb4cc" stroke-width="2"/>
+        <rect x="44" y="90" width="32" height="20" rx="4" fill="#13263d"/>
+        <polyline points="48,106 54,100 60,103 66,94 72,97" fill="none" stroke="#5fd0a8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="23" y="84" width="8" height="26" rx="4" fill="#dce6f2" stroke="#9fb4cc" stroke-width="2"/>
+        <rect x="89" y="84" width="8" height="26" rx="4" fill="#dce6f2" stroke="#9fb4cc" stroke-width="2" class="m-wave"/>
+      </svg>
+    </div>
+
+    <section class="in-step active" data-in="1">
+      <div class="in-say">Hi, I'm Jobo. Two minutes, and you'll see what's really coming.</div>
+      <span class="in-ey">Before we score your job</span>
+      <h2 class="in-h">AI isn't just a <span class="hot">chatbot</span> anymore</h2>
+      <p class="in-p">You've probably typed questions into one. That's the surface. Today's AI also reads documents, writes code, analyzes images, and makes decisions &mdash; and <b>robots are starting to give it hands</b>, in warehouses, kitchens, and on job sites.</p>
+    </section>
+
+    <section class="in-step" data-in="2">
+      <span class="in-ey">What changed</span>
+      <h2 class="in-h">And it's getting better, <span class="hot">fast</span></h2>
+      <div class="in-accel" aria-hidden="true">
+        <i style="--h:14%"></i><i style="--h:22%"></i><i style="--h:34%"></i><i style="--h:52%"></i><i style="--h:74%"></i><i style="--h:96%"></i>
+        <span>&rarr;</span>
+      </div>
+      <p class="in-p">A few years ago, AI could barely finish a sentence. Now it passes professional exams, writes working software, and does in seconds what took people hours. <b>Each year it takes on more of what used to need a person.</b></p>
+    </section>
+
+    <section class="in-step" data-in="3">
+      <span class="in-ey">We've been here before</span>
+      <h2 class="in-h">Horses &rarr; <span class="hot">cars</span></h2>
+      <div class="in-scene" aria-hidden="true">
+        <div class="in-road"></div>
+        <div class="in-veh in-horse">&#128052;</div>
+        <div class="in-veh in-car">&#128663;</div>
+        <span class="in-yr l">1900</span><span class="in-yr r">1920s</span>
+      </div>
+      <p class="in-p">In 1900, cities ran on horses &mdash; <b>more than 100,000 in New York alone</b>, plus the stable hands, farriers, and carriage makers who served them. Within about 20 years, cars replaced nearly all of it. Those jobs <b>went extinct</b> &mdash; but new ones appeared, and the people who saw it coming moved first.</p>
+    </section>
+
+    <section class="in-step" data-in="4">
+      <span class="in-ey">Your turn</span>
+      <h2 class="in-h">AI and robots are the <span class="hot">new cars</span></h2>
+      <div class="in-exs" aria-hidden="true">
+        <span class="in-ex hi">Translators &middot; going</span>
+        <span class="in-ex hi">Data entry &middot; going</span>
+        <span class="in-ex lo">Electricians &middot; safer</span>
+        <span class="in-ex lo">Nurses &middot; safer</span>
+      </div>
+      <p class="in-p">This time it's hitting <b>knowledge work and physical work</b> &mdash; faster than the horse-to-car shift. Some jobs will go extinct. Most will change. The real question isn't just <b>if</b> &mdash; it's <b>when</b>, and what to do about it.</p>
+    </section>
+  </div>
+
+  <div class="intro-nav">
+    <div class="intro-dots" id="intro-dots" aria-hidden="true"></div>
+    <button type="button" class="intro-next" id="intro-next">Next &rsaquo;</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var intro = document.getElementById('intro');
+  if (!intro) return;
+  var SEEN = 'jb_intro_seen';
+  function seen() { try { return localStorage.getItem(SEEN) === '1'; } catch (e) { return false; } }
+  function markSeen() { try { localStorage.setItem(SEEN, '1'); } catch (e) {} }
+  // Returning visitors (and anyone who's seen it) skip straight to the home gate.
+  if (seen()) return;
+
+  var steps = Array.prototype.slice.call(intro.querySelectorAll('.in-step'));
+  var dotsEl = document.getElementById('intro-dots');
+  var nextB = document.getElementById('intro-next');
+  var skipB = document.getElementById('intro-skip');
+  var i = 0;
+  dotsEl.innerHTML = steps.map(function () { return '<i></i>'; }).join('');
+  var dots = Array.prototype.slice.call(dotsEl.querySelectorAll('i'));
+
+  function show(n) {
+    i = Math.max(0, Math.min(steps.length - 1, n));
+    steps.forEach(function (s, k) { s.classList.toggle('active', k === i); });
+    dots.forEach(function (d, k) { d.classList.toggle('on', k === i); });
+    nextB.innerHTML = (i === steps.length - 1) ? 'See where my job lands &rsaquo;' : 'Next &rsaquo;';
+  }
+  function finish() {
+    markSeen();
+    intro.classList.remove('show');
+    document.body.classList.remove('intro-on');
+  }
+  nextB.addEventListener('click', function () {
+    if (i === steps.length - 1) { finish(); } else { show(i + 1); }
+  });
+  if (skipB) skipB.addEventListener('click', finish);
+
+  // Show it.
+  document.body.classList.add('intro-on');
+  intro.classList.add('show');
+  show(0);
+})();
+</script>
