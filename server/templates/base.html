@@ -1233,8 +1233,9 @@
     <nav>
       <a href="/" class="nav-home" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path
-        d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg><span>Home</span></a>
-      <a href="/?view=info">More information</a><a href="/methodology">How it works</a>
+        d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg><span>{{ t('nav.home', 'Home') }}</span></a>
+      <a href="/?view=info">{{ t('nav.info', 'More information') }}</a><a href="/methodology">{{ t('nav.how', 'How it works') }}</a>
+      <select class="lang-sel" aria-label="Language" onchange="var u=new URL(location);u.searchParams.set('lang',this.value);location.href=u.toString()" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:5px 8px;font:inherit;font-size:13px;cursor:pointer;margin-left:4px">{% for code, name in langs.items() %}<option value="{{ code }}"{{ ' selected' if code==lang else '' }} style="color:#13263d">{{ name }}</option>{% endfor %}</select>
       <button id="theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch theme">
         <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/>

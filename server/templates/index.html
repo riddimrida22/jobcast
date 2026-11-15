@@ -16,24 +16,24 @@
   .lp-or::before, .lp-or::after { content:""; flex:1; height:1px; background:rgba(255,255,255,.14); }
 </style>
 <div class="gate" id="gate-aud" role="dialog" aria-label="Welcome to JobBreak">
-  <div class="gate-q">Will <span class="hot">AI</span> replace your job?</div>
-  <p class="gate-sub">Type your job for an instant score &mdash; 0 to 100, from real data. Or choose how to start.</p>
+  <div class="gate-q">{{ t('gate.q', 'Will <span class="hot">AI</span> replace your job?') }}</div>
+  <p class="gate-sub">{{ t('gate.sub', 'Type your job for an instant score &mdash; 0 to 100, from real data. Or choose how to start.') }}</p>
   <div class="lp-search">
-    <input id="lp-q" type="text" autocomplete="off" placeholder="Type your job, e.g. electrician, nurse, accountant"
+    <input id="lp-q" type="text" autocomplete="off" placeholder="{{ t('lp.ph', 'Type your job, e.g. electrician, nurse, accountant') }}"
            role="combobox" aria-controls="lp-qlist" aria-expanded="false" aria-label="Type your job">
     <div id="lp-qlist" class="combo-list" role="listbox" hidden></div>
   </div>
-  <div class="lp-or"><span>or</span></div>
+  <div class="lp-or"><span>{{ t('lp.or', 'or') }}</span></div>
   <div class="gate-paths">
     <a class="gate-card primary" href="#" id="aud-employee">
-      <span class="gc-ey">Working now</span>
-      <div class="gc-h">I'm an employee</div>
-      <div class="gc-sub">See how exposed your own job is, or take a quick tour of how it works first.</div>
+      <span class="gc-ey">{{ t('emp.ey', 'Working now') }}</span>
+      <div class="gc-h">{{ t('emp.h', "I'm an employee") }}</div>
+      <div class="gc-sub">{{ t('emp.sub', 'See how exposed your own job is, or take a quick tour of how it works first.') }}</div>
     </a>
     <a class="gate-card" href="/students" id="aud-student">
-      <span class="gc-ey">Still choosing</span>
-      <div class="gc-h">I'm a student</div>
-      <div class="gc-sub">Find careers that pay well and are hard for AI to take, ranked from real data.</div>
+      <span class="gc-ey">{{ t('stu.ey', 'Still choosing') }}</span>
+      <div class="gc-h">{{ t('stu.h', "I'm a student") }}</div>
+      <div class="gc-sub">{{ t('stu.sub', 'Find careers that pay well and are hard for AI to take, ranked from real data.') }}</div>
     </a>
   </div>
 </div>

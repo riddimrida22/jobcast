@@ -423,6 +423,28 @@ def create_app() -> Flask:
                                rail_early=rail_early, rail_degree=rail_degree,
                                most_exposed=most, least_exposed=least)
 
+    from . import i18n
+
+    @app.before_request
+    def _set_lang():
+        from flask import g
+        g.lang = i18n.resolve_locale(request.args.get("lang"),
+                                     request.cookies.get("jb_lang"),
+                                     request.headers.get("Accept-Language", ""))
+
+    @app.context_processor
+    def _i18n_ctx():
+        from flask import g
+        lang = getattr(g, "lang", i18n.DEFAULT)
+        return {"lang": lang, "langs": i18n.LANGS, "t": i18n.translator(lang)}
+
+    @app.after_request
+    def _persist_lang(resp):
+        chosen = request.args.get("lang")
+        if chosen in i18n.LANGS:
+            resp.set_cookie("jb_lang", chosen, max_age=31536000, samesite="Lax")
+        return resp
+
     @app.after_request
     def _attach_ref_cookie(resp):
         # First-touch referral attribution: a friend landing on ?r=<code> is tagged for 30
