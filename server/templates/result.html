@@ -1001,11 +1001,9 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     tabs[0].click();                 // Overview is the one free slide
     overview.scrollTop = 0;
     // Tour (generic) nudges the curious to personalize; personal result goes to the paywall.
-    var goLabel = SEO ? 'See my real number ›' : 'Unlock to uncover ›';
-    var ghostTitle = SEO ? ('Add your state and situation to see this for you')
-                         : ('The rest of your ' + RATING + ' is locked');
-    var barLab = SEO ? ('Generic number. Localize it for your real ' + RATING + '.')
-                     : '1 slide of your full breakdown';
+    var goLabel = 'Unlock the full breakdown ›';
+    var ghostTitle = 'See every exposed task, your AI and robotics timeline, and what to do';
+    var barLab = '1 slide shown. Unlock your full AI and robotics breakdown.';
     if (!document.getElementById('jlp-ghost')) {
       var g = document.createElement('div'); g.id = 'jlp-ghost'; g.className = 'jlp-ghost';
       g.innerHTML = '<div class="jlp-grows" aria-hidden="true">'
@@ -1027,8 +1025,8 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     function advance() {
       bar.remove(); document.body.classList.remove('rstage');
       var gh = document.getElementById('jlp-ghost'); if (gh) gh.remove();
-      // Tour: funnel to the personal flow, prefilled with this job. Personal: the paywall.
-      if (SEO) { window.location.href = '/?flow=1&title=' + encodeURIComponent(OCC_TITLE); return; }
+      // Everyone goes straight to the paywall/checkout; the 8-step form is optional refinement,
+      // not a toll gate before buying. (Was: SEO/tour users got routed into the 8-step form.)
       showLock(); openUpsell(unlockBreakdown);
     }
     document.getElementById('jlp-unlock').addEventListener('click', advance);
