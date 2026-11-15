@@ -22,6 +22,18 @@
   @keyframes m-pulse { 0%,100%{ opacity:.5 } 50%{ opacity:1 } }
   .m-wave { transform-origin:92px 86px; animation:m-wave 2.6s ease-in-out infinite; }
   @keyframes m-wave { 0%,60%,100%{ transform:rotate(0) } 70%{ transform:rotate(-22deg) } 85%{ transform:rotate(-8deg) } }
+  /* Eyebrows + mouth express the mood of each step */
+  .m-brow { transform-box:fill-box; transform-origin:center; transition:transform .35s ease; }
+  .mascot.mood-happy .bl { transform:translateY(-1.5px) rotate(7deg); }
+  .mascot.mood-happy .br { transform:translateY(-1.5px) rotate(-7deg); }
+  .mascot.mood-think .bl, .mascot.mood-think .br { transform:translateY(-2.5px); }
+  .mascot.mood-sad .bl { transform:translateY(-1px) rotate(-17deg); }
+  .mascot.mood-sad .br { transform:translateY(-1px) rotate(17deg); }
+  .mascot.mood-hope .bl { transform:translateY(-1px) rotate(4deg); }
+  .mascot.mood-hope .br { transform:translateY(-1px) rotate(-4deg); }
+  #m-msg { transition:fill .3s ease; }
+  .mascot.talking #m-mouth { transform-box:fill-box; transform-origin:center; animation:m-talk .26s ease-in-out 5 both; }
+  @keyframes m-talk { 0%,100%{ transform:scaleY(1) } 50%{ transform:scaleY(.4) } }
   /* Steps */
   .in-step { display:none; animation:in-rise .5s ease both; }
   .in-step.active { display:block; }
@@ -79,12 +91,14 @@
         <circle cx="60" cy="5" r="5" fill="#f3a35f" class="m-blip"/>
         <rect x="22" y="18" width="76" height="58" rx="17" fill="#e8eef6" stroke="#9fb4cc" stroke-width="2"/>
         <rect x="30" y="29" width="60" height="30" rx="13" fill="#13263d"/>
-        <circle cx="48" cy="44" r="6" fill="#f3a35f" class="m-eye"/>
-        <circle cx="72" cy="44" r="6" fill="#f3a35f" class="m-eye"/>
-        <path d="M50 65 q10 7 20 0" stroke="#9fb4cc" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <rect x="42" y="35" width="12" height="3" rx="1.5" fill="#cfdcea" class="m-brow bl"/>
+        <rect x="66" y="35" width="12" height="3" rx="1.5" fill="#cfdcea" class="m-brow br"/>
+        <circle cx="48" cy="45" r="6" fill="#f3a35f" class="m-eye"/>
+        <circle cx="72" cy="45" r="6" fill="#f3a35f" class="m-eye"/>
+        <path id="m-mouth" d="M49 64 q11 8 22 0" stroke="#9fb4cc" stroke-width="2.6" fill="none" stroke-linecap="round"/>
         <rect x="34" y="80" width="52" height="40" rx="11" fill="#dce6f2" stroke="#9fb4cc" stroke-width="2"/>
-        <rect x="44" y="90" width="32" height="20" rx="4" fill="#13263d"/>
-        <polyline points="48,106 54,100 60,103 66,94 72,97" fill="none" stroke="#5fd0a8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="42" y="90" width="36" height="20" rx="4" fill="#13263d"/>
+        <text id="m-msg" x="60" y="104" text-anchor="middle" font-size="10" font-weight="800" letter-spacing="1" fill="#5fd0a8" font-family="system-ui,Segoe UI,sans-serif">HELLO</text>
         <rect x="23" y="84" width="8" height="26" rx="4" fill="#dce6f2" stroke="#9fb4cc" stroke-width="2"/>
         <rect x="89" y="84" width="8" height="26" rx="4" fill="#dce6f2" stroke="#9fb4cc" stroke-width="2" class="m-wave"/>
       </svg>
@@ -156,11 +170,31 @@
   dotsEl.innerHTML = steps.map(function () { return '<i></i>'; }).join('');
   var dots = Array.prototype.slice.call(dotsEl.querySelectorAll('i'));
 
+  // Per-step mood: Jobo's brows, mouth, chest message and a brief "talking" wiggle.
+  var mascotEl = document.getElementById('mascot');
+  var mouthEl = document.getElementById('m-mouth'), msgEl = document.getElementById('m-msg');
+  var MOODS = [
+    { mood: 'happy', msg: 'HELLO',  mouth: 'M49 64 q11 8 22 0' },
+    { mood: 'think', msg: 'FASTER', mouth: 'M50 66 h20' },
+    { mood: 'sad',   msg: 'SORRY',  mouth: 'M49 68 q11 -7 22 0' },
+    { mood: 'hope',  msg: 'GO!',    mouth: 'M50 65 q10 6 20 0' }
+  ];
+  function setMood(k) {
+    var m = MOODS[k] || MOODS[0];
+    if (mascotEl) {
+      mascotEl.classList.remove('mood-happy', 'mood-think', 'mood-sad', 'mood-hope');
+      mascotEl.classList.add('mood-' + m.mood);
+      mascotEl.classList.remove('talking'); void mascotEl.offsetWidth; mascotEl.classList.add('talking');
+    }
+    if (mouthEl) mouthEl.setAttribute('d', m.mouth);
+    if (msgEl) { msgEl.textContent = m.msg; msgEl.setAttribute('fill', m.mood === 'sad' ? '#f3a35f' : '#5fd0a8'); }
+  }
   function show(n) {
     i = Math.max(0, Math.min(steps.length - 1, n));
     steps.forEach(function (s, k) { s.classList.toggle('active', k === i); });
     dots.forEach(function (d, k) { d.classList.toggle('on', k === i); });
     nextB.innerHTML = (i === steps.length - 1) ? 'See where my job lands &rsaquo;' : 'Next &rsaquo;';
+    setMood(i);
   }
   function finish() {
     markSeen();
