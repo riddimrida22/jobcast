@@ -3,9 +3,26 @@
 {% block description %}Will AI or robots take your job, and when? Get your Job Extinction Risk (0 to 100) from real O*NET and BLS data, with a timeline and what to do about it. Free, no signup.{% endblock %}
 {% block body_class %}wide{% endblock %}
 {% block content %}
+<style>
+  .lp-search { position:relative; width:min(92vw,520px); margin:2px auto 0; z-index:4; }
+  .lp-search #lp-q { width:100%; box-sizing:border-box; background:rgba(255,255,255,.1); border:1.5px solid rgba(255,255,255,.28); color:#fff; border-radius:12px; padding:15px 18px; font:inherit; font-size:clamp(16px,2.4vw,18px); }
+  .lp-search #lp-q::placeholder { color:#b9c7d8; }
+  .lp-search #lp-qlist { top:calc(100% + 4px); max-height:44vh; overflow-y:auto; text-align:left; background:#16293f; border:1px solid rgba(255,255,255,.2); }
+  .lp-search #lp-qlist .combo-item { color:#eaf1f9; border-bottom:1px solid rgba(255,255,255,.08); }
+  .lp-search #lp-qlist .combo-item:hover { background:rgba(255,255,255,.12); }
+  .lp-search #lp-qlist .combo-custom b { color:#fff; }
+  .lp-or { display:flex; align-items:center; gap:12px; width:min(92vw,520px); margin:18px auto 14px; color:#8ea3bc; font-size:13px; text-transform:uppercase; letter-spacing:.08em; }
+  .lp-or::before, .lp-or::after { content:""; flex:1; height:1px; background:rgba(255,255,255,.14); }
+</style>
 <div class="gate" id="gate-aud" role="dialog" aria-label="Welcome to JobBreak">
   <div class="gate-q">Will <span class="hot">AI</span> replace your job?</div>
-  <p class="gate-sub">First, which one are you?</p>
+  <p class="gate-sub">Type your job for an instant score &mdash; 0 to 100, from real data. Or choose how to start.</p>
+  <div class="lp-search">
+    <input id="lp-q" type="text" autocomplete="off" placeholder="Type your job, e.g. electrician, nurse, accountant"
+           role="combobox" aria-controls="lp-qlist" aria-expanded="false" aria-label="Type your job">
+    <div id="lp-qlist" class="combo-list" role="listbox" hidden></div>
+  </div>
+  <div class="lp-or"><span>or</span></div>
   <div class="gate-paths">
     <a class="gate-card primary" href="#" id="aud-employee">
       <span class="gc-ey">Working now</span>
@@ -796,13 +813,14 @@
 })();
 </script>
 <script>
-// Employee tour: search box + Back/Next on the careers screen.
+// Instant job search: the landing box (lp-q) and the careers-screen box (cs-q) both jump to a score.
 (function () {
-  var q = document.getElementById('cs-q'), list = document.getElementById('cs-qlist');
-  if (q && list) {
-    function sset(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
-    function goSoc(soc) { sset('jb_reveal', '1'); sset('jb_tour', '1'); sset('jb_aud', 'emp'); location.href = '/jobs/' + soc; }
-    function goFree(text) { location.href = '/?flow=1&title=' + encodeURIComponent(text); }
+  function sset(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
+  function goSoc(soc) { sset('jb_reveal', '1'); sset('jb_tour', '1'); sset('jb_aud', 'emp'); location.href = '/jobs/' + soc; }
+  function goFree(text) { location.href = '/?flow=1&title=' + encodeURIComponent(text); }
+  function initCombo(qId, listId) {
+    var q = document.getElementById(qId), list = document.getElementById(listId);
+    if (!q || !list) return;
     var lastQ = null, tmr = null;
     function render(items) {
       list.innerHTML = '';
@@ -837,6 +855,8 @@
     });
     document.addEventListener('click', function (e) { if (e.target !== q && !list.contains(e.target)) list.hidden = true; });
   }
+  initCombo('lp-q', 'lp-qlist');
+  initCombo('cs-q', 'cs-qlist');
   var back = document.getElementById('cs-back');
   if (back) back.addEventListener('click', function () { location.href = '/'; });
 })();
