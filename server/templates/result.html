@@ -27,6 +27,7 @@
     <div class="rv-num"><b id="rv-num">0</b><small>{{ rating_label }} &middot; of 100</small></div>
     <div class="rv-msg" id="rv-msg"></div>
     <button type="button" class="rv-go" id="rv-go">See the full breakdown</button>
+    <button type="button" id="rv-share" style="margin-top:14px;background:none;border:none;color:inherit;opacity:.85;font:inherit;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Share my score &amp; challenge a friend</button>
   </div>
 </div>
 <script id="reveal-data" type="application/json">{{ {"exposure": r.base_exposure, "band": r.timeline.band.id, "title": r.occupation.title} | tojson }}</script>
@@ -50,9 +51,9 @@
     <h2 class="up-q">Unlock your plan</h2>
     <p class="up-sub">Pay once, or subscribe to keep watching your job. Apple Pay, Google Pay, card or Link.</p>
     <div class="up-plans">
-      <label class="up-plan feat"><input type="radio" name="up_plan" value="once" checked><span class="up-pn">One-time</span><span class="up-price">$4.99</span><span class="up-save">no subscription</span></label>
+      <label class="up-plan feat"><input type="radio" name="up_plan" value="yearly" checked><span class="up-pn">Yearly &middot; best value</span><span class="up-price">$12<small>/yr</small></span><span class="up-save">just $1/mo &middot; save 50%</span></label>
       <label class="up-plan"><input type="radio" name="up_plan" value="monthly"><span class="up-pn">Monthly</span><span class="up-price">$1.99<small>/mo</small></span></label>
-      <label class="up-plan"><input type="radio" name="up_plan" value="yearly"><span class="up-pn">Yearly</span><span class="up-price">$12<small>/yr</small></span></label>
+      <label class="up-plan"><input type="radio" name="up_plan" value="once"><span class="up-pn">One-time</span><span class="up-price">$4.99</span><span class="up-save">pay once, no monitoring</span></label>
     </div>
     <div class="pay-badges"><span class="pb">Apple Pay</span><span class="pb">Google Pay</span><span class="pb">Card</span><span class="pb">Link</span></div>
     <button type="button" class="up-cta" data-up-next>Continue</button>
@@ -130,18 +131,20 @@ It is a sourced range, not a verdict, and the detail is below.</p>
 </div>
 <script>
   (function () {
-    var b = document.getElementById('share-btn'); if (!b) return;
     var url = {{ (request.host_url ~ 'jobs/' ~ r.occupation.soc) | tojson }};
     var text = {{ ('My work (' ~ r.occupation.title ~ ') is ' ~ r.base_exposure ~ ' of 100 exposed to AI and robots. What is yours?') | tojson }};
     var note = document.getElementById('share-note');
-    b.addEventListener('click', function () {
+    function doShare() {
       if (navigator.share) {
         navigator.share({ title: 'JobBreak', text: text, url: url }).catch(function () {});
       } else if (navigator.clipboard) {
         navigator.clipboard.writeText(text + ' ' + url).then(
-          function () { note.textContent = 'Link copied to clipboard.'; },
-          function () { note.textContent = url; });
-      } else { note.textContent = url; }
+          function () { if (note) note.textContent = 'Link copied to clipboard.'; },
+          function () { if (note) note.textContent = url; });
+      } else if (note) { note.textContent = url; }
+    }
+    ['share-btn', 'rv-share'].forEach(function (id) {
+      var b = document.getElementById(id); if (b) b.addEventListener('click', doShare);
     });
   })();
 </script>
