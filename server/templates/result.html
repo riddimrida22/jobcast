@@ -13,6 +13,14 @@
 {% if seo %}<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":{{ ("Will AI or robots replace " ~ r.occupation.title ~ "?") | tojson }},"acceptedAnswer":{"@type":"Answer","text":{{ (r.occupation.title ~ " scores " ~ r.base_exposure ~ " of 100 for automation exposure, from O*NET task data and peer-reviewed AI-exposure research - higher means more of the role's tasks are automatable. JobBreak shows the full sourced breakdown and a timeline.") | tojson }}}}]}</script>{% endif %}
 {% set check %}<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>{% endset %}
 
+<style>
+  .rv-extinct { display:flex; align-items:center; justify-content:center; gap:12px; margin:0 0 14px; }
+  .rv-jobo-sad { flex:none; filter:drop-shadow(0 4px 10px rgba(0,0,0,.3)); }
+  .rv-ext-txt { text-align:left; }
+  .rv-ext-lab { display:block; font-size:12px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#ff8a6a; }
+  .rv-ext-name { display:block; font-size:clamp(17px,4.4vw,25px); font-weight:900; color:#ff5a4d; animation:rv-blink 1.1s ease-in-out infinite; }
+  @keyframes rv-blink { 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
+</style>
 <!-- Dramatic reveal: plays only when arriving from the guided flow or tour -->
 <div id="reveal" class="rv" hidden aria-hidden="true">
   <div class="rv-fx" id="rv-fx" aria-hidden="true"></div>
@@ -23,6 +31,26 @@
     <div class="rv-bar"><span id="rv-barfill"></span></div>
   </div>
   <div class="rv-done" id="rv-done" hidden>
+    <div class="rv-extinct" id="rv-extinct" hidden>
+      <svg class="rv-jobo-sad" viewBox="0 0 120 125" width="72" height="75" aria-hidden="true">
+        <line x1="60" y1="18" x2="60" y2="7" stroke="#e07559" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="60" cy="5" r="5" fill="#e07559"/>
+        <rect x="22" y="18" width="76" height="58" rx="17" fill="#e8eef6" stroke="#9fb4cc" stroke-width="2"/>
+        <rect x="30" y="29" width="60" height="30" rx="13" fill="#13263d"/>
+        <rect x="42" y="36" width="12" height="3" rx="1.5" fill="#cfdcea" transform="rotate(-17 48 37.5)"/>
+        <rect x="66" y="36" width="12" height="3" rx="1.5" fill="#cfdcea" transform="rotate(17 72 37.5)"/>
+        <circle cx="48" cy="45" r="6" fill="#f3a35f"/>
+        <circle cx="72" cy="45" r="6" fill="#f3a35f"/>
+        <path d="M49 68 q11 -7 22 0" stroke="#9fb4cc" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <rect x="34" y="80" width="52" height="38" rx="11" fill="#dce6f2" stroke="#9fb4cc" stroke-width="2"/>
+        <rect x="42" y="90" width="36" height="18" rx="4" fill="#13263d"/>
+        <text x="60" y="103" text-anchor="middle" font-size="9" font-weight="800" fill="#e07559" font-family="system-ui,sans-serif">SORRY</text>
+      </svg>
+      <div class="rv-ext-txt">
+        <span class="rv-ext-lab">Near extinction</span>
+        <span class="rv-ext-name" id="rv-ext-name"></span>
+      </div>
+    </div>
     <div class="rv-badge" id="rv-badge"></div>
     <div class="rv-num"><b id="rv-num">0</b><small>{{ rating_label }} &middot; of 100</small></div>
     <div class="rv-msg" id="rv-msg"></div>
@@ -860,10 +888,15 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     ov.classList.add(tier);
     var badge = document.getElementById('rv-badge'), msg = document.getElementById('rv-msg');
     if (tier === 'safe') { badge.textContent = 'Good news'; msg.textContent = '{{ "Most of this work still needs a person. AI reshapes this role more than it replaces it." if seo else "Most of your work still needs a person. AI reshapes this role more than it replaces it." }}'; party(); }
-    else if (tier === 'storm') { badge.textContent = 'Heads up'; msg.textContent = 'A lot of this role is exposed to AI and automation. The good news: there is time to get ahead of it.'; storm(); }
+    else if (tier === 'storm') { badge.textContent = 'Act early'; msg.textContent = 'A big share of this role is exposed to AI and robots, and its timeline runs shorter than most. No need to panic — but the people who move early keep the most options. Start with your fastest safe move.'; storm(); }
     else { badge.textContent = 'Mixed'; msg.textContent = 'Parts of this role are exposed, parts are safe. Where you focus next is what matters.'; }
+    var ext = document.getElementById('rv-extinct');
+    if (ext) {
+      if (exp >= 80) { var en = document.getElementById('rv-ext-name'); if (en) en.textContent = OCC_TITLE; ext.hidden = false; }
+      else { ext.hidden = true; }
+    }
     var gobtn = document.getElementById('rv-go');
-    if (gobtn) { var isStu; try { isStu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {} gobtn.textContent = isStu ? 'See the full breakdown' : 'See my breakdown'; }
+    if (gobtn) { var isStu; try { isStu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {} gobtn.textContent = isStu ? 'See the full breakdown' : (tier === 'storm' ? 'See what to do now ›' : 'See my breakdown'); }
     countTo(document.getElementById('rv-num'), exp, 1200);
   }
   function countTo(el, target, ms) {
