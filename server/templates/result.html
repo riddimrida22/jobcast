@@ -15,6 +15,7 @@
 
 <style>
   .rv-extinct { display:flex; align-items:center; justify-content:center; gap:12px; margin:0 0 14px; }
+  .rv-extinct[hidden] { display:none; }
   .rv-jobo-sad { flex:none; filter:drop-shadow(0 4px 10px rgba(0,0,0,.3)); }
   .rv-ext-txt { text-align:left; }
   .rv-ext-lab { display:block; font-size:12px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#ff8a6a; }
@@ -44,10 +45,10 @@
         <path d="M49 68 q11 -7 22 0" stroke="#9fb4cc" stroke-width="2.6" fill="none" stroke-linecap="round"/>
         <rect x="34" y="80" width="52" height="38" rx="11" fill="#dce6f2" stroke="#9fb4cc" stroke-width="2"/>
         <rect x="42" y="90" width="36" height="18" rx="4" fill="#13263d"/>
-        <text x="60" y="103" text-anchor="middle" font-size="9" font-weight="800" fill="#e07559" font-family="system-ui,sans-serif">SORRY</text>
+        <text x="60" y="103" text-anchor="middle" font-size="9" font-weight="800" fill="#e07559" font-family="system-ui,sans-serif">{{ t('rv.extinct.sorry') }}</text>
       </svg>
       <div class="rv-ext-txt">
-        <span class="rv-ext-lab">Near extinction</span>
+        <span class="rv-ext-lab">{{ t('rv.extinct.lab') }}</span>
         <span class="rv-ext-name" id="rv-ext-name"></span>
       </div>
     </div>
@@ -55,7 +56,7 @@
     <div class="rv-num"><b id="rv-num">0</b><small>{{ rating_label }} &middot; of 100</small></div>
     <div class="rv-msg" id="rv-msg"></div>
     <button type="button" class="rv-go" id="rv-go">See the full breakdown</button>
-    <button type="button" id="rv-share" style="margin-top:14px;background:none;border:none;color:inherit;opacity:.85;font:inherit;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Share my score &amp; challenge a friend</button>
+    <button type="button" id="rv-share" style="margin-top:14px;background:none;border:none;color:inherit;opacity:.85;font:inherit;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>{{ t('share.reveal') }}</button>
   </div>
 </div>
 <script id="reveal-data" type="application/json">{{ {"exposure": r.base_exposure, "band": r.timeline.band.id, "title": r.occupation.title} | tojson }}</script>
@@ -154,7 +155,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
   <button type="button" id="share-btn" class="secondary" style="margin:0;display:inline-flex;align-items:center;gap:7px">
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/>
-      <circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Share my result</button>
+      <circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>{{ t('share.btn') }}</button>
   <span id="share-note" class="muted" style="font-size:12px"></span>
 </div>
 <script>
@@ -167,7 +168,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
         navigator.share({ title: 'JobBreak', text: text, url: url }).catch(function () {});
       } else if (navigator.clipboard) {
         navigator.clipboard.writeText(text + ' ' + url).then(
-          function () { if (note) note.textContent = 'Link copied to clipboard.'; },
+          function () { if (note) note.textContent = '{{ t("share.copied") }}'; },
           function () { if (note) note.textContent = url; });
       } else if (note) { note.textContent = url; }
     }
@@ -178,16 +179,16 @@ It is a sourced range, not a verdict, and the detail is below.</p>
 </script>
 
 <div class="refer-box" style="margin:0 0 16px;padding:14px 16px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.03)">
-  <b style="display:block;margin-bottom:4px">Refer 5 friends who subscribe, get 50% off</b>
-  <p class="muted" style="font-size:13px;margin:0 0 10px">Get your personal link. When 5 people you refer subscribe to Monitor, we email you a one-time 50% off code.</p>
+  <b style="display:block;margin-bottom:4px">{{ t('ref.title') }}</b>
+  <p class="muted" style="font-size:13px;margin:0 0 10px">{{ t('ref.desc') }}</p>
   <div id="refer-form" style="display:flex;gap:8px;flex-wrap:wrap">
     <input type="email" id="refer-email" placeholder="you@example.com" style="flex:1;min-width:180px">
-    <button type="button" id="refer-go" class="secondary" style="margin:0">Get my link</button>
+    <button type="button" id="refer-go" class="secondary" style="margin:0">{{ t('ref.go') }}</button>
   </div>
   <div id="refer-out" hidden style="margin-top:10px">
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <input type="text" id="refer-link" readonly onclick="this.select()" style="flex:1;min-width:180px">
-      <button type="button" id="refer-copy" class="secondary" style="margin:0">Copy</button>
+      <button type="button" id="refer-copy" class="secondary" style="margin:0">{{ t('ref.copy') }}</button>
     </div>
     <span id="refer-progress" class="muted" style="font-size:13px;display:block;margin-top:6px"></span>
   </div>
@@ -202,8 +203,8 @@ It is a sourced range, not a verdict, and the detail is below.</p>
       form.hidden = true; out.hidden = false;
       document.getElementById('refer-link').value = d.link;
       document.getElementById('refer-progress').textContent = d.rewarded
-        ? 'Reward earned - check your email for your 50% off code.'
-        : (d.count + ' of ' + d.threshold + ' referred friends have subscribed.');
+        ? '{{ t("ref.rewarded") }}'
+        : (d.count + ' {{ t("ref.of") }} ' + d.threshold + ' {{ t("ref.subscribed") }}');
     }
     go.addEventListener('click', function () {
       var email = (em.value || '').trim();
@@ -212,7 +213,7 @@ It is a sourced range, not a verdict, and the detail is below.</p>
       fetch('/referral', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email }) })
         .then(function (r) { return r.json(); })
-        .then(function (d) { go.disabled = false; if (d.ok) render(d); else err.textContent = 'Please enter a valid email.'; })
+        .then(function (d) { go.disabled = false; if (d.ok) render(d); else err.textContent = '{{ t("ref.err") }}'; })
         .catch(function () { go.disabled = false; err.textContent = 'Something went wrong. Try again.'; });
     });
     var cp = document.getElementById('refer-copy');
@@ -887,16 +888,16 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     var tier = exp >= 62 ? 'storm' : (exp < 45 ? 'safe' : 'mixed');
     ov.classList.add(tier);
     var badge = document.getElementById('rv-badge'), msg = document.getElementById('rv-msg');
-    if (tier === 'safe') { badge.textContent = 'Good news'; msg.textContent = '{{ "Most of this work still needs a person. AI reshapes this role more than it replaces it." if seo else "Most of your work still needs a person. AI reshapes this role more than it replaces it." }}'; party(); }
-    else if (tier === 'storm') { badge.textContent = 'Act early'; msg.textContent = 'A big share of this role is exposed to AI and robots, and its timeline runs shorter than most. No need to panic — but the people who move early keep the most options. Start with your fastest safe move.'; storm(); }
-    else { badge.textContent = 'Mixed'; msg.textContent = 'Parts of this role are exposed, parts are safe. Where you focus next is what matters.'; }
+    if (tier === 'safe') { badge.textContent = '{{ t("rv.badge.safe") }}'; msg.textContent = '{{ t("rv.msg.safe") }}'; party(); }
+    else if (tier === 'storm') { badge.textContent = '{{ t("rv.badge.storm") }}'; msg.textContent = '{{ t("rv.msg.storm") }}'; storm(); }
+    else { badge.textContent = '{{ t("rv.badge.mixed") }}'; msg.textContent = '{{ t("rv.msg.mixed") }}'; }
     var ext = document.getElementById('rv-extinct');
     if (ext) {
       if (exp >= 80) { var en = document.getElementById('rv-ext-name'); if (en) en.textContent = OCC_TITLE; ext.hidden = false; }
       else { ext.hidden = true; }
     }
     var gobtn = document.getElementById('rv-go');
-    if (gobtn) { var isStu; try { isStu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {} gobtn.textContent = isStu ? 'See the full breakdown' : (tier === 'storm' ? 'See what to do now ›' : 'See my breakdown'); }
+    if (gobtn) { var isStu; try { isStu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {} gobtn.textContent = isStu ? '{{ t("rv.cta.full") }}' : (tier === 'storm' ? '{{ t("rv.cta.now") }}' : '{{ t("rv.cta.breakdown") }}'); }
     countTo(document.getElementById('rv-num'), exp, 1200);
   }
   function countTo(el, target, ms) {
