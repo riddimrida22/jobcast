@@ -1,16 +1,92 @@
 {% extends "base.html" %}
-{% block title %}Will AI Replace Your Job? Browse 900+ Jobs by Risk | JobBreak{% endblock %}
-{% block description %}See the AI and robot Job Extinction Risk for 900+ occupations, from real O*NET and BLS data. Find your job and see how exposed it is, with a timeline.{% endblock %}
+{% block title %}Browse all jobs by AI and robot risk | JobBreak{% endblock %}
+{% block description %}Browse every occupation we track, sorted by AI and robot Job Extinction Risk, pay, or name. Real O*NET and BLS data, with a page for each job.{% endblock %}
 {% block content %}
-<h1>Browse all jobs</h1>
-<p class="lead">Pick a field, then a job, to see its automation exposure. Each job has its own page.</p>
-{% for f in families %}
-<div class="card">
-  <h2 style="margin-top:0">{{ f.name }}</h2>
-  <ul>
-    {% for j in f.jobs %}<li><a href="/jobs/{{ j.soc }}">{{ j.title }}</a></li>{% endfor %}
-  </ul>
+<style>
+  .jb-head { margin:0 0 4px; }
+  .jb-lead { color:var(--muted); margin:0 0 16px; }
+  .jb-tools { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 6px; }
+  .jb-sort { display:flex; flex-wrap:wrap; gap:6px; }
+  .jb-sort button { font:inherit; font-size:13px; font-weight:700; padding:7px 13px; border-radius:999px;
+    border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }
+  .jb-sort button.on { background:var(--primary); color:#fff; border-color:var(--primary); }
+  #jb-filter { font:inherit; padding:9px 13px; border-radius:10px; border:1px solid var(--line);
+    background:var(--card); color:var(--ink); flex:1; min-width:160px; box-sizing:border-box; }
+  .jb-count { color:var(--muted); font-size:13px; margin:6px 0 10px; }
+  .jb-list { display:flex; flex-direction:column; gap:6px; }
+  .jb-row { display:flex; align-items:center; gap:12px; padding:11px 14px; border:1px solid var(--line);
+    border-radius:10px; background:var(--card); text-decoration:none; color:var(--ink); }
+  .jb-row:hover { border-color:var(--accent); }
+  .jb-t { flex:1; font-weight:600; }
+  .jb-pay { color:var(--muted); font-size:13px; white-space:nowrap; }
+  .jb-risk { font-weight:800; font-size:15px; min-width:34px; text-align:right; }
+  .jb-risk.hi { color:var(--red); } .jb-risk.md { color:#c0792e; } .jb-risk.lo { color:var(--green); }
+  .jb-more { text-align:center; margin:14px 0 0; }
+  .jb-more button { font:inherit; font-weight:700; padding:10px 20px; border-radius:10px;
+    border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }
+</style>
+<h1 class="jb-head">Browse every job by AI and robot risk</h1>
+<p class="jb-lead">All {{ jobs|length }} jobs we track. Sort by risk, pay, or name &mdash; or search for yours. Each opens its own page.</p>
+<div class="jb-tools">
+  <div class="jb-sort" id="jb-sort">
+    <button type="button" data-sort="risk" class="on">Most at risk</button>
+    <button type="button" data-sort="safe">Safest</button>
+    <button type="button" data-sort="az">A&ndash;Z</button>
+    <button type="button" data-sort="pay">Highest pay</button>
+  </div>
+  <input id="jb-filter" type="search" placeholder="Search jobs&hellip;" aria-label="Search jobs">
 </div>
-{% endfor %}
-<p><a href="/">Back to the personal read</a></p>
+<div class="jb-count" id="jb-count"></div>
+<div class="jb-list" id="jb-list"></div>
+<div class="jb-more" id="jb-more" hidden><button type="button" id="jb-more-btn">Show more</button></div>
+<script id="jobs-data" type="application/json">{{ jobs|tojson }}</script>
+<script>
+(function () {
+  var DATA = JSON.parse(document.getElementById('jobs-data').textContent);
+  var listEl = document.getElementById('jb-list'), countEl = document.getElementById('jb-count');
+  var moreEl = document.getElementById('jb-more'), moreBtn = document.getElementById('jb-more-btn');
+  var filter = document.getElementById('jb-filter');
+  var sort = 'risk', q = '', shown = 0, PAGE = 60, current = [];
+  function band(n) { return n >= 66 ? 'hi' : (n >= 33 ? 'md' : 'lo'); }
+  function money(w) { return w ? '$' + Math.round(w / 1000) + 'k' : ''; }
+  var SORTS = {
+    risk: function (a, b) { return b.base - a.base || a.title.localeCompare(b.title); },
+    safe: function (a, b) { return a.base - b.base || a.title.localeCompare(b.title); },
+    az:   function (a, b) { return a.title.localeCompare(b.title); },
+    pay:  function (a, b) { return (b.wage || 0) - (a.wage || 0) || a.title.localeCompare(b.title); }
+  };
+  function render(reset) {
+    if (reset) { shown = 0; listEl.innerHTML = ''; }
+    var slice = current.slice(shown, shown + PAGE);
+    var frag = document.createDocumentFragment();
+    slice.forEach(function (j) {
+      var a = document.createElement('a'); a.className = 'jb-row'; a.href = '/jobs/' + j.soc;
+      var t = document.createElement('span'); t.className = 'jb-t'; t.textContent = j.title; a.appendChild(t);
+      if (j.wage) { var p = document.createElement('span'); p.className = 'jb-pay'; p.textContent = money(j.wage); a.appendChild(p); }
+      var r = document.createElement('span'); r.className = 'jb-risk ' + band(j.base); r.textContent = j.base; a.appendChild(r);
+      frag.appendChild(a);
+    });
+    listEl.appendChild(frag);
+    shown += slice.length;
+    moreEl.hidden = shown >= current.length;
+  }
+  function apply() {
+    current = DATA.filter(function (j) { return !q || j.title.toLowerCase().indexOf(q) !== -1; });
+    current.sort(SORTS[sort]);
+    countEl.textContent = current.length + ' job' + (current.length === 1 ? '' : 's');
+    render(true);
+  }
+  document.getElementById('jb-sort').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    sort = b.getAttribute('data-sort');
+    this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    apply();
+  });
+  var tmr; filter.addEventListener('input', function () {
+    clearTimeout(tmr); tmr = setTimeout(function () { q = filter.value.trim().toLowerCase(); apply(); }, 120);
+  });
+  moreBtn.addEventListener('click', function () { render(false); });
+  apply();
+})();
+</script>
 {% endblock %}

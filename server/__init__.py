@@ -326,8 +326,16 @@ def create_app() -> Flask:
 
     @app.get("/jobs")
     def browse_jobs():
+        jobs = []
+        for o in engine.snapshot.all_occupations():
+            jobs.append({
+                "soc": o["soc"],
+                "title": o["title"],
+                "base": round(max(o.get("ai") or 0, o.get("robo") or 0) * 100),
+                "wage": o.get("median_wage_national") or 0,
+            })
         return render_template("jobs.html", version=VERSION, licensed=engine.snapshot.licensed,
-                               families=engine.snapshot.families())
+                               families=engine.snapshot.families(), jobs=jobs)
 
     @app.get("/jobs/<soc>")
     def occupation_page(soc):
