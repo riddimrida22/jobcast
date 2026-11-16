@@ -2,6 +2,7 @@
    full-screen overlays (gate, intro) whose own header is covered. Positioned by the
    parent via .jb-ctrls. #}
 <div class="jb-ctrls" aria-label="Preferences">
+  {% if countries and countries|length > 1 %}<span class="jb-country" aria-label="Country">{% for code, name in countries.items() %}<a href="?country={{ code }}" title="{{ name }}"{{ ' class="on"' if code == country else '' }}>{{ code|upper }}</a>{% endfor %}</span>{% endif %}
   <span class="jb-lang">{% for code, name in langs.items() %}<a href="?lang={{ code }}" title="{{ name }}"{{ ' class="on"' if code == lang else '' }}>{{ code|upper }}</a>{% endfor %}</span>
   <button type="button" class="theme-toggle" aria-label="Switch theme" title="Switch theme">
     <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M5 5l1.7 1.7M17.3 17.3l1.7 1.7M19 5l-1.7 1.7M6.7 17.3L5 19"/></svg>

@@ -8,6 +8,7 @@ from typing import Optional, Dict, Any
 @dataclass(frozen=True)
 class Profile:
     title: str
+    country: Optional[str] = None   # "us" (default) | "uk" | ...; resolved via riskcore.countries
     zip_code: Optional[str] = None
     age: Optional[int] = None
     experience_years: Optional[int] = None

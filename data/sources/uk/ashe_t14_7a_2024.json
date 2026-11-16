@@ -1,0 +1,2073 @@
+{
+"_meta": {
+"source": "UK ONS Annual Survey of Hours and Earnings (ASHE), Table 14.7a Annual pay - Gross, All employees",
+"edition": "2024 revised",
+"url": "https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/occupation4digitsoc2010ashetable14/2024revised",
+"classification": "SOC2020 4-digit unit groups",
+"currency": "GBP",
+"measure": "median gross annual pay",
+"field": "median_annual_gbp",
+"retrieved": "2026-11-15",
+"note": "x = suppressed for quality in the ONS source; stored as null."
+},
+"1111": {
+"title": "Chief executives and senior officials",
+"median_annual_gbp": 81810.0,
+"n_jobs_thousand": 111.0
+},
+"1112": {
+"title": "Elected officers and representatives",
+"median_annual_gbp": null,
+"n_jobs_thousand": 9.0
+},
+"1121": {
+"title": "Production managers and directors in manufacturing",
+"median_annual_gbp": 50000.0,
+"n_jobs_thousand": 526.0
+},
+"1122": {
+"title": "Production managers and directors in construction",
+"median_annual_gbp": 52326.0,
+"n_jobs_thousand": 101.0
+},
+"1123": {
+"title": "Production managers and directors in mining and energy",
+"median_annual_gbp": 54117.0,
+"n_jobs_thousand": 11.0
+},
+"1131": {
+"title": "Financial managers and directors",
+"median_annual_gbp": 69071.0,
+"n_jobs_thousand": 379.0
+},
+"1132": {
+"title": "Marketing, sales and advertising directors",
+"median_annual_gbp": 82979.0,
+"n_jobs_thousand": 205.0
+},
+"1133": {
+"title": "Public relations and communications directors",
+"median_annual_gbp": 73782.0,
+"n_jobs_thousand": 13.0
+},
+"1134": {
+"title": "Purchasing managers and directors",
+"median_annual_gbp": 52933.0,
+"n_jobs_thousand": 57.0
+},
+"1135": {
+"title": "Charitable organisation managers and directors",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"1136": {
+"title": "Human resource managers and directors",
+"median_annual_gbp": 50346.0,
+"n_jobs_thousand": 160.0
+},
+"1137": {
+"title": "Information technology directors",
+"median_annual_gbp": 80401.0,
+"n_jobs_thousand": 54.0
+},
+"1139": {
+"title": "Functional managers and directors n.e.c.",
+"median_annual_gbp": 68991.0,
+"n_jobs_thousand": 100.0
+},
+"1140": {
+"title": "Directors in logistics, warehousing and transport",
+"median_annual_gbp": 76164.0,
+"n_jobs_thousand": 12.0
+},
+"1150": {
+"title": "Managers and directors in retail and wholesale",
+"median_annual_gbp": 34860.0,
+"n_jobs_thousand": 332.0
+},
+"1161": {
+"title": "Officers in armed forces",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"1162": {
+"title": "Senior police officers",
+"median_annual_gbp": 63990.0,
+"n_jobs_thousand": 11.0
+},
+"1163": {
+"title": "Senior officers in fire, ambulance, prison and related services",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"1171": {
+"title": "Health services and public health managers and directors",
+"median_annual_gbp": 52339.0,
+"n_jobs_thousand": 59.0
+},
+"1172": {
+"title": "Social services managers and directors",
+"median_annual_gbp": 40098.0,
+"n_jobs_thousand": 13.0
+},
+"1211": {
+"title": "Managers and proprietors in agriculture and horticulture",
+"median_annual_gbp": 35325.0,
+"n_jobs_thousand": 17.0
+},
+"1212": {
+"title": "Managers and proprietors in forestry, fishing and related services",
+"median_annual_gbp": 30666.0,
+"n_jobs_thousand": null
+},
+"1221": {
+"title": "Hotel and accommodation managers and proprietors",
+"median_annual_gbp": 34999.0,
+"n_jobs_thousand": 16.0
+},
+"1222": {
+"title": "Restaurant and catering establishment managers and proprietors",
+"median_annual_gbp": 29787.0,
+"n_jobs_thousand": 38.0
+},
+"1223": {
+"title": "Publicans and managers of licensed premises",
+"median_annual_gbp": 35272.0,
+"n_jobs_thousand": 13.0
+},
+"1224": {
+"title": "Leisure and sports managers",
+"median_annual_gbp": 31187.0,
+"n_jobs_thousand": 30.0
+},
+"1225": {
+"title": "Travel agency managers and proprietors",
+"median_annual_gbp": 34026.0,
+"n_jobs_thousand": null
+},
+"1231": {
+"title": "Health care practice managers",
+"median_annual_gbp": 37159.0,
+"n_jobs_thousand": 15.0
+},
+"1232": {
+"title": "Residential, day and domiciliary care managers and proprietors",
+"median_annual_gbp": 38713.0,
+"n_jobs_thousand": 57.0
+},
+"1233": {
+"title": "Early education and childcare services proprietors",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"1241": {
+"title": "Managers in transport and distribution",
+"median_annual_gbp": 44096.0,
+"n_jobs_thousand": 63.0
+},
+"1242": {
+"title": "Managers in storage and warehousing",
+"median_annual_gbp": 34424.0,
+"n_jobs_thousand": 89.0
+},
+"1243": {
+"title": "Managers in logistics",
+"median_annual_gbp": 44748.0,
+"n_jobs_thousand": 26.0
+},
+"1251": {
+"title": "Property, housing and estate managers",
+"median_annual_gbp": 39859.0,
+"n_jobs_thousand": 101.0
+},
+"1252": {
+"title": "Garage managers and proprietors",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"1253": {
+"title": "Hairdressing and beauty salon managers and proprietors",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"1254": {
+"title": "Waste disposal and environmental services managers",
+"median_annual_gbp": 47704.0,
+"n_jobs_thousand": null
+},
+"1255": {
+"title": "Managers and directors in the creative industries",
+"median_annual_gbp": 43763.0,
+"n_jobs_thousand": 18.0
+},
+"1256": {
+"title": "Betting shop and gambling establishment managers",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"1257": {
+"title": "Hire services managers and proprietors",
+"median_annual_gbp": 29342.0,
+"n_jobs_thousand": null
+},
+"1258": {
+"title": "Directors in consultancy services",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"1259": {
+"title": "Managers and proprietors in other services n.e.c.",
+"median_annual_gbp": 38310.0,
+"n_jobs_thousand": 29.0
+},
+"2111": {
+"title": "Chemical scientists",
+"median_annual_gbp": 38996.0,
+"n_jobs_thousand": 14.0
+},
+"2112": {
+"title": "Biological scientists",
+"median_annual_gbp": null,
+"n_jobs_thousand": 9.0
+},
+"2113": {
+"title": "Biochemists and biomedical scientists",
+"median_annual_gbp": 44730.0,
+"n_jobs_thousand": 38.0
+},
+"2114": {
+"title": "Physical scientists",
+"median_annual_gbp": 48634.0,
+"n_jobs_thousand": 13.0
+},
+"2115": {
+"title": "Social and humanities scientists",
+"median_annual_gbp": 37466.0,
+"n_jobs_thousand": null
+},
+"2119": {
+"title": "Natural and social science professionals n.e.c.",
+"median_annual_gbp": 41287.0,
+"n_jobs_thousand": 39.0
+},
+"2121": {
+"title": "Civil engineers",
+"median_annual_gbp": 49001.0,
+"n_jobs_thousand": 64.0
+},
+"2122": {
+"title": "Mechanical engineers",
+"median_annual_gbp": 46417.0,
+"n_jobs_thousand": 33.0
+},
+"2123": {
+"title": "Electrical engineers",
+"median_annual_gbp": 57817.0,
+"n_jobs_thousand": 38.0
+},
+"2124": {
+"title": "Electronics engineers",
+"median_annual_gbp": 51960.0,
+"n_jobs_thousand": null
+},
+"2125": {
+"title": "Production and process engineers",
+"median_annual_gbp": 44988.0,
+"n_jobs_thousand": 52.0
+},
+"2126": {
+"title": "Aerospace engineers",
+"median_annual_gbp": 52431.0,
+"n_jobs_thousand": null
+},
+"2127": {
+"title": "Engineering project managers and project engineers",
+"median_annual_gbp": 51210.0,
+"n_jobs_thousand": 73.0
+},
+"2129": {
+"title": "Engineering professionals n.e.c.",
+"median_annual_gbp": 45698.0,
+"n_jobs_thousand": 131.0
+},
+"2131": {
+"title": "IT project managers",
+"median_annual_gbp": 57783.0,
+"n_jobs_thousand": 34.0
+},
+"2132": {
+"title": "IT managers",
+"median_annual_gbp": 54506.0,
+"n_jobs_thousand": 219.0
+},
+"2133": {
+"title": "IT business analysts, architects and systems designers",
+"median_annual_gbp": 54481.0,
+"n_jobs_thousand": 165.0
+},
+"2134": {
+"title": "Programmers and software development professionals",
+"median_annual_gbp": 53363.0,
+"n_jobs_thousand": 339.0
+},
+"2135": {
+"title": "Cyber security professionals",
+"median_annual_gbp": 48555.0,
+"n_jobs_thousand": 29.0
+},
+"2136": {
+"title": "IT quality and testing professionals",
+"median_annual_gbp": 40182.0,
+"n_jobs_thousand": 18.0
+},
+"2137": {
+"title": "IT network professionals",
+"median_annual_gbp": 45079.0,
+"n_jobs_thousand": 37.0
+},
+"2139": {
+"title": "Information technology professionals n.e.c.",
+"median_annual_gbp": 49385.0,
+"n_jobs_thousand": 67.0
+},
+"2141": {
+"title": "Web design professionals",
+"median_annual_gbp": 43794.0,
+"n_jobs_thousand": 13.0
+},
+"2142": {
+"title": "Graphic and multimedia designers",
+"median_annual_gbp": 30000.0,
+"n_jobs_thousand": 48.0
+},
+"2151": {
+"title": "Conservation professionals",
+"median_annual_gbp": 33969.0,
+"n_jobs_thousand": null
+},
+"2152": {
+"title": "Environment professionals",
+"median_annual_gbp": 36702.0,
+"n_jobs_thousand": 45.0
+},
+"2161": {
+"title": "Research and development (R&D) managers",
+"median_annual_gbp": 52139.0,
+"n_jobs_thousand": 73.0
+},
+"2162": {
+"title": "Other researchers, unspecified discipline",
+"median_annual_gbp": 40245.0,
+"n_jobs_thousand": 18.0
+},
+"2211": {
+"title": "Generalist medical practitioners",
+"median_annual_gbp": 45377.0,
+"n_jobs_thousand": 67.0
+},
+"2212": {
+"title": "Specialist medical practitioners",
+"median_annual_gbp": 70142.0,
+"n_jobs_thousand": 189.0
+},
+"2221": {
+"title": "Physiotherapists",
+"median_annual_gbp": 38512.0,
+"n_jobs_thousand": 59.0
+},
+"2222": {
+"title": "Occupational therapists",
+"median_annual_gbp": 35727.0,
+"n_jobs_thousand": 36.0
+},
+"2223": {
+"title": "Speech and language therapists",
+"median_annual_gbp": 32130.0,
+"n_jobs_thousand": 14.0
+},
+"2224": {
+"title": "Psychotherapists and cognitive behaviour therapists",
+"median_annual_gbp": 38444.0,
+"n_jobs_thousand": null
+},
+"2225": {
+"title": "Clinical psychologists",
+"median_annual_gbp": 43668.0,
+"n_jobs_thousand": 15.0
+},
+"2226": {
+"title": "Other psychologists",
+"median_annual_gbp": 30685.0,
+"n_jobs_thousand": 19.0
+},
+"2229": {
+"title": "Therapy professionals n.e.c.",
+"median_annual_gbp": 30117.0,
+"n_jobs_thousand": 18.0
+},
+"2231": {
+"title": "Midwifery nurses",
+"median_annual_gbp": 35404.0,
+"n_jobs_thousand": 47.0
+},
+"2232": {
+"title": "Community nurses",
+"median_annual_gbp": 32290.0,
+"n_jobs_thousand": 80.0
+},
+"2233": {
+"title": "Specialist nurses",
+"median_annual_gbp": 40746.0,
+"n_jobs_thousand": 52.0
+},
+"2234": {
+"title": "Nurse practitioners",
+"median_annual_gbp": 39321.0,
+"n_jobs_thousand": 94.0
+},
+"2235": {
+"title": "Mental health nurses",
+"median_annual_gbp": 38573.0,
+"n_jobs_thousand": 17.0
+},
+"2236": {
+"title": "Children's nurses",
+"median_annual_gbp": 32112.0,
+"n_jobs_thousand": 17.0
+},
+"2237": {
+"title": "Other nursing professionals",
+"median_annual_gbp": 35021.0,
+"n_jobs_thousand": 723.0
+},
+"2240": {
+"title": "Veterinarians",
+"median_annual_gbp": 42616.0,
+"n_jobs_thousand": 14.0
+},
+"2251": {
+"title": "Pharmacists",
+"median_annual_gbp": 42634.0,
+"n_jobs_thousand": 50.0
+},
+"2252": {
+"title": "Optometrists",
+"median_annual_gbp": null,
+"n_jobs_thousand": 13.0
+},
+"2253": {
+"title": "Dental practitioners",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"2254": {
+"title": "Medical radiographers",
+"median_annual_gbp": 40507.0,
+"n_jobs_thousand": 42.0
+},
+"2255": {
+"title": "Paramedics",
+"median_annual_gbp": 52089.0,
+"n_jobs_thousand": 37.0
+},
+"2256": {
+"title": "Podiatrists",
+"median_annual_gbp": 35653.0,
+"n_jobs_thousand": null
+},
+"2259": {
+"title": "Other health professionals n.e.c.",
+"median_annual_gbp": 39260.0,
+"n_jobs_thousand": 87.0
+},
+"2311": {
+"title": "Higher education teaching professionals",
+"median_annual_gbp": 45680.0,
+"n_jobs_thousand": 246.0
+},
+"2312": {
+"title": "Further education teaching professionals",
+"median_annual_gbp": 37272.0,
+"n_jobs_thousand": 65.0
+},
+"2313": {
+"title": "Secondary education teaching professionals",
+"median_annual_gbp": 42446.0,
+"n_jobs_thousand": 462.0
+},
+"2314": {
+"title": "Primary education teaching professionals",
+"median_annual_gbp": 39283.0,
+"n_jobs_thousand": 460.0
+},
+"2315": {
+"title": "Nursery education teaching professionals",
+"median_annual_gbp": 28731.0,
+"n_jobs_thousand": 15.0
+},
+"2316": {
+"title": "Special needs education teaching professionals",
+"median_annual_gbp": 35919.0,
+"n_jobs_thousand": 36.0
+},
+"2317": {
+"title": "Teachers of English as a foreign language",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"2319": {
+"title": "Teaching professionals n.e.c.",
+"median_annual_gbp": null,
+"n_jobs_thousand": 46.0
+},
+"2321": {
+"title": "Head teachers and principals",
+"median_annual_gbp": 69293.0,
+"n_jobs_thousand": 61.0
+},
+"2322": {
+"title": "Education managers",
+"median_annual_gbp": 42320.0,
+"n_jobs_thousand": 49.0
+},
+"2323": {
+"title": "Education advisers and school inspectors",
+"median_annual_gbp": 38386.0,
+"n_jobs_thousand": 19.0
+},
+"2324": {
+"title": "Early education and childcare services managers",
+"median_annual_gbp": 26297.0,
+"n_jobs_thousand": 21.0
+},
+"2329": {
+"title": "Other educational professionals n.e.c",
+"median_annual_gbp": 35406.0,
+"n_jobs_thousand": 21.0
+},
+"2411": {
+"title": "Barristers and judges",
+"median_annual_gbp": 54876.0,
+"n_jobs_thousand": null
+},
+"2412": {
+"title": "Solicitors and lawyers",
+"median_annual_gbp": 49934.0,
+"n_jobs_thousand": 112.0
+},
+"2419": {
+"title": "Legal professionals n.e.c.",
+"median_annual_gbp": 31284.0,
+"n_jobs_thousand": 56.0
+},
+"2421": {
+"title": "Chartered and certified accountants",
+"median_annual_gbp": 46131.0,
+"n_jobs_thousand": 82.0
+},
+"2422": {
+"title": "Finance and investment analysts and advisers",
+"median_annual_gbp": 43736.0,
+"n_jobs_thousand": 188.0
+},
+"2423": {
+"title": "Taxation experts",
+"median_annual_gbp": 45608.0,
+"n_jobs_thousand": 27.0
+},
+"2431": {
+"title": "Management consultants and business analysts",
+"median_annual_gbp": 47738.0,
+"n_jobs_thousand": 224.0
+},
+"2432": {
+"title": "Marketing and commercial managers",
+"median_annual_gbp": 47422.0,
+"n_jobs_thousand": 104.0
+},
+"2433": {
+"title": "Actuaries, economists and statisticians",
+"median_annual_gbp": 53394.0,
+"n_jobs_thousand": 38.0
+},
+"2434": {
+"title": "Business and related research professionals",
+"median_annual_gbp": 37697.0,
+"n_jobs_thousand": 80.0
+},
+"2435": {
+"title": "Professional/Chartered company secretaries",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"2439": {
+"title": "Business, research and administrative professionals n.e.c.",
+"median_annual_gbp": 55396.0,
+"n_jobs_thousand": 73.0
+},
+"2440": {
+"title": "Business and financial project management professionals",
+"median_annual_gbp": 54619.0,
+"n_jobs_thousand": 287.0
+},
+"2451": {
+"title": "Architects",
+"median_annual_gbp": 46290.0,
+"n_jobs_thousand": 33.0
+},
+"2452": {
+"title": "Chartered architectural technologists, planning officers and consultants",
+"median_annual_gbp": 33071.0,
+"n_jobs_thousand": 20.0
+},
+"2453": {
+"title": "Quantity surveyors",
+"median_annual_gbp": 47545.0,
+"n_jobs_thousand": 40.0
+},
+"2454": {
+"title": "Chartered surveyors",
+"median_annual_gbp": 42937.0,
+"n_jobs_thousand": 63.0
+},
+"2455": {
+"title": "Construction project managers and related professionals",
+"median_annual_gbp": 42878.0,
+"n_jobs_thousand": 36.0
+},
+"2461": {
+"title": "Social workers",
+"median_annual_gbp": 40698.0,
+"n_jobs_thousand": 99.0
+},
+"2462": {
+"title": "Probation officers",
+"median_annual_gbp": 33276.0,
+"n_jobs_thousand": null
+},
+"2463": {
+"title": "Clergy",
+"median_annual_gbp": 29152.0,
+"n_jobs_thousand": 36.0
+},
+"2464": {
+"title": "Youth work professionals",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"2469": {
+"title": "Welfare professionals n.e.c.",
+"median_annual_gbp": null,
+"n_jobs_thousand": 10.0
+},
+"2471": {
+"title": "Librarians",
+"median_annual_gbp": 28300.0,
+"n_jobs_thousand": 14.0
+},
+"2472": {
+"title": "Archivists and curators",
+"median_annual_gbp": 31490.0,
+"n_jobs_thousand": 11.0
+},
+"2481": {
+"title": "Quality control and planning engineers",
+"median_annual_gbp": 40375.0,
+"n_jobs_thousand": 56.0
+},
+"2482": {
+"title": "Quality assurance and regulatory professionals",
+"median_annual_gbp": 46608.0,
+"n_jobs_thousand": 129.0
+},
+"2483": {
+"title": "Environmental health professionals",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"2491": {
+"title": "Newspaper and periodical editors",
+"median_annual_gbp": 38005.0,
+"n_jobs_thousand": 23.0
+},
+"2492": {
+"title": "Newspaper and periodical journalists and reporters",
+"median_annual_gbp": 31834.0,
+"n_jobs_thousand": null
+},
+"2493": {
+"title": "Public relations professionals",
+"median_annual_gbp": 34400.0,
+"n_jobs_thousand": 39.0
+},
+"2494": {
+"title": "Advertising accounts managers and creative directors",
+"median_annual_gbp": 43048.0,
+"n_jobs_thousand": 30.0
+},
+"3111": {
+"title": "Laboratory technicians",
+"median_annual_gbp": 26258.0,
+"n_jobs_thousand": 54.0
+},
+"3112": {
+"title": "Electrical and electronics technicians",
+"median_annual_gbp": 38623.0,
+"n_jobs_thousand": 14.0
+},
+"3113": {
+"title": "Engineering technicians",
+"median_annual_gbp": 42124.0,
+"n_jobs_thousand": 80.0
+},
+"3114": {
+"title": "Building and civil engineering technicians",
+"median_annual_gbp": 31830.0,
+"n_jobs_thousand": null
+},
+"3115": {
+"title": "Quality assurance technicians",
+"median_annual_gbp": 30677.0,
+"n_jobs_thousand": 31.0
+},
+"3116": {
+"title": "Planning, process and production technicians",
+"median_annual_gbp": 33890.0,
+"n_jobs_thousand": 45.0
+},
+"3119": {
+"title": "Science, engineering and production technicians n.e.c.",
+"median_annual_gbp": 33313.0,
+"n_jobs_thousand": 168.0
+},
+"3120": {
+"title": "CAD, drawing and architectural technicians",
+"median_annual_gbp": 33282.0,
+"n_jobs_thousand": 40.0
+},
+"3131": {
+"title": "IT operations technicians",
+"median_annual_gbp": 34085.0,
+"n_jobs_thousand": 70.0
+},
+"3132": {
+"title": "IT user support technicians",
+"median_annual_gbp": 32116.0,
+"n_jobs_thousand": 152.0
+},
+"3133": {
+"title": "Database administrators and web content technicians",
+"median_annual_gbp": 33515.0,
+"n_jobs_thousand": 37.0
+},
+"3211": {
+"title": "Dispensing opticians",
+"median_annual_gbp": 26444.0,
+"n_jobs_thousand": null
+},
+"3212": {
+"title": "Pharmaceutical technicians",
+"median_annual_gbp": 25496.0,
+"n_jobs_thousand": 23.0
+},
+"3213": {
+"title": "Medical and dental technicians",
+"median_annual_gbp": 26472.0,
+"n_jobs_thousand": 28.0
+},
+"3214": {
+"title": "Complementary health associate professionals",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"3219": {
+"title": "Health associate professionals n.e.c.",
+"median_annual_gbp": 26115.0,
+"n_jobs_thousand": null
+},
+"3221": {
+"title": "Youth and community workers",
+"median_annual_gbp": 27367.0,
+"n_jobs_thousand": 93.0
+},
+"3222": {
+"title": "Child and early years officers",
+"median_annual_gbp": 27535.0,
+"n_jobs_thousand": 57.0
+},
+"3223": {
+"title": "Housing officers",
+"median_annual_gbp": 30906.0,
+"n_jobs_thousand": 47.0
+},
+"3224": {
+"title": "Counsellors",
+"median_annual_gbp": 24034.0,
+"n_jobs_thousand": 20.0
+},
+"3229": {
+"title": "Welfare and housing associate professionals n.e.c.",
+"median_annual_gbp": 25974.0,
+"n_jobs_thousand": 131.0
+},
+"3231": {
+"title": "Higher level teaching assistants",
+"median_annual_gbp": 22047.0,
+"n_jobs_thousand": 36.0
+},
+"3232": {
+"title": "Early education and childcare practitioners",
+"median_annual_gbp": 17850.0,
+"n_jobs_thousand": 105.0
+},
+"3240": {
+"title": "Veterinary nurses",
+"median_annual_gbp": 23710.0,
+"n_jobs_thousand": 21.0
+},
+"3311": {
+"title": "Non-commissioned officers and other ranks",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"3312": {
+"title": "Police officers (sergeant and below)",
+"median_annual_gbp": 46457.0,
+"n_jobs_thousand": 247.0
+},
+"3313": {
+"title": "Fire service officers (watch manager and below)",
+"median_annual_gbp": 40433.0,
+"n_jobs_thousand": 59.0
+},
+"3314": {
+"title": "Prison service officers (below principal officer)",
+"median_annual_gbp": 36710.0,
+"n_jobs_thousand": 13.0
+},
+"3319": {
+"title": "Protective service associate professionals n.e.c.",
+"median_annual_gbp": 40478.0,
+"n_jobs_thousand": 35.0
+},
+"3411": {
+"title": "Artists",
+"median_annual_gbp": 36054.0,
+"n_jobs_thousand": null
+},
+"3412": {
+"title": "Authors, writers and translators",
+"median_annual_gbp": 31993.0,
+"n_jobs_thousand": 17.0
+},
+"3413": {
+"title": "Actors, entertainers and presenters",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"3414": {
+"title": "Dancers and choreographers",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"3415": {
+"title": "Musicians",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"3416": {
+"title": "Arts officers, producers and directors",
+"median_annual_gbp": 35487.0,
+"n_jobs_thousand": 22.0
+},
+"3417": {
+"title": "Photographers, audio-visual and broadcasting equipment operators",
+"median_annual_gbp": 27971.0,
+"n_jobs_thousand": 19.0
+},
+"3421": {
+"title": "Interior designers",
+"median_annual_gbp": 33816.0,
+"n_jobs_thousand": 19.0
+},
+"3422": {
+"title": "Clothing, fashion and accessories designers",
+"median_annual_gbp": 35977.0,
+"n_jobs_thousand": null
+},
+"3429": {
+"title": "Design occupations n.e.c.",
+"median_annual_gbp": 38249.0,
+"n_jobs_thousand": 23.0
+},
+"3431": {
+"title": "Sports players",
+"median_annual_gbp": null,
+"n_jobs_thousand": 10.0
+},
+"3432": {
+"title": "Sports coaches, instructors and officials",
+"median_annual_gbp": null,
+"n_jobs_thousand": 58.0
+},
+"3433": {
+"title": "Fitness and wellbeing instructors",
+"median_annual_gbp": null,
+"n_jobs_thousand": 21.0
+},
+"3511": {
+"title": "Aircraft pilots and air traffic controllers",
+"median_annual_gbp": 96417.0,
+"n_jobs_thousand": 13.0
+},
+"3512": {
+"title": "Ship and hovercraft officers",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"3520": {
+"title": "Legal associate professionals",
+"median_annual_gbp": 30664.0,
+"n_jobs_thousand": 40.0
+},
+"3531": {
+"title": "Brokers",
+"median_annual_gbp": 46102.0,
+"n_jobs_thousand": 17.0
+},
+"3532": {
+"title": "Insurance underwriters",
+"median_annual_gbp": 34832.0,
+"n_jobs_thousand": 27.0
+},
+"3533": {
+"title": "Financial and accounting technicians",
+"median_annual_gbp": 42166.0,
+"n_jobs_thousand": 31.0
+},
+"3534": {
+"title": "Financial accounts managers",
+"median_annual_gbp": 42734.0,
+"n_jobs_thousand": 128.0
+},
+"3541": {
+"title": "Estimators, valuers and assessors",
+"median_annual_gbp": 33285.0,
+"n_jobs_thousand": 46.0
+},
+"3542": {
+"title": "Importers and exporters",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"3543": {
+"title": "Project support officers",
+"median_annual_gbp": 33161.0,
+"n_jobs_thousand": 62.0
+},
+"3544": {
+"title": "Data analysts",
+"median_annual_gbp": 34125.0,
+"n_jobs_thousand": 58.0
+},
+"3549": {
+"title": "Business associate professionals n.e.c.",
+"median_annual_gbp": 28770.0,
+"n_jobs_thousand": 96.0
+},
+"3551": {
+"title": "Buyers and procurement officers",
+"median_annual_gbp": 34365.0,
+"n_jobs_thousand": 55.0
+},
+"3552": {
+"title": "Business sales executives",
+"median_annual_gbp": 34915.0,
+"n_jobs_thousand": 145.0
+},
+"3553": {
+"title": "Merchandisers",
+"median_annual_gbp": 24658.0,
+"n_jobs_thousand": 19.0
+},
+"3554": {
+"title": "Marketing associate professionals",
+"median_annual_gbp": 28986.0,
+"n_jobs_thousand": 126.0
+},
+"3555": {
+"title": "Estate agents and auctioneers",
+"median_annual_gbp": 25000.0,
+"n_jobs_thousand": 22.0
+},
+"3556": {
+"title": "Sales accounts and business development managers",
+"median_annual_gbp": 53660.0,
+"n_jobs_thousand": 436.0
+},
+"3557": {
+"title": "Events managers and organisers",
+"median_annual_gbp": 26866.0,
+"n_jobs_thousand": 45.0
+},
+"3560": {
+"title": "Public services associate professionals",
+"median_annual_gbp": 37256.0,
+"n_jobs_thousand": 90.0
+},
+"3571": {
+"title": "Human resources and industrial relations officers",
+"median_annual_gbp": 31364.0,
+"n_jobs_thousand": 138.0
+},
+"3572": {
+"title": "Careers advisers and vocational guidance specialists",
+"median_annual_gbp": 27570.0,
+"n_jobs_thousand": 14.0
+},
+"3573": {
+"title": "Information technology trainers",
+"median_annual_gbp": 37937.0,
+"n_jobs_thousand": null
+},
+"3574": {
+"title": "Other vocational and industrial trainers",
+"median_annual_gbp": 31226.0,
+"n_jobs_thousand": 113.0
+},
+"3581": {
+"title": "Inspectors of standards and regulations",
+"median_annual_gbp": 33192.0,
+"n_jobs_thousand": 18.0
+},
+"3582": {
+"title": "Health and safety managers and officers",
+"median_annual_gbp": 41412.0,
+"n_jobs_thousand": 62.0
+},
+"4111": {
+"title": "National government administrative occupations",
+"median_annual_gbp": 28912.0,
+"n_jobs_thousand": 158.0
+},
+"4112": {
+"title": "Local government administrative occupations",
+"median_annual_gbp": 27129.0,
+"n_jobs_thousand": 45.0
+},
+"4113": {
+"title": "Officers of non-governmental organisations",
+"median_annual_gbp": 23553.0,
+"n_jobs_thousand": 10.0
+},
+"4121": {
+"title": "Credit controllers",
+"median_annual_gbp": 27234.0,
+"n_jobs_thousand": 22.0
+},
+"4122": {
+"title": "Book-keepers, payroll managers and wages clerks",
+"median_annual_gbp": 25901.0,
+"n_jobs_thousand": 253.0
+},
+"4123": {
+"title": "Bank and post office clerks",
+"median_annual_gbp": 25974.0,
+"n_jobs_thousand": 84.0
+},
+"4124": {
+"title": "Finance officers",
+"median_annual_gbp": 26447.0,
+"n_jobs_thousand": 25.0
+},
+"4129": {
+"title": "Financial administrative occupations n.e.c.",
+"median_annual_gbp": 24542.0,
+"n_jobs_thousand": 87.0
+},
+"4131": {
+"title": "Records clerks and assistants",
+"median_annual_gbp": 25056.0,
+"n_jobs_thousand": 117.0
+},
+"4132": {
+"title": "Pensions and insurance clerks and assistants",
+"median_annual_gbp": 26227.0,
+"n_jobs_thousand": 31.0
+},
+"4133": {
+"title": "Stock control clerks and assistants",
+"median_annual_gbp": 27601.0,
+"n_jobs_thousand": 65.0
+},
+"4134": {
+"title": "Transport and distribution clerks and assistants",
+"median_annual_gbp": 29821.0,
+"n_jobs_thousand": 49.0
+},
+"4135": {
+"title": "Library clerks and assistants",
+"median_annual_gbp": 17323.0,
+"n_jobs_thousand": 17.0
+},
+"4136": {
+"title": "Human resources administrative occupations",
+"median_annual_gbp": 23868.0,
+"n_jobs_thousand": 16.0
+},
+"4141": {
+"title": "Office managers",
+"median_annual_gbp": 33948.0,
+"n_jobs_thousand": 174.0
+},
+"4142": {
+"title": "Office supervisors",
+"median_annual_gbp": 32580.0,
+"n_jobs_thousand": 57.0
+},
+"4143": {
+"title": "Customer service managers",
+"median_annual_gbp": 32136.0,
+"n_jobs_thousand": 53.0
+},
+"4151": {
+"title": "Sales administrators",
+"median_annual_gbp": 25786.0,
+"n_jobs_thousand": 43.0
+},
+"4152": {
+"title": "Data entry administrators",
+"median_annual_gbp": 24353.0,
+"n_jobs_thousand": 13.0
+},
+"4159": {
+"title": "Other administrative occupations n.e.c.",
+"median_annual_gbp": 22364.0,
+"n_jobs_thousand": 674.0
+},
+"4211": {
+"title": "Medical secretaries",
+"median_annual_gbp": 22553.0,
+"n_jobs_thousand": 37.0
+},
+"4212": {
+"title": "Legal secretaries",
+"median_annual_gbp": 23067.0,
+"n_jobs_thousand": 18.0
+},
+"4213": {
+"title": "School secretaries",
+"median_annual_gbp": 21756.0,
+"n_jobs_thousand": 38.0
+},
+"4214": {
+"title": "Company secretaries and administrators",
+"median_annual_gbp": null,
+"n_jobs_thousand": 11.0
+},
+"4215": {
+"title": "Personal assistants and other secretaries",
+"median_annual_gbp": 24500.0,
+"n_jobs_thousand": 147.0
+},
+"4216": {
+"title": "Receptionists",
+"median_annual_gbp": 16920.0,
+"n_jobs_thousand": 171.0
+},
+"4217": {
+"title": "Typists and related keyboard occupations",
+"median_annual_gbp": 23200.0,
+"n_jobs_thousand": null
+},
+"5111": {
+"title": "Farmers",
+"median_annual_gbp": 31388.0,
+"n_jobs_thousand": null
+},
+"5112": {
+"title": "Horticultural trades",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"5113": {
+"title": "Gardeners and landscape gardeners",
+"median_annual_gbp": 26323.0,
+"n_jobs_thousand": 32.0
+},
+"5114": {
+"title": "Groundsmen and greenkeepers",
+"median_annual_gbp": 25316.0,
+"n_jobs_thousand": 32.0
+},
+"5119": {
+"title": "Agricultural and fishing trades n.e.c.",
+"median_annual_gbp": 26861.0,
+"n_jobs_thousand": 17.0
+},
+"5211": {
+"title": "Sheet metal workers",
+"median_annual_gbp": 31449.0,
+"n_jobs_thousand": 9.0
+},
+"5212": {
+"title": "Metal plate workers, smiths, moulders and related occupations",
+"median_annual_gbp": 32206.0,
+"n_jobs_thousand": null
+},
+"5213": {
+"title": "Welding trades",
+"median_annual_gbp": 34326.0,
+"n_jobs_thousand": 38.0
+},
+"5214": {
+"title": "Pipe fitters",
+"median_annual_gbp": 46046.0,
+"n_jobs_thousand": null
+},
+"5221": {
+"title": "Metal machining setters and setter-operators",
+"median_annual_gbp": 34302.0,
+"n_jobs_thousand": 53.0
+},
+"5222": {
+"title": "Tool makers, tool fitters and markers-out",
+"median_annual_gbp": 37329.0,
+"n_jobs_thousand": null
+},
+"5223": {
+"title": "Metal working production and maintenance fitters",
+"median_annual_gbp": 38325.0,
+"n_jobs_thousand": 238.0
+},
+"5224": {
+"title": "Precision instrument makers and repairers",
+"median_annual_gbp": 31809.0,
+"n_jobs_thousand": 9.0
+},
+"5225": {
+"title": "Air-conditioning and refrigeration installers and repairers",
+"median_annual_gbp": 40563.0,
+"n_jobs_thousand": null
+},
+"5231": {
+"title": "Vehicle technicians, mechanics and electricians",
+"median_annual_gbp": 34605.0,
+"n_jobs_thousand": 92.0
+},
+"5232": {
+"title": "Vehicle body builders and repairers",
+"median_annual_gbp": 32298.0,
+"n_jobs_thousand": 18.0
+},
+"5233": {
+"title": "Vehicle paint technicians",
+"median_annual_gbp": 33142.0,
+"n_jobs_thousand": null
+},
+"5234": {
+"title": "Aircraft maintenance and related trades",
+"median_annual_gbp": 44732.0,
+"n_jobs_thousand": 9.0
+},
+"5235": {
+"title": "Boat and ship builders and repairers",
+"median_annual_gbp": 31019.0,
+"n_jobs_thousand": null
+},
+"5236": {
+"title": "Rail and rolling stock builders and repairers",
+"median_annual_gbp": 56983.0,
+"n_jobs_thousand": null
+},
+"5241": {
+"title": "Electricians and electrical fitters",
+"median_annual_gbp": 38058.0,
+"n_jobs_thousand": 92.0
+},
+"5242": {
+"title": "Telecoms and related network installers and repairers",
+"median_annual_gbp": 36598.0,
+"n_jobs_thousand": 27.0
+},
+"5243": {
+"title": "TV, video and audio servicers and repairers",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"5244": {
+"title": "Computer system and equipment installers and servicers",
+"median_annual_gbp": 34999.0,
+"n_jobs_thousand": 11.0
+},
+"5245": {
+"title": "Security system installers and repairers",
+"median_annual_gbp": 34608.0,
+"n_jobs_thousand": 10.0
+},
+"5246": {
+"title": "Electrical service and maintenance mechanics and repairers",
+"median_annual_gbp": 39152.0,
+"n_jobs_thousand": 61.0
+},
+"5249": {
+"title": "Electrical and electronic trades n.e.c.",
+"median_annual_gbp": 45849.0,
+"n_jobs_thousand": 22.0
+},
+"5250": {
+"title": "Skilled metal, electrical and electronic trades supervisors",
+"median_annual_gbp": 41595.0,
+"n_jobs_thousand": 64.0
+},
+"5311": {
+"title": "Steel erectors",
+"median_annual_gbp": 34842.0,
+"n_jobs_thousand": null
+},
+"5312": {
+"title": "Stonemasons and related trades",
+"median_annual_gbp": 31954.0,
+"n_jobs_thousand": null
+},
+"5313": {
+"title": "Bricklayers",
+"median_annual_gbp": 30211.0,
+"n_jobs_thousand": 9.0
+},
+"5314": {
+"title": "Roofers, roof tilers and slaters",
+"median_annual_gbp": 28181.0,
+"n_jobs_thousand": 12.0
+},
+"5315": {
+"title": "Plumbers & heating and ventilating installers and repairers",
+"median_annual_gbp": 37416.0,
+"n_jobs_thousand": 55.0
+},
+"5316": {
+"title": "Carpenters and joiners",
+"median_annual_gbp": 32426.0,
+"n_jobs_thousand": 54.0
+},
+"5317": {
+"title": "Glaziers, window fabricators and fitters",
+"median_annual_gbp": 28222.0,
+"n_jobs_thousand": 17.0
+},
+"5319": {
+"title": "Construction and building trades n.e.c.",
+"median_annual_gbp": 31928.0,
+"n_jobs_thousand": 37.0
+},
+"5321": {
+"title": "Plasterers",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"5322": {
+"title": "Floorers and wall tilers",
+"median_annual_gbp": 32179.0,
+"n_jobs_thousand": 9.0
+},
+"5323": {
+"title": "Painters and decorators",
+"median_annual_gbp": 30877.0,
+"n_jobs_thousand": 18.0
+},
+"5330": {
+"title": "Construction and building trades supervisors",
+"median_annual_gbp": 41054.0,
+"n_jobs_thousand": 44.0
+},
+"5411": {
+"title": "Upholsterers",
+"median_annual_gbp": 24135.0,
+"n_jobs_thousand": null
+},
+"5412": {
+"title": "Footwear and leather working trades",
+"median_annual_gbp": 26654.0,
+"n_jobs_thousand": null
+},
+"5413": {
+"title": "Tailors and dressmakers",
+"median_annual_gbp": 22124.0,
+"n_jobs_thousand": null
+},
+"5419": {
+"title": "Textiles, garments and related trades n.e.c.",
+"median_annual_gbp": 24402.0,
+"n_jobs_thousand": null
+},
+"5421": {
+"title": "Pre-press technicians",
+"median_annual_gbp": 26222.0,
+"n_jobs_thousand": null
+},
+"5422": {
+"title": "Printers",
+"median_annual_gbp": 27648.0,
+"n_jobs_thousand": 8.0
+},
+"5423": {
+"title": "Print finishing and binding workers",
+"median_annual_gbp": 25031.0,
+"n_jobs_thousand": 7.0
+},
+"5431": {
+"title": "Butchers",
+"median_annual_gbp": 26148.0,
+"n_jobs_thousand": 23.0
+},
+"5432": {
+"title": "Bakers and flour confectioners",
+"median_annual_gbp": 22505.0,
+"n_jobs_thousand": 15.0
+},
+"5433": {
+"title": "Fishmongers and poultry dressers",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"5434": {
+"title": "Chefs",
+"median_annual_gbp": 25577.0,
+"n_jobs_thousand": 146.0
+},
+"5435": {
+"title": "Cooks",
+"median_annual_gbp": 16215.0,
+"n_jobs_thousand": 40.0
+},
+"5436": {
+"title": "Catering and bar managers",
+"median_annual_gbp": 25377.0,
+"n_jobs_thousand": 37.0
+},
+"5441": {
+"title": "Glass and ceramics makers, decorators and finishers",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"5442": {
+"title": "Furniture makers and other craft woodworkers",
+"median_annual_gbp": 31407.0,
+"n_jobs_thousand": 10.0
+},
+"5443": {
+"title": "Florists",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"5449": {
+"title": "Other skilled trades n.e.c.",
+"median_annual_gbp": 30185.0,
+"n_jobs_thousand": 10.0
+},
+"6111": {
+"title": "Early education and childcare assistants",
+"median_annual_gbp": 18492.0,
+"n_jobs_thousand": 80.0
+},
+"6112": {
+"title": "Teaching assistants",
+"median_annual_gbp": 17265.0,
+"n_jobs_thousand": 227.0
+},
+"6113": {
+"title": "Educational support assistants",
+"median_annual_gbp": 16481.0,
+"n_jobs_thousand": 132.0
+},
+"6114": {
+"title": "Childminders",
+"median_annual_gbp": 19004.0,
+"n_jobs_thousand": null
+},
+"6116": {
+"title": "Nannies and au pairs",
+"median_annual_gbp": 23428.0,
+"n_jobs_thousand": 9.0
+},
+"6117": {
+"title": "Playworkers",
+"median_annual_gbp": null,
+"n_jobs_thousand": 25.0
+},
+"6121": {
+"title": "Pest control officers",
+"median_annual_gbp": 29660.0,
+"n_jobs_thousand": null
+},
+"6129": {
+"title": "Animal care services occupations n.e.c.",
+"median_annual_gbp": 21465.0,
+"n_jobs_thousand": 23.0
+},
+"6131": {
+"title": "Nursing auxiliaries and assistants",
+"median_annual_gbp": 23483.0,
+"n_jobs_thousand": 459.0
+},
+"6132": {
+"title": "Ambulance staff (excluding paramedics)",
+"median_annual_gbp": 28579.0,
+"n_jobs_thousand": 21.0
+},
+"6133": {
+"title": "Dental nurses",
+"median_annual_gbp": 20935.0,
+"n_jobs_thousand": 42.0
+},
+"6134": {
+"title": "Houseparents and residential wardens",
+"median_annual_gbp": 24579.0,
+"n_jobs_thousand": 9.0
+},
+"6135": {
+"title": "Care workers and home carers",
+"median_annual_gbp": 19753.0,
+"n_jobs_thousand": 486.0
+},
+"6136": {
+"title": "Senior care workers",
+"median_annual_gbp": 25272.0,
+"n_jobs_thousand": 90.0
+},
+"6137": {
+"title": "Care escorts",
+"median_annual_gbp": 10322.0,
+"n_jobs_thousand": 11.0
+},
+"6138": {
+"title": "Undertakers, mortuary and crematorium assistants",
+"median_annual_gbp": 25584.0,
+"n_jobs_thousand": 16.0
+},
+"6211": {
+"title": "Sports and leisure assistants",
+"median_annual_gbp": null,
+"n_jobs_thousand": 38.0
+},
+"6212": {
+"title": "Travel agents",
+"median_annual_gbp": 24792.0,
+"n_jobs_thousand": 21.0
+},
+"6213": {
+"title": "Air travel assistants",
+"median_annual_gbp": 30115.0,
+"n_jobs_thousand": 27.0
+},
+"6214": {
+"title": "Rail travel assistants",
+"median_annual_gbp": 40673.0,
+"n_jobs_thousand": 14.0
+},
+"6219": {
+"title": "Leisure and travel service occupations n.e.c.",
+"median_annual_gbp": null,
+"n_jobs_thousand": 11.0
+},
+"6221": {
+"title": "Hairdressers and barbers",
+"median_annual_gbp": 14641.0,
+"n_jobs_thousand": 36.0
+},
+"6222": {
+"title": "Beauticians and related occupations",
+"median_annual_gbp": 14915.0,
+"n_jobs_thousand": 20.0
+},
+"6231": {
+"title": "Housekeepers and related occupations",
+"median_annual_gbp": 17240.0,
+"n_jobs_thousand": 33.0
+},
+"6232": {
+"title": "Caretakers",
+"median_annual_gbp": 24008.0,
+"n_jobs_thousand": 59.0
+},
+"6240": {
+"title": "Cleaning and housekeeping managers and supervisors",
+"median_annual_gbp": 22395.0,
+"n_jobs_thousand": 50.0
+},
+"6250": {
+"title": "Bed and breakfast and guest house owners and proprietors",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"6311": {
+"title": "Police community support officers",
+"median_annual_gbp": 32225.0,
+"n_jobs_thousand": 9.0
+},
+"6312": {
+"title": "Parking and civil enforcement occupations",
+"median_annual_gbp": 26017.0,
+"n_jobs_thousand": 11.0
+},
+"7111": {
+"title": "Sales and retail assistants",
+"median_annual_gbp": 13637.0,
+"n_jobs_thousand": 826.0
+},
+"7112": {
+"title": "Retail cashiers and check-out operators",
+"median_annual_gbp": 11640.0,
+"n_jobs_thousand": 47.0
+},
+"7113": {
+"title": "Telephone salespersons",
+"median_annual_gbp": 25975.0,
+"n_jobs_thousand": 6.0
+},
+"7114": {
+"title": "Pharmacy and optical dispensing assistants",
+"median_annual_gbp": 17286.0,
+"n_jobs_thousand": 48.0
+},
+"7115": {
+"title": "Vehicle and parts salespersons and advisers",
+"median_annual_gbp": 29444.0,
+"n_jobs_thousand": 14.0
+},
+"7121": {
+"title": "Collector salespersons and credit agents",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"7122": {
+"title": "Debt, rent and other cash collectors",
+"median_annual_gbp": 25671.0,
+"n_jobs_thousand": 10.0
+},
+"7123": {
+"title": "Roundspersons and van salespersons",
+"median_annual_gbp": 25525.0,
+"n_jobs_thousand": null
+},
+"7124": {
+"title": "Market and street traders and assistants",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"7125": {
+"title": "Visual merchandisers and related occupations",
+"median_annual_gbp": 23209.0,
+"n_jobs_thousand": null
+},
+"7129": {
+"title": "Sales related occupations n.e.c.",
+"median_annual_gbp": 26821.0,
+"n_jobs_thousand": 16.0
+},
+"7131": {
+"title": "Shopkeepers and owners - retail and wholesale",
+"median_annual_gbp": 30732.0,
+"n_jobs_thousand": 5.0
+},
+"7132": {
+"title": "Sales supervisors - retail and wholesale",
+"median_annual_gbp": 23676.0,
+"n_jobs_thousand": 72.0
+},
+"7211": {
+"title": "Call and contact centre occupations",
+"median_annual_gbp": 23482.0,
+"n_jobs_thousand": 36.0
+},
+"7212": {
+"title": "Telephonists",
+"median_annual_gbp": null,
+"n_jobs_thousand": 5.0
+},
+"7213": {
+"title": "Communication operators",
+"median_annual_gbp": 30978.0,
+"n_jobs_thousand": 12.0
+},
+"7214": {
+"title": "Market research interviewers",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"7219": {
+"title": "Customer service occupations n.e.c.",
+"median_annual_gbp": 22694.0,
+"n_jobs_thousand": 298.0
+},
+"7220": {
+"title": "Customer service supervisors",
+"median_annual_gbp": 32527.0,
+"n_jobs_thousand": 18.0
+},
+"8111": {
+"title": "Food, drink and tobacco process operatives",
+"median_annual_gbp": 25994.0,
+"n_jobs_thousand": 142.0
+},
+"8112": {
+"title": "Textile process operatives",
+"median_annual_gbp": 25798.0,
+"n_jobs_thousand": 9.0
+},
+"8113": {
+"title": "Chemical and related process operatives",
+"median_annual_gbp": 33089.0,
+"n_jobs_thousand": 16.0
+},
+"8114": {
+"title": "Plastics process operatives",
+"median_annual_gbp": 25419.0,
+"n_jobs_thousand": 12.0
+},
+"8115": {
+"title": "Metal making and treating process operatives",
+"median_annual_gbp": 29893.0,
+"n_jobs_thousand": 12.0
+},
+"8119": {
+"title": "Process operatives n.e.c.",
+"median_annual_gbp": 28852.0,
+"n_jobs_thousand": null
+},
+"8120": {
+"title": "Metal working machine operatives",
+"median_annual_gbp": 30046.0,
+"n_jobs_thousand": 10.0
+},
+"8131": {
+"title": "Paper and wood machine operatives",
+"median_annual_gbp": 29007.0,
+"n_jobs_thousand": 12.0
+},
+"8132": {
+"title": "Mining and quarry workers and related operatives",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"8133": {
+"title": "Energy plant operatives",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"8134": {
+"title": "Water and sewerage plant operatives",
+"median_annual_gbp": 37668.0,
+"n_jobs_thousand": 10.0
+},
+"8135": {
+"title": "Printing machine assistants",
+"median_annual_gbp": 26891.0,
+"n_jobs_thousand": 13.0
+},
+"8139": {
+"title": "Plant and machine operatives n.e.c.",
+"median_annual_gbp": 27009.0,
+"n_jobs_thousand": null
+},
+"8141": {
+"title": "Assemblers (electrical and electronic products)",
+"median_annual_gbp": 26679.0,
+"n_jobs_thousand": 19.0
+},
+"8142": {
+"title": "Assemblers (vehicles and metal goods)",
+"median_annual_gbp": 31944.0,
+"n_jobs_thousand": 28.0
+},
+"8143": {
+"title": "Routine inspectors and testers",
+"median_annual_gbp": 31249.0,
+"n_jobs_thousand": 36.0
+},
+"8144": {
+"title": "Weighers, graders and sorters",
+"median_annual_gbp": 28314.0,
+"n_jobs_thousand": null
+},
+"8145": {
+"title": "Tyre, exhaust and windscreen fitters",
+"median_annual_gbp": 29028.0,
+"n_jobs_thousand": 10.0
+},
+"8146": {
+"title": "Sewing machinists",
+"median_annual_gbp": 21748.0,
+"n_jobs_thousand": 15.0
+},
+"8149": {
+"title": "Assemblers and routine operatives n.e.c.",
+"median_annual_gbp": 25796.0,
+"n_jobs_thousand": 57.0
+},
+"8151": {
+"title": "Scaffolders, stagers and riggers",
+"median_annual_gbp": 38339.0,
+"n_jobs_thousand": 11.0
+},
+"8152": {
+"title": "Road construction operatives",
+"median_annual_gbp": 37309.0,
+"n_jobs_thousand": 18.0
+},
+"8153": {
+"title": "Rail construction and maintenance operatives",
+"median_annual_gbp": 42194.0,
+"n_jobs_thousand": 7.0
+},
+"8159": {
+"title": "Construction operatives n.e.c.",
+"median_annual_gbp": 28421.0,
+"n_jobs_thousand": 80.0
+},
+"8160": {
+"title": "Production, factory and assembly supervisors",
+"median_annual_gbp": 33886.0,
+"n_jobs_thousand": 23.0
+},
+"8211": {
+"title": "Large goods vehicle drivers",
+"median_annual_gbp": 38353.0,
+"n_jobs_thousand": 202.0
+},
+"8212": {
+"title": "Bus and coach drivers",
+"median_annual_gbp": 32044.0,
+"n_jobs_thousand": 81.0
+},
+"8213": {
+"title": "Taxi and cab drivers and chauffeurs",
+"median_annual_gbp": null,
+"n_jobs_thousand": 6.0
+},
+"8214": {
+"title": "Delivery drivers and couriers",
+"median_annual_gbp": 23164.0,
+"n_jobs_thousand": 109.0
+},
+"8215": {
+"title": "Driving instructors",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"8219": {
+"title": "Road transport drivers n.e.c.",
+"median_annual_gbp": 27220.0,
+"n_jobs_thousand": 105.0
+},
+"8221": {
+"title": "Crane drivers",
+"median_annual_gbp": 45644.0,
+"n_jobs_thousand": null
+},
+"8222": {
+"title": "Fork-lift truck drivers",
+"median_annual_gbp": 28316.0,
+"n_jobs_thousand": 21.0
+},
+"8229": {
+"title": "Mobile machine drivers and operatives n.e.c.",
+"median_annual_gbp": 32431.0,
+"n_jobs_thousand": 46.0
+},
+"8231": {
+"title": "Train and tram drivers",
+"median_annual_gbp": 63861.0,
+"n_jobs_thousand": 20.0
+},
+"8232": {
+"title": "Marine and waterways transport operatives",
+"median_annual_gbp": 36488.0,
+"n_jobs_thousand": null
+},
+"8233": {
+"title": "Air transport operatives",
+"median_annual_gbp": 30746.0,
+"n_jobs_thousand": 10.0
+},
+"8234": {
+"title": "Rail transport operatives",
+"median_annual_gbp": 52930.0,
+"n_jobs_thousand": 12.0
+},
+"8239": {
+"title": "Other drivers and transport operatives n.e.c.",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"9111": {
+"title": "Farm workers",
+"median_annual_gbp": 24799.0,
+"n_jobs_thousand": 21.0
+},
+"9112": {
+"title": "Forestry and related workers",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"9119": {
+"title": "Fishing and other elementary agriculture occupations n.e.c.",
+"median_annual_gbp": 23397.0,
+"n_jobs_thousand": 14.0
+},
+"9121": {
+"title": "Groundworkers",
+"median_annual_gbp": 38049.0,
+"n_jobs_thousand": 11.0
+},
+"9129": {
+"title": "Elementary construction occupations n.e.c.",
+"median_annual_gbp": 25023.0,
+"n_jobs_thousand": 39.0
+},
+"9131": {
+"title": "Industrial cleaning process occupations",
+"median_annual_gbp": 20127.0,
+"n_jobs_thousand": 21.0
+},
+"9132": {
+"title": "Packers, bottlers, canners and fillers",
+"median_annual_gbp": 24284.0,
+"n_jobs_thousand": 62.0
+},
+"9139": {
+"title": "Elementary process plant occupations n.e.c.",
+"median_annual_gbp": 26698.0,
+"n_jobs_thousand": 35.0
+},
+"9211": {
+"title": "Postal workers, mail sorters and messengers",
+"median_annual_gbp": 31770.0,
+"n_jobs_thousand": 108.0
+},
+"9219": {
+"title": "Elementary administration occupations n.e.c.",
+"median_annual_gbp": 18626.0,
+"n_jobs_thousand": 24.0
+},
+"9221": {
+"title": "Window cleaners",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"9222": {
+"title": "Street cleaners",
+"median_annual_gbp": 25809.0,
+"n_jobs_thousand": 4.0
+},
+"9223": {
+"title": "Cleaners and domestics",
+"median_annual_gbp": 10964.0,
+"n_jobs_thousand": 404.0
+},
+"9224": {
+"title": "Launderers, dry cleaners and pressers",
+"median_annual_gbp": 19537.0,
+"n_jobs_thousand": 11.0
+},
+"9225": {
+"title": "Refuse and salvage occupations",
+"median_annual_gbp": 26080.0,
+"n_jobs_thousand": 17.0
+},
+"9226": {
+"title": "Vehicle valeters and cleaners",
+"median_annual_gbp": 23792.0,
+"n_jobs_thousand": 12.0
+},
+"9229": {
+"title": "Elementary cleaning occupations n.e.c.",
+"median_annual_gbp": 25082.0,
+"n_jobs_thousand": null
+},
+"9231": {
+"title": "Security guards and related occupations",
+"median_annual_gbp": 28301.0,
+"n_jobs_thousand": 83.0
+},
+"9232": {
+"title": "School midday and crossing patrol occupations",
+"median_annual_gbp": 4094.0,
+"n_jobs_thousand": 60.0
+},
+"9233": {
+"title": "Exam invigilators",
+"median_annual_gbp": 2398.0,
+"n_jobs_thousand": 12.0
+},
+"9241": {
+"title": "Shelf fillers",
+"median_annual_gbp": 16103.0,
+"n_jobs_thousand": 9.0
+},
+"9249": {
+"title": "Elementary sales occupations n.e.c.",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"9251": {
+"title": "Elementary storage supervisors",
+"median_annual_gbp": 29762.0,
+"n_jobs_thousand": 27.0
+},
+"9252": {
+"title": "Warehouse operatives",
+"median_annual_gbp": 25090.0,
+"n_jobs_thousand": 397.0
+},
+"9253": {
+"title": "Delivery operatives",
+"median_annual_gbp": 25156.0,
+"n_jobs_thousand": 15.0
+},
+"9259": {
+"title": "Elementary storage occupations n.e.c.",
+"median_annual_gbp": 29669.0,
+"n_jobs_thousand": 7.0
+},
+"9261": {
+"title": "Bar and catering supervisors",
+"median_annual_gbp": 20388.0,
+"n_jobs_thousand": 27.0
+},
+"9262": {
+"title": "Hospital porters",
+"median_annual_gbp": 26120.0,
+"n_jobs_thousand": 5.0
+},
+"9263": {
+"title": "Kitchen and catering assistants",
+"median_annual_gbp": 11068.0,
+"n_jobs_thousand": 310.0
+},
+"9264": {
+"title": "Waiters and waitresses",
+"median_annual_gbp": 8647.0,
+"n_jobs_thousand": 116.0
+},
+"9265": {
+"title": "Bar staff",
+"median_annual_gbp": 8708.0,
+"n_jobs_thousand": 77.0
+},
+"9266": {
+"title": "Coffee shop workers",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+},
+"9267": {
+"title": "Leisure and theme park attendants",
+"median_annual_gbp": null,
+"n_jobs_thousand": 19.0
+},
+"9269": {
+"title": "Other elementary services occupations n.e.c.",
+"median_annual_gbp": null,
+"n_jobs_thousand": null
+}
+}

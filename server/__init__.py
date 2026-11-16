@@ -67,7 +67,7 @@ def _cache_put(sig, result):
     except Exception:
         pass
 
-from flask import Flask, request, jsonify, render_template, redirect, url_for, session
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session, g
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from riskcore import Profile, load_default_engine  # noqa: E402
@@ -89,8 +89,10 @@ def _num(value):
 
 
 def profile_from(source) -> Profile:
+    from flask import g
     return Profile(
         title=(source.get("title") or "").strip(),
+        country=(source.get("country") or "").strip() or getattr(g, "country", None),
         zip_code=(source.get("zip_code") or source.get("zip") or "").strip() or None,
         age=_num(source.get("age")),
         experience_years=_num(source.get("experience_years")),
@@ -343,9 +345,10 @@ def create_app() -> Flask:
         occ = engine.snapshot.occupation(soc)
         if occ is None:
             return redirect(url_for("index"))
-        result = engine.assess(Profile(title=occ["title"]))
+        prof = Profile(title=occ["title"], country=getattr(g, "country", None))
+        result = engine.assess(prof)
         session["jb_soc"] = soc              # so a "notify me" on this page watches this job
-        return render_template("result.html", r=result, profile=Profile(title=occ["title"]),
+        return render_template("result.html", r=result, profile=prof,
                                version=VERSION, licensed=engine.snapshot.licensed, seo=True)
 
     @app.get("/jobs/<soc>/card.png")
@@ -428,21 +431,32 @@ def create_app() -> Flask:
     @app.before_request
     def _set_lang():
         from flask import g
+        from riskcore import countries
         g.lang = i18n.resolve_locale(request.args.get("lang"),
                                      request.cookies.get("jb_lang"),
                                      request.headers.get("Accept-Language", ""))
+        g.country = countries.resolve(request.args.get("country")
+                                      or request.cookies.get("jb_country"))
 
     @app.context_processor
     def _i18n_ctx():
         from flask import g
+        from riskcore import countries
         lang = getattr(g, "lang", i18n.DEFAULT)
-        return {"lang": lang, "langs": i18n.LANGS, "t": i18n.translator(lang)}
+        country = getattr(g, "country", countries.DEFAULT)
+        return {"lang": lang, "langs": i18n.LANGS, "t": i18n.translator(lang),
+                "country": country,
+                "countries": {c: v["name"] for c, v in countries.COUNTRIES.items()}}
 
     @app.after_request
     def _persist_lang(resp):
+        from riskcore import countries
         chosen = request.args.get("lang")
         if chosen in i18n.LANGS:
             resp.set_cookie("jb_lang", chosen, max_age=31536000, samesite="Lax")
+        chosen_c = request.args.get("country")
+        if chosen_c and chosen_c.lower() in countries.COUNTRIES:
+            resp.set_cookie("jb_country", chosen_c.lower(), max_age=31536000, samesite="Lax")
         return resp
 
     @app.after_request

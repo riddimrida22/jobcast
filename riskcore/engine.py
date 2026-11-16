@@ -8,10 +8,32 @@ from typing import Optional, Dict, Any, List
 
 from .model import Profile
 from .snapshot import Snapshot
+from . import countries
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SNAPSHOT = REPO_ROOT / "data" / "fixtures" / "snapshot.json"
 DEFAULT_CONFIG_DIR = REPO_ROOT / "config"
+OVERLAY_DIR = REPO_ROOT / "data" / "overlays"
+
+
+def _load_overlays(overlay_dir: Path = OVERLAY_DIR) -> Dict[str, Dict[str, Any]]:
+    """Load any per-country wage overlays present on disk, keyed by country code.
+
+    An overlay is data/overlays/<code>_wages.json with shape:
+      {"source": "...", "snapshot": "...", "soc_median": {"<soc>": <median_in_local_currency>, ...}}
+    Absent overlays are simply not loaded; the engine then withholds pay for that
+    country rather than present US figures in the wrong currency.
+    """
+    out: Dict[str, Dict[str, Any]] = {}
+    try:
+        for f in (overlay_dir.glob("*_wages.json") if overlay_dir.exists() else []):
+            code = f.name.split("_wages.json")[0].lower()
+            if code in countries.COUNTRIES and code != countries.DEFAULT:
+                with open(f, "r", encoding="utf-8") as fh:
+                    out[code] = json.load(fh)
+    except Exception:
+        pass
+    return out
 
 
 def _clamp(x: float, lo: float = 0.0, hi: float = 100.0) -> float:
@@ -20,11 +42,14 @@ def _clamp(x: float, lo: float = 0.0, hi: float = 100.0) -> float:
 
 class Engine:
     def __init__(self, snapshot: Snapshot, weights: Dict[str, Any],
-                 sources: Dict[str, Any], tiers: Dict[str, Any]):
+                 sources: Dict[str, Any], tiers: Dict[str, Any],
+                 overlays: Optional[Dict[str, Dict[str, Any]]] = None):
         self.snapshot = snapshot
         self.weights = weights
         self.sources = sources
         self.tiers = tiers
+        # Per-country wage overlays (country code -> {soc_median, ...}). US needs none.
+        self.overlays = _load_overlays() if overlays is None else overlays
 
     # ---- public API ------------------------------------------------------
     def assess(self, profile: Profile) -> Dict[str, Any]:
@@ -38,11 +63,13 @@ class Engine:
                 "suggestions": self.snapshot.suggest_titles(profile.title, limit=5),
             }
 
-        metro_id = self.snapshot.metro_for_zip(profile.zip_code)
+        country = countries.resolve(profile.country)
+        # US uses zip->metro geography; other countries are national-only for now.
+        metro_id = self.snapshot.metro_for_zip(profile.zip_code) if country == countries.DEFAULT else None
         axes, decomposition = self._score_axes(occ, profile)
         base_exposure = max(axes["ai_software"], axes["physical_robotics"])
         timeline = self._timeline(occ, metro_id, base_exposure, profile)
-        wages = self._wages(occ, metro_id, profile)
+        wages = self._wages(occ, metro_id, profile, country)
         adjacency = self._adjacency(occ, base_exposure)
         confidence = self._confidence_band(axes)
         drivers = self._key_drivers(occ, axes, decomposition, timeline, wages, profile)
@@ -53,7 +80,11 @@ class Engine:
             "occupation": {"soc": occ["soc"], "title": occ["title"],
                            "job_zone": occ.get("job_zone"),
                            "family": self.snapshot.family_name(self.snapshot.family_code(occ["soc"]))},
-            "location": {"metro_id": metro_id, "metro": self.snapshot.metro_name(metro_id)},
+            "location": {"metro_id": metro_id,
+                         "metro": self.snapshot.metro_name(metro_id) if metro_id
+                         else countries.info(country)["name"]},
+            "country": country,
+            "currency": countries.currency(country),
             "exposure": axes,
             "exposure_range": confidence,
             "base_exposure": round(base_exposure, 1),
@@ -252,12 +283,21 @@ class Engine:
                 "remaining_working_years": remaining_years,
                 "overlap_note": overlap}
 
-    def _wages(self, occ, metro_id, profile: Profile):
+    def _wages(self, occ, metro_id, profile: Profile, country: str = countries.DEFAULT):
         out: Dict[str, Any] = {"available": False}
-        median = self._metro(occ, metro_id).get("median_wage") \
-            or occ.get("median_wage_national")
+        if country == countries.DEFAULT:
+            median = self._metro(occ, metro_id).get("median_wage") \
+                or occ.get("median_wage_national")
+            trend = occ.get("wage_trend_5yr_real_pct")
+        else:
+            # Non-US: pay comes only from a country wage overlay keyed to the shared SOC.
+            # No overlay entry -> withhold pay rather than present US dollars as local money.
+            ov = self.overlays.get(country, {})
+            soc_median = ov.get("soc_median", {})
+            median = soc_median.get(occ["soc"]) or soc_median.get(occ.get("soc6") or "")
+            trend = (ov.get("soc_trend", {}) or {}).get(occ["soc"])
         out["occupation_median_wage"] = median
-        out["occupation_wage_trend_5yr_real_pct"] = occ.get("wage_trend_5yr_real_pct")
+        out["occupation_wage_trend_5yr_real_pct"] = trend
 
         if profile.pay_current is not None and median:
             out["pay_vs_median_pct"] = round((profile.pay_current / median - 1) * 100, 1)
@@ -272,7 +312,7 @@ class Engine:
                 out["real_change_pct"] = round(
                     (profile.pay_current / real_past - 1) * 100, 1)
                 out["available"] = True
-                occ_trend = occ.get("wage_trend_5yr_real_pct")
+                occ_trend = trend
                 if out["real_change_pct"] < 0:
                     out["signal"] = ("My pay has fallen in real terms over five years, "
                                      "an early sign of pressure on this role.")

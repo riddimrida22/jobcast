@@ -564,7 +564,7 @@
   <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><h2 style="margin:0">Pay and local market</h2></div>
   <div class="stat-tiles">
     {% if r.wages.occupation_median_wage %}
-    <div class="stile"><div class="st-val">${{ "{:,.0f}".format(r.wages.occupation_median_wage) }}</div><div class="st-lab">Median pay, {{ r.location.metro }}</div></div>
+    <div class="stile"><div class="st-val">{{ r.currency.symbol }}{{ "{:,.0f}".format(r.wages.occupation_median_wage) }}</div><div class="st-lab">Median pay, {{ r.location.metro }}</div></div>
     {% endif %}
     <div class="stile"><div class="st-val">{{ r.timeline.local_demand_trend }}</div><div class="st-lab">Local demand</div></div>
     {% if r.wages.available %}
