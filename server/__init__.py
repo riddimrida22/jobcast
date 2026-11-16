@@ -67,7 +67,7 @@ def _cache_put(sig, result):
     except Exception:
         pass
 
-from flask import Flask, request, jsonify, render_template, redirect, url_for, session, g
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session, g, Response
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from riskcore import Profile, load_default_engine  # noqa: E402
@@ -783,6 +783,43 @@ def create_app() -> Flask:
             days = 30
         return render_template("admin_stats.html", s=an.summary(days), watches=wc,
                                key=admin_key, days=days, version=VERSION, noindex=True)
+
+    @app.get("/admin/checkouts")
+    def admin_checkouts():
+        """Diagnostic: the last few real Stripe Checkout sessions and exactly what the
+        grant logic sees for each. Protected by JOBCAST_ADMIN_KEY (?key=...). Plain text so
+        it reads on a phone. Temporary - for pinning down a stuck 'processing' payment."""
+        admin_key = os.environ.get("JOBCAST_ADMIN_KEY")
+        if not admin_key or request.args.get("key") != admin_key:
+            from flask import abort
+            abort(404)
+        from . import payments as pay
+        if not pay.configured():
+            return Response("stripe not configured\n", mimetype="text/plain")
+        lines = []
+        try:
+            stripe = pay._client()
+            sessions = stripe.checkout.Session.list(limit=10, expand=["data.line_items"])
+            for s in sessions.auto_paging_iter() if hasattr(sessions, "auto_paging_iter") else sessions.data:
+                sid = pay._get(s, "id")
+                status = pay._get(s, "status")
+                pstatus = pay._get(s, "payment_status")
+                mode = pay._get(s, "mode")
+                md = pay._get(s, "metadata") or {}
+                mtier = md.get("tier") if hasattr(md, "get") else None
+                mperiod = md.get("period") if hasattr(md, "get") else None
+                created = pay._get(s, "created")
+                when = time.strftime("%Y-%m-%d %H:%M", time.gmtime(created)) if created else "-"
+                grants = pay.tier_from_session(s)
+                lines.append(
+                    "%s  %s  mode=%s  status=%s  payment=%s  md.tier=%s  md.period=%s  GRANTS=%s" % (
+                        when, (sid or "-")[:24], mode or "-", status or "-", pstatus or "-",
+                        mtier or "-", mperiod or "-", grants or "NONE"))
+                if len(lines) >= 10:
+                    break
+        except Exception as e:
+            lines.append("ERROR %s: %s" % (type(e).__name__, e))
+        return Response(("\n".join(lines) or "no sessions") + "\n", mimetype="text/plain")
 
     @app.get("/privacy")
     def privacy():
