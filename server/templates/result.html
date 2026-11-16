@@ -21,6 +21,16 @@
   .rv-ext-lab { display:block; font-size:12px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#ff8a6a; }
   .rv-ext-name { display:block; font-size:clamp(17px,4.4vw,25px); font-weight:900; color:#ff5a4d; animation:rv-blink 1.1s ease-in-out infinite; }
   @keyframes rv-blink { 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
+  .jlp-hook { font-size:15px; font-weight:700; margin:0 0 10px; color:var(--ink); text-align:center; }
+  .jlp-hook b { color:var(--red); }
+  .jlp-tasks { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+  .jlp-trow { display:flex; align-items:center; gap:10px; padding:9px 12px; border:1px solid var(--line); border-radius:9px; background:var(--card); }
+  .jlp-trow.blur { filter:blur(4.5px); opacity:.8; user-select:none; pointer-events:none; }
+  .jlp-tn { flex:1; font-size:14px; font-weight:600; text-align:left; }
+  .jlp-tx { font-weight:800; font-size:14px; min-width:28px; text-align:right; }
+  .jlp-tx.exp { color:var(--red); } .jlp-tx.saf { color:var(--green); }
+  #jlp-ghost.jlp-ghost { min-height:0; padding-top:20px; }
+  #jlp-ghost .jlp-glock { position:static; inset:auto; min-height:0; background:none; padding:10px 0 0; justify-content:flex-start; }
 </style>
 <!-- Dramatic reveal: plays only when arriving from the guided flow or tour -->
 <div id="reveal" class="rv" hidden aria-hidden="true">
@@ -60,6 +70,7 @@
   </div>
 </div>
 <script id="reveal-data" type="application/json">{{ {"exposure": r.base_exposure, "band": r.timeline.band.id, "title": r.occupation.title} | tojson }}</script>
+<script id="tasks-data" type="application/json">[{% for t in r.tasks %}{"name": {{ t.name|tojson }}, "mx": {{ (t.ai if t.ai >= t.robo else t.robo)|round|int }}, "exposed": {{ t.exposed|tojson }}}{{ "," if not loop.last }}{% endfor %}]</script>
 
 <!-- Full-screen upsell: pitch the AI plan, then a demo of the order flow -->
 <div id="upsell" hidden aria-hidden="true">
@@ -1090,14 +1101,25 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     var barLab = '1 slide shown. Unlock your full AI and robotics breakdown.';
     if (!document.getElementById('jlp-ghost')) {
       var g = document.createElement('div'); g.id = 'jlp-ghost'; g.className = 'jlp-ghost';
-      g.innerHTML = '<div class="jlp-grows" aria-hidden="true">'
-        + '<div class="jgr"><span>Which tasks are exposed</span><i></i><i></i><i></i></div>'
-        + '<div class="jgr"><span>What drives your result</span><i></i><i></i></div>'
-        + '<div class="jgr"><span>What to do about it</span><i></i><i></i><i></i></div>'
-        + '<div class="jgr"><span>Safer adjacent roles</span><i></i><i></i></div></div>'
+      var tdata = []; try { tdata = JSON.parse(document.getElementById('tasks-data').textContent) || []; } catch (e) {}
+      var scored = tdata.slice().sort(function (a, b) { return b.mx - a.mx; });
+      var total = scored.length, high = scored.filter(function (t) { return t.mx >= 60; }).length;
+      function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+      function rowHtml(t, blur) {
+        return '<div class="jlp-trow' + (blur ? ' blur' : '') + '"><span class="jlp-tn">' + esc(t.name) + '</span>'
+          + '<span class="jlp-tx ' + (t.mx >= 50 ? 'exp' : 'saf') + '">' + Math.round(t.mx) + '</span></div>';
+      }
+      var hook = total ? (high > 0
+          ? ('<b>' + high + '</b> of your <b>' + total + '</b> tasks are highly exposed to AI')
+          : ('All <b>' + total + '</b> of your tasks, scored for AI and robots'))
+        : 'Your full task-by-task breakdown';
+      var rows = scored.slice(0, 3).map(function (t) { return rowHtml(t, false); }).join('')
+        + scored.slice(3, 7).map(function (t) { return rowHtml(t, true); }).join('');
+      g.innerHTML = '<div class="jlp-hook">' + hook + '</div>'
+        + '<div class="jlp-tasks">' + rows + '</div>'
         + '<div class="jlp-glock">'
         + '<svg viewBox="0 0 24 24" class="jgl-ic" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
-        + '<b>' + ghostTitle + '</b>'
+        + '<b>Unlock all ' + (total || 'your') + ' tasks, your timeline, and exactly what to do</b>'
         + '<button type="button" class="jgl-go" id="jlp-ghost-go">' + goLabel + '</button></div>';
       overview.appendChild(g);
     }
