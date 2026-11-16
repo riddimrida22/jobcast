@@ -408,6 +408,33 @@
       color:#2a1708; background:linear-gradient(180deg,var(--accent),#e8863a); box-shadow:0 10px 30px rgba(243,163,95,.42);
       animation:ctaPulse 2.2s ease-in-out infinite; }
     .wel-go:hover { filter:brightness(1.05); }
+    /* Full-screen overlays: center when content fits, scroll (never clip the CTA) when it does
+       not. 'safe center' falls back to the top edge instead of clipping when content overflows. */
+    .rv, #upsell, #rlock, .welcome, .scoring, .gate { justify-content:safe center; }
+    .rv { overflow-y:auto; overflow-x:hidden; }
+    /* Pin the paywall CTA to the bottom so it is always visible, even when the pitch scrolls. */
+    #upsell .up-cta { position:sticky; bottom:12px; z-index:3; box-shadow:0 8px 24px rgba(8,16,28,.45); }
+    /* Short screens (small phones, compact devices): shrink the reveal and paywall so the
+       primary button stays on screen without scrolling. */
+    @media (max-height:720px) {
+      .rv-num b { font-size:clamp(42px,12vh,78px); }
+      .rv-done { gap:9px; padding:14px; }
+      .rv-msg { font-size:15px; line-height:1.3; }
+      .rv-go, .wel-go, #rlock .rl-go { padding:12px 26px; font-size:16px; }
+      .rv-extinct { margin-bottom:8px; }
+      .rv-jobo-sad { width:56px; height:58px; }
+      #rlock .rl-list li { padding:6px 0 6px 32px; font-size:14px; }
+      #upsell { padding:40px 20px 52px; }
+      #upsell .up-q { font-size:clamp(21px,5.6vw,28px); }
+      #upsell .up-sub { font-size:14px; line-height:1.35; margin-bottom:10px; }
+      #upsell .up-list li { margin:6px 0; font-size:14px; }
+      #upsell .up-plans { gap:9px; }
+      #upsell .up-plan { padding:9px 14px; }
+      #upsell .up-pn { font-size:11px; }
+      #upsell .up-price { font-size:clamp(22px,7vw,30px); }
+      #upsell .up-save { font-size:11px; padding:3px 8px; }
+      #upsell .pay-badges { margin:0 0 10px; }
+    }
     .home-fab svg { width:18px; height:18px; }
     @media (max-width:560px){ .home-fab span { display:none; } .home-fab { padding:10px; } }
     /* Persistent buy bar across the top of every page */
