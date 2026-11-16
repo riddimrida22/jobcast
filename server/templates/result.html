@@ -136,10 +136,12 @@
   </div>
 </div>
 
+{# Country-local occupation name (e.g. Canadian-French NOC title), shown only in the matching UI language. English stays for SEO/meta. #}
+{% set disp_title = r.occupation.title_local if (lang == 'fr' and r.occupation.title_local) else r.occupation.title %}
 <p class="muted">{{ r.occupation.family }} &middot; {{ r.location.metro }}</p>
 {% if closest_match %}<p class="closest-note">{{ t('seo.closest.a', 'You entered') }} <strong>{{ typed_title }}</strong>. {{ t('seo.closest.b', "It's not on our list yet, so this is the closest career we track:") }} <strong>{{ closest_match }}</strong>.</p>{% endif %}
-<h1 style="margin-bottom:2px">{{ r.occupation.title }}</h1>
-<p class="lead" style="margin-top:0">{% if seo %}<strong>{{ t('seo.replace', 'Will AI or robots replace') }} {{ r.occupation.title }}?</strong> {% endif %}{{ t('seo.lead', 'How exposed this work is to automation, shown as ranges with the reasoning and sources.') }}</p>
+<h1 style="margin-bottom:2px">{{ disp_title }}</h1>
+<p class="lead" style="margin-top:0">{% if seo %}<strong>{{ t('seo.replace', 'Will AI or robots replace') }} {{ disp_title }}?</strong> {% endif %}{{ t('seo.lead', 'How exposed this work is to automation, shown as ranges with the reasoning and sources.') }}</p>
 
 {% set be = r.base_exposure %}
 {% set bid = r.timeline.band.id %}
@@ -150,7 +152,7 @@
 <p class="verdict"><strong>{{ t('seo.short', 'The short version:') }}</strong> {{ t('seo.v.pre', 'this role is') }} {{ vlvl }} {{ t('seo.v.mid', 'to automation,') }} {{ vtim }}{{ t('seo.v.suf', '. It is a sourced range, not a verdict, and the detail is below.') }}</p>
 {% if seo %}
 <div class="tour-localize">
-  <div class="tl-txt"><b>{{ t('seo.tl.pre', 'This is the national picture for') }} {{ r.occupation.title }}.</b> {{ t('seo.tl.post', "See your Job Extinction Risk: add your state and situation and we'll localize and personalize it.") }}</div>
+  <div class="tl-txt"><b>{{ t('seo.tl.pre', 'This is the national picture for') }} {{ disp_title }}.</b> {{ t('seo.tl.post', "See your Job Extinction Risk: add your state and situation and we'll localize and personalize it.") }}</div>
   <a class="tl-go" href="/?flow=1&amp;title={{ r.occupation.title | urlencode }}">{{ t('seo.realnum', 'See my real number &#8250;') }}</a>
 </div>
 {% endif %}
@@ -171,7 +173,7 @@
 <script>
   (function () {
     var url = {{ (request.host_url ~ 'jobs/' ~ r.occupation.soc) | tojson }};
-    var text = {{ ('My work (' ~ r.occupation.title ~ ') is ' ~ r.base_exposure ~ ' of 100 exposed to AI and robots. What is yours?') | tojson }};
+    var text = {{ ('My work (' ~ disp_title ~ ') is ' ~ r.base_exposure ~ ' of 100 exposed to AI and robots. What is yours?') | tojson }};
     var note = document.getElementById('share-note');
     function doShare() {
       if (navigator.share) {
@@ -475,7 +477,7 @@
   <div id="sshow" class="sshow" hidden aria-modal="true" role="dialog" aria-label="Plan slideshow">
     <button type="button" class="ss-close" id="ss-close" aria-label="Close slideshow">&times;</button>
     <div class="ss-scale" aria-hidden="true">
-      <div class="ssc-job"><b>{{ r.occupation.title }}</b><span>exposure {{ r.base_exposure|round|int }} of 100</span></div>
+      <div class="ssc-job"><b>{{ disp_title }}</b><span>exposure {{ r.base_exposure|round|int }} of 100</span></div>
       <div class="ssc-row"><span>safe</span><div class="ssc-track"><i class="ssc-mark" style="left:{{ r.base_exposure|round|int }}%"></i></div><span>exposed</span></div>
     </div>
     <div class="ss-count" id="ss-count"></div>
@@ -893,7 +895,7 @@
   // Payment state: when Stripe is live the paywall goes to real checkout; subscribers skip it.
   var STRIPE = {{ stripe_enabled|tojson }}, ENT = {{ entitlement|tojson }};
   // Tour (generic) funnels to "localize & personalize"; personal result goes to the paywall.
-  var SEO = {{ seo|default(false)|tojson }}, OCC_TITLE = {{ r.occupation.title|tojson }}, RATING = {{ rating_label|tojson }};
+  var SEO = {{ seo|default(false)|tojson }}, OCC_TITLE = {{ disp_title|tojson }}, RATING = {{ rating_label|tojson }};
   ov.hidden = false; ov.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
   window.jbEv && window.jbEv('reveal');
   var steps = ['{{ "Mapping the tasks..." if seo else "Mapping your tasks..." }}', 'Scoring AI exposure...', 'Checking the robots...', '{{ "Reading the timeline..." if seo else "Reading your timeline..." }}', 'Comparing to the labor data...', 'Almost there...'];

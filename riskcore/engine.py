@@ -78,6 +78,7 @@ class Engine:
         return {
             "ok": True,
             "occupation": {"soc": occ["soc"], "title": occ["title"],
+                           "title_local": self._local_title(occ, country),
                            "job_zone": occ.get("job_zone"),
                            "family": self.snapshot.family_name(self.snapshot.family_code(occ["soc"]))},
             "location": {"metro_id": metro_id,
@@ -282,6 +283,15 @@ class Engine:
                                "displacement.") if profile.union_status == "yes" else None,
                 "remaining_working_years": remaining_years,
                 "overlap_note": overlap}
+
+    def _local_title(self, occ, country: str):
+        """A country-local occupation title (e.g. the Canadian-French NOC name), when the
+        country overlay carries one for this occupation. Returned to the template, which
+        shows it only in the matching UI language. None for US / when absent."""
+        if country == countries.DEFAULT:
+            return None
+        titles = (self.overlays.get(country, {}) or {}).get("soc_title_fr", {})
+        return titles.get(occ["soc"]) or titles.get(occ.get("soc6") or "") or None
 
     def _wages(self, occ, metro_id, profile: Profile, country: str = countries.DEFAULT):
         out: Dict[str, Any] = {"available": False}

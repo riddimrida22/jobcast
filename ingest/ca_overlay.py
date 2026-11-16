@@ -16,7 +16,19 @@ Run: python -m ingest.ca_overlay
 """
 import csv
 import json
+import re
 from pathlib import Path
+
+
+def _clean_fr_title(t: str) -> str:
+    """Turn an official NOC French unit-group name into a consumer-friendly title:
+    keep the masculine/feminine doublet (correct Quebec form) but drop parenthetical
+    qualifiers and any ' et <secondary group>' tail, which make the group names very long.
+    e.g. 'Infirmiers autorises/infirmieres autorisees et infirmiers psychiatriques ...'
+         -> 'Infirmiers autorises/infirmieres autorisees'."""
+    t = re.sub(r"\s*\([^)]*\)", "", t or "")      # drop "(...)" qualifiers
+    t = re.split(r"\s+et\s+", t, maxsplit=1)[0]    # keep the primary group before " et "
+    return t.strip()
 
 ROOT = Path(__file__).resolve().parents[1]
 CROSSWALK = ROOT / "config" / "crosswalks" / "noc2021_onet26.csv"
@@ -36,13 +48,17 @@ def build(verbose: bool = True) -> dict:
             if onet:
                 xw.setdefault(onet, []).append(noc)
 
-    soc_median, missing = {}, []
+    soc_median, soc_title_fr, missing = {}, {}, []
     for onet, cands in xw.items():
         med = None
         for c in cands:
             rec = nocs.get(c)
             if isinstance(rec, dict) and rec.get("annual_cad"):
                 med = round(float(rec["annual_cad"]))
+                # French NOC title from the same unit group (Canadian French, for ca+fr).
+                tf = _clean_fr_title(rec.get("title_fr") or "")
+                if tf:
+                    soc_title_fr[onet] = tf
                 break
         if med:
             soc_median[onet] = med
@@ -57,6 +73,7 @@ def build(verbose: bool = True) -> dict:
         "measure": meta.get("measure"),
         "crosswalk": "config/crosswalks/noc2021_onet26.csv (Dais/Brookfield NOC2021<->O*NET v26)",
         "soc_median": soc_median,
+        "soc_title_fr": soc_title_fr,
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(overlay, ensure_ascii=False, indent=0), encoding="utf-8")
