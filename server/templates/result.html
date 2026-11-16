@@ -270,6 +270,14 @@
     </div>
   </div>
 
+  {% if r.wages.occupation_median_wage %}
+  <div class="ov-pay">
+    <span class="ovp-lab">{{ t('ov.pay', 'Typical pay') }}</span>
+    <b class="ovp-val">{{ r.currency.symbol }}{{ "{:,.0f}".format(r.wages.occupation_median_wage) }}</b>
+    <span class="ovp-sub muted">{{ t('ov.paymed', 'median') }} &middot; {{ r.location.metro }}</span>
+  </div>
+  {% endif %}
+
   <p class="muted" style="text-align:center;margin:14px 0 2px">{{ t('ov.when', 'When the change is likely') }}</p>
   {% set bid = r.timeline.band.id %}
   {% set ry = r.timeline.remaining_working_years %}

@@ -125,6 +125,8 @@ TRANSLATIONS = {
         "ov.band.near_term_high": "Near-term, high",
         "ov.about": "about",
         "ov.wyears": "working years left",
+        "ov.pay": "Typical pay",
+        "ov.paymed": "median",
         # SEO occupation-page body
         "seo.replace": "Will AI or robots replace",
         "seo.lead": "How exposed this work is to automation, shown as ranges with the reasoning and sources.",
@@ -275,6 +277,8 @@ TRANSLATIONS = {
         "ov.band.near_term_high": "A corto plazo, alto",
         "ov.about": "unos",
         "ov.wyears": "años de trabajo restantes",
+        "ov.pay": "Pago típico",
+        "ov.paymed": "mediana",
         # SEO occupation-page body
         "seo.replace": "¿La IA o los robots reemplazarán a",
         "seo.lead": "Qué tan expuesto está este trabajo a la automatización, mostrado como rangos con el razonamiento y las fuentes.",
@@ -420,6 +424,8 @@ TRANSLATIONS = {
         "ov.band.near_term_high": "À court terme, élevé",
         "ov.about": "environ",
         "ov.wyears": "années de travail restantes",
+        "ov.pay": "Salaire type",
+        "ov.paymed": "médiane",
         # SEO occupation-page body
         "seo.replace": "L'IA ou les robots vont-ils remplacer",
         "seo.lead": "À quel point ce travail est exposé à l'automatisation, présenté sous forme de fourchettes avec le raisonnement et les sources.",
@@ -565,6 +571,8 @@ TRANSLATIONS = {
         "ov.band.near_term_high": "Alekoutan, wo",
         "ov.about": "anviwon",
         "ov.wyears": "ane travay ki rete",
+        "ov.pay": "Salè tipik",
+        "ov.paymed": "medyàn",
         # SEO occupation-page body
         "seo.replace": "Èske IA oswa robo ap ranplase",
         "seo.lead": "Ki jan travay sa a ekspoze ak otomatizasyon, montre kòm ranje ak rezònman an ak sous yo.",
