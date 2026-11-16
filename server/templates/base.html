@@ -570,11 +570,11 @@
     .jb-ctrls .jb-lang { display:inline-flex; gap:2px; }
     .jb-ctrls .jb-lang a { color:#9db0c6; text-decoration:none; font-size:13px; font-weight:700; padding:5px 7px; border-radius:7px; line-height:1; }
     .jb-ctrls .jb-lang a:hover { color:#fff; background:rgba(255,255,255,.08); }
-    .jb-ctrls .jb-lang a.on { color:#fff; background:rgba(255,255,255,.16); }
+    .jb-ctrls .jb-lang a.on { color:#2a1708; background:var(--accent); font-weight:800; }
     .jb-ctrls .jb-country { display:inline-flex; gap:2px; padding-right:10px; margin-right:2px; border-right:1px solid rgba(255,255,255,.18); }
     .jb-ctrls .jb-country a { color:#9db0c6; text-decoration:none; font-size:13px; font-weight:700; padding:5px 7px; border-radius:7px; line-height:1; }
     .jb-ctrls .jb-country a:hover { color:#fff; background:rgba(255,255,255,.08); }
-    .jb-ctrls .jb-country a.on { color:#fff; background:rgba(255,255,255,.16); }
+    .jb-ctrls .jb-country a.on { color:#2a1708; background:var(--accent); font-weight:800; }
     .jb-ctrls .theme-toggle { width:32px; height:32px; margin:0; padding:0; display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.22); border-radius:8px; color:#cdd9ea; cursor:pointer; }
     .jb-ctrls .theme-toggle:hover { background:rgba(255,255,255,.18); }
     .jb-ctrls .theme-toggle svg { width:17px; height:17px; display:block; }
@@ -1287,8 +1287,8 @@
         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path
         d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg><span>{{ t('nav.home', 'Home') }}</span></a>
       <a href="/?view=info">{{ t('nav.info', 'More information') }}</a><a href="/methodology">{{ t('nav.how', 'How it works') }}</a>
-      {% if countries and countries|length > 1 %}<span class="country-links" aria-label="Country" style="display:inline-flex;gap:1px;margin-left:2px;padding-right:8px;border-right:1px solid rgba(255,255,255,.18)">{% for code, name in countries.items() %}<a href="?country={{ code }}" title="{{ name }}" style="color:{{ '#fff' if code == country else 'rgba(255,255,255,.55)' }};text-decoration:none;font-size:12px;font-weight:700;padding:4px 6px;border-radius:6px;{{ 'background:rgba(255,255,255,.15);' if code == country else '' }}">{{ code|upper }}</a>{% endfor %}</span>{% endif %}
-      <span class="lang-links" aria-label="Language" style="display:inline-flex;gap:1px;margin-left:2px">{% for code, name in langs.items() %}<a href="?lang={{ code }}" title="{{ name }}" style="color:{{ '#fff' if code == lang else 'rgba(255,255,255,.55)' }};text-decoration:none;font-size:12px;font-weight:700;padding:4px 6px;border-radius:6px;{{ 'background:rgba(255,255,255,.15);' if code == lang else '' }}">{{ code|upper }}</a>{% endfor %}</span>
+      {% if countries and countries|length > 1 %}<span class="country-links" aria-label="Country" style="display:inline-flex;gap:1px;margin-left:2px;padding-right:8px;border-right:1px solid rgba(255,255,255,.18)">{% for code, name in countries.items() %}<a href="?country={{ code }}" title="{{ name }}" style="color:{{ '#2a1708' if code == country else 'rgba(255,255,255,.55)' }};text-decoration:none;font-size:12px;font-weight:700;padding:4px 6px;border-radius:6px;{{ 'background:var(--accent);font-weight:800;' if code == country else '' }}">{{ code|upper }}</a>{% endfor %}</span>{% endif %}
+      <span class="lang-links" aria-label="Language" style="display:inline-flex;gap:1px;margin-left:2px">{% for code, name in langs.items() %}<a href="?lang={{ code }}" title="{{ name }}" style="color:{{ '#2a1708' if code == lang else 'rgba(255,255,255,.55)' }};text-decoration:none;font-size:12px;font-weight:700;padding:4px 6px;border-radius:6px;{{ 'background:var(--accent);font-weight:800;' if code == lang else '' }}">{{ code|upper }}</a>{% endfor %}</span>
       <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch theme">
         <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/>
