@@ -24,6 +24,8 @@ TRANSLATIONS = {
         "intro.next": "Next &rsaquo;",
         "intro.go": "See where my job lands &rsaquo;",
         "intro.say": "Hi, I'm Jobo. Two minutes, and you'll see what's coming for your job.",
+        "intro.title": "Will AI or a robot take my job?",
+
         "intro.1.ey": "Before we score your job",
         "intro.1.h": 'AI isn\'t just a <span class="hot">chatbot</span> anymore',
         "intro.1.p": "You've probably typed questions into one. That's the surface. Today's AI also reads documents, writes code, analyzes images, and makes decisions &mdash; and <b>robots are starting to give it hands</b>, in warehouses, kitchens, and on job sites.",
@@ -178,6 +180,8 @@ TRANSLATIONS = {
         "intro.next": "Siguiente &rsaquo;",
         "intro.go": "Ver dónde queda mi trabajo &rsaquo;",
         "intro.say": "Hola, soy Jobo. Dos minutos y verás lo que le espera a tu trabajo.",
+        "intro.title": "¿La IA o un robot me quitará el trabajo?",
+
         "intro.1.ey": "Antes de calcular tu puntuación",
         "intro.1.h": 'La IA ya no es solo un <span class="hot">chatbot</span>',
         "intro.1.p": "Seguramente le has escrito preguntas. Eso es solo la superficie. La IA de hoy también lee documentos, escribe código, analiza imágenes y toma decisiones, y <b>los robots empiezan a darle manos</b>, en almacenes, cocinas y obras.",
@@ -328,6 +332,8 @@ TRANSLATIONS = {
         "intro.next": "Suivant &rsaquo;",
         "intro.go": "Voir où se situe mon métier &rsaquo;",
         "intro.say": "Salut, je suis Jobo. Deux minutes, et tu verras ce qui attend ton emploi.",
+        "intro.title": "L'IA ou un robot va-t-il prendre mon emploi ?",
+
         "intro.1.ey": "Avant de noter votre métier",
         "intro.1.h": 'L\'IA n\'est plus seulement un <span class="hot">chatbot</span>',
         "intro.1.p": "Vous lui avez sûrement déjà posé des questions. Ce n'est que la surface. L'IA d'aujourd'hui lit des documents, écrit du code, analyse des images et prend des décisions, et <b>les robots commencent à lui donner des mains</b>, dans les entrepôts, les cuisines et sur les chantiers.",
@@ -476,6 +482,8 @@ TRANSLATIONS = {
         "intro.next": "Pwochen &rsaquo;",
         "intro.go": "Gade kote travay mwen ye &rsaquo;",
         "intro.say": "Bonjou, mwen se Jobo. De minit, epi w ap wè sa k ap tann travay ou.",
+        "intro.title": "Èske IA oswa yon robo ap pran travay mwen?",
+
         "intro.1.ey": "Anvan nou bay travay ou yon nòt",
         "intro.1.h": 'IA pa jis yon <span class="hot">chatbot</span> ankò',
         "intro.1.p": "Ou pwobableman deja tape kesyon nan youn. Sa se sèlman anwo a. IA jodi a li dokiman, ekri kòd, analize imaj epi pran desizyon, epi <b>robo yo kòmanse ba li men</b>, nan depo, kizin ak sou chantye.",

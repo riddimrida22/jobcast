@@ -13,6 +13,8 @@
   .intro-skip:hover { background:rgba(255,255,255,.14); }
   .intro-stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
     text-align:center; padding:48px 22px 0; max-width:620px; margin:0 auto; width:100%; }
+  .intro-title { font-size:clamp(21px,5.4vw,31px); font-weight:800; line-height:1.14; letter-spacing:-.01em;
+    color:#fff; margin:0 0 14px; }
   /* Mascot */
   .mascot { width:118px; height:138px; margin-bottom:6px; animation:m-float 3.4s ease-in-out infinite; }
   @keyframes m-float { 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-9px) } }
@@ -86,6 +88,7 @@
   {% include "_controls.html" %}
   <button type="button" class="intro-skip" id="intro-skip">{{ t('intro.skip') }}</button>
   <div class="intro-stage">
+    <h1 class="intro-title">{{ t('intro.title', 'Will AI or a robot take my job?') }}</h1>
     <div class="mascot" id="mascot">
       <svg viewBox="0 0 120 140" width="118" height="138" aria-hidden="true">
         <line x1="60" y1="18" x2="60" y2="7" stroke="#f3a35f" stroke-width="3" stroke-linecap="round"/>
@@ -157,11 +160,8 @@
 (function () {
   var intro = document.getElementById('intro');
   if (!intro) return;
-  var SEEN = 'jb_intro_seen';
-  function seen() { try { return localStorage.getItem(SEEN) === '1'; } catch (e) { return false; } }
-  function markSeen() { try { localStorage.setItem(SEEN, '1'); } catch (e) {} }
-  // Returning visitors (and anyone who's seen it) skip straight to the home gate.
-  if (seen()) return;
+  // Jobo greets on every home-page visit: the intro replays each time (by design),
+  // and Skip jumps straight to the gate.
 
   var steps = Array.prototype.slice.call(intro.querySelectorAll('.in-step'));
   var dotsEl = document.getElementById('intro-dots');
@@ -198,7 +198,6 @@
     setMood(i);
   }
   function finish() {
-    markSeen();
     intro.classList.remove('show');
     document.body.classList.remove('intro-on');
   }
