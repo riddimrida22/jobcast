@@ -34,6 +34,14 @@ COUNTRIES: Dict[str, Dict[str, Any]] = {
         "wage_source": "ONS ASHE Table 14 (SOC2020, median gross annual)",
         "geography": "national",
     },
+    "ca": {
+        "name": "Canada",
+        "currency_code": "CAD",
+        "currency_symbol": "C$",
+        "wage_period": "year",
+        "wage_source": "Government of Canada Job Bank wages (NOC 2021, national median)",
+        "geography": "national",
+    },
 }
 
 
