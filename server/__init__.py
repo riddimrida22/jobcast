@@ -668,9 +668,18 @@ def create_app() -> Flask:
                     except Exception as e:
                         print(f"[billing] watch failed: {e}", file=sys.stderr, flush=True)
         # A session that exists but didn't resolve to a tier is almost always an async
-        # payment still settling - reassure rather than alarm a paid customer.
+        # payment still settling - reassure rather than alarm a paid customer. If it is
+        # NOT settling, surface the raw session state as a short reference so a stuck
+        # payment can be diagnosed from the screen (temporary).
+        diag = ""
+        if sess is not None and not tier:
+            smd = pay._get(sess, "metadata") or {}
+            diag = "ref %s/%s/%s" % (
+                pay._get(sess, "status") or "-",
+                pay._get(sess, "payment_status") or "-",
+                (smd.get("tier") if hasattr(smd, "get") else None) or "-")
         return render_template("billing.html", ok=bool(tier), tier=tier,
-                               processing=(not tier and sess is not None), session_id=sid,
+                               processing=(not tier and sess is not None), session_id=sid, diag=diag,
                                version=VERSION, licensed=engine.snapshot.licensed)
 
     @app.get("/unsubscribe")

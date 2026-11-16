@@ -27,6 +27,7 @@
     your access unlocks as soon as it clears. Give it a second and refresh.</p>
     <a href="/billing/success?session_id={{ session_id }}" class="plan-cta" style="display:inline-block;text-decoration:none;
       padding:12px 22px;border-radius:11px;background:linear-gradient(180deg,var(--primary),var(--primary-dark));color:#fff;font-weight:700">Refresh</a>
+    {% if diag %}<p class="muted" style="margin:16px 0 0;font-size:11px;opacity:.6">{{ diag }}</p>{% endif %}
   {% else %}
     <h1 style="font-size:22px;margin:10px 0 6px">We could not confirm that payment</h1>
     <p class="lead" style="margin:0 0 18px">If you were charged, it will appear shortly. Contact support if anything
