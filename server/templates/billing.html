@@ -20,6 +20,13 @@
     <h1 style="font-size:22px;margin:10px 0 6px">Checkout canceled</h1>
     <p class="lead" style="margin:0 0 18px">No charge was made. You can pick a plan again whenever you are ready.</p>
     <a href="/" style="color:var(--primary);font-weight:600">Back to JobBreak</a>
+  {% elif processing %}
+    <div style="font-size:40px;line-height:1">&#8987;</div>
+    <h1 style="font-size:22px;margin:10px 0 6px">Your payment is processing</h1>
+    <p class="lead" style="margin:0 0 18px">This can take a few moments. If you were charged, you're all set &mdash;
+    your access unlocks as soon as it clears. Give it a second and refresh.</p>
+    <a href="/billing/success?session_id={{ session_id }}" class="plan-cta" style="display:inline-block;text-decoration:none;
+      padding:12px 22px;border-radius:11px;background:linear-gradient(180deg,var(--primary),var(--primary-dark));color:#fff;font-weight:700">Refresh</a>
   {% else %}
     <h1 style="font-size:22px;margin:10px 0 6px">We could not confirm that payment</h1>
     <p class="lead" style="margin:0 0 18px">If you were charged, it will appear shortly. Contact support if anything

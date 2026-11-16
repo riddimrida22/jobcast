@@ -634,9 +634,18 @@ def create_app() -> Flask:
         from . import payments as pay
         sid = request.args.get("session_id")
         tier = None
+        sess = None
         if sid and pay.configured():
-            sess = pay.retrieve_session(sid)
-            tier = pay.tier_from_session(sess)
+            # The return redirect (especially Apple Pay) can beat Stripe finalizing the
+            # Checkout Session, so the first retrieve may show it not-yet-complete. Retry
+            # briefly so a genuine payment is never shown as "not confirmed" over a
+            # sub-second consistency lag.
+            for _attempt in range(6):
+                sess = pay.retrieve_session(sid)
+                tier = pay.tier_from_session(sess)
+                if tier or sess is None:  # resolved, or a hard retrieve failure - no point retrying
+                    break
+                time.sleep(0.5)
             if tier:
                 session["jb_tier"] = tier
                 session.permanent = True
@@ -658,7 +667,10 @@ def create_app() -> Flask:
                         store.add_watch(email, soc, source="monitor", exposure=exp, demand=dem)
                     except Exception as e:
                         print(f"[billing] watch failed: {e}", file=sys.stderr, flush=True)
+        # A session that exists but didn't resolve to a tier is almost always an async
+        # payment still settling - reassure rather than alarm a paid customer.
         return render_template("billing.html", ok=bool(tier), tier=tier,
+                               processing=(not tier and sess is not None), session_id=sid,
                                version=VERSION, licensed=engine.snapshot.licensed)
 
     @app.get("/unsubscribe")
