@@ -131,7 +131,13 @@
       <li>{{ t('rl.b4') }}</li>
     </ul>
     <button type="button" class="rl-go" id="rl-go">{{ t('rl.go') }}</button>
-    <div class="pay-badges"><span class="pb">Apple Pay</span><span class="pb">Google Pay</span><span class="pb">Card</span><span class="pb">Link</span></div>
+    <p class="rl-express-lab">{{ t('rl.express', 'Check out in one tap') }}</p>
+    <div class="pay-badges express">
+      <button type="button" class="pb" data-express aria-label="Checkout with Apple Pay">Apple Pay</button>
+      <button type="button" class="pb" data-express aria-label="Checkout with Google Pay">Google Pay</button>
+      <button type="button" class="pb" data-express aria-label="Checkout with card">Card</button>
+      <button type="button" class="pb" data-express aria-label="Checkout with Link">Link</button>
+    </div>
     <a class="rl-alt" href="/">{{ t('rl.alt') }}</a>
   </div>
 </div>
@@ -1080,6 +1086,20 @@
     up.hidden = false; up.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
     up._show(0);
   }
+  // Express checkout: a payment badge sends the visitor straight to Stripe hosted
+  // checkout (best-value yearly plan) - Apple Pay, Google Pay, card and Link all appear
+  // there. Preview mode (Stripe off) falls back to the normal upsell flow.
+  function directCheckout(el) {
+    if (typeof STRIPE !== 'undefined' && !STRIPE) { openUpsell(unlockBreakdown); return; }
+    window.jbEv && window.jbEv('checkout');
+    if (el) { el.style.pointerEvents = 'none'; el.style.opacity = '.65'; }
+    fetch('/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tier: 'tier2', period: 'yearly' }) })
+      .then(function (r) { return r.json(); }).then(function (d) {
+        if (d.ok && d.url) { window.location.href = d.url; }
+        else { if (el) { el.style.pointerEvents = ''; el.style.opacity = ''; } openUpsell(unlockBreakdown); }
+      }).catch(function () { if (el) { el.style.pointerEvents = ''; el.style.opacity = ''; } openUpsell(unlockBreakdown); });
+  }
   // Paywall gate for employees: the reveal is the free teaser (headline score + one-line
   // read). The full breakdown stays locked behind the paywall until they pass it.
   function showLock() {
@@ -1090,6 +1110,9 @@
     lk.hidden = false; lk.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
     var gob = document.getElementById('rl-go');
     if (gob && !gob._wired) { gob._wired = true; gob.addEventListener('click', function () { openUpsell(unlockBreakdown); }); }
+    lk.querySelectorAll('.pay-badges.express .pb').forEach(function (b) {
+      if (!b._wired) { b._wired = true; b.addEventListener('click', function () { directCheckout(b); }); }
+    });
   }
   function unlockBreakdown() {
     var lk = document.getElementById('rlock'); if (lk) { lk.hidden = true; lk.setAttribute('aria-hidden', 'true'); }
