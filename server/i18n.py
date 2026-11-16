@@ -107,6 +107,7 @@ TRANSLATIONS = {
         "fs.allpost": "of your tasks, scored for AI and robots",
         "fs.unlockpre": "Unlock all",
         "fs.unlockpost": "tasks, your timeline, your market pay, and exactly what to do",
+        "tasks.hint": "Each task is scored 0–100 — how much of it AI or robots can already do. Higher means more exposed.",
         # Overview slide: dials, timeline, bands
         "ov.of100": "of 100",
         "ov.rating": "Job Extinction Risk",
@@ -262,6 +263,7 @@ TRANSLATIONS = {
         "fs.allpost": "tareas de tu trabajo, evaluadas para IA y robots",
         "fs.unlockpre": "Desbloquea las",
         "fs.unlockpost": "tareas, tu cronograma, tu salario de mercado y exactamente qué hacer",
+        "tasks.hint": "Cada tarea se puntúa de 0 a 100: cuánto pueden hacer ya la IA o los robots. Más alto = más expuesta.",
         # Overview slide: dials, timeline, bands
         "ov.of100": "de 100",
         "ov.rating": "Riesgo de extinción del empleo",
@@ -412,6 +414,7 @@ TRANSLATIONS = {
         "fs.allpost": "tâches de votre métier, évaluées pour l'IA et les robots",
         "fs.unlockpre": "Débloquez les",
         "fs.unlockpost": "tâches, votre échéance, votre salaire du marché et exactement quoi faire",
+        "tasks.hint": "Chaque tâche est notée de 0 à 100 : ce que l'IA ou les robots peuvent déjà faire. Plus élevé = plus exposée.",
         # Overview slide: dials, timeline, bands
         "ov.of100": "sur 100",
         "ov.rating": "Risque de disparition du poste",
@@ -562,6 +565,7 @@ TRANSLATIONS = {
         "fs.allpost": "travay ou yo, evalye pou IA ak robo",
         "fs.unlockpre": "Debloke tout",
         "fs.unlockpost": "travay yo, delè ou, salè mache ou, ak egzakteman kisa pou fè",
+        "tasks.hint": "Chak travay gen yon nòt 0 a 100: konbyen IA oswa robo ka deja fè. Pi wo = pi ekspoze.",
         # Overview slide: dials, timeline, bands
         "ov.of100": "sou 100",
         "ov.rating": "Risk pou travay la disparèt",
