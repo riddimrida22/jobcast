@@ -7,7 +7,7 @@
     color:#eaf1f9; overflow:hidden; }
   .intro.show { display:flex; }
   body.intro-on { overflow:hidden; }
-  .intro-skip { position:absolute; top:14px; right:16px; z-index:3; background:rgba(255,255,255,.08);
+  .intro-skip { position:absolute; top:14px; left:16px; z-index:3; background:rgba(255,255,255,.08);
     border:1px solid rgba(255,255,255,.18); color:#cdd9ea; font:inherit; font-size:14px;
     padding:8px 14px; border-radius:999px; cursor:pointer; }
   .intro-skip:hover { background:rgba(255,255,255,.14); }
@@ -83,6 +83,7 @@
 </style>
 
 <div class="intro" id="intro" role="dialog" aria-label="How AI and robots are changing work">
+  {% include "_controls.html" %}
   <button type="button" class="intro-skip" id="intro-skip">{{ t('intro.skip') }}</button>
   <div class="intro-stage">
     <div class="mascot" id="mascot">

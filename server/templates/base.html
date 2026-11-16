@@ -565,6 +565,18 @@
     #theme-toggle .ico-moon { display:none; }
     [data-theme="dark"] #theme-toggle .ico-sun { display:none; }
     [data-theme="dark"] #theme-toggle .ico-moon { display:block; }
+    /* Top-right preferences cluster (language links + theme toggle) on full-screen overlays */
+    .jb-ctrls { position:absolute; top:12px; right:14px; z-index:6; display:flex; align-items:center; gap:14px; }
+    .jb-ctrls .jb-lang { display:inline-flex; gap:2px; }
+    .jb-ctrls .jb-lang a { color:#9db0c6; text-decoration:none; font-size:13px; font-weight:700; padding:5px 7px; border-radius:7px; line-height:1; }
+    .jb-ctrls .jb-lang a:hover { color:#fff; background:rgba(255,255,255,.08); }
+    .jb-ctrls .jb-lang a.on { color:#fff; background:rgba(255,255,255,.16); }
+    .jb-ctrls .theme-toggle { width:32px; height:32px; margin:0; padding:0; display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.22); border-radius:8px; color:#cdd9ea; cursor:pointer; }
+    .jb-ctrls .theme-toggle:hover { background:rgba(255,255,255,.18); }
+    .jb-ctrls .theme-toggle svg { width:17px; height:17px; display:block; }
+    .jb-ctrls .theme-toggle .ico-moon { display:none; }
+    [data-theme="dark"] .jb-ctrls .theme-toggle .ico-sun { display:none; }
+    [data-theme="dark"] .jb-ctrls .theme-toggle .ico-moon { display:block; }
 
     .bar { height:14px; border-radius:8px; background:var(--track); overflow:hidden; margin:6px 0 4px; }
     .bar > span { display:block; height:100%; border-radius:8px; }
@@ -1262,8 +1274,8 @@
         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path
         d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg><span>{{ t('nav.home', 'Home') }}</span></a>
       <a href="/?view=info">{{ t('nav.info', 'More information') }}</a><a href="/methodology">{{ t('nav.how', 'How it works') }}</a>
-      <select class="lang-sel" aria-label="Language" onchange="var u=new URL(location);u.searchParams.set('lang',this.value);location.href=u.toString()" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:5px 8px;font:inherit;font-size:13px;cursor:pointer;margin-left:4px">{% for code, name in langs.items() %}<option value="{{ code }}"{{ ' selected' if code==lang else '' }} style="color:#13263d">{{ name }}</option>{% endfor %}</select>
-      <button id="theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch theme">
+      <span class="lang-links" aria-label="Language" style="display:inline-flex;gap:1px;margin-left:2px">{% for code, name in langs.items() %}<a href="?lang={{ code }}" title="{{ name }}" style="color:{{ '#fff' if code == lang else 'rgba(255,255,255,.55)' }};text-decoration:none;font-size:12px;font-weight:700;padding:4px 6px;border-radius:6px;{{ 'background:rgba(255,255,255,.15);' if code == lang else '' }}">{{ code|upper }}</a>{% endfor %}</span>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch theme">
         <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/>
           <path d="M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M5 5l1.7 1.7M17.3 17.3l1.7 1.7M19 5l-1.7 1.7M6.7 17.3L5 19"/></svg>
@@ -1289,17 +1301,18 @@
   </script>
   <script>
     (function () {
-      var root = document.documentElement, btn;
+      var root = document.documentElement, btns = [];
       function apply(t) { if (t === "dark") root.setAttribute("data-theme", "dark"); else root.removeAttribute("data-theme");
-        if (btn) btn.setAttribute("aria-label", t === "dark" ? "Switch to light mode" : "Switch to dark mode"); }
+        var lab = t === "dark" ? "Switch to light mode" : "Switch to dark mode";
+        btns.forEach(function (b) { b.setAttribute("aria-label", lab); }); }
       apply(localStorage.getItem("jobcast-theme") || "light");
       document.addEventListener("DOMContentLoaded", function () {
-        btn = document.getElementById("theme-toggle");
+        btns = Array.prototype.slice.call(document.querySelectorAll(".theme-toggle"));
         apply(localStorage.getItem("jobcast-theme") || "light");
-        btn.addEventListener("click", function () {
+        btns.forEach(function (b) { b.addEventListener("click", function () {
           var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
           localStorage.setItem("jobcast-theme", next); apply(next);
-        });
+        }); });
       });
     })();
   </script>

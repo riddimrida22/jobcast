@@ -74,29 +74,29 @@
 
 <!-- Full-screen upsell: pitch the AI plan, then a demo of the order flow -->
 <div id="upsell" hidden aria-hidden="true">
-  <button type="button" class="up-x" id="up-x">Exit</button>
+  <button type="button" class="up-x" id="up-x">{{ t('pay.exit') }}</button>
   <section class="up-step" data-up="ad">
     <div class="up-ico" aria-hidden="true">&#129504;</div>
-    <h2 class="up-q">Unlock the full breakdown</h2>
-    <p class="up-sub">You've seen your {{ rating_label }}. <b>JobBreak Monitor</b> unlocks every exposed task and your timeline, plus a researched, cited plan built for this role, and keeps watching.</p>
+    <h2 class="up-q">{{ t('up.ad.q') }}</h2>
+    <p class="up-sub">{{ t('up.ad.sub') }}</p>
     <ul class="up-list">
-      <li>A full, step-by-step plan, researched and sourced for your job</li>
-      <li>Personalised to your skills, pay, and location</li>
-      <li>Re-run it any time your situation changes</li>
-      <li>Alerts the moment your outlook shifts</li>
+      <li>{{ t('up.ad.b1') }}</li>
+      <li>{{ t('up.ad.b2') }}</li>
+      <li>{{ t('up.ad.b3') }}</li>
+      <li>{{ t('up.ad.b4') }}</li>
     </ul>
-    <button type="button" class="up-cta" data-up-next>See the plans</button>
+    <button type="button" class="up-cta" data-up-next>{{ t('up.ad.cta') }}</button>
   </section>
   <section class="up-step" data-up="plans">
-    <h2 class="up-q">Unlock your plan</h2>
-    <p class="up-sub">Pay once, or subscribe to keep watching your job. Apple Pay, Google Pay, card or Link.</p>
+    <h2 class="up-q">{{ t('up.pl.q') }}</h2>
+    <p class="up-sub">{{ t('up.pl.sub') }}</p>
     <div class="up-plans">
-      <label class="up-plan feat"><input type="radio" name="up_plan" value="yearly" checked><span class="up-pn">Yearly &middot; best value</span><span class="up-price">$12<small>/yr</small></span><span class="up-save">just $1/mo &middot; save 50%</span></label>
-      <label class="up-plan"><input type="radio" name="up_plan" value="monthly"><span class="up-pn">Monthly</span><span class="up-price">$1.99<small>/mo</small></span></label>
-      <label class="up-plan"><input type="radio" name="up_plan" value="once"><span class="up-pn">One-time</span><span class="up-price">$4.99</span><span class="up-save">pay once, no monitoring</span></label>
+      <label class="up-plan feat"><input type="radio" name="up_plan" value="yearly" checked><span class="up-pn">{{ t('up.pl.yearly') }}</span><span class="up-price">$12<small>/yr</small></span><span class="up-save">{{ t('up.pl.yearly.save') }}</span></label>
+      <label class="up-plan"><input type="radio" name="up_plan" value="monthly"><span class="up-pn">{{ t('up.pl.monthly') }}</span><span class="up-price">$1.99<small>/mo</small></span></label>
+      <label class="up-plan"><input type="radio" name="up_plan" value="once"><span class="up-pn">{{ t('up.pl.once') }}</span><span class="up-price">$4.99</span><span class="up-save">{{ t('up.pl.once.sub') }}</span></label>
     </div>
     <div class="pay-badges"><span class="pb">Apple Pay</span><span class="pb">Google Pay</span><span class="pb">Card</span><span class="pb">Link</span></div>
-    <button type="button" class="up-cta" data-up-next>Continue</button>
+    <button type="button" class="up-cta" data-up-next>{{ t('up.pl.cta') }}</button>
   </section>
   <section class="up-step" data-up="order">
     <h2 class="up-q">Your order</h2>
@@ -120,19 +120,19 @@
 <!-- Paywall gate: for employees the breakdown stays locked behind the teaser until unlocked -->
 <div id="rlock" hidden aria-hidden="true">
   <div class="rl-card">
-    <span class="rl-ey">Your {{ rating_label }}</span>
+    <span class="rl-ey">{{ t('rl.ey') }}</span>
     <div class="rl-score"><b id="rl-num">0</b><small>of 100</small></div>
-    <h2 class="rl-h">The full breakdown is locked</h2>
-    <p class="rl-sub">You've seen where <span id="rl-role">this role</span> stands. Unlock every exposed task, the timeline, and a researched plan on what to do next.</p>
+    <h2 class="rl-h">{{ t('rl.h') }}</h2>
+    <p class="rl-sub">{{ t('rl.sub') }}</p>
     <ul class="rl-list">
-      <li>Task-by-task exposure breakdown</li>
-      <li>When the change is likely, your timeline</li>
-      <li>A researched, cited action plan</li>
-      <li>Safer adjacent roles and local pay</li>
+      <li>{{ t('rl.b1') }}</li>
+      <li>{{ t('rl.b2') }}</li>
+      <li>{{ t('rl.b3') }}</li>
+      <li>{{ t('rl.b4') }}</li>
     </ul>
-    <button type="button" class="rl-go" id="rl-go">Unlock the full breakdown</button>
+    <button type="button" class="rl-go" id="rl-go">{{ t('rl.go') }}</button>
     <div class="pay-badges"><span class="pb">Apple Pay</span><span class="pb">Google Pay</span><span class="pb">Card</span><span class="pb">Link</span></div>
-    <a class="rl-alt" href="/">Try another career</a>
+    <a class="rl-alt" href="/">{{ t('rl.alt') }}</a>
   </div>
 </div>
 
@@ -1096,9 +1096,9 @@ It is a sourced range, not a verdict, and the detail is below.</p>
     tabs[0].click();                 // Overview is the one free slide
     overview.scrollTop = 0;
     // Tour (generic) nudges the curious to personalize; personal result goes to the paywall.
-    var goLabel = 'Unlock the full breakdown ›';
+    var goLabel = '{{ t("fs.unlock") }}';
     var ghostTitle = 'See every exposed task, your AI and robotics timeline, and what to do';
-    var barLab = '1 slide shown. Unlock your full AI and robotics breakdown.';
+    var barLab = '{{ t("fs.bar") }}';
     if (!document.getElementById('jlp-ghost')) {
       var g = document.createElement('div'); g.id = 'jlp-ghost'; g.className = 'jlp-ghost';
       var tdata = []; try { tdata = JSON.parse(document.getElementById('tasks-data').textContent) || []; } catch (e) {}
@@ -1110,8 +1110,8 @@ It is a sourced range, not a verdict, and the detail is below.</p>
           + '<span class="jlp-tx ' + (t.mx >= 50 ? 'exp' : 'saf') + '">' + Math.round(t.mx) + '</span></div>';
       }
       var hook = total ? (high > 0
-          ? ('<b>' + high + '</b> of your <b>' + total + '</b> tasks are highly exposed to AI')
-          : ('All <b>' + total + '</b> of your tasks, scored for AI and robots'))
+          ? ('<b>' + high + '</b> {{ t("fs.ofyour") }} <b>' + total + '</b> {{ t("fs.highexposed") }}')
+          : ('{{ t("fs.allpre") }} <b>' + total + '</b> {{ t("fs.allpost") }}'))
         : 'Your full task-by-task breakdown';
       var rows = scored.slice(0, 3).map(function (t) { return rowHtml(t, false); }).join('')
         + scored.slice(3, 7).map(function (t) { return rowHtml(t, true); }).join('');
@@ -1119,14 +1119,14 @@ It is a sourced range, not a verdict, and the detail is below.</p>
         + '<div class="jlp-tasks">' + rows + '</div>'
         + '<div class="jlp-glock">'
         + '<svg viewBox="0 0 24 24" class="jgl-ic" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
-        + '<b>Unlock all ' + (total || 'your') + ' tasks, your timeline, and exactly what to do</b>'
+        + '<b>{{ t("fs.unlockpre") }} ' + (total || 'your') + ' {{ t("fs.unlockpost") }}</b>'
         + '<button type="button" class="jgl-go" id="jlp-ghost-go">' + goLabel + '</button></div>';
       overview.appendChild(g);
     }
     var bar = document.createElement('div'); bar.className = 'rtour jlp-bar'; bar.id = 'jlp-bar';
-    bar.innerHTML = '<span class="rt-step">Free preview</span><b class="rt-lab">' + barLab + '</b>'
+    bar.innerHTML = '<span class="rt-step">{{ t("fs.preview") }}</span><b class="rt-lab">' + barLab + '</b>'
       + '<button type="button" class="rt-next" id="jlp-unlock">' + goLabel + '</button>'
-      + '<button type="button" class="rt-x" id="jlp-x">Exit</button>';
+      + '<button type="button" class="rt-x" id="jlp-x">{{ t("fs.exit") }}</button>';
     document.body.appendChild(bar);
     function advance() {
       bar.remove(); document.body.classList.remove('rstage');
