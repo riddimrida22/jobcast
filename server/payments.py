@@ -139,10 +139,20 @@ def _tier_for_price(pid):
     return None
 
 
+def _sole_paid_tier():
+    """The highest-rank tier that actually has a price for sale. A completed, paid checkout
+    can only have bought a tier we sell, so this is the safe fallback when a session's
+    metadata is missing (the inline-price path leaves no price id to match). Today only
+    tier2 (Monitor) has prices, so this returns 'tier2'."""
+    tiers = {t for (t, _period) in PRICE_CENTS.keys()}
+    return max(tiers, key=lambda t: TIER_RANK.get(t, 0)) if tiers else None
+
+
 def tier_from_session(session):
     """The advice tier a completed checkout grants, or None. Robust to subscription mode
-    (which signals completion via status == 'complete') and to missing metadata (falls back
-    to the purchased price)."""
+    (which signals completion via status == 'complete') and to missing metadata: a session
+    that is genuinely complete/paid but carries no tier falls back to the only paid tier on
+    sale, so a real payment is never left locked out over a metadata gap."""
     if not session:
         return None
     status = _get(session, "status")
@@ -158,12 +168,54 @@ def tier_from_session(session):
                     break
         except Exception:
             pass
+    done = (status == "complete") or (pstatus in ("paid", "no_payment_required"))
+    if not tier and done:
+        # A genuinely paid checkout with no resolvable tier (inline prices leave no price id
+        # to match, and metadata can be absent). Grant the only paid tier rather than leave a
+        # paying customer stuck on "processing".
+        tier = _sole_paid_tier()
     print(f"[payments] success session tier={tier} status={status} payment_status={pstatus}",
           file=sys.stderr, flush=True)
-    done = (status == "complete") or (pstatus in ("paid", "no_payment_required"))
     if done and tier in TIER_RANK and tier != "free":
         return tier
     return None
+
+
+# --- Durable, race-free unlock: session_id -> granted tier ------------------------------
+# The checkout.session.completed webhook fires server-side and never races the browser
+# redirect, so it records the grant here; /billing/success reads it first. Append-only so
+# concurrent writes (webhook + success page) can't corrupt it, and grants are idempotent.
+GRANTS_FILE = _data_dir() / "grants.jsonl"
+
+
+def record_grant(session_id, tier):
+    if not session_id or not tier:
+        return
+    try:
+        GRANTS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(GRANTS_FILE, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"sid": session_id, "tier": tier, "ts": int(time.time())}) + "\n")
+    except Exception:
+        pass
+
+
+def grant_for(session_id):
+    """The tier recorded for this checkout session, or None. Last write wins."""
+    if not session_id or not GRANTS_FILE.exists():
+        return None
+    found = None
+    try:
+        with open(GRANTS_FILE, encoding="utf-8") as fh:
+            for line in fh:
+                try:
+                    rec = json.loads(line)
+                except Exception:
+                    continue
+                if rec.get("sid") == session_id and rec.get("tier"):
+                    found = rec["tier"]
+    except Exception:
+        return None
+    return found
 
 
 def verify_webhook(payload, sig_header):

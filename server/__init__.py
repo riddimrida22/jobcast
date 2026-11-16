@@ -636,19 +636,26 @@ def create_app() -> Flask:
         tier = None
         sess = None
         if sid and pay.configured():
-            # The return redirect (especially Apple Pay) can beat Stripe finalizing the
-            # Checkout Session, so the first retrieve may show it not-yet-complete. Retry
-            # briefly so a genuine payment is never shown as "not confirmed" over a
-            # sub-second consistency lag.
-            for _attempt in range(6):
-                sess = pay.retrieve_session(sid)
-                tier = pay.tier_from_session(sess)
-                if tier or sess is None:  # resolved, or a hard retrieve failure - no point retrying
-                    break
-                time.sleep(0.5)
+            # 1) The webhook may already have recorded this unlock server-side - race-free,
+            #    so trust it first and skip the fragile live lookup entirely.
+            tier = pay.grant_for(sid)
+            # 2) Otherwise the return redirect (especially Apple Pay) can beat Stripe
+            #    finalizing the Checkout Session, so the first retrieve may show it
+            #    not-yet-complete. Retry briefly so a genuine payment is never shown as
+            #    "not confirmed" over a short consistency lag.
+            if not tier:
+                for _attempt in range(8):
+                    sess = pay.retrieve_session(sid)
+                    tier = pay.tier_from_session(sess)
+                    if tier or sess is None:  # resolved, or a hard retrieve failure
+                        break
+                    time.sleep(0.5)
             if tier:
+                pay.record_grant(sid, tier)  # persist so any later reload unlocks instantly
                 session["jb_tier"] = tier
                 session.permanent = True
+                if sess is None:  # granted from the webhook store; fetch details best-effort
+                    sess = pay.retrieve_session(sid)
                 details = pay._get(sess, "customer_details") or {}
                 email = details.get("email") if hasattr(details, "get") else None
                 pay.record_subscription({
@@ -733,12 +740,18 @@ def create_app() -> Flask:
         if etype == "checkout.session.completed":
             md = pay._get(obj, "metadata") or {}
             details = pay._get(obj, "customer_details") or {}
+            # Authoritative unlock: this fires server-side and never races the browser
+            # redirect, so record the grant here keyed to the checkout session id. The
+            # success page reads it first, so access unlocks even if the redirect was slow,
+            # lost, or closed before Stripe finished.
+            gtier = pay.tier_from_session(obj)
+            pay.record_grant(pay._get(obj, "id"), gtier)
             pay.record_subscription({
                 "event": etype,
                 "email": details.get("email") if hasattr(details, "get") else None,
                 "customer": pay._get(obj, "customer"),
                 "subscription": pay._get(obj, "subscription"),
-                "tier": md.get("tier") if hasattr(md, "get") else None,
+                "tier": gtier or (md.get("tier") if hasattr(md, "get") else None),
                 "ts": int(time.time())})
             # Referral: a PAID conversion credits the referrer (keyed by the Stripe session
             # id, so a webhook retry never double-counts). At the threshold, issue a one-time
