@@ -278,6 +278,7 @@
   </div>
   {% endif %}
 
+  <div class="ov-timeline">
   <p class="muted" style="text-align:center;margin:14px 0 2px">{{ t('ov.when', 'When the change is likely') }}</p>
   {% set bid = r.timeline.band.id %}
   {% set ry = r.timeline.remaining_working_years %}
@@ -307,6 +308,7 @@
   {% if r.timeline.overlap_note %}<p style="text-align:center;margin:8px 0 0">{{ r.timeline.overlap_note }}
     {% if r.timeline.remaining_working_years is not none %}<span class="muted">({{ t('ov.about', 'about') }} {{ r.timeline.remaining_working_years }} {{ t('ov.wyears', 'working years left') }})</span>{% endif %}</p>{% endif %}
   {% if r.timeline.union_note %}<p class="muted" style="text-align:center;margin:4px 0 0">{{ r.timeline.union_note }}</p>{% endif %}
+  </div>
 </div>
 
 <!-- WHAT TO DO -->
@@ -1120,8 +1122,8 @@
           ? ('<b>' + high + '</b> {{ t("fs.ofyour") }} <b>' + total + '</b> {{ t("fs.highexposed") }}')
           : ('{{ t("fs.allpre") }} <b>' + total + '</b> {{ t("fs.allpost") }}'))
         : 'Your full task-by-task breakdown';
-      var rows = scored.slice(0, 3).map(function (t) { return rowHtml(t, false); }).join('')
-        + scored.slice(3, 7).map(function (t) { return rowHtml(t, true); }).join('');
+      var rows = scored.slice(0, 1).map(function (t) { return rowHtml(t, false); }).join('')
+        + scored.slice(1, 5).map(function (t) { return rowHtml(t, true); }).join('');
       g.innerHTML = '<div class="jlp-hook">' + hook + '</div>'
         + '<div class="jlp-tasks">' + rows + '</div>'
         + '<div class="jlp-glock">'

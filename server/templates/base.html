@@ -603,6 +603,11 @@
     .ov-pay .ovp-lab { display:block; font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
     .ov-pay .ovp-val { display:block; font-size:26px; font-weight:800; color:var(--ink); line-height:1.1; margin:2px 0 1px; }
     .ov-pay .ovp-sub { font-size:12px; }
+    /* Free employee teaser: keep the headline score as the hook; the exposure split,
+       the timeline and market pay are part of the paid breakdown. */
+    body.rstage #p-overview .gauges,
+    body.rstage #p-overview .ov-pay,
+    body.rstage #p-overview .ov-timeline { display:none; }
 
     /* hero + chips */
     .hero { margin-bottom:6px; }

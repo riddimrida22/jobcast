@@ -103,7 +103,7 @@ TRANSLATIONS = {
         "fs.allpre": "All",
         "fs.allpost": "of your tasks, scored for AI and robots",
         "fs.unlockpre": "Unlock all",
-        "fs.unlockpost": "tasks, your timeline, and exactly what to do",
+        "fs.unlockpost": "tasks, your timeline, your market pay, and exactly what to do",
         # Overview slide: dials, timeline, bands
         "ov.of100": "of 100",
         "ov.rating": "Job Extinction Risk",
@@ -255,7 +255,7 @@ TRANSLATIONS = {
         "fs.allpre": "Las",
         "fs.allpost": "tareas de tu trabajo, evaluadas para IA y robots",
         "fs.unlockpre": "Desbloquea las",
-        "fs.unlockpost": "tareas, tu cronograma y exactamente qué hacer",
+        "fs.unlockpost": "tareas, tu cronograma, tu salario de mercado y exactamente qué hacer",
         # Overview slide: dials, timeline, bands
         "ov.of100": "de 100",
         "ov.rating": "Riesgo de extinción del empleo",
@@ -402,7 +402,7 @@ TRANSLATIONS = {
         "fs.allpre": "Les",
         "fs.allpost": "tâches de votre métier, évaluées pour l'IA et les robots",
         "fs.unlockpre": "Débloquez les",
-        "fs.unlockpost": "tâches, votre échéance et exactement quoi faire",
+        "fs.unlockpost": "tâches, votre échéance, votre salaire du marché et exactement quoi faire",
         # Overview slide: dials, timeline, bands
         "ov.of100": "sur 100",
         "ov.rating": "Risque de disparition du poste",
@@ -549,7 +549,7 @@ TRANSLATIONS = {
         "fs.allpre": "Tout",
         "fs.allpost": "travay ou yo, evalye pou IA ak robo",
         "fs.unlockpre": "Debloke tout",
-        "fs.unlockpost": "travay yo, delè ou, ak egzakteman kisa pou fè",
+        "fs.unlockpost": "travay yo, delè ou, salè mache ou, ak egzakteman kisa pou fè",
         # Overview slide: dials, timeline, bands
         "ov.of100": "sou 100",
         "ov.rating": "Risk pou travay la disparèt",
