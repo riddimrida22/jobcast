@@ -1084,9 +1084,13 @@
       document.getElementById('up-x').addEventListener('click', function () { closeUp(); });
       document.getElementById('up-finish').addEventListener('click', function () { closeUp(); if (up._onComplete) up._onComplete(); });
       up._show = show;
+      // When Stripe is live, skip the marketing "ad" preamble and open straight on the
+      // plan picker, so buying is one screen then pay, not a slideshow.
+      up._plansIdx = steps.findIndex(function (s) { return s.getAttribute('data-up') === 'plans'; });
     }
     up.hidden = false; up.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
-    up._show(0);
+    var _start = (typeof STRIPE !== 'undefined' && STRIPE && up._plansIdx > 0) ? up._plansIdx : 0;
+    up._show(_start);
   }
   // Express checkout: a payment badge sends the visitor straight to Stripe hosted
   // checkout (best-value yearly plan) - Apple Pay, Google Pay, card and Link all appear

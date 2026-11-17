@@ -206,9 +206,26 @@
   });
   if (skipB) skipB.addEventListener('click', finish);
 
-  // Show it.
-  document.body.classList.add('intro-on');
-  intro.classList.add('show');
-  show(0);
+  // Opt-in, not forced. Force-showing Jobo on every visit was bouncing almost all
+  // first-time visitors before they reached the job input; now the home page lands on
+  // the "type your job" gate, and the intro opens only on request (a "how it works"
+  // link, or ?intro=1).
+  function openIntro() {
+    document.body.classList.add('intro-on');
+    intro.classList.add('show');
+    show(0);
+  }
+  window.jbShowIntro = openIntro;
+  show(0); // pre-render step 1 so the first frame is ready when opened
+  function wireOpeners() {
+    Array.prototype.slice.call(document.querySelectorAll('.js-intro-open')).forEach(function (el) {
+      if (el._introWired) return; el._introWired = true;
+      el.addEventListener('click', function (e) { e.preventDefault(); openIntro(); });
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wireOpeners);
+  } else { wireOpeners(); }
+  try { if (/[?&]intro=1(&|$)/.test(location.search)) openIntro(); } catch (e) {}
 })();
 </script>
