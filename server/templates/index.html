@@ -163,6 +163,10 @@
       {% for f in families %}<optgroup label="{{ f.name }}" data-code="{{ f.code }}">{% for j in f.jobs %}<option value="{{ j.title }}">{{ j.title }}</option>{% endfor %}</optgroup>{% endfor %}
     </select>
   </div>
+  <div id="wz-quick-wrap" style="display:none;margin-top:18px">
+    <button type="button" id="wz-quick" style="width:100%;font:inherit;font-weight:800;font-size:16px;border:0;border-radius:12px;padding:14px;cursor:pointer;color:#2a1708;background:linear-gradient(180deg,var(--accent),#e8863a);box-shadow:0 8px 22px rgba(243,163,95,.4)">See my result now &#8250;</button>
+    <p class="muted" style="text-align:center;font-size:12.5px;margin:9px 0 0">The next questions are optional &mdash; they localize and sharpen your score.</p>
+  </div>
 
   </section>
   <section class="wz-step" data-step="loc">
@@ -656,7 +660,10 @@
   function toEmployee() {
     try { sessionStorage.setItem('jb_aud', 'emp'); } catch (err) {}
     if (aud) aud.classList.add('is-hidden');
-    showWelcome(function () { gate.classList.remove('is-hidden'); });
+    // Fast path: skip the race animation, the "how do you want to start" gate and the
+    // scoring explainer, and drop the employee straight onto the one question we need.
+    set(ENTERED, '1'); hideGate();
+    if (window.jobcastStartFlow) window.jobcastStartFlow();
   }
   if (audEmp) audEmp.addEventListener('click', function (e) { e.preventDefault(); toEmployee(); });
   // The "More information" menu link opens the full browse page (hero, scrolling careers,
@@ -794,11 +801,24 @@
     show(i + 1, 'next');
   });
   if (backB) backB.addEventListener('click', function () { show(i - 1, 'back'); });
-  // Auto-advance the instant a job is picked, to keep the momentum going.
+  // Quick result: once a job is picked on step 1, reveal a "See my result now" button so the
+  // only required field can go straight to the score; the remaining steps stay optional.
+  var quickWrap = document.getElementById('wz-quick-wrap');
+  var quickB = document.getElementById('wz-quick');
+  function jobChosen() { return !!(titleSearch && titleSearch.value.trim() && titleSel && titleSel.value); }
+  function syncQuick() { if (quickWrap) quickWrap.style.display = jobChosen() ? 'block' : 'none'; }
+  function submitNow() {
+    if (!okStep()) return;
+    try { sessionStorage.setItem('jb_reveal', '1'); } catch (e) {}
+    if (form.requestSubmit) form.requestSubmit(); else form.submit();
+  }
+  if (quickB) quickB.addEventListener('click', submitNow);
+  if (titleSearch) titleSearch.addEventListener('input', syncQuick);
+  if (titleSel) titleSel.addEventListener('change', syncQuick);
   var jlist = document.getElementById('title-list');
   if (jlist) jlist.addEventListener('mousedown', function () {
     setTimeout(function () {
-      if (document.body.classList.contains('flow-active') && steps[i].getAttribute('data-step') === 'job' && titleSearch && titleSearch.value.trim()) show(i + 1, 'next');
+      if (document.body.classList.contains('flow-active') && steps[i].getAttribute('data-step') === 'job') syncQuick();
     }, 340);
   });
   if (quitB) quitB.addEventListener('click', function () { document.body.classList.remove('flow-active'); });
