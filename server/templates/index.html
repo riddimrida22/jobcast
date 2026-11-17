@@ -315,6 +315,10 @@
   <aside class="side">
     <div class="side-title safe">Careers more resilient</div>
     <div class="side-sub">Live ratings &mdash; tap any job</div>
+    <a href="/students" style="display:block;text-decoration:none;background:rgba(243,163,95,.12);border:1px solid rgba(243,163,95,.42);border-radius:12px;padding:12px 14px;margin:0 0 12px">
+      <div style="font-weight:800;color:var(--accent);font-size:14px">Free for students</div>
+      <div style="color:var(--muted);font-size:12.5px;margin-top:3px;line-height:1.35">Every career's AI-risk data, no charge. Explore safe options &#8250;</div>
+    </a>
     <div class="ticker rev"><div class="ticker-inner">
       {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}
       {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}

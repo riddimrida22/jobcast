@@ -419,6 +419,9 @@
     .rv { overflow-y:auto; overflow-x:hidden; }
     /* Pin the paywall CTA to the bottom so it is always visible, even when the pitch scrolls. */
     #upsell .up-cta { position:sticky; bottom:12px; z-index:3; box-shadow:0 8px 24px rgba(8,16,28,.45); }
+    /* On phones the stacked plans are tall; a sticky CTA floats over the last card. Let it
+       sit in normal flow below the plans instead, so nothing overlaps. */
+    @media (max-width:560px){ #upsell .up-cta { position:static; margin-top:14px; } }
     /* Short screens (small phones, compact devices): shrink the reveal and paywall so the
        primary button stays on screen without scrolling. */
     @media (max-height:720px) {
@@ -450,6 +453,13 @@
     .buybar .bb-cta { font-weight:800; background:rgba(255,255,255,.22); border-radius:999px; padding:4px 13px; white-space:nowrap; }
     .buybar:hover .bb-cta { background:rgba(255,255,255,.34); }
     @media (max-width:560px){ .buybar { font-size:12.5px; padding:9px 12px; gap:6px 10px; } }
+    /* Charitable note shown site-wide: the student career explorer is free for everyone. */
+    .freebar { display:flex; align-items:center; justify-content:center; gap:6px 10px; flex-wrap:wrap;
+      text-decoration:none; padding:7px 16px; text-align:center; font-size:12.5px; line-height:1.3;
+      color:var(--muted); background:var(--card); border-bottom:1px solid var(--line); }
+    .freebar b { color:var(--accent); font-weight:800; }
+    .freebar .fb-cta { font-weight:700; color:var(--accent); text-decoration:underline; white-space:nowrap; }
+    @media (max-width:560px){ .freebar { font-size:11.5px; padding:6px 12px; } }
     .disclaimer { font-size:12px; line-height:1.45; color:var(--muted); background:var(--card);
       border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin:0 0 14px; }
     .disclaimer a { color:var(--primary); }
@@ -1305,6 +1315,10 @@
   <a class="buybar" href="/?flow=1" aria-label="Check your job and get your plan">
     <span class="bb-txt"><b>{{ t('bb.q', 'Is your job safe from AI?') }}</b> {{ t('bb.txt', 'Get your full Job Extinction Risk &amp; action plan') }}</span>
     <span class="bb-cta">{{ t('bb.cta', 'from $1.99/mo &#8250;') }}</span>
+  </a>
+  <a class="freebar" href="/students" aria-label="Students: browse AI-risk data for every career, free">
+    <span><b>{{ t('fb.b', 'Free for students.') }}</b> {{ t('fb.txt', 'Browse the AI-risk data for every career, no charge.') }}</span>
+    <span class="fb-cta">{{ t('fb.cta', 'Explore free &#8250;') }}</span>
   </a>
   <script>
     // Lightweight funnel events (cookie-free); shows up in /admin/stats under /_ev/*.
