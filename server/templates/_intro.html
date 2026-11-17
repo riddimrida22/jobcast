@@ -160,8 +160,8 @@
 (function () {
   var intro = document.getElementById('intro');
   if (!intro) return;
-  // Jobo greets on every home-page visit: the intro replays each time (by design),
-  // and Skip jumps straight to the gate.
+  // Jobo is opt-in: the home page lands on the gate, and the intro opens only when a
+  // ".js-intro-open" link (or ?intro=1) asks for it. Skip/finish returns to the gate.
 
   var steps = Array.prototype.slice.call(intro.querySelectorAll('.in-step'));
   var dotsEl = document.getElementById('intro-dots');
