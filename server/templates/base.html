@@ -355,6 +355,19 @@
     #rlock .rl-alt { display:block; margin-top:16px; color:#9db0c6; font-size:14px; text-decoration:underline; }
     .pay-badges { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:16px 0 0; }
     #upsell .pay-badges { margin:0 0 20px; }
+    /* Phones: compact the paywall so the plans and the button fit with little scrolling, and
+       drop the fixed nav bar into normal flow so Back never overlaps Continue. */
+    @media (max-width:600px){
+      #upsell { padding:52px 16px 28px; justify-content:flex-start; }
+      #upsell .up-q { font-size:clamp(22px,6.2vw,28px); margin:0 0 6px; }
+      #upsell .up-sub { font-size:13.5px; line-height:1.35; margin:0 0 14px; }
+      #upsell .up-plans { gap:10px; margin:0 0 14px; }
+      #upsell .up-plan { padding:12px 14px; }
+      #upsell .up-plan .up-price { font-size:25px; }
+      #upsell .pay-badges { margin:0 0 12px; }
+      #upsell .up-cta { position:static; margin-top:4px; width:100%; }
+      #upsell .up-nav { position:static; margin-top:12px; padding:4px 0 0; }
+    }
     .pay-badges .pb { font-size:12px; font-weight:700; letter-spacing:.02em; color:#dfe8f3;
       background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.22); border-radius:8px; padding:6px 11px; }
     /* Express checkout: clickable payment badges that go straight to Stripe checkout. */

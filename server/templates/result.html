@@ -1177,7 +1177,11 @@
       showLock(); openUpsell(unlockBreakdown);
     }
     document.getElementById('jlp-unlock').addEventListener('click', advance);
-    document.getElementById('jlp-x').addEventListener('click', advance);
+    // Exit should close the preview and leave the free result visible, not open the paywall.
+    document.getElementById('jlp-x').addEventListener('click', function () {
+      bar.remove(); document.body.classList.remove('rstage');
+      var gh = document.getElementById('jlp-ghost'); if (gh) gh.remove();
+    });
     var gg = document.getElementById('jlp-ghost-go'); if (gg) gg.addEventListener('click', advance);
   }
   var go = document.getElementById('rv-go');
