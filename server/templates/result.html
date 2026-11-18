@@ -93,9 +93,10 @@
     <p class="up-sub">{{ t('up.pl.sub') }}</p>
     <div class="up-plans">
       <label class="up-plan feat"><input type="radio" name="up_plan" value="yearly" checked><span class="up-pn">{{ t('up.pl.yearly') }}</span><span class="up-price">$12<small>/yr</small></span><span class="up-save">{{ t('up.pl.yearly.save') }}</span></label>
-      <label class="up-plan"><input type="radio" name="up_plan" value="monthly"><span class="up-pn">{{ t('up.pl.monthly') }}</span><span class="up-price">$1.99<small>/mo</small></span></label>
-      <label class="up-plan"><input type="radio" name="up_plan" value="once"><span class="up-pn">{{ t('up.pl.once') }}</span><span class="up-price">$4.99</span><span class="up-save">{{ t('up.pl.once.sub') }}</span></label>
+      <label class="up-plan up-plan-more"><input type="radio" name="up_plan" value="monthly"><span class="up-pn">{{ t('up.pl.monthly') }}</span><span class="up-price">$1.99<small>/mo</small></span></label>
+      <label class="up-plan up-plan-more"><input type="radio" name="up_plan" value="once"><span class="up-pn">{{ t('up.pl.once') }}</span><span class="up-price">$4.99</span><span class="up-save">{{ t('up.pl.once.sub') }}</span></label>
     </div>
+    <button type="button" class="up-more-toggle" id="up-more-toggle">{{ t('up.pl.more', 'Other plans &#8250;') }}</button>
     <div class="up-paynote">{{ t('up.pl.tap', 'Tap to pay in one step') }}</div>
     <div class="pay-badges"><span class="pb">Apple Pay</span><span class="pb">Google Pay</span><span class="pb">Card</span><span class="pb">Link</span></div>
     <button type="button" class="up-cta" data-up-next>{{ t('up.pl.cta') }}</button>
@@ -1089,6 +1090,14 @@
         b.setAttribute('role', 'button'); b.tabIndex = 0;
         b.addEventListener('click', function () { if (STRIPE) { upCheckout(plansCta || b); } else { show(ui + 1); } });
         b.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); b.click(); } });
+      });
+      // "Other plans" toggle: the recommended yearly plan leads; monthly and one-time stay
+      // tucked away until asked for, so the first decision is just yes/no on one price.
+      var moreToggle = document.getElementById('up-more-toggle');
+      if (moreToggle && plansStep) moreToggle.addEventListener('click', function () {
+        var pw = plansStep.querySelector('.up-plans'); if (!pw) return;
+        var open = pw.classList.toggle('show-more');
+        moreToggle.innerHTML = open ? '{{ t("up.pl.fewer", "Fewer options") }}' : '{{ t("up.pl.more", "Other plans &#8250;") }}';
       });
       if (back) back.addEventListener('click', function () { show(ui - 1); });
       // Exit leaves the breakdown locked; finishing the preview flow (Stripe off) unlocks it.

@@ -505,6 +505,12 @@
     .up-plan .up-pn { font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#b9c7d8; }
     .up-plan .up-price { font-size:30px; font-weight:900; color:#fff; } .up-plan .up-price small { font-size:14px; font-weight:600; color:#b9c7d8; }
     .up-plan .up-save { font-size:11px; font-weight:800; color:#2a1708; background:var(--accent); border-radius:999px; padding:2px 9px; }
+    /* Lead with the recommended plan; the others stay behind an "Other plans" toggle. */
+    .up-plan-more { display:none; }
+    .up-plans.show-more .up-plan-more { display:flex; }
+    .up-more-toggle { background:none; border:0; color:#9db0c6; font:inherit; font-size:13.5px; text-decoration:underline;
+      cursor:pointer; margin:0 0 20px; }
+    .up-more-toggle:hover { color:#fff; }
     .up-order { text-align:left; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16); border-radius:14px; padding:16px; margin:0 0 20px; }
     .up-row { display:flex; justify-content:space-between; font-size:16px; padding-bottom:12px; margin-bottom:4px; border-bottom:1px solid rgba(255,255,255,.14); } .up-row b { color:var(--accent); }
     .up-field { margin-top:12px; } .up-field label { display:block; font-size:13px; color:#b9c7d8; margin-bottom:5px; }
