@@ -96,6 +96,7 @@
       <label class="up-plan"><input type="radio" name="up_plan" value="monthly"><span class="up-pn">{{ t('up.pl.monthly') }}</span><span class="up-price">$1.99<small>/mo</small></span></label>
       <label class="up-plan"><input type="radio" name="up_plan" value="once"><span class="up-pn">{{ t('up.pl.once') }}</span><span class="up-price">$4.99</span><span class="up-save">{{ t('up.pl.once.sub') }}</span></label>
     </div>
+    <div class="up-paynote">{{ t('up.pl.tap', 'Tap to pay in one step') }}</div>
     <div class="pay-badges"><span class="pb">Apple Pay</span><span class="pb">Google Pay</span><span class="pb">Card</span><span class="pb">Link</span></div>
     <button type="button" class="up-cta" data-up-next>{{ t('up.pl.cta') }}</button>
   </section>
@@ -1078,6 +1079,16 @@
           if (STRIPE && step && step.getAttribute('data-up') === 'plans') { upCheckout(b); return; }
           show(ui + 1);
         });
+      });
+      // One-tap wallet pay: the plan step's payment badges (Apple Pay, Google Pay, Card, Link)
+      // go straight to Stripe checkout with the selected plan, so paying is a single tap -
+      // Stripe's hosted page then surfaces Apple/Google Pay at the top on supported devices.
+      var plansStep = up.querySelector('.up-step[data-up="plans"]');
+      var plansCta = plansStep && plansStep.querySelector('.up-cta');
+      if (plansStep) plansStep.querySelectorAll('.pay-badges .pb').forEach(function (b) {
+        b.setAttribute('role', 'button'); b.tabIndex = 0;
+        b.addEventListener('click', function () { if (STRIPE) { upCheckout(plansCta || b); } else { show(ui + 1); } });
+        b.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); b.click(); } });
       });
       if (back) back.addEventListener('click', function () { show(ui - 1); });
       // Exit leaves the breakdown locked; finishing the preview flow (Stripe off) unlocks it.

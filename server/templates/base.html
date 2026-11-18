@@ -370,6 +370,10 @@
     }
     .pay-badges .pb { font-size:12px; font-weight:700; letter-spacing:.02em; color:#dfe8f3;
       background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.22); border-radius:8px; padding:6px 11px; }
+    /* Paywall wallet badges are tappable one-tap checkout, so make them read as buttons. */
+    #upsell .pay-badges .pb { cursor:pointer; transition:background .15s, border-color .15s, color .15s; }
+    #upsell .pay-badges .pb:hover, #upsell .pay-badges .pb:focus-visible { background:rgba(243,163,95,.18); border-color:var(--accent); color:#fff; outline:none; }
+    .up-paynote { font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); margin:2px 0 9px; }
     /* Express checkout: clickable payment badges that go straight to Stripe checkout. */
     .rl-express-lab { text-align:center; font-size:12px; color:rgba(255,255,255,.62); margin:16px 0 6px; }
     .pay-badges.express { margin:0; }
