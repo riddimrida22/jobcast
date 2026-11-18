@@ -89,17 +89,29 @@
     <button type="button" class="up-cta" data-up-next>{{ t('up.ad.cta') }}</button>
   </section>
   <section class="up-step" data-up="plans">
-    <h2 class="up-q">{{ t('up.pl.q') }}</h2>
-    <p class="up-sub">{{ t('up.pl.sub') }}</p>
-    <div class="up-plans">
-      <label class="up-plan feat"><input type="radio" name="up_plan" value="yearly" checked><span class="up-pn">{{ t('up.pl.yearly') }}</span><span class="up-price">$12<small>/yr</small></span><span class="up-save">{{ t('up.pl.yearly.save') }}</span></label>
-      <label class="up-plan up-plan-more"><input type="radio" name="up_plan" value="monthly"><span class="up-pn">{{ t('up.pl.monthly') }}</span><span class="up-price">$1.99<small>/mo</small></span></label>
-      <label class="up-plan up-plan-more"><input type="radio" name="up_plan" value="once"><span class="up-pn">{{ t('up.pl.once') }}</span><span class="up-price">$4.99</span><span class="up-save">{{ t('up.pl.once.sub') }}</span></label>
+    <aside class="up-info" aria-hidden="true">
+      <h3 class="up-info-h">{{ t('up.info.h', 'What you unlock') }}</h3>
+      <ul class="up-benefits">
+        <li>{{ t('up.info.1', 'Every exposed task in your job, scored 0 to 100') }}</li>
+        <li>{{ t('up.info.2', 'Your AI and robotics timeline, year by year') }}</li>
+        <li>{{ t('up.info.3', 'A step-by-step plan for what to do next') }}</li>
+        <li>{{ t('up.info.4', 'We watch your job and email you when the outlook shifts') }}</li>
+      </ul>
+      <p class="up-promo">{{ t('up.info.promo', 'Instant access, no account needed. Cancel anytime.') }}</p>
+    </aside>
+    <div class="up-buy">
+      <h2 class="up-q">{{ t('up.pl.q') }}</h2>
+      <p class="up-sub">{{ t('up.pl.sub') }}</p>
+      <div class="up-plans">
+        <label class="up-plan feat"><input type="radio" name="up_plan" value="yearly" checked><span class="up-pn">{{ t('up.pl.yearly') }}</span><span class="up-price">$12<small>/yr</small></span><span class="up-save">{{ t('up.pl.yearly.save') }}</span></label>
+        <label class="up-plan up-plan-more"><input type="radio" name="up_plan" value="monthly"><span class="up-pn">{{ t('up.pl.monthly') }}</span><span class="up-price">$1.99<small>/mo</small></span></label>
+        <label class="up-plan up-plan-more"><input type="radio" name="up_plan" value="once"><span class="up-pn">{{ t('up.pl.once') }}</span><span class="up-price">$4.99</span><span class="up-save">{{ t('up.pl.once.sub') }}</span></label>
+      </div>
+      <button type="button" class="up-more-toggle" id="up-more-toggle">{{ t('up.pl.more', 'Other plans &#8250;') }}</button>
+      <div class="up-paynote">{{ t('up.pl.tap', 'Tap to pay in one step') }}</div>
+      <div class="pay-badges"><span class="pb">Apple Pay</span><span class="pb">Google Pay</span><span class="pb">Card</span><span class="pb">Link</span></div>
+      <button type="button" class="up-cta" data-up-next>{{ t('up.pl.cta') }}</button>
     </div>
-    <button type="button" class="up-more-toggle" id="up-more-toggle">{{ t('up.pl.more', 'Other plans &#8250;') }}</button>
-    <div class="up-paynote">{{ t('up.pl.tap', 'Tap to pay in one step') }}</div>
-    <div class="pay-badges"><span class="pb">Apple Pay</span><span class="pb">Google Pay</span><span class="pb">Card</span><span class="pb">Link</span></div>
-    <button type="button" class="up-cta" data-up-next>{{ t('up.pl.cta') }}</button>
   </section>
   <section class="up-step" data-up="order">
     <h2 class="up-q">Your order</h2>

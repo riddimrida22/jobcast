@@ -489,6 +489,21 @@
     .up-x { position:absolute; top:16px; right:18px; background:none; border:0; color:#9db0c6; font:inherit; font-size:13px; text-decoration:underline; cursor:pointer; }
     .up-step { display:none; width:100%; max-width:480px; }
     .up-step.active { display:block; animation:wzIn .35s ease; }
+    /* Desktop side-lane: use the empty space beside the narrow modal for a value panel. */
+    .up-info { display:none; } .up-buy { width:100%; }
+    .up-info-h { font-size:20px; font-weight:800; color:#fff; margin:0 0 14px; }
+    .up-benefits { list-style:none; padding:0; margin:0 0 16px; text-align:left; }
+    .up-benefits li { position:relative; padding:9px 0 9px 28px; font-size:14.5px; color:#eaf1f9; border-bottom:1px solid rgba(255,255,255,.1); }
+    .up-benefits li::before { content:""; position:absolute; left:3px; top:14px; width:9px; height:5px;
+      border-left:2.5px solid var(--accent); border-bottom:2.5px solid var(--accent); transform:rotate(-45deg); }
+    .up-promo { color:#9db0c6; font-size:13px; line-height:1.5; margin:0; }
+    @media (min-width:880px){
+      #upsell .up-step[data-up="plans"].active { display:flex; align-items:center; gap:44px; max-width:840px; text-align:left; }
+      #upsell .up-info { display:block; flex:1 1 300px; }
+      #upsell .up-buy { flex:0 0 340px; }
+      #upsell .up-step[data-up="plans"] .up-q { font-size:28px; }
+      #upsell .up-step[data-up="plans"] .pay-badges { justify-content:flex-start; }
+    }
     .up-ico { font-size:54px; margin-bottom:8px; animation:wzPop .55s cubic-bezier(.2,1.35,.4,1); }
     .up-q { font-size:clamp(26px,5vw,36px); font-weight:800; color:#fff; margin:0 0 8px; }
     .up-sub { color:#b9c7d8; font-size:16px; line-height:1.45; margin:0 0 20px; } .up-sub b { color:#fff; }
