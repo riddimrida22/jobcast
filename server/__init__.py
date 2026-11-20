@@ -165,6 +165,7 @@ def create_app() -> Flask:
                 "meta_pixel_id": os.environ.get("JOBCAST_META_PIXEL_ID", ""),
                 "google_ads_id": os.environ.get("JOBCAST_GOOGLE_ADS_ID", ""),
                 "google_conversion_label": os.environ.get("JOBCAST_GOOGLE_CONVERSION_LABEL", ""),
+                "tiktok_pixel_id": os.environ.get("JOBCAST_TIKTOK_PIXEL_ID", ""),
                 # Consumer-facing name for the 0-100 rating. One place to change it.
                 "rating_label": "Job Extinction Risk"}
 
