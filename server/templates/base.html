@@ -482,7 +482,9 @@
       #upsell .pay-badges { margin:0 0 10px; }
     }
     .home-fab svg { width:18px; height:18px; }
-    @media (max-width:560px){ .home-fab span { display:none; } .home-fab { padding:10px; } }
+    /* On phones the fixed home button overlapped the header wordmark; the header's own
+       logo and Home link already cover navigation, so drop the floating one there. */
+    @media (max-width:560px){ .home-fab { display:none !important; } }
     /* Persistent buy bar across the top of every page */
     .buybar { display:flex; align-items:center; justify-content:center; gap:8px 16px; flex-wrap:wrap;
       text-decoration:none; padding:10px 16px; text-align:center; color:#fff; font-size:14px; line-height:1.3;
