@@ -26,8 +26,16 @@ def _db_path() -> Path:
 
 
 def _conn() -> sqlite3.Connection:
-    conn = sqlite3.connect(str(_db_path()))
+    # timeout waits on a locked DB instead of raising; WAL lets readers and a writer
+    # work concurrently; these matter under a traffic spike when many requests write at once.
+    conn = sqlite3.connect(str(_db_path()), timeout=5.0)
     conn.row_factory = sqlite3.Row
+    try:
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=5000")
+        conn.execute("PRAGMA synchronous=NORMAL")
+    except sqlite3.Error:
+        pass
     conn.execute(
         """CREATE TABLE IF NOT EXISTS pageviews (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

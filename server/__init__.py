@@ -344,14 +344,25 @@ def create_app() -> Flask:
         return render_template("jobs.html", version=VERSION, licensed=engine.snapshot.licensed,
                                families=engine.snapshot.families(), jobs=jobs)
 
+    _tour_cache = {}  # (soc, country) -> assessment. These pages take no personal input, so the
+                      # generic read is identical per occupation and safe to memoize. This is the
+                      # viral path (ads and shares link here), so caching it multiplies capacity.
     @app.get("/jobs/<soc>")
     def occupation_page(soc):
         """Programmatic SEO page: a generic read for an occupation (no personal inputs)."""
         occ = engine.snapshot.occupation(soc)
         if occ is None:
             return redirect(url_for("index"))
-        prof = Profile(title=occ["title"], country=getattr(g, "country", None))
-        result = engine.assess(prof)
+        country = getattr(g, "country", None)
+        prof = Profile(title=occ["title"], country=country)
+        key = (soc, country or "us")
+        result = _tour_cache.get(key)
+        if result is None:
+            result = engine.assess(prof)
+            if result.get("ok"):
+                if len(_tour_cache) > 6000:
+                    _tour_cache.clear()
+                _tour_cache[key] = result
         session["jb_soc"] = soc              # so a "notify me" on this page watches this job
         return render_template("result.html", r=result, profile=prof,
                                version=VERSION, licensed=engine.snapshot.licensed, seo=True)
