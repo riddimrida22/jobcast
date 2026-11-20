@@ -35,4 +35,19 @@
     <a href="/" style="color:var(--primary);font-weight:600">Back to JobBreak</a>
   {% endif %}
 </div>
+{% if ok %}
+<script>
+// Fire the purchase conversion to the ad platforms (only when their tags are loaded).
+(function () {
+  var val = {{ paid_value|default(0, true) }}, cur = {{ (paid_currency|default('USD', true))|tojson }};
+  try { if (window.fbq) fbq('track', 'Purchase', { value: val, currency: cur }); } catch (e) {}
+  try {
+    if (window.gtag) {
+      {% if google_ads_id and google_conversion_label %}gtag('event', 'conversion', { send_to: '{{ google_ads_id }}/{{ google_conversion_label }}', value: val, currency: cur });
+      {% endif %}gtag('event', 'purchase', { value: val, currency: cur });
+    }
+  } catch (e) {}
+})();
+</script>
+{% endif %}
 {% endblock %}

@@ -3,6 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% if meta_pixel_id %}
+  <!-- Meta Pixel (loads only when JOBCAST_META_PIXEL_ID is set) -->
+  <script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,
+  'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init','{{ meta_pixel_id }}');fbq('track','PageView');</script>
+  <noscript><img height="1" width="1" style="display:none" alt=""
+    src="https://www.facebook.com/tr?id={{ meta_pixel_id }}&ev=PageView&noscript=1"/></noscript>
+  {% endif %}
+  {% if google_ads_id %}
+  <!-- Google Ads / gtag (loads only when JOBCAST_GOOGLE_ADS_ID is set) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_ads_id }}"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+  gtag('js',new Date());gtag('config','{{ google_ads_id }}');</script>
+  {% endif %}
   <meta name="google-site-verification" content="ZSZdAmIx4f0BBT9WjDnOZ3tCJioJNbSDHpg9bJkEZR8" />
   <title>{% block title %}JobBreak{% endblock %}</title>
   <meta name="description" content="{% block description %}A clear, sourced read on whether AI or robots are likely to take your job, and when.{% endblock %}">
@@ -1364,10 +1381,19 @@
   </a>
   <script>
     // Lightweight funnel events (cookie-free); shows up in /admin/stats under /_ev/*.
-    window.jbEv = function (n) { try { var b = JSON.stringify({ name: n });
-      if (navigator.sendBeacon) { navigator.sendBeacon('/v1/ev', new Blob([b], { type: 'application/json' })); }
-      else { fetch('/v1/ev', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: b, keepalive: true }); }
-    } catch (e) {} };
+    window.jbEv = function (n) {
+      try { var b = JSON.stringify({ name: n });
+        if (navigator.sendBeacon) { navigator.sendBeacon('/v1/ev', new Blob([b], { type: 'application/json' })); }
+        else { fetch('/v1/ev', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: b, keepalive: true }); }
+      } catch (e) {}
+      // Mirror the funnel step to the ad platforms, only when their tags are loaded.
+      try {
+        var FB = { reveal: 'Lead', free_slide: 'ViewContent', example_open: 'ViewContent',
+                   paywall: 'AddToCart', checkout: 'InitiateCheckout' };
+        if (window.fbq && FB[n]) fbq('track', FB[n]);
+        if (window.gtag && n === 'checkout') gtag('event', 'begin_checkout');
+      } catch (e) {}
+    };
   </script>
   <script>
     if ('serviceWorker' in navigator) {

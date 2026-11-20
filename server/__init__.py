@@ -160,6 +160,11 @@ def create_app() -> Flask:
         from . import payments as pay
         return {"noindex": noindex, "stripe_enabled": pay.configured(),
                 "entitlement": session.get("jb_tier", "free"),
+                # Ad-platform tags (Meta Pixel, Google Ads). Dormant until the IDs are set as
+                # env vars, so nothing loads or changes on the site until an ad account exists.
+                "meta_pixel_id": os.environ.get("JOBCAST_META_PIXEL_ID", ""),
+                "google_ads_id": os.environ.get("JOBCAST_GOOGLE_ADS_ID", ""),
+                "google_conversion_label": os.environ.get("JOBCAST_GOOGLE_CONVERSION_LABEL", ""),
                 # Consumer-facing name for the 0-100 rating. One place to change it.
                 "rating_label": "Job Extinction Risk"}
 
@@ -685,8 +690,17 @@ def create_app() -> Flask:
                 pay._get(sess, "status") or "-",
                 pay._get(sess, "payment_status") or "-",
                 (smd.get("tier") if hasattr(smd, "get") else None) or "-")
+        # Purchase value for ad-conversion tracking (Meta Pixel / Google Ads), from the
+        # Stripe session when present. Best-effort; a missing value just omits the amount.
+        paid_value = paid_currency = None
+        if tier and sess is not None:
+            amt = pay._get(sess, "amount_total")
+            if amt:
+                paid_value = round(amt / 100.0, 2)
+                paid_currency = (pay._get(sess, "currency") or "usd").upper()
         return render_template("billing.html", ok=bool(tier), tier=tier,
                                processing=(not tier and sess is not None), session_id=sid, diag=diag,
+                               paid_value=paid_value, paid_currency=paid_currency,
                                version=VERSION, licensed=engine.snapshot.licensed)
 
     @app.get("/unsubscribe")
