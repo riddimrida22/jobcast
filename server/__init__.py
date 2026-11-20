@@ -587,6 +587,25 @@ def create_app() -> Flask:
         return Response(sw, mimetype="application/javascript",
                         headers={"Service-Worker-Allowed": "/"})
 
+    @app.get("/.well-known/assetlinks.json")
+    def assetlinks():
+        """Digital Asset Links for the Android TWA (Play Store wrapper): lets the installed
+        app verify it owns jobbreak.ai and run without the browser address bar. Filled in by
+        env once the Play package exists - JOBCAST_TWA_PACKAGE (the app's package name) and
+        JOBCAST_TWA_FINGERPRINTS (comma-separated SHA-256 signing-cert fingerprints from Play
+        App Signing). Emits an empty, harmless list until both are set."""
+        from flask import Response
+        pkg = os.environ.get("JOBCAST_TWA_PACKAGE", "").strip()
+        fps = [f.strip() for f in os.environ.get("JOBCAST_TWA_FINGERPRINTS", "").split(",") if f.strip()]
+        statements = []
+        if pkg and fps:
+            statements = [{
+                "relation": ["delegate_permission/common.handle_all_urls"],
+                "target": {"namespace": "android_app", "package_name": pkg,
+                           "sha256_cert_fingerprints": fps},
+            }]
+        return Response(json.dumps(statements), mimetype="application/json")
+
     # ---- Payments (Stripe hosted Checkout; env-driven, test-mode ready) ----
     @app.post("/checkout")
     def checkout():
