@@ -18,6 +18,13 @@
   .gate-lang a { color:#9db0c6; text-decoration:none; font-size:13px; font-weight:700; padding:5px 8px; border-radius:7px; line-height:1; }
   .gate-lang a:hover { color:#fff; background:rgba(255,255,255,.08); }
   .gate-lang a.on { color:#fff; background:rgba(255,255,255,.16); }
+  .lp-quick { width:min(92vw,520px); margin:13px auto 0; display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  .lp-quick .lpq-lab { width:100%; text-align:center; color:#8ea3bc; font-size:12px; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px; }
+  .lp-quick a { color:#eaf1f9; text-decoration:none; font-size:14px; font-weight:600; padding:8px 13px; border-radius:999px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); }
+  .lp-quick a:hover { background:rgba(255,255,255,.15); }
+  /* Clear the absolute top controls bar when the gate's content is tall (the quick-pick
+     chips push the headline up), so the title never sits under the country/language row. */
+  #gate-aud { padding-top:66px; }
 </style>
 <div class="gate" id="gate-aud" role="dialog" aria-label="Welcome to JobBreak">
   {% include "_controls.html" %}
@@ -27,6 +34,15 @@
     <input id="lp-q" type="text" autocomplete="off" placeholder="{{ t('lp.ph', 'Type your job, e.g. electrician, nurse, accountant') }}"
            role="combobox" aria-controls="lp-qlist" aria-expanded="false" aria-label="Type your job">
     <div id="lp-qlist" class="combo-list" role="listbox" hidden></div>
+  </div>
+  <div class="lp-quick">
+    <span class="lpq-lab">{{ t('lp.quick', 'Or tap a job to see its score') }}</span>
+    <a href="/jobs/13-2011.00">Accountant</a>
+    <a href="/jobs/29-1141.00">Nurse</a>
+    <a href="/jobs/15-1252.00">Software developer</a>
+    <a href="/jobs/53-3032.00">Truck driver</a>
+    <a href="/jobs/27-1024.00">Graphic designer</a>
+    <a href="/jobs/47-2111.00">Electrician</a>
   </div>
   <div class="lp-or"><span>{{ t('lp.or', 'or') }}</span></div>
   <div class="gate-paths">
@@ -41,7 +57,105 @@
       <div class="gc-sub">{{ t('stu.sub', 'Find careers that pay well and are hard for AI to take, ranked from real data.') }}</div>
     </a>
   </div>
+  <div class="jd-trigger">
+    <button type="button" class="jd-open" id="jd-open">
+      <span class="jd-ey">See a worked example</span>
+      <span class="jd-h">Jane, a customer service rep &mdash; her score and the plan she gets &#8250;</span>
+    </button>
+  </div>
   <div class="gate-skip" style="margin-top:16px"><a href="#" class="js-intro-open">{{ t('intro.open', 'New to this? Watch the 30-second intro &#8250;') }}</a></div>
+</div>
+<style>
+  .jd-trigger { width:min(92vw,520px); margin:14px auto 0; }
+  .jd-open { width:100%; display:flex; flex-direction:column; gap:3px; text-align:center; cursor:pointer;
+    background:rgba(243,163,95,.09); border:1px solid rgba(243,163,95,.4); border-radius:12px; padding:11px 14px; color:#eaf1f9; font:inherit; }
+  .jd-open:hover { background:rgba(243,163,95,.16); }
+  .jd-open .jd-ey { color:var(--accent,#f3a35f); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
+  .jd-open .jd-h { font-weight:700; font-size:14.5px; line-height:1.35; }
+  .jd-demo { position:fixed; inset:0; z-index:2000; background:rgba(6,14,24,.74); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+    display:flex; align-items:flex-start; justify-content:center; overflow-y:auto; padding:24px 14px 44px; }
+  .jd-demo[hidden] { display:none; }
+  .jd-card { width:min(96vw,560px); background:#102338; border:1px solid rgba(255,255,255,.14); border-radius:18px;
+    padding:20px 20px 22px; color:#eef3f9; box-shadow:0 24px 60px rgba(0,0,0,.5); position:relative; }
+  .jd-x { position:absolute; top:9px; right:13px; background:none; border:0; color:#9db0c6; font-size:27px; line-height:1; cursor:pointer; padding:0; }
+  .jd-x:hover { color:#fff; }
+  .jd-note { font-size:11.5px; color:#9db0c6; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+    border-radius:8px; padding:7px 10px; margin:2px 24px 16px 0; line-height:1.4; }
+  .jd-top { display:flex; align-items:center; justify-content:space-between; gap:14px; }
+  .jd-who .jd-ey { color:var(--accent,#f3a35f); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; }
+  .jd-who .jd-role { font-size:18px; font-weight:800; margin-top:1px; }
+  .jd-score { text-align:right; line-height:1; }
+  .jd-score b { font-size:40px; font-weight:800; color:var(--accent,#f3a35f); }
+  .jd-score span { display:block; font-size:11px; color:#9db0c6; margin-top:3px; }
+  .jd-score .jd-band { display:inline-block; margin-top:5px; font-size:11px; font-weight:700; color:#2a1708;
+    background:var(--accent,#f3a35f); border-radius:999px; padding:2px 9px; font-style:normal; }
+  .jd-bars { margin:16px 0 4px; display:flex; flex-direction:column; gap:9px; }
+  .jd-bar { display:flex; align-items:center; gap:10px; font-size:13px; }
+  .jd-bar .jd-bl { width:122px; color:#c6d3e2; flex:none; }
+  .jd-bar .jd-track { flex:1; height:9px; border-radius:6px; background:rgba(255,255,255,.1); overflow:hidden; }
+  .jd-bar .jd-track i { display:block; height:100%; border-radius:6px; background:#e8794a; }
+  .jd-bar .jd-track i.lo { background:#5ec98c; }
+  .jd-bar b { width:26px; text-align:right; font-variant-numeric:tabular-nums; }
+  .jd-time { font-size:13px; color:#c6d3e2; background:rgba(255,255,255,.05); border-radius:9px; padding:9px 12px; margin:12px 0 16px; }
+  .jd-time b { color:#fff; }
+  .jd-plan-h { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:#9db0c6; margin:0 0 9px; }
+  .jd-steps { display:flex; flex-direction:column; gap:9px; }
+  .jd-step { background:#17304d; border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:11px 13px; }
+  .jd-sh { display:flex; align-items:center; gap:8px; }
+  .jd-sh .jd-ico { font-size:15px; }
+  .jd-sh b { font-size:14.5px; }
+  .jd-act { margin:5px 0 0; font-size:13.5px; color:#eaf1f9; line-height:1.4; }
+  .jd-ev { margin:5px 0 0; font-size:12.5px; color:#9fb3ca; line-height:1.4; }
+  .jd-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .jd-meta span { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:#b7c6d7;
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:999px; padding:2px 8px; }
+  .jd-meta span.imp { color:#2a1708; background:var(--accent,#f3a35f); border-color:transparent; }
+  .jd-cta { width:100%; margin-top:16px; font:inherit; font-weight:800; font-size:16px; border:0; border-radius:12px;
+    padding:14px; cursor:pointer; color:#2a1708; background:linear-gradient(180deg,var(--accent,#f3a35f),#e8863a);
+    box-shadow:0 8px 22px rgba(243,163,95,.4); }
+</style>
+<div class="jd-demo" id="jd-demo" hidden role="dialog" aria-modal="true" aria-label="Example profile">
+  <div class="jd-card">
+    <button type="button" class="jd-x" id="jd-x" aria-label="Close">&times;</button>
+    <div class="jd-note">Example profile &mdash; a sample to show what you get. Jane is not a real person.</div>
+    <div class="jd-top">
+      <div class="jd-who"><span class="jd-ey">Jane, 41 &middot; United States</span><div class="jd-role">Customer Service Representative</div></div>
+      <div class="jd-score"><b>70</b><span>{{ rating_label }} &middot; of 100</span><em class="jd-band">High</em></div>
+    </div>
+    <div class="jd-bars">
+      <div class="jd-bar"><span class="jd-bl">AI / software</span><div class="jd-track"><i style="width:70%"></i></div><b>70</b></div>
+      <div class="jd-bar"><span class="jd-bl">Physical / robotics</span><div class="jd-track"><i class="lo" style="width:30%"></i></div><b>30</b></div>
+    </div>
+    <div class="jd-time">When: a <b>partial change over the next 3 to 7 years</b>, not overnight. Enough time to get ahead of it.</div>
+    <div class="jd-plan-h">Her plan &mdash; the kind of steps you get</div>
+    <div class="jd-steps">
+      <div class="jd-step">
+        <div class="jd-sh"><span class="jd-ico" aria-hidden="true">&#9889;</span><b>Own the hard calls</b></div>
+        <p class="jd-act">Volunteer for escalations and complex cases, the ones bots hand back to a person.</p>
+        <p class="jd-ev">Support teams keep reps for the share of contacts that automated help still can't resolve.</p>
+        <div class="jd-meta"><span>Now</span><span class="imp">High impact</span><span>Low effort</span></div>
+      </div>
+      <div class="jd-step">
+        <div class="jd-sh"><span class="jd-ico" aria-hidden="true">&#129504;</span><b>Run the bots, don't race them</b></div>
+        <p class="jd-act">Learn the CRM and helpdesk admin side (Zendesk, Salesforce) and move toward CX operations.</p>
+        <p class="jd-ev">As firms roll out support AI, roles like conversation designer and CX ops are opening up.</p>
+        <div class="jd-meta"><span>6-18 months</span><span class="imp">High impact</span><span>Medium effort</span></div>
+      </div>
+      <div class="jd-step">
+        <div class="jd-sh"><span class="jd-ico" aria-hidden="true">&#129309;</span><b>Build a human edge</b></div>
+        <p class="jd-act">Shift toward account management or sales, where trust and judgment still decide the outcome.</p>
+        <p class="jd-ev">The parts of support that need empathy and negotiation are the slowest to automate.</p>
+        <div class="jd-meta"><span>1-3 years</span><span class="imp">High impact</span><span>Medium effort</span></div>
+      </div>
+      <div class="jd-step">
+        <div class="jd-sh"><span class="jd-ico" aria-hidden="true">&#128176;</span><b>Bank a buffer</b></div>
+        <p class="jd-act">Set aside three to six months of expenses while the change plays out.</p>
+        <p class="jd-ev">Her timeline is measured in years, not months, so steady saving beats a rushed exit.</p>
+        <div class="jd-meta"><span>0-6 months</span><span>Medium impact</span><span>Low effort</span></div>
+      </div>
+    </div>
+    <button type="button" class="jd-cta" id="jd-cta">Now see your own job &#8250;</button>
+  </div>
 </div>
 <div class="welcome" id="welcome" hidden role="dialog" aria-label="Welcome">
   <div class="wel-head"><h2>Here's the race</h2><p>Automation is taking some work faster than others. Watch, then see where you land.</p></div>
@@ -890,6 +1004,29 @@
   initCombo('cs-q', 'cs-qlist');
   var back = document.getElementById('cs-back');
   if (back) back.addEventListener('click', function () { location.href = '/'; });
+})();
+</script>
+<script>
+// Activation: put the cursor in the landing job box on desktop (not touch, where it would
+// pop the keyboard and shove the page). And the "worked example" (Jane) modal.
+(function () {
+  var q = document.getElementById('lp-q');
+  if (q && window.matchMedia && window.matchMedia('(pointer:fine)').matches) {
+    setTimeout(function () { try { q.focus(); } catch (e) {} }, 300);
+  }
+  var open = document.getElementById('jd-open'), modal = document.getElementById('jd-demo'),
+      x = document.getElementById('jd-x'), cta = document.getElementById('jd-cta');
+  if (!open || !modal) return;
+  function show() { modal.hidden = false; document.body.style.overflow = 'hidden'; if (window.jbEv) window.jbEv('example_open'); }
+  function hide() { modal.hidden = true; document.body.style.overflow = ''; }
+  open.addEventListener('click', show);
+  if (x) x.addEventListener('click', hide);
+  modal.addEventListener('click', function (e) { if (e.target === modal) hide(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !modal.hidden) hide(); });
+  if (cta) cta.addEventListener('click', function () {
+    hide(); var box = document.getElementById('lp-q');
+    if (box) { box.focus(); box.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  });
 })();
 </script>
 {% endblock %}

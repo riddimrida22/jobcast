@@ -73,7 +73,8 @@ class Engine:
         adjacency = self._adjacency(occ, base_exposure)
         confidence = self._confidence_band(axes)
         drivers = self._key_drivers(occ, axes, decomposition, timeline, wages, profile)
-        strategies = self._strategies(axes, base_exposure, timeline, wages, adjacency, profile)
+        strategies = self._strategies(occ, axes, base_exposure, timeline, wages, adjacency,
+                                      decomposition, profile)
 
         return {
             "ok": True,
@@ -95,6 +96,7 @@ class Engine:
             "tasks": decomposition,
             "wages": wages,
             "adjacent_lower_risk": adjacency,
+            "geo": self._geo_compare(occ),
             "sources": self.snapshot.data.get("sources") or self.sources.get("sources", []),
             "snapshot": {"id": self.snapshot.snapshot_id, "date": self.snapshot.snapshot_date,
                          "licensed": self.snapshot.licensed},
@@ -385,70 +387,102 @@ class Engine:
         drivers.sort(key=lambda d: d["weight"], reverse=True)
         return drivers[:5]
 
-    def _strategies(self, axes, base_exposure, timeline, wages, adjacency, profile) -> List[Dict[str, Any]]:
+    @staticmethod
+    def _short_task(name: str) -> str:
+        """O*NET task sentences run long; reduce one to its first clause (kept verbatim,
+        so it can be quoted) for use inside advice text."""
+        t = (name or "").split(",")[0].strip().rstrip(".")
+        words = t.split()
+        if len(words) > 12:
+            t = " ".join(words[:12])
+        return t
+
+    def _strategies(self, occ, axes, base_exposure, timeline, wages, adjacency,
+                    decomposition, profile) -> List[Dict[str, Any]]:
         """Concrete, data-grounded strategies to protect the person's livelihood, most
-        relevant first. Deterministic here; the paid plan expands each with a
-        language-model-written, personalised version. Never changes the score."""
+        relevant first. Grounded in THIS person's actual exposed tasks, adjacent roles, and
+        skills so it reads specific, not generic. Deterministic; the paid plan rewrites each
+        with a language-model version. Never changes the score."""
         s: List[Dict[str, Any]] = []
         band = timeline.get("band", {}).get("id")
 
+        ranked = sorted(decomposition, key=lambda d: max(d["ai"], d["robo"]), reverse=True)
+        top_exposed = ranked[0] if ranked else None
+        safe = [d for d in decomposition if max(d["ai"], d["robo"]) < 45]
+        top_safe = min(safe, key=lambda d: max(d["ai"], d["robo"])) if safe else None
+        exp_q = ('“' + self._short_task(top_exposed["name"]) + '”') if top_exposed else None
+
         # 1. Timing, from the timeline band.
         if band == "near_term_high":
-            s.append({"title": "Act within the next 1 to 2 years",
+            s.append({"title": "Act within the next 1 to 2 years", "icon": "buffer",
                       "detail": "Displacement for this role is near-term. Start a concrete reskilling "
                                 "plan now, while you still have income and leverage."})
         elif band == "partial_5_10yr":
-            s.append({"title": "Use your 5 to 10 year runway",
+            s.append({"title": "Use your 5 to 10 year runway", "icon": "buffer",
                       "detail": "Change here is gradual. Build resilient skills steadily and watch the "
                                 "signals rather than waiting for a shock."})
         else:
-            s.append({"title": "Stay sharp; urgency is low",
+            s.append({"title": "Stay sharp; urgency is low", "icon": "buffer",
                       "detail": "This role looks durable. Keep your skills current and watch for shifts "
                                 "in your field."})
 
-        # 2. The dominant threat axis.
+        # 2. The dominant threat axis, grounded in the person's own tasks.
         if axes["ai_software"] >= axes["physical_robotics"] and axes["ai_software"] >= 45:
-            s.append({"title": "Lean into the human edge", "icon": "dna",
-                      "detail": "The exposed parts are routine and cognitive. Invest in judgment, client "
-                                "relationships, and complex problem-solving that AI still cannot do."})
+            lead = (f"The most exposed part of your work is {exp_q} — exactly what today's AI does well. "
+                    if exp_q else "The exposed parts of your work are routine and cognitive. ")
+            edge = (f"Your edge is the human side, like “{self._short_task(top_safe['name'])}” and the "
+                    "judgment around it; move more of your week there."
+                    if top_safe else "Your edge is judgment, client relationships, and complex "
+                    "problem-solving AI still cannot do; move more of your week there.")
+            s.append({"title": "Lean into the human edge", "icon": "dna", "detail": lead + edge})
         elif axes["physical_robotics"] >= 45:
-            s.append({"title": "Move up from the task to the system",
-                      "detail": "Robotics targets the physical work. Shift toward supervising, maintaining, "
-                                "or programming the automation instead of competing with it."})
+            lead = (f"Robotics targets the hands-on work, like {exp_q}. " if exp_q
+                    else "Robotics targets the physical work. ")
+            s.append({"title": "Move up from the task to the system", "icon": "pivot",
+                      "detail": lead + "Shift toward supervising, maintaining, or programming the "
+                      "automation instead of competing with it."})
 
-        # 3. A concrete lower-risk pivot.
+        # 3. Get ahead by directing the tools, not racing them.
+        if top_exposed and max(top_exposed["ai"], top_exposed["robo"]) >= 50:
+            s.append({"title": "Direct the tools, don't race them", "icon": "automate",
+                      "detail": f"Get hands-on with the AI tools arriving in your field and point them at "
+                                f"your exposed work, like {exp_q}. Be the person who runs them, not the "
+                                "one they replace."})
+
+        # 4. A concrete lower-risk pivot.
         if adjacency:
             a = adjacency[0]
-            s.append({"title": f"Pivot toward {a['title']}",
+            s.append({"title": f"Pivot toward {a['title']}", "icon": "pivot",
                       "detail": f"It is skill-adjacent and less exposed ({a['max_exposure']} vs "
                                 f"{round(base_exposure)}). A lateral move now beats a forced one later."})
 
-        # 4. Financial resilience - the core of avoiding a livelihood shock.
-        s.append({"title": "Build a financial buffer",
+        # 5. Financial resilience - the core of avoiding a livelihood shock.
+        s.append({"title": "Build a financial buffer", "icon": "buffer",
                   "detail": "Keep 6 to 12 months of expenses and diversify your income, so a disruption "
                             "is a setback rather than a catastrophe."})
 
-        # 5. Wage trajectory.
+        # 6. Wage trajectory.
         if wages.get("available") and (wages.get("real_change_pct") or 0) < 0:
-            s.append({"title": "Stop the income slide",
+            s.append({"title": "Stop the income slide", "icon": "buffer",
                       "detail": "Your real pay is already falling. Renegotiate, add a credential, or move "
                                 "before the erosion compounds."})
 
-        # 6. Protection and credentials.
+        # 7. Protection and credentials.
         if timeline.get("union_protected"):
-            s.append({"title": "Use your collective leverage",
+            s.append({"title": "Use your collective leverage", "icon": "network",
                       "detail": "Union coverage can fund retraining and ease transitions. Push for those "
                                 "protections while you have them."})
         else:
-            s.append({"title": "Add a recognised credential",
+            s.append({"title": "Add a recognised credential", "icon": "credential",
                       "detail": "A certification or license raises the bar against automation and signals "
                                 "value in a tightening market."})
 
-        # 7. Skills the person listed.
+        # 8. Skills the person listed.
         if profile.skills:
-            s.append({"title": "Market your transferable skills",
-                      "detail": f"Your skills ({profile.skills}) carry into adjacent roles. Frame them for "
-                                "where the work is heading, not just where it has been."})
+            adj_name = adjacency[0]["title"] if adjacency else "less-exposed roles"
+            s.append({"title": "Market your transferable skills", "icon": "skill",
+                      "detail": f"Your skills ({profile.skills}) carry into adjacent work like {adj_name}. "
+                                "Frame them for where the work is heading, not just where it has been."})
         return s
 
     def _adjacency(self, occ, base_exposure) -> List[Dict[str, Any]]:
@@ -463,6 +497,99 @@ class Engine:
                             "max_exposure": round(adj_max, 1),
                             "projection_pct": full.get("projection_pct")})
         out.sort(key=lambda a: a["max_exposure"])
+        return out
+
+    @staticmethod
+    def _soc_keys(occ) -> List[str]:
+        """Candidate SOC keys, since sources key by 6-digit ('43-9021') or 8-digit
+        ('43-9021.00') codes interchangeably."""
+        soc = occ.get("soc") or ""
+        soc6 = occ.get("soc6") or (soc.split(".")[0] if soc else "")
+        cands = []
+        for k in (soc, soc6, soc6 + ".00" if soc6 else "", soc + ".00" if "." not in soc else ""):
+            if k and k not in cands:
+                cands.append(k)
+        return cands
+
+    @classmethod
+    def _soc_lookup(cls, mapping, occ):
+        for k in cls._soc_keys(occ):
+            if k in mapping:
+                return mapping[k]
+        return None
+
+    @staticmethod
+    def _state_of(metro_name: str):
+        """Extract a 2-letter state from a 'City, ST' or 'City, ST1-ST2' metro name."""
+        if not metro_name or "," not in metro_name:
+            return None
+        tail = metro_name.rsplit(",", 1)[1].strip()
+        st = tail.split("-")[0].strip()[:2].upper()
+        return st if len(st) == 2 and st.isalpha() else None
+
+    def _geo_compare(self, occ) -> Dict[str, Any]:
+        """Where this role pays most and where demand holds up. The exposure score does NOT
+        vary by place (it is task-intrinsic); what varies is pay and local demand, so that is
+        all this compares. Pay is each country's own median in its own currency, never
+        converted. US detail is rolled up from metro data to states."""
+        soc = occ["soc"]
+        soc6 = occ.get("soc6") or soc[:7]
+        out: Dict[str, Any] = {"countries": [], "states": [], "top_metros": [], "demand": None}
+
+        # By country: US national + any country wage overlay keyed to the shared SOC.
+        for code in ("us", "uk", "ca"):
+            info = countries.info(code)
+            cur = countries.currency(code)
+            if code == "us":
+                med = occ.get("median_wage_national")
+            else:
+                sm = (self.overlays.get(code, {}) or {}).get("soc_median", {})
+                med = self._soc_lookup(sm, occ)
+            if med:
+                out["countries"].append({"code": code, "name": info["name"],
+                                         "symbol": cur["symbol"], "median": round(med),
+                                         "period": cur["period"]})
+
+        # US metros -> state rollup (employment-weighted mean pay) + demand mix.
+        mw = self._soc_lookup(self.snapshot.data.get("metro_wages", {}), occ) or {}
+        metros, states = [], {}
+        g = sdemand = d = 0
+        for mid, m in mw.items():
+            wage = m.get("median_wage")
+            if not wage:
+                continue
+            emp = m.get("employment") or 0
+            tr = m.get("demand_trend") or "stable"
+            name = self.snapshot.metro_name(mid)
+            st = self._state_of(name)
+            metros.append({"name": name, "state": st, "median": round(wage), "demand": tr})
+            if tr == "growing":
+                g += 1
+            elif tr == "declining":
+                d += 1
+            else:
+                sdemand += 1
+            if st:
+                row = states.setdefault(st, {"w": 0.0, "e": 0.0, "g": 0, "d": 0})
+                weight = emp or 1
+                row["w"] += wage * weight
+                row["e"] += weight
+                row["g"] += 1 if tr == "growing" else 0
+                row["d"] += 1 if tr == "declining" else 0
+
+        strows = []
+        for st, r in states.items():
+            if r["e"] <= 0:
+                continue
+            strows.append({"state": st, "pay": round(r["w"] / r["e"]),
+                           "trend": "growing" if r["g"] > r["d"]
+                           else ("declining" if r["d"] > r["g"] else "mixed")})
+        strows.sort(key=lambda r: r["pay"], reverse=True)
+        out["states"] = strows
+        out["top_metros"] = sorted(metros, key=lambda m: m["median"], reverse=True)[:6]
+        if mw:
+            out["demand"] = {"growing": g, "stable": sdemand, "declining": d,
+                             "total": g + sdemand + d}
         return out
 
     def _confidence_band(self, axes) -> Dict[str, Any]:

@@ -39,8 +39,13 @@ def _context(assessment: Dict[str, Any], profile: Dict[str, Any]) -> Dict[str, A
     w = assessment.get("wages", {})
     t = assessment.get("timeline", {})
     loc = assessment.get("location", {})
+    _tasks = sorted(assessment.get("tasks", []),
+                    key=lambda d: max(d.get("ai", 0), d.get("robo", 0)), reverse=True)
     return {
         "occupation": assessment["occupation"]["title"],
+        "most_exposed_tasks": [d["name"] for d in _tasks[:4]],
+        "resilient_tasks": [d["name"] for d in reversed(_tasks)
+                            if max(d.get("ai", 0), d.get("robo", 0)) < 45][:3],
         "occupation_family": assessment["occupation"].get("family"),
         "location": loc.get("metro"),
         "age": profile.get("age"),
@@ -89,8 +94,11 @@ SYSTEM = (
     "{n} concrete, personalised steps to protect this person's livelihood from automation, most important "
     "first. Hard rules: never invent statistics, probabilities, or numbers; reference only the facts given; "
     "frame everything as options, never a certainty that a job will be lost; name the adjacent roles and "
-    "the person's own skills and field where relevant. Keep words minimal and meaningful - a card, not a "
-    "paragraph. Leave \"evidence\" and \"source\" empty. " + _SCHEMA
+    "the person's own skills and field where relevant. Ground the plan in THIS person's real work: name at "
+    "least one of their most_exposed_tasks (verbatim or lightly trimmed) and, where it helps, a resilient "
+    "task; every step must be something that would not fit a different occupation. Ban generic filler such "
+    "as 'stay adaptable', 'embrace lifelong learning', 'upskill', or 'leverage your strengths'. Keep words "
+    "minimal and meaningful - a card, not a paragraph. Leave \"evidence\" and \"source\" empty. " + _SCHEMA
 )
 
 RESEARCH_SYSTEM = (
@@ -102,8 +110,10 @@ RESEARCH_SYSTEM = (
     "outcomes, and how workers like them have adapted. Then produce {n} concrete, personalised steps, most "
     "important first. Absolute rules: never fabricate a number, rate, or claim - every specific figure must "
     "come from a source you actually searched, named in \"source\"; frame everything as options and ranges, "
-    "never a certainty that a job will be lost. Put the single most useful, specific, sourced insight for "
-    "each step in \"evidence\" (concrete, not generic). Keep words minimal. " + _SCHEMA
+    "never a certainty that a job will be lost. Ground every step in THIS person's real work: name at least "
+    "one of their most_exposed_tasks and tie the move to it; never give advice that would fit any occupation "
+    "(no 'stay adaptable', 'embrace lifelong learning', or 'upskill' filler). Put the single most useful, "
+    "specific, sourced insight for each step in \"evidence\" (concrete, not generic). Keep words minimal. " + _SCHEMA
 )
 
 

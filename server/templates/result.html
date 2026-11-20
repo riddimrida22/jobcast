@@ -265,6 +265,7 @@
   {% if r.key_drivers %}<button class="tab" data-panel="p-drivers">What drives it</button>{% endif %}
   {% if not seo %}<button class="tab" data-panel="p-pay">Pay &amp; place</button>{% endif %}
   {% if r.adjacent_lower_risk %}<button class="tab" data-panel="p-paths">Safer paths</button>{% endif %}
+  {% if r.geo and (r.geo.countries|length > 1 or r.geo.states) %}<button class="tab" data-panel="p-geo">Where it pays</button>{% endif %}
   <button class="tab" data-panel="p-scored">How it's worked out</button>
 </div>
 
@@ -636,6 +637,68 @@
 </div>
 {% endif %}
 
+<!-- WHERE IT PAYS -->
+{% if r.geo and (r.geo.countries|length > 1 or r.geo.states) %}
+<style>
+  #p-geo .geo-sub { color:var(--muted); margin:2px 0 14px; font-size:14px; line-height:1.5; }
+  #p-geo .geo-h { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:18px 0 8px; }
+  #p-geo .geo-row { display:flex; align-items:center; gap:10px; margin:6px 0; font-size:14px; }
+  #p-geo .geo-lab { width:116px; flex:none; }
+  #p-geo .geo-track { flex:1; height:12px; background:rgba(0,0,0,.08); border-radius:7px; overflow:hidden; }
+  #p-geo .geo-track i { display:block; height:100%; background:linear-gradient(90deg,#5ec98c,#3fae73); border-radius:7px; }
+  #p-geo .geo-row b { width:96px; text-align:right; font-variant-numeric:tabular-nums; }
+  #p-geo .geo-note { color:var(--muted); font-size:12px; margin:8px 0 0; line-height:1.5; }
+  #p-geo .geo-demand b.up { color:#2f9e63; } #p-geo .geo-demand b.down { color:#d0574a; }
+  #p-geo .geo-tbl { width:100%; border-collapse:collapse; margin-top:4px; font-size:14px; }
+  #p-geo .geo-tbl th, #p-geo .geo-tbl td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); }
+  #p-geo .geo-tbl th.num, #p-geo .geo-tbl td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  #p-geo .geo-tbl th { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  #p-geo .geo-tag { font-size:11px; font-weight:700; text-transform:capitalize; padding:2px 9px; border-radius:999px; }
+  #p-geo .geo-tag.growing { color:#1f7a4d; background:rgba(94,201,140,.22); }
+  #p-geo .geo-tag.declining { color:#a83a2d; background:rgba(224,83,58,.16); }
+  #p-geo .geo-tag.mixed { color:#7a6a3a; background:rgba(243,163,95,.2); }
+  #p-geo .geo-cta { display:inline-block; margin-top:16px; font-weight:800; text-decoration:none; color:var(--accent); }
+</style>
+<div id="p-geo" class="panel card">
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><h2 style="margin:0">Where this job pays and holds up</h2></div>
+  <p class="geo-sub">The {{ rating_label }} is the same wherever you live &mdash; it is about the work, not the place. What changes from place to place is pay and how local demand is moving.</p>
+
+  {% if r.geo.countries and r.geo.countries|length > 1 %}
+  {% set cmax = (r.geo.countries | map(attribute='median') | max) or 1 %}
+  <div class="geo-h">By country</div>
+  {% for c in r.geo.countries %}
+    <div class="geo-row"><span class="geo-lab">{{ c.name }}</span>
+      <div class="geo-track"><i style="width:{{ (c.median / cmax * 100)|round|int }}%"></i></div>
+      <b>{{ c.symbol }}{{ "{:,}".format(c.median) }}</b></div>
+  {% endfor %}
+  <p class="geo-note">Each country's own median pay, in its own currency &mdash; not currency-converted, so read each on its own. Sources: BLS OEWS (US), ONS ASHE (UK), Job Bank (Canada).</p>
+  {% endif %}
+
+  {% if r.geo.demand and r.geo.demand.total %}
+  <div class="geo-h">US demand right now</div>
+  <p class="geo-demand">Across {{ r.geo.demand.total }} US metro areas, demand for this role is
+    <b class="up">growing in {{ r.geo.demand.growing }}</b>, steady in {{ r.geo.demand.stable }}, and
+    <b class="down">declining in {{ r.geo.demand.declining }}</b>.</p>
+  {% endif %}
+
+  {% if r.geo.states %}
+  <div class="geo-h">Top-paying US states</div>
+  <table class="geo-tbl">
+    <thead><tr><th>State</th><th class="num">Typical pay</th><th>Local demand</th></tr></thead>
+    <tbody>
+    {% for s in r.geo.states[:8] %}
+      <tr><td>{{ s.state }}</td><td class="num">${{ "{:,}".format(s.pay) }}</td>
+        <td><span class="geo-tag {{ s.trend }}">{{ s.trend }}</span></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="geo-note">Typical pay is the employment-weighted average of each state's metro areas (BLS OEWS). Local demand is the share of a state's areas with growing vs declining projected demand.</p>
+  {% endif %}
+
+  {% if seo %}<a class="geo-cta" href="/?flow=1&amp;title={{ r.occupation.title | urlencode }}">See where your own area lands &#8250;</a>{% endif %}
+</div>
+{% endif %}
+
 <!-- HOW IT'S SCORED -->
 <div id="p-scored" class="panel card">
   <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><h2 style="margin:0">How your {{ rating_label }} is worked out</h2></div>
@@ -716,6 +779,8 @@
       '<div class="deck-top"><span class="deck-num">' + (i + 1) + '</span><span class="deck-hz">' + esc(HZ[hi]) + '</span></div>' +
       '<svg class="deck-illus"><use href="#mo-' + icon + '"></use></svg>' +
       '<div class="deck-head">' + esc(head) + '</div>' +
+      (act ? '<div class="deck-act">' + esc(act) + '</div>' : '') +
+      ev +
       '<div class="deck-meters">' + bars(imp, 'impact') + bars(eff, 'effort') + '</div>' +
       '<div class="htrack"><div class="rail">' + rail + '</div><div class="labs">' + labs + '</div></div>' +
       src +
