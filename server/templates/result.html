@@ -915,9 +915,25 @@
   if (subOpts && btn && btn.parentNode) { btn.parentNode.insertAdjacentElement('afterend', subOpts); }
   if (btn) btn.addEventListener('click', function () {
     if (entitled('tier2')) { generate('tier2', btn); return; }
-    // Non-payers get the same $4.99-first paywall (one-time lead + one-tap wallets, with
-    // yearly/monthly under "Other plans") as the rest of the funnel, not a subscription-only block.
+    // Lead with the $4.99 one-time offer on every path, never a subscription-only block.
+    // In the ad funnel the paywall modal is wired (one-time lead + one-tap wallets, with
+    // yearly/monthly under "Other plans"); on a cold deep-link or reload it may not be, so
+    // fall back to the one-time Stripe checkout directly (Apple Pay, Google Pay, card, Link).
     if (window.jbOpenPaywall) { window.jbOpenPaywall(); return; }
+    if (BILL.stripe) {
+      var old = btn.textContent; btn.textContent = 'Opening secure checkout...'; btn.style.pointerEvents = 'none';
+      window.jbEv && window.jbEv('checkout');
+      fetch('/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tier: 'tier2', period: 'once' }) })
+        .then(function (r) { return r.json(); }).then(function (d) {
+          if (d.ok && d.url) { window.location.href = d.url; return; }
+          btn.textContent = old; btn.style.pointerEvents = '';
+          if (subOpts) { subOpts.hidden = false; subOpts.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+        }).catch(function () {
+          btn.textContent = old; btn.style.pointerEvents = '';
+          if (subOpts) { subOpts.hidden = false; subOpts.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+        });
+      return;
+    }
     if (subOpts) { subOpts.hidden = false; subOpts.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
     else { generate('tier2', btn); }
   });
