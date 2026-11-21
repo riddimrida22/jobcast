@@ -41,7 +41,9 @@ def test_plan_free_by_default(client):
 def test_home_page(client):
     r = client.get("/")
     assert r.status_code == 200
-    assert b"Show my read" in r.data
+    # Assert on a stable structural hook (the landing "type your job" input) rather than
+    # headline copy, which gets tuned often and left this test stale before.
+    assert b'id="lp-q"' in r.data
 
 
 def test_assess_page_renders_result(client):
