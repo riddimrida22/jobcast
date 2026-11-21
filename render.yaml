@@ -17,6 +17,8 @@ services:
     envVars:
       - key: JOBCAST_NOINDEX
         value: "0"
+      - key: JOBCAST_TIKTOK_PIXEL_ID
+        value: DC0Q5RRC77U1GN73IRC0   # public pixel id (exposed client-side); activates the TikTok Pixel
       - key: JOBCAST_DATA_DIR
         value: /var/data        # all durable data lives on the mounted disk
       - key: JOBCAST_DEMO_USER
