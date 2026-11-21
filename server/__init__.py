@@ -129,7 +129,9 @@ def create_app() -> Flask:
         if not demo_user:
             return None
         if request.endpoint in ("login", "static", "manifest", "service_worker", "stripe_webhook",
-                                "privacy", "terms", "admin_stats"):
+                                "privacy", "terms", "admin_stats",
+                                "help_page", "support_alias", "support_contact", "support_restore",
+                                "support_manage", "admin_support", "admin_support_action"):
             return None
         if session.get("jb_authed"):
             return None
@@ -169,7 +171,9 @@ def create_app() -> Flask:
                 # exposed client-side anyway); an env var still overrides it if ever needed.
                 "tiktok_pixel_id": os.environ.get("JOBCAST_TIKTOK_PIXEL_ID", "DC0Q5RRC77U1GN73IRC0"),
                 # Consumer-facing name for the 0-100 rating. One place to change it.
-                "rating_label": "Job Extinction Risk"}
+                "rating_label": "Job Extinction Risk",
+                # Support inbox shown on the help page and used by the contact form.
+                "support_email": os.environ.get("JOBCAST_SUPPORT_EMAIL", "support@jobbreak.ai")}
 
     @app.after_request
     def _track(resp):
@@ -896,6 +900,178 @@ def create_app() -> Flask:
                                snapshot_id=engine.snapshot.snapshot_id,
                                calibration=getattr(engine, "calibration", None),
                                licensed=engine.snapshot.licensed)
+
+    # --- Customer support ---------------------------------------------------------------
+    SUPPORT_TOPICS = {"refund": "Refund request", "cancel": "Cancel subscription",
+                      "access": "No access after paying", "receipt": "Receipt / invoice",
+                      "other": "General question"}
+
+    def _support_email():
+        return os.environ.get("JOBCAST_SUPPORT_EMAIL", "support@jobbreak.ai")
+
+    _contact_hits = {}
+
+    def _support_rate_ok(req):
+        """Best-effort per-IP throttle (5 messages / 10 min). Per gunicorn worker, so it is a
+        soft guard against an abusive burst, not a hard quota."""
+        import hashlib
+        xff = req.headers.get("X-Forwarded-For", "")
+        ip = (xff.split(",")[0].strip() if xff else (req.remote_addr or ""))
+        k = hashlib.sha256(ip.encode("utf-8", "ignore")).hexdigest()[:16]
+        now = time.time()
+        hits = [t for t in _contact_hits.get(k, []) if now - t < 600]
+        if len(hits) >= 5:
+            _contact_hits[k] = hits
+            return False
+        hits.append(now)
+        _contact_hits[k] = hits
+        return True
+
+    @app.get("/help")
+    def help_page():
+        return render_template("help.html", version=VERSION, licensed=engine.snapshot.licensed)
+
+    @app.get("/support")
+    def support_alias():
+        return redirect(url_for("help_page"))
+
+    @app.post("/support/contact")
+    def support_contact():
+        from . import emailer
+        form = request.form
+        # Honeypot: a filled hidden field means a bot. Accept quietly, send nothing.
+        if (form.get("website") or "").strip():
+            return render_template("help.html", sent=True, version=VERSION, licensed=engine.snapshot.licensed)
+        email = (form.get("email") or "").strip()
+        message = (form.get("message") or "").strip()
+        topic = (form.get("topic") or "other").strip()
+        sid = (form.get("session_id") or "").strip()
+        keep = {"email": email, "message": message, "session_id": sid}
+        if "@" not in email or len(email) > 254 or len(message) < 5:
+            return render_template("help.html", error="Please add a valid email and a short message.",
+                                   form=keep, version=VERSION, licensed=engine.snapshot.licensed), 400
+        if not _support_rate_ok(request):
+            return render_template("help.html",
+                                   error="Thanks - that came through. If you sent several, give us a minute.",
+                                   form=keep, version=VERSION, licensed=engine.snapshot.licensed), 429
+        label = SUPPORT_TOPICS.get(topic, "General question")
+        body = ("Topic: %s\nFrom: %s\nCheckout session: %s\n\n%s\n"
+                % (label, email, sid or "-", message[:4000]))
+        emailer.send(_support_email(), "[JobBreak support] " + label, body, reply_to=email)
+        return render_template("help.html", sent=True, version=VERSION, licensed=engine.snapshot.licensed)
+
+    @app.post("/support/restore")
+    def support_restore():
+        from . import payments as pay
+        sid = (request.form.get("session_id") or "").strip()
+        if not pay.valid_session_id(sid):
+            return render_template("support_result.html", ok=False, heading="That does not look right",
+                                   message="Please paste the full checkout session id - it starts with cs_. "
+                                           "If you cannot find it, use the contact form with the email you paid with.",
+                                   version=VERSION, licensed=engine.snapshot.licensed), 400
+        # Reuse the race-safe grant path: it re-grants the cookie from the session id.
+        return redirect("/billing/success?session_id=" + sid)
+
+    @app.post("/support/manage")
+    def support_manage():
+        from . import payments as pay
+        sid = (request.form.get("session_id") or "").strip()
+        if not pay.valid_session_id(sid):
+            return render_template("support_result.html", ok=False, heading="That does not look right",
+                                   message="Please paste the full checkout session id (it starts with cs_), "
+                                           "or use the contact form below and we will help.",
+                                   version=VERSION, licensed=engine.snapshot.licensed), 400
+        if not pay.configured():
+            return render_template("support_result.html", ok=False, heading="Billing is unavailable",
+                                   message="We could not open your billing page right now. Please use the contact form.",
+                                   version=VERSION, licensed=engine.snapshot.licensed)
+        base = request.host_url.rstrip("/")
+        url, err = pay.billing_portal_url(sid, return_url=base + "/help")
+        if err == "no_customer":
+            return render_template("support_result.html", ok=False, heading="Nothing to manage",
+                                   message="That purchase is a one-time plan, not a subscription, so there is "
+                                           "nothing recurring to cancel. For a refund, use the contact form.",
+                                   version=VERSION, licensed=engine.snapshot.licensed)
+        if err or not url:
+            return render_template("support_result.html", ok=False, heading="We could not open your billing page",
+                                   message="Please try again in a moment, or use the contact form and we will "
+                                           "cancel it for you.",
+                                   version=VERSION, licensed=engine.snapshot.licensed)
+        return redirect(url)
+
+    @app.get("/admin/support")
+    def admin_support():
+        admin_key = os.environ.get("JOBCAST_ADMIN_KEY")
+        if not admin_key or request.args.get("key") != admin_key:
+            from flask import abort
+            abort(404)
+        from . import payments as pay
+        q = (request.args.get("q") or "").strip()
+        info = pay.lookup(q) if q else None
+        return render_template("admin_support.html", key=admin_key, q=q, info=info,
+                               stripe_ok=pay.configured(), version=VERSION, noindex=True,
+                               msg=request.args.get("msg"), msg_ok=(request.args.get("ok") == "1"))
+
+    @app.post("/admin/support/action")
+    def admin_support_action():
+        admin_key = os.environ.get("JOBCAST_ADMIN_KEY")
+        if not admin_key or request.form.get("key") != admin_key:
+            from flask import abort
+            abort(404)
+        from . import payments as pay
+        from . import emailer
+        sid = (request.form.get("q") or "").strip()
+        action = (request.form.get("action") or "").strip()
+        msg, ok = "Done.", True
+        if not pay.configured():
+            msg, ok = "Stripe is not configured.", False
+        elif action == "refund":
+            _r, err = pay.refund_session(sid)
+            ok = not err
+            msg = "Refund issued." if ok else ("Refund failed: " + (err or "error") + ".")
+        elif action == "cancel":
+            _s, err = pay.cancel_subscription_for(sid, at_period_end=True)
+            ok = not err
+            msg = "Subscription set to cancel at period end." if ok else ("Cancel failed: " + (err or "error") + ".")
+        elif action == "regrant":
+            info = pay.lookup(sid)
+            tier = info.get("grants") if isinstance(info, dict) else None
+            email = info.get("email") if isinstance(info, dict) else None
+            if not tier:
+                msg, ok = "No paid tier to grant for that session.", False
+            else:
+                pay.record_grant(sid, tier)  # persist so the link unlocks instantly
+                if email:
+                    link = request.host_url.rstrip("/") + "/billing/success?session_id=" + sid
+                    sent_ok, _i = emailer.send(
+                        email, "Your JobBreak access",
+                        "Here is your access link - open it on the device where you want JobBreak unlocked:\n\n"
+                        + link + "\n\nIt restores your plan right away. Reply to this email if you need anything.",
+                        '<p>Here is your access link - open it on the device where you want JobBreak unlocked:</p>'
+                        '<p><a href="' + link + '">' + link + '</a></p>'
+                        '<p>It restores your plan right away. Reply to this email if you need anything.</p>',
+                        reply_to=_support_email())
+                    msg = ("Access re-granted and link emailed to " + email + ".") if sent_ok \
+                        else "Access re-granted, but the email could not be sent."
+                else:
+                    msg = "Access re-granted. No email on file to send the link to."
+        elif action == "receipt":
+            url, email = pay.receipt_for_session(sid)
+            if url and email:
+                emailer.send(email, "Your JobBreak receipt",
+                             "Here is your JobBreak receipt:\n\n" + url + "\n",
+                             '<p>Here is your JobBreak receipt:</p><p><a href="' + url + '">' + url + '</a></p>',
+                             reply_to=_support_email())
+                msg = "Receipt re-sent to " + email + "."
+            elif url:
+                msg, ok = "Found the receipt but no email on file: " + url, False
+            else:
+                msg, ok = "Could not find a receipt for that session.", False
+        else:
+            msg, ok = "Unknown action.", False
+        from urllib.parse import quote
+        return redirect("/admin/support?key=" + quote(admin_key) + "&q=" + quote(sid)
+                        + "&ok=" + ("1" if ok else "0") + "&msg=" + quote(msg))
 
     return app
 

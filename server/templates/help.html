@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Help and support - JobBreak{% endblock %}
+{% block description %}Refunds, cancellation, access, and how to reach JobBreak support.{% endblock %}
+{% block og_media %}<meta name="twitter:card" content="summary">{% endblock %}
+{% block content %}
+<style>
+  .supportform { max-width:560px; margin:4px 0 0; }
+  .supportform label { display:block; font-size:13px; font-weight:600; color:var(--ink); margin:12px 0 4px; }
+  .supportform input[type=text], .supportform input[type=email], .supportform select, .supportform textarea {
+    width:100%; box-sizing:border-box; font:inherit; font-size:15px; padding:11px 13px; border-radius:11px;
+    border:1px solid var(--line); background:var(--card); color:var(--ink); outline:none; }
+  .supportform input:focus, .supportform select:focus, .supportform textarea:focus {
+    border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft); }
+  .supportform textarea { min-height:120px; resize:vertical; }
+  .supportform .hp { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+  .supportform button { margin-top:16px; }
+  .inline-form { display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; max-width:560px; }
+  .inline-form input[type=text] { flex:1 1 260px; box-sizing:border-box; font:inherit; font-size:15px;
+    padding:11px 13px; border-radius:11px; border:1px solid var(--line); background:var(--card); color:var(--ink); }
+  .inline-form button { margin-top:0; }
+  .faq-note { background:var(--primary-soft); border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin:10px 0 0; }
+</style>
+<div class="legal">
+  <h1>Help and support</h1>
+  <p class="muted">We want JobBreak to be fair and easy. If anything about your purchase is not right, we will fix it.</p>
+
+  <h2>What you get</h2>
+  <p>Anyone can check a job and see a free preview of the result. The paid <strong>JobBreak Monitor</strong>
+  plan unlocks your full breakdown and AI-researched plan. You can buy it once for a single full plan
+  ($4.99), or subscribe to keep your outlook monitored ($1.99/month or $12/year).</p>
+
+  <h2 id="access">I paid but I do not see my plan</h2>
+  <p>Access is tied to the device and browser you bought on. If you cleared your cookies, switched
+  browsers, or your checkout tab closed before it finished, you can restore access here. Paste the
+  <strong>checkout session id</strong> from the confirmation page web address (the part after
+  <code>session_id=</code>) or from your Stripe email receipt, then select Restore.</p>
+  <form class="inline-form" method="post" action="/support/restore">
+    <input type="text" name="session_id" placeholder="cs_live_..." aria-label="Stripe checkout session id" autocomplete="off">
+    <button type="submit">Restore access</button>
+  </form>
+  <p class="faq-note">Cannot find it? Use the form at the bottom of this page with the email you paid
+  with, and we will restore it for you.</p>
+
+  <h2 id="cancel">Cancel a subscription</h2>
+  <p>You can cancel the Monitor subscription any time and keep access until the end of the period you
+  already paid for. Paste your checkout session id below to open your secure Stripe billing page, where
+  you can cancel, update your card, and download invoices.</p>
+  <form class="inline-form" method="post" action="/support/manage">
+    <input type="text" name="session_id" placeholder="cs_live_..." aria-label="Stripe checkout session id" autocomplete="off">
+    <button type="submit">Manage my subscription</button>
+  </form>
+  <p class="muted" style="margin-top:8px">A one-time $4.99 purchase is not a subscription, so there is
+  nothing recurring to cancel.</p>
+
+  <h2 id="refund">Refunds</h2>
+  <p><strong>14-day, no-questions-asked refund.</strong> If you are not happy, ask within 14 days of your
+  purchase and we will refund it in full. Use the form below with the email you paid with (and your
+  checkout session id if you have it), choose Refund, and we will take care of it. Refunds return to your
+  original payment method, usually within a few business days.</p>
+
+  <h2>Receipts and invoices</h2>
+  <p>Stripe emails a receipt automatically at purchase. You can also get receipts and invoices any time
+  from your secure billing page using Manage my subscription above, or ask us below and we will re-send it.</p>
+
+  <h2 id="contact">Contact us</h2>
+  <p>Send us a message and we will reply by email, usually within one business day. You can also email
+  <a href="mailto:{{ support_email }}">{{ support_email }}</a> directly.</p>
+  {% if sent %}
+    <div class="faq-note" role="status"><strong>Thanks &mdash; your message is on its way.</strong>
+      We will reply to the email you gave. No further action is needed.</div>
+  {% else %}
+  <form class="supportform" method="post" action="/support/contact">
+    {% if error %}<p class="faq-note" style="background:#fdecea;border-color:#f3b4ab" role="alert">{{ error }}</p>{% endif %}
+    <label for="sf-email">Your email</label>
+    <input type="email" id="sf-email" name="email" required placeholder="you@example.com"
+      value="{{ (form.email if form) or '' }}" autocomplete="email">
+    <label for="sf-topic">What do you need help with?</label>
+    <select id="sf-topic" name="topic">
+      <option value="refund">Request a refund</option>
+      <option value="cancel">Cancel my subscription</option>
+      <option value="access">I paid but have no access</option>
+      <option value="receipt">Receipt or invoice</option>
+      <option value="other">Something else</option>
+    </select>
+    <label for="sf-sid">Checkout session id <span class="muted" style="font-weight:400">(optional, helps us find your purchase faster)</span></label>
+    <input type="text" id="sf-sid" name="session_id" placeholder="cs_live_..." autocomplete="off"
+      value="{{ (form.session_id if form) or '' }}">
+    <label for="sf-msg">Message</label>
+    <textarea id="sf-msg" name="message" required placeholder="Tell us what happened.">{{ (form.message if form) or '' }}</textarea>
+    <div class="hp" aria-hidden="true"><label>Leave this field empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+    <button type="submit">Send message</button>
+  </form>
+  {% endif %}
+
+  <p class="muted" style="margin-top:28px"><a href="/">Back to JobBreak</a> &middot;
+  <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a></p>
+</div>
+{% endblock %}
