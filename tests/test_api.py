@@ -57,3 +57,27 @@ def test_browse_and_occupation_pages(client):
     assert client.get("/jobs").status_code == 200
     assert client.get("/jobs/43-9021").status_code == 200
     assert client.get("/methodology").status_code == 200
+
+
+def test_green_endpoint_returns_targets(client):
+    # Billing is unconfigured in tests, so the paid gate is open (preview behaviour).
+    r = client.post("/v1/green", json={"title": "data entry",
+                                       "skills": ["verify records", "customer service"]})
+    assert r.status_code == 200
+    d = r.get_json()
+    assert d["ok"] is True
+    assert "your_exposure" in d and "currency" in d
+    for t in d.get("targets", []):
+        assert t["max_exposure"] < t["your_exposure"]
+
+
+def test_green_endpoint_requires_title(client):
+    r = client.post("/v1/green", json={"skills": ["x"]})
+    assert r.status_code == 400
+    assert r.get_json()["error"] == "missing_title"
+
+
+def test_green_endpoint_accepts_comma_skills(client):
+    r = client.post("/v1/green", json={"title": "data entry", "skills": "verify records, reports"})
+    assert r.status_code == 200
+    assert r.get_json()["ok"] is True
