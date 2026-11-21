@@ -1369,6 +1369,14 @@
   {% elif noindex %}
   <div class="dev-banner">Private preview. Not a public release.</div>
   {% endif %}
+  <style>
+    /* Mobile: keep the header to one tight row so result content (the score) sits higher. */
+    @media (max-width:640px){
+      header.site nav a[href="/?view=info"],
+      header.site nav a[href="/methodology"],
+      header.site nav .country-links { display:none !important; }
+    }
+  </style>
   <header class="site"><div class="wrap">
     <a class="brand" href="/" aria-label="JobBreak home">Job<span class="brk">Break</span></a>
     <nav>
@@ -1386,14 +1394,16 @@
           d="M21 12.9A9 9 0 1 1 11.1 3a7.1 7.1 0 0 0 9.9 9.9z"/></svg></button>
     </nav>
   </div></header>
+  {% block promobars %}
   <a class="buybar" href="/?flow=1" aria-label="Check your job and get your plan">
     <span class="bb-txt"><b>{{ t('bb.q', 'Is your job safe from AI?') }}</b> {{ t('bb.txt', 'Get your full Job Extinction Risk &amp; action plan') }}</span>
-    <span class="bb-cta">{{ t('bb.cta', 'from $1.99/mo &#8250;') }}</span>
+    <span class="bb-cta">{{ t('bb.cta', '$4.99 &#8250;') }}</span>
   </a>
   <a class="freebar" href="/students" aria-label="Students: browse AI-risk data for every career, free">
     <span><b>{{ t('fb.b', 'Free for students.') }}</b> {{ t('fb.txt', 'Browse the AI-risk data for every career, no charge.') }}</span>
     <span class="fb-cta">{{ t('fb.cta', 'Explore free &#8250;') }}</span>
   </a>
+  {% endblock %}
   <script>
     // Lightweight funnel events (cookie-free); shows up in /admin/stats under /_ev/*.
     window.jbEv = function (n) {

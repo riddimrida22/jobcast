@@ -158,7 +158,7 @@ TRANSLATIONS = {
         # Buybar banner
         "bb.q": "Is your job safe from AI?",
         "bb.txt": "Get your full Job Extinction Risk &amp; action plan",
-        "bb.cta": "from $1.99/mo &#8250;",
+        "bb.cta": "$4.99 &#8250;",
     },
     "es": {
         # Header / nav
@@ -314,7 +314,7 @@ TRANSLATIONS = {
         # Buybar banner
         "bb.q": "¿Tu trabajo está a salvo de la IA?",
         "bb.txt": "Obtén tu Riesgo de extinción del empleo completo y un plan de acción",
-        "bb.cta": "desde $1.99/mes &#8250;",
+        "bb.cta": "$4.99 &#8250;",
     },
     "fr": {
         "nav.home": "Accueil",
@@ -465,7 +465,7 @@ TRANSLATIONS = {
         # Buybar banner
         "bb.q": "Votre emploi est-il à l'abri de l'IA ?",
         "bb.txt": "Obtenez votre Risque de disparition du poste complet et un plan d'action",
-        "bb.cta": "à partir de 1,99 $/mois &#8250;",
+        "bb.cta": "4,99 $ &#8250;",
     },
     "ht": {
         "nav.home": "Akèy",
@@ -616,7 +616,7 @@ TRANSLATIONS = {
         # Buybar banner
         "bb.q": "Èske travay ou an pwoteje kont IA?",
         "bb.txt": "Jwenn Risk pou travay la disparèt konplè ou a ak yon plan aksyon",
-        "bb.cta": "apati $1.99/mwa &#8250;",
+        "bb.cta": "$4.99 &#8250;",
     },
 }
 

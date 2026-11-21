@@ -9,6 +9,9 @@
   <meta property="og:image:height" content="630">
   <meta name="twitter:image" content="{{ ogcard }}">
 {% endblock %}
+{# On a result page the visitor already has their answer: hide the site-wide promo/free bars so
+   the score sits right at the top, and let the in-page paywall do the selling after the free taste. #}
+{% block promobars %}{% endblock %}
 {% block content %}
 {% if seo %}<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":{{ ("Will AI or robots replace " ~ r.occupation.title ~ "?") | tojson }},"acceptedAnswer":{"@type":"Answer","text":{{ (r.occupation.title ~ " scores " ~ r.base_exposure ~ " of 100 for automation exposure, from O*NET task data and peer-reviewed AI-exposure research - higher means more of the role's tasks are automatable. JobBreak shows the full sourced breakdown and a timeline.") | tojson }}}}]}</script>{% endif %}
 {% set check %}<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>{% endset %}
@@ -32,6 +35,17 @@
   .jlp-tx.exp { color:var(--red); } .jlp-tx.saf { color:var(--green); }
   #jlp-ghost.jlp-ghost { min-height:0; padding-top:20px; }
   #jlp-ghost .jlp-glock { position:static; inset:auto; min-height:0; background:none; padding:10px 0 0; justify-content:flex-start; }
+  /* Hero score: the number the visitor came for, shown immediately under the title. */
+  .hero-score { display:flex; align-items:center; gap:18px; margin:6px 0 16px; padding:16px 18px;
+    border-radius:16px; border:1px solid var(--line); background:var(--card); }
+  .hero-score .hs-num { display:flex; align-items:baseline; line-height:.9; flex:none; }
+  .hero-score .hs-num b { font-size:clamp(48px,17vw,76px); font-weight:900; font-variant-numeric:tabular-nums; }
+  .hero-score .hs-num span { font-size:17px; font-weight:700; color:var(--muted); margin-left:3px; }
+  .hero-score .hs-lvl { font-size:clamp(16px,4.8vw,21px); font-weight:800; text-transform:capitalize; line-height:1.15; }
+  .hero-score .hs-sub { font-size:12px; color:var(--muted); margin-top:3px; }
+  .hero-score.hero-hi .hs-num b, .hero-score.hero-hi .hs-lvl { color:var(--red,#ff5a4d); }
+  .hero-score.hero-mid .hs-num b, .hero-score.hero-mid .hs-lvl { color:var(--accent,#e8794a); }
+  .hero-score.hero-lo .hs-num b, .hero-score.hero-lo .hs-lvl { color:var(--green,#3fb27f); }
 </style>
 <!-- Dramatic reveal: plays only when arriving from the guided flow or tour -->
 <div id="reveal" class="rv" hidden aria-hidden="true">
@@ -170,6 +184,13 @@
 {% set vtim = t('seo.tim.near', 'and the bigger shift looks near-term') if bid == 'near_term_high'
    else (t('seo.tim.partial', 'and meaningful change looks likely over the next 5 to 10 years') if bid == 'partial_5_10yr'
    else t('seo.tim.far', 'and a near-term shift looks unlikely')) %}
+<div class="hero-score hero-{{ 'hi' if be >= 66 else ('mid' if be >= 40 else 'lo') }}" aria-label="Your Job Extinction Risk score">
+  <div class="hs-num"><b>{{ be|round|int }}</b><span>/100</span></div>
+  <div class="hs-meta">
+    <div class="hs-lvl">{{ vlvl }}</div>
+    <div class="hs-sub">{{ t('ov.rating', rating_label) }}</div>
+  </div>
+</div>
 <p class="verdict"><strong>{{ t('seo.short', 'The short version:') }}</strong> {{ t('seo.v.pre', 'this role is') }} {{ vlvl }} {{ t('seo.v.mid', 'to automation,') }} {{ vtim }}{{ t('seo.v.suf', '. It is a sourced range, not a verdict, and the detail is below.') }}</p>
 {% if seo %}
 <div class="tour-localize">
