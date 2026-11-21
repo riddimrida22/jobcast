@@ -40,6 +40,56 @@ def _clamp(x: float, lo: float = 0.0, hi: float = 100.0) -> float:
     return max(lo, min(hi, x))
 
 
+# Function words and ultra-generic verbs that carry no skill signal, so overlap is driven by the
+# meaningful nouns/verbs of the work (e.g. "records", "diagnose", "schedule", "weld").
+_SKILL_STOP = {
+    "the", "and", "for", "with", "from", "that", "this", "their", "your", "you", "our",
+    "are", "was", "were", "has", "have", "had", "will", "would", "can", "may", "into", "out",
+    "off", "per", "via", "such", "other", "others", "all", "any", "new", "various", "including",
+    "between", "within", "onto", "upon", "about", "over", "under", "using", "use", "used", "uses",
+    "perform", "performed", "performing", "provide", "provided", "providing", "ensure", "ensuring",
+    "maintain", "maintaining", "prepare", "preparing", "operate", "operating", "conduct", "assist",
+    "work", "working", "tasks", "task", "related", "appropriate", "necessary", "according",
+    "based", "well", "etc", "non", "one", "two", "each", "also", "them",
+}
+
+
+def _is_catch_all(occ: Dict[str, Any]) -> bool:
+    """O*NET residual buckets ('... All Other', 'Miscellaneous ...') are not real target
+    careers and usually carry no tasks, so they must never be offered as a green move."""
+    title = (occ.get("title") or "").lower()
+    return title.endswith("all other") or "all other" in title or title.startswith("miscellaneous")
+
+
+def _skill_tokens(text: str) -> set:
+    """Reduce a task statement or a self-reported skill to a set of meaningful lowercase stems,
+    so two pieces of work can be compared for real overlap. Deterministic and data-only."""
+    out = set()
+    word = ""
+    for ch in (text or "").lower():
+        if ch.isalnum():
+            word += ch
+        else:
+            if word:
+                out.add(word)
+            word = ""
+    if word:
+        out.add(word)
+    stems = set()
+    for w in out:
+        if len(w) < 3 or w in _SKILL_STOP or w.isdigit():
+            continue
+        # Light singularisation so "records"/"record", "systems"/"system" match.
+        if len(w) > 4 and w.endswith("ies"):
+            w = w[:-3] + "y"
+        elif len(w) > 4 and w.endswith("es"):
+            w = w[:-2]
+        elif len(w) > 3 and w.endswith("s"):
+            w = w[:-1]
+        stems.add(w)
+    return stems
+
+
 class Engine:
     def __init__(self, snapshot: Snapshot, weights: Dict[str, Any],
                  sources: Dict[str, Any], tiers: Dict[str, Any],
@@ -50,6 +100,7 @@ class Engine:
         self.tiers = tiers
         # Per-country wage overlays (country code -> {soc_median, ...}). US needs none.
         self.overlays = _load_overlays() if overlays is None else overlays
+        self._task_name_cache: Dict[str, List[str]] = {}   # soc -> core task names (green match)
 
     # ---- public API ------------------------------------------------------
     def assess(self, profile: Profile) -> Dict[str, Any]:
@@ -203,6 +254,155 @@ class Engine:
         else:
             out.sort(key=lambda x: -x["fit"])
         return out[:n]
+
+    # ---- green option: a safer, reachable career from the person's skills ----
+    def green_option(self, profile: Profile, user_skills: Optional[List[str]] = None,
+                     n: int = 3) -> Dict[str, Any]:
+        """The paid payoff: safer occupations this person can realistically move into using
+        skills they already have. Fully data-driven and the one AI-free path - matches come
+        from O*NET adjacency and core-task overlap crossed with the engine's own automation
+        scores; the language model may later explain a target, but never invents the match or
+        the numbers.
+
+        Ranking is (how much safer) x (how reachable), where reachable = skill overlap between
+        the person's skills and the target's O*NET core tasks, lifted by O*NET relatedness and
+        an education (job-zone) fit. Returns {ok, your_exposure, targets:[...]}.
+        """
+        base = self.assess(profile)
+        if not base.get("ok"):
+            return {"ok": False, "error": "occupation_not_found"}
+        occ = self.snapshot.match_title(profile.title)
+        your_exposure = base["base_exposure"]
+        your_soc = occ["soc"]
+        your_zone = occ.get("job_zone")
+        your_family = self.snapshot.family_code(your_soc)
+
+        # The person's skill vocabulary: the real work they already do (their occupation's core
+        # tasks) plus anything they ticked or typed. Both are O*NET-grounded or self-reported -
+        # never model-generated.
+        skill_tokens = set()
+        for tk in occ.get("tasks", []):
+            skill_tokens |= _skill_tokens(tk.get("name", ""))
+        for s in (user_skills or []):
+            skill_tokens |= _skill_tokens(s)
+        has_user_skills = bool([s for s in (user_skills or []) if (s or "").strip()])
+
+        # Candidate pool, kept to roles whose reachability is defensible from data - never a
+        # cross-field leap invented from coincidental word overlap:
+        #   1. O*NET related occupations (the authoritative transferable-skills signal), and
+        #   2. same-field (SOC major group) roles within educational reach,
+        # both only when they are meaningfully safer. The task overlap below then ranks them and
+        # names which skills already carry and which to add. Residual "All Other" catch-all
+        # occupations are excluded: they carry no task basis and are not real target careers.
+        SAFER_MARGIN = 8                            # points of risk drop to count as safer
+        candidates: Dict[str, Dict[str, Any]] = {}
+        adjacent_socs = set()
+        for adj in occ.get("adjacent", []):
+            full = self.snapshot.occupation(adj["soc"])
+            # Use the full occupation when the snapshot carries it (richer: tasks, wage, zone);
+            # otherwise fall back to the O*NET adjacency entry's own scores so the related role
+            # is still offered. Either way the data is O*NET-derived, never invented.
+            cand = full or {"soc": adj["soc"], "title": adj.get("title", ""),
+                            "ai": adj.get("ai"), "robo": adj.get("robo"),
+                            "tasks": [], "job_zone": None, "median_wage_national": None}
+            if _is_catch_all(cand):
+                continue
+            candidates[adj["soc"]] = cand
+            adjacent_socs.add(adj["soc"])
+        for cand in self.snapshot.all_occupations():
+            soc = cand["soc"]
+            if soc == your_soc or soc in candidates or _is_catch_all(cand):
+                continue
+            if self.snapshot.family_code(soc) != your_family:
+                continue                            # same field only for the wider pool
+            cz = cand.get("job_zone")
+            if your_zone is not None and cz is not None and cz > your_zone + 1:
+                continue                            # out of educational reach
+            if self._max_exposure(cand) <= your_exposure - SAFER_MARGIN:
+                candidates[soc] = cand
+
+        targets = []
+        for soc, cand in candidates.items():
+            cand_exp = self._max_exposure(cand)
+            risk_drop = round(your_exposure - cand_exp, 1)
+            if risk_drop < SAFER_MARGIN:            # must be meaningfully safer to be "green"
+                continue
+            is_adjacent = soc in adjacent_socs
+            covered, to_add = [], []
+            for name in self._occ_task_names(cand):
+                toks = _skill_tokens(name)
+                if not toks:
+                    continue
+                shared = toks & skill_tokens
+                if len(shared) >= 2 or (toks and len(shared) / len(toks) >= 0.4):
+                    covered.append(name)
+                else:
+                    to_add.append(name)
+            m = len(covered) + len(to_add)
+            qualified = (len(covered) / m) if m else (0.5 if is_adjacent else 0.3)
+            # Reachability gate: O*NET-related roles always qualify (the relatedness IS the skill
+            # signal). A same-field role that is not O*NET-related must still show real overlap -
+            # at least two of its core tasks the person can already do - to count as reachable.
+            if not is_adjacent and len(covered) < 2:
+                continue
+            zone_fit = (your_zone is None or cand.get("job_zone") is None
+                        or cand.get("job_zone") <= your_zone)
+            reach = 1.0
+            if is_adjacent:
+                reach *= 1.35
+            if zone_fit:
+                reach *= 1.1
+            if your_zone is not None and cand.get("job_zone") is not None \
+                    and cand.get("job_zone") > your_zone + 1:
+                reach *= 0.6
+            # Reachability leads the ranking (0.15 floor so a large drop still counts), so the
+            # safest job the person can mostly already do wins over a safer one they cannot.
+            score = risk_drop * (0.15 + 0.85 * qualified) * reach
+            targets.append({
+                "soc": soc,
+                "title": cand["title"],
+                "max_exposure": round(cand_exp, 1),
+                "your_exposure": your_exposure,
+                "risk_drop": risk_drop,
+                "qualified_pct": round(qualified * 100),
+                "qualified_k": len(covered),
+                "qualified_m": m,
+                "have_skills": [self._short_task(x) for x in covered[:6]],
+                "add_skills": [self._short_task(x) for x in to_add[:4]],
+                "median_wage": cand.get("median_wage_national"),
+                "job_zone": cand.get("job_zone"),
+                "adjacent": is_adjacent,
+                "growth": cand.get("projection_pct"),
+                "_score": round(score, 2),
+            })
+
+        targets.sort(key=lambda t: t["_score"], reverse=True)
+        return {"ok": True, "your_exposure": your_exposure,
+                "occupation": occ["title"], "soc": your_soc,
+                "used_user_skills": has_user_skills,
+                "targets": targets[:max(1, n)]}
+
+    def _occ_task_names(self, occ: Dict[str, Any]) -> List[str]:
+        """Core-task statements for an occupation, cached by SOC (the green match scans the whole
+        snapshot, so this keeps repeated requests cheap)."""
+        soc = occ.get("soc") or ""
+        hit = self._task_name_cache.get(soc)
+        if hit is None:
+            hit = [t.get("name", "") for t in (occ.get("tasks") or []) if t.get("name")]
+            self._task_name_cache[soc] = hit
+        return hit
+
+    def _max_exposure(self, occ: Dict[str, Any]) -> float:
+        """Combined automation exposure (0-100) for an occupation, matching how assess() derives
+        the headline: occupation-level ai/robo when present, else the task mean."""
+        if occ.get("ai") is not None or occ.get("robo") is not None:
+            return max(occ.get("ai") or 0.0, occ.get("robo") or 0.0) * 100
+        tasks = occ.get("tasks", [])
+        if tasks:
+            ai = sum(t.get("ai", 0) for t in tasks) / len(tasks)
+            robo = sum(t.get("robo", 0) for t in tasks) / len(tasks)
+            return max(ai, robo) * 100
+        return 0.0
 
     # ---- scoring internals ----------------------------------------------
     def _score_axes(self, occ: Dict[str, Any], profile: Profile):

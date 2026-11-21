@@ -89,3 +89,41 @@ def test_mitigation_tiers(engine):
     t2 = engine.mitigation_plan(p, "tier2")
     assert t2["options_count"] == 3
     assert len(t2["options"]) <= 3
+
+
+def test_green_option_is_safer_and_reachable(engine):
+    g = engine.green_option(Profile(title="data entry"),
+                            user_skills=["verify records", "customer service"])
+    assert g["ok"] is True
+    assert g["targets"], "a high-risk clerical role should have green targets"
+    for t in g["targets"]:
+        # Every target must be a genuine risk drop (safer), and never a catch-all bucket.
+        assert t["max_exposure"] < t["your_exposure"]
+        assert t["risk_drop"] >= 8
+        assert "all other" not in t["title"].lower()
+        assert 0 <= t["qualified_pct"] <= 100
+        assert t["qualified_k"] <= t["qualified_m"]
+    # Best target leads (ranked by safer x reachable).
+    scores = [t["_score"] for t in g["targets"]]
+    assert scores == sorted(scores, reverse=True)
+
+
+def test_green_option_skills_change_qualification(engine):
+    # Adding skills that match a target's tasks should not reduce how qualified we look.
+    none = engine.green_option(Profile(title="data entry"), user_skills=None)
+    some = engine.green_option(Profile(title="data entry"),
+                               user_skills=["verify and correct data in records",
+                                            "compile and format data into reports"])
+    assert none["ok"] and some["ok"]
+    assert some["used_user_skills"] is True
+    assert none["used_user_skills"] is False
+
+
+def test_green_option_unknown_title(engine):
+    g = engine.green_option(Profile(title="wizard"))
+    assert g["ok"] is False
+
+
+def test_green_option_deterministic(engine):
+    p = Profile(title="data entry")
+    assert engine.green_option(p, user_skills=["a", "b"]) == engine.green_option(p, user_skills=["a", "b"])

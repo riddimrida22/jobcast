@@ -106,7 +106,7 @@
     <aside class="up-info" aria-hidden="true">
       <h3 class="up-info-h">{{ t('up.info.h', 'What you unlock') }}</h3>
       <ul class="up-benefits">
-        <li>{{ t('up.info.1', 'Every exposed task in your job, scored 0 to 100') }}</li>
+        <li>{{ t('up.info.1', 'The safer career you already qualify for, matched to your skills') }}</li>
         <li>{{ t('up.info.2', 'Your AI and robotics timeline, year by year') }}</li>
         <li>{{ t('up.info.3', 'A step-by-step plan for what to do next') }}</li>
         <li>{{ t('up.info.4', 'We watch your job and email you when the outlook shifts') }}</li>
@@ -360,6 +360,230 @@
 {% if r.strategies %}
 <div id="p-strategy" class="panel card">
   <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><h2 style="margin:0">What to do about it</h2></div>
+
+  {% if not seo %}
+  {# The green option: lead the paid result with a safer, reachable career the person already
+     qualifies for. Shown interactively to paid/preview users; a locked teaser otherwise. #}
+  {% set paid = (entitlement and entitlement != 'free') or (not stripe_enabled) %}
+  <style>
+    .green-opt { border:1px solid var(--line); border-radius:16px; background:linear-gradient(180deg,rgba(63,178,127,.10),rgba(63,178,127,.03)); padding:18px 18px 16px; margin:4px 0 18px; }
+    .go-ey { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--green,#3fb27f); margin-bottom:6px; }
+    .go-h { font-size:clamp(18px,4.6vw,23px); font-weight:900; margin:0 0 6px; line-height:1.15; }
+    .go-sub { font-size:14px; color:var(--muted); margin:0 0 14px; line-height:1.45; }
+    .go-cta { display:inline-flex; align-items:center; gap:7px; border:none; cursor:pointer; font:inherit; font-weight:800; font-size:15px; color:#fff; padding:12px 20px; border-radius:11px; background:linear-gradient(180deg,#45c389,#2f9e68); box-shadow:0 4px 14px rgba(47,158,104,.35); }
+    .go-cta:disabled { opacity:.6; cursor:default; }
+    .go-loading { font-size:14px; color:var(--muted); padding:8px 0; }
+    .go-lock { display:flex; align-items:center; gap:7px; font-size:12px; color:var(--muted); margin-top:10px; }
+    .go-lock svg { width:14px; height:14px; flex:none; }
+    /* result cards */
+    .gt-lead { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-top:4px; }
+    .gt-top { display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; }
+    .gt-ring { flex:none; width:96px; height:96px; position:relative; }
+    .gt-ring svg { transform:rotate(-90deg); }
+    .gt-ring .gt-pct { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .gt-ring .gt-pct b { font-size:23px; font-weight:900; line-height:1; color:var(--green,#3fb27f); }
+    .gt-ring .gt-pct span { font-size:10px; color:var(--muted); font-weight:700; }
+    .gt-headwrap { flex:1; min-width:180px; }
+    .gt-role-ey { font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+    .gt-role { font-size:clamp(17px,4.4vw,21px); font-weight:900; margin:2px 0 3px; line-height:1.15; }
+    .gt-qual { font-size:14px; color:var(--ink); font-weight:600; }
+    .gt-qual b { color:var(--green,#3fb27f); }
+    /* risk drop bars */
+    .gt-drop { margin:14px 0 2px; }
+    .gt-drop-row { display:flex; align-items:center; gap:10px; margin:5px 0; font-size:13px; }
+    .gt-drop-lab { width:62px; flex:none; color:var(--muted); font-weight:700; }
+    .gt-drop-track { flex:1; height:16px; border-radius:8px; background:rgba(0,0,0,.08); overflow:hidden; }
+    .gt-drop-track i { display:block; height:100%; border-radius:8px; }
+    .gt-drop-track i.now { background:linear-gradient(90deg,#ff7a5a,#f0553e); }
+    .gt-drop-track i.safe { background:linear-gradient(90deg,#5ec98c,#2f9e68); }
+    .gt-drop-val { width:34px; flex:none; text-align:right; font-weight:800; font-variant-numeric:tabular-nums; }
+    .gt-drop-cap { font-size:13px; color:var(--ink); margin:8px 0 0; font-weight:600; }
+    .gt-drop-cap b { color:var(--green,#3fb27f); }
+    /* skills + pay */
+    .gt-skills { margin-top:14px; }
+    .gt-skills h4 { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 7px; }
+    .gt-chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .gt-chip { font-size:12.5px; font-weight:600; padding:5px 10px; border-radius:999px; border:1px solid var(--line); }
+    .gt-chip.have { color:var(--green,#2f9e68); background:rgba(63,178,127,.12); border-color:rgba(63,178,127,.3); }
+    .gt-chip.add { color:var(--accent,#e8794a); background:rgba(232,121,74,.10); border-color:rgba(232,121,74,.3); }
+    .gt-pay { margin-top:14px; display:flex; align-items:baseline; gap:8px; }
+    .gt-pay b { font-size:20px; font-weight:900; }
+    .gt-pay span { font-size:12px; color:var(--muted); }
+    .gt-more { margin-top:12px; display:grid; gap:8px; }
+    .gt-mini { display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:11px; padding:11px 13px; }
+    .gt-mini-pct { flex:none; font-size:17px; font-weight:900; color:var(--green,#3fb27f); width:46px; }
+    .gt-mini-body { flex:1; min-width:0; }
+    .gt-mini-role { font-weight:800; font-size:14px; }
+    .gt-mini-meta { font-size:12px; color:var(--muted); }
+    .gt-method { font-size:11.5px; color:var(--muted); margin:14px 0 0; line-height:1.5; }
+    .gt-empty { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:15px; }
+    .gt-empty b { color:var(--green,#3fb27f); }
+    /* skills modal */
+    .skm { position:fixed; inset:0; z-index:1200; background:rgba(8,12,20,.72); display:flex; align-items:center; justify-content:center; padding:16px; }
+    .skm[hidden] { display:none; }
+    .skm-card { background:var(--card,#141b26); border:1px solid var(--line); border-radius:16px; max-width:520px; width:100%; max-height:88vh; overflow:auto; padding:22px 20px; position:relative; }
+    .skm-x { position:absolute; top:10px; right:12px; background:none; border:none; color:var(--muted); font-size:26px; line-height:1; cursor:pointer; }
+    .skm-h { font-size:20px; font-weight:900; margin:0 0 4px; }
+    .skm-sub { font-size:13.5px; color:var(--muted); margin:0 0 14px; line-height:1.45; }
+    .skm-list { display:flex; flex-direction:column; gap:7px; margin-bottom:14px; }
+    .skm-item { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; cursor:pointer; font-size:14px; line-height:1.35; }
+    .skm-item input { margin-top:3px; flex:none; width:17px; height:17px; accent-color:var(--green,#3fb27f); }
+    .skm-item.off { opacity:.5; }
+    .skm-add label { display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:6px; }
+    .skm-add input[type=text] { width:100%; padding:11px 12px; border-radius:10px; border:1px solid var(--line); background:var(--bg,#0d131c); color:inherit; font:inherit; margin-bottom:16px; }
+  </style>
+
+  <div id="green-option" class="green-opt" data-paid="{{ '1' if paid else '0' }}">
+    <div id="go-intro">
+      <span class="go-ey">Your safer move</span>
+      <h3 class="go-h">Find the AI-safe career you already qualify for</h3>
+      <p class="go-sub">Tell us what you're good at. We match the skills you already have to a lower-risk career you can realistically move into &mdash; and show exactly how much of it you already qualify for, and how far your risk drops.</p>
+      <button type="button" id="go-start" class="go-cta">{{ 'Add my skills' if paid else 'Unlock my safer career' }} &#8250;</button>
+      {% if not paid %}<div class="go-lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Part of JobBreak Monitor &mdash; one-time $4.99</div>{% endif %}
+    </div>
+    <div id="go-loading" class="go-loading" hidden>Matching your skills to safer careers&hellip;</div>
+    <div id="go-results" hidden></div>
+  </div>
+
+  <div id="skills-modal" class="skm" hidden aria-modal="true" role="dialog" aria-label="Add your skills">
+    <div class="skm-card">
+      <button type="button" class="skm-x" id="skm-x" aria-label="Close">&times;</button>
+      <h3 class="skm-h">What are you good at?</h3>
+      <p class="skm-sub">Here are the core skills in your role today. Keep the ones you have, drop any you don't, and add anything else. We use these to find the safer career you already qualify for.</p>
+      <div class="skm-list" id="skm-list">
+        {% for t in r.tasks %}
+        <label class="skm-item"><input type="checkbox" class="skm-ck" value="{{ t.name }}" checked><span class="skm-tn">{{ t.name }}</span></label>
+        {% endfor %}
+      </div>
+      <div class="skm-add">
+        <label for="skm-extra">Add other skills you have (comma separated)</label>
+        <input type="text" id="skm-extra" placeholder="e.g. project management, Excel, customer service, scheduling">
+      </div>
+      <button type="button" class="go-cta" id="skm-go" style="width:100%;justify-content:center">Show my safer career &#8250;</button>
+    </div>
+  </div>
+  <script id="green-flags" type="application/json">{{ {"start": (start_skills|default(false)), "paid": paid} | tojson }}</script>
+  <script>
+  (function () {
+    var root = document.getElementById('green-option');
+    if (!root) return;
+    var FLAGS = {}; try { FLAGS = JSON.parse(document.getElementById('green-flags').textContent) || {}; } catch (e) {}
+    var intro = document.getElementById('go-intro'), loading = document.getElementById('go-loading'),
+        results = document.getElementById('go-results'), startBtn = document.getElementById('go-start'),
+        modal = document.getElementById('skills-modal');
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+    function profile() {
+      var el = document.getElementById('profile-data');
+      if (el) { try { return JSON.parse(el.textContent); } catch (e) {} }
+      return { title: {{ r.occupation.title|tojson }} };
+    }
+    // ---- skills modal ----
+    function openModal() { if (modal) { modal.hidden = false; document.body.style.overflow = 'hidden'; } }
+    function closeModal() { if (modal) { modal.hidden = true; document.body.style.overflow = ''; } }
+    var xBtn = document.getElementById('skm-x'); if (xBtn) xBtn.addEventListener('click', closeModal);
+    if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+    document.querySelectorAll('.skm-ck').forEach(function (ck) {
+      ck.addEventListener('change', function () { ck.closest('.skm-item').classList.toggle('off', !ck.checked); });
+    });
+    // ---- start: paid opens the modal; unpaid is sent to the paywall ----
+    if (startBtn) startBtn.addEventListener('click', function () {
+      if (FLAGS.paid) { openModal(); return; }
+      window.jbEv && window.jbEv('green_paywall');
+      if (window.jbOpenPaywall) { window.jbOpenPaywall(); return; }
+      var ab = document.getElementById('ai-plan-btn'); if (ab) { ab.click(); return; }
+      fetch('/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier: 'tier2', period: 'once' }) })
+        .then(function (r) { return r.json(); }).then(function (d) { if (d.ok && d.url) window.location.href = d.url; });
+    });
+    // ---- run the match ----
+    var goBtn = document.getElementById('skm-go');
+    if (goBtn) goBtn.addEventListener('click', function () {
+      var skills = [];
+      document.querySelectorAll('.skm-ck').forEach(function (ck) { if (ck.checked) skills.push(ck.value); });
+      var extra = (document.getElementById('skm-extra').value || '').split(',');
+      extra.forEach(function (s) { s = s.trim(); if (s) skills.push(s); });
+      closeModal(); run(skills);
+    });
+    function run(skills) {
+      intro.hidden = true; results.hidden = true; loading.hidden = false;
+      window.jbEv && window.jbEv('green_match');
+      var prof = profile(); prof.skills_list = skills; prof.skills = (skills || []).join(', ');
+      fetch('/v1/green', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: prof.title, country: prof.country, skills: skills }) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          loading.hidden = true;
+          if (d && d.error === 'payment_required') { intro.hidden = false; if (window.jbOpenPaywall) window.jbOpenPaywall(); return; }
+          if (!d || !d.ok) { intro.hidden = false; return; }
+          render(d);
+        })
+        .catch(function () { loading.hidden = true; intro.hidden = false; });
+    }
+    function bar(cls, val) {
+      var w = Math.max(4, Math.min(100, val));
+      return '<div class="gt-drop-track"><i class="' + cls + '" style="width:' + w + '%"></i></div>';
+    }
+    function money(sym, v) { return v ? (sym || '$') + Math.round(v).toLocaleString() : ''; }
+    function leadCard(t, sym) {
+      var C = 2 * Math.PI * 42, off = C * (1 - (t.qualified_pct || 0) / 100);
+      var qualLine = t.qualified_m
+        ? 'You already qualify for <b>' + t.qualified_k + ' of ' + t.qualified_m + ' core skills</b>.'
+        : 'A closely related role at much lower automation risk.';
+      var have = (t.have_skills || []).map(function (s) { return '<span class="gt-chip have">' + esc(s) + '</span>'; }).join('');
+      var add = (t.add_skills || []).map(function (s) { return '<span class="gt-chip add">+ ' + esc(s) + '</span>'; }).join('');
+      var pay = money(sym, t.median_wage);
+      return '<div class="gt-lead">' +
+        '<div class="gt-top">' +
+          '<div class="gt-ring"><svg width="96" height="96" viewBox="0 0 96 96">' +
+            '<circle cx="48" cy="48" r="42" fill="none" stroke="rgba(127,127,127,.18)" stroke-width="9"/>' +
+            '<circle cx="48" cy="48" r="42" fill="none" stroke="#3fb27f" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '"/>' +
+          '</svg><div class="gt-pct"><b>' + (t.qualified_pct || 0) + '%</b><span>qualified</span></div></div>' +
+          '<div class="gt-headwrap">' +
+            '<div class="gt-role-ey">Your safer move</div>' +
+            '<div class="gt-role">' + esc(t.title) + '</div>' +
+            '<div class="gt-qual">' + qualLine + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="gt-drop">' +
+          '<div class="gt-drop-row"><span class="gt-drop-lab">Your job</span>' + bar('now', t.your_exposure) + '<span class="gt-drop-val">' + Math.round(t.your_exposure) + '</span></div>' +
+          '<div class="gt-drop-row"><span class="gt-drop-lab">' + esc((t.title || '').split(',')[0]) + '</span>' + bar('safe', t.max_exposure) + '<span class="gt-drop-val">' + Math.round(t.max_exposure) + '</span></div>' +
+          '<p class="gt-drop-cap">Risk drops <b>' + Math.round(t.your_exposure) + ' &rarr; ' + Math.round(t.max_exposure) + '</b> (down ' + Math.round(t.risk_drop) + ' of 100).</p>' +
+        '</div>' +
+        (have ? '<div class="gt-skills"><h4>Skills you already bring</h4><div class="gt-chips">' + have + '</div></div>' : '') +
+        (add ? '<div class="gt-skills"><h4>Skills to add</h4><div class="gt-chips">' + add + '</div></div>' : '') +
+        (pay ? '<div class="gt-pay"><b>' + pay + '</b><span>typical pay &middot; national median</span></div>' : '') +
+      '</div>';
+    }
+    function miniCard(t, sym) {
+      var pay = money(sym, t.median_wage);
+      return '<div class="gt-mini"><div class="gt-mini-pct">' + (t.qualified_pct || 0) + '%</div>' +
+        '<div class="gt-mini-body"><div class="gt-mini-role">' + esc(t.title) + '</div>' +
+        '<div class="gt-mini-meta">risk ' + Math.round(t.your_exposure) + ' &rarr; ' + Math.round(t.max_exposure) +
+        (pay ? ' &middot; ' + pay : '') + '</div></div></div>';
+    }
+    function render(d) {
+      var sym = (d.currency && d.currency.symbol) || '$';
+      var ts = d.targets || [];
+      if (!ts.length) {
+        results.innerHTML = '<div class="gt-empty"><p style="margin:0 0 6px"><b>Good news:</b> at ' +
+          Math.round(d.your_exposure) + ' of 100, your role is already on the lower-risk side, so there isn\'t a clearly safer career you\'d need to jump to.</p>' +
+          '<p class="muted" style="margin:0">See the <strong>Safer paths</strong> tab for adjacent roles if you want to lower your exposure further.</p></div>';
+        results.hidden = false; return;
+      }
+      var html = leadCard(ts[0], sym);
+      if (ts.length > 1) html += '<div class="gt-more">' + ts.slice(1).map(function (t) { return miniCard(t, sym); }).join('') + '</div>';
+      html += '<p class="gt-method">Matches are computed from O*NET related-occupation and core-task data crossed with this model\'s automation-exposure scores &mdash; from your skills, not estimated by an AI. Figures are ranges for planning, not a guarantee.</p>';
+      results.innerHTML = html; results.hidden = false;
+      window.jbEv && window.jbEv('green_shown');
+    }
+    // Auto-open the capture when a freshly paid customer lands here to build their plan.
+    if (FLAGS.start && FLAGS.paid) {
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', openModal);
+      else openModal();
+    }
+  })();
+  </script>
+  {% endif %}
   <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:2px 0 4px">
     <svg class="runners" viewBox="0 0 340 92" aria-hidden="true" style="width:235px;height:56px">
       <line x1="0" y1="70" x2="340" y2="70" stroke="var(--line)" stroke-width="1"></line>

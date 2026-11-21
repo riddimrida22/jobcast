@@ -291,6 +291,41 @@ def create_app() -> Flask:
         return jsonify({"ok": True, "source": "rules",
                         "strategies": assessment.get("strategies", [])[:n], "sources": []})
 
+    @app.post("/v1/green")
+    def api_green():
+        """The paid payoff: a safer, reachable 'green' career the person already qualifies for,
+        matched from their skills. Data-driven (O*NET adjacency + core-task overlap x the engine's
+        automation scores); no language model is involved in the match or the numbers. Gated to a
+        paid entitlement when billing is live, like /v1/advice."""
+        body = request.get_json(silent=True) or request.form
+        # skills may arrive as a list (JSON) or a comma string (form); normalise before building
+        # the profile, whose skills field is a plain string.
+        raw_skills = body.get("skills") if hasattr(body, "get") else None
+        if isinstance(raw_skills, list):
+            skills = [str(s).strip() for s in raw_skills if str(s).strip()]
+        elif isinstance(raw_skills, str):
+            skills = [s.strip() for s in raw_skills.split(",") if s.strip()]
+        else:
+            skills = None
+        src = {k: v for k, v in (body.items() if hasattr(body, "items") else [])}
+        src["skills"] = ", ".join(skills) if skills else ""
+        profile = profile_from(src)
+        if not (profile.title or "").strip():
+            return jsonify({"ok": False, "error": "missing_title"}), 400
+        from . import payments as pay
+        if pay.configured():
+            ent = session.get("jb_tier", "free")
+            if pay.TIER_RANK.get(ent, 0) < pay.TIER_RANK.get("tier2", 2):
+                return jsonify({"ok": False, "error": "payment_required", "tier": "tier2"}), 402
+        result = engine.green_option(profile, user_skills=skills, n=3)
+        if not result.get("ok"):
+            return jsonify(result), 404
+        # Attach the display currency so the client formats pay correctly (matches assess()).
+        from riskcore import countries
+        cur = countries.currency(countries.resolve(profile.country or getattr(g, "country", None)))
+        result["currency"] = {"symbol": cur["symbol"], "period": cur["period"]}
+        return jsonify(result)
+
     # ---- HTML pages -----------------------------------------------------
     def _occupations():
         return [{"soc": o["soc"], "title": o["title"]}
@@ -337,6 +372,24 @@ def create_app() -> Flask:
                                profile_json=json.dumps(asdict(profile)), version=VERSION,
                                closest_match=closest_match, typed_title=typed,
                                licensed=engine.snapshot.licensed)
+
+    @app.get("/plan")
+    def plan_landing():
+        """Where a paid customer lands to build their safe-career plan. We only persist the job
+        they were on (no accounts), so we rebuild the result for that occupation and open the
+        skills capture that powers the green-option match. If no job is in the session, send
+        them home to check one."""
+        soc = session.get("jb_soc")
+        occ = engine.snapshot.occupation(soc) if soc else None
+        if occ is None:
+            return redirect(url_for("index"))
+        prof = Profile(title=occ["title"], country=getattr(g, "country", None))
+        result = engine.assess(prof)
+        if not result.get("ok"):
+            return redirect(url_for("index"))
+        return render_template("result.html", r=result, profile=prof,
+                               profile_json=json.dumps(asdict(prof)), version=VERSION,
+                               licensed=engine.snapshot.licensed, start_skills=True)
 
     @app.get("/jobs")
     def browse_jobs():
