@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Support admin - JobBreak{% endblock %}
+{% block content %}
+<style>
+  .adm { max-width:720px; margin:14px auto 0; }
+  .adm h1 { font-size:22px; margin:0 0 4px; }
+  .adm form.lookup { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:12px 0 18px; }
+  .adm input[type=text] { flex:1 1 320px; box-sizing:border-box; font:inherit; font-size:15px; padding:10px 12px;
+    border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink); }
+  .adm button { margin-top:0; }
+  .adm .kv { width:100%; border-collapse:collapse; margin:4px 0 16px; font-size:14px; }
+  .adm .kv th { text-align:left; width:150px; color:var(--muted); font-weight:600; padding:5px 10px 5px 0; vertical-align:top; white-space:nowrap; }
+  .adm .kv td { padding:5px 0; font-family:ui-monospace,Menlo,Consolas,monospace; word-break:break-all; }
+  .adm .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+  .adm .actions form { margin:0; }
+  .adm .msg { border-radius:11px; padding:12px 15px; margin:0 0 16px; font-size:14px; }
+  .adm .msg.ok { background:#e7f6ec; border:1px solid #a9d8ba; }
+  .adm .msg.err { background:#fdecea; border:1px solid #f3b4ab; }
+  .adm .danger { background:#fff; color:#b3261e; border:1px solid #e3a59f; box-shadow:none; padding:9px 16px; font-size:14px; }
+  .adm .danger:hover { background:#fdecea; filter:none; }
+  .adm .muted { font-size:12px; }
+</style>
+<div class="adm">
+  <h1>Support admin</h1>
+  <p class="muted">Look up a purchase by Stripe checkout session id (<code>cs_...</code>) or by the email
+  the customer paid with, then resolve it.</p>
+
+  {% if msg %}<div class="msg {{ 'ok' if msg_ok else 'err' }}">{{ msg }}</div>{% endif %}
+
+  <form class="lookup" method="get" action="/admin/support">
+    <input type="hidden" name="key" value="{{ key }}">
+    <input type="text" name="q" value="{{ q or '' }}" placeholder="cs_live_...  or  customer@email.com" autocomplete="off" autofocus>
+    <button type="submit">Look up</button>
+  </form>
+
+  {% if not stripe_ok %}
+    <div class="msg err">Stripe is not configured on this server, so lookups and actions are unavailable.</div>
+  {% elif info and info.error %}
+    <div class="msg err">No purchase found for that{% if info.error == 'stripe_error' %} (Stripe error){% endif %}.</div>
+  {% elif info %}
+    <table class="kv">
+      <tr><th>Session</th><td>{{ info.id }}</td></tr>
+      <tr><th>Created</th><td>{{ info.created or '-' }}</td></tr>
+      <tr><th>Email</th><td>{{ info.email or '-' }}</td></tr>
+      <tr><th>Amount</th><td>{{ info.amount }} {{ info.currency }}{% if info.amount is none %}-{% endif %}</td></tr>
+      <tr><th>Mode</th><td>{{ info.mode or '-' }}</td></tr>
+      <tr><th>Status</th><td>{{ info.status or '-' }} / payment {{ info.payment_status or '-' }}</td></tr>
+      <tr><th>Grants tier</th><td>{{ info.grants or 'NONE' }} (metadata tier={{ info.tier or '-' }}, period={{ info.period or '-' }})</td></tr>
+      <tr><th>Customer</th><td>{{ info.customer or '-' }}</td></tr>
+      <tr><th>Subscription</th><td>{{ info.subscription or '-' }}</td></tr>
+    </table>
+    <div class="actions">
+      <form method="post" action="/admin/support/action">
+        <input type="hidden" name="key" value="{{ key }}">
+        <input type="hidden" name="q" value="{{ info.id }}">
+        <input type="hidden" name="action" value="receipt">
+        <button type="submit" class="secondary">Re-send receipt</button>
+      </form>
+      <form method="post" action="/admin/support/action">
+        <input type="hidden" name="key" value="{{ key }}">
+        <input type="hidden" name="q" value="{{ info.id }}">
+        <input type="hidden" name="action" value="regrant">
+        <button type="submit" class="secondary">Re-grant access email</button>
+      </form>
+      {% if info.subscription %}
+      <form method="post" action="/admin/support/action" onsubmit="return confirm('Cancel this subscription at period end? The customer keeps access until the paid period ends.');">
+        <input type="hidden" name="key" value="{{ key }}">
+        <input type="hidden" name="q" value="{{ info.id }}">
+        <input type="hidden" name="action" value="cancel">
+        <button type="submit" class="danger">Cancel subscription</button>
+      </form>
+      {% endif %}
+      <form method="post" action="/admin/support/action" onsubmit="return confirm('Refund this payment in full? This cannot be undone.');">
+        <input type="hidden" name="key" value="{{ key }}">
+        <input type="hidden" name="q" value="{{ info.id }}">
+        <input type="hidden" name="action" value="refund">
+        <button type="submit" class="danger">Refund payment</button>
+      </form>
+    </div>
+    <p class="muted" style="margin-top:14px">Re-grant emails the customer a one-click link that restores
+    access on their device (uses the checkout session id). Refund and cancel act on Stripe immediately.</p>
+  {% endif %}
+</div>
+{% endblock %}

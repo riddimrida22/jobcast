@@ -25,9 +25,12 @@ def sender() -> str:
     return os.environ.get("JOBCAST_EMAIL_FROM") or _DEFAULT_FROM
 
 
-def send(to: str, subject: str, text: str, html: str = "") -> Tuple[bool, str]:
+def send(to: str, subject: str, text: str, html: str = "", reply_to: str = "") -> Tuple[bool, str]:
     """Send one email. Returns (ok, info). With no API key this is a dry run that logs a
-    one-line summary and reports success, so callers and tests work unchanged."""
+    one-line summary and reports success, so callers and tests work unchanged.
+
+    reply_to: optional address replies should go to (used by the support contact form so a
+    reply reaches the customer, not the no-reply sending address)."""
     to = (to or "").strip()
     if not to:
         return False, "no_recipient"
@@ -38,6 +41,8 @@ def send(to: str, subject: str, text: str, html: str = "") -> Tuple[bool, str]:
     body = {"from": sender(), "to": [to], "subject": subject, "text": text}
     if html:
         body["html"] = html
+    if reply_to and "@" in reply_to:
+        body["reply_to"] = reply_to.strip()
     data = json.dumps(body).encode("utf-8")
     req = urllib.request.Request(_API, data=data, method="POST", headers={
         "Authorization": "Bearer " + key,
