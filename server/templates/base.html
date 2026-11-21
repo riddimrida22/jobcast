@@ -1460,6 +1460,56 @@
         });
       })();
     </script>
+    <!-- Get the app: QR on desktop (scan -> open on phone), install button on mobile.
+         Points at the installable PWA; no app store, works on any iPhone or Android. -->
+    <div class="getapp" aria-label="Get JobBreak on your phone">
+      <img class="getapp-qr" src="/static/qr-app.svg" alt="QR code that opens JobBreak on your phone" width="116" height="116" loading="lazy">
+      <div class="getapp-txt">
+        <b>{{ t('getapp.h', 'Get JobBreak on your phone') }}</b>
+        <span class="getapp-desk">{{ t('getapp.desk', 'Point your phone camera at the code, open the link, then tap <b>Add to Home Screen</b>. It opens like an app on any iPhone or Android. Free, no app store.') }}</span>
+        <span class="getapp-mob">{{ t('getapp.mob', 'Add JobBreak to your home screen and it opens like an app. Any iPhone or Android, free.') }}</span>
+        <button type="button" class="getapp-btn" id="getapp-install">{{ t('getapp.btn', 'Add to home screen') }}</button>
+        <span class="getapp-hint" id="getapp-hint" hidden></span>
+      </div>
+    </div>
+    <style>
+      .getapp { display:flex; gap:16px; align-items:center; max-width:560px; margin:36px auto 0; padding:16px;
+        border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.03); }
+      .getapp-qr { flex:none; width:116px; height:116px; border-radius:10px; background:#fff; padding:6px; box-sizing:border-box; }
+      .getapp-txt { display:flex; flex-direction:column; gap:5px; min-width:0; }
+      .getapp-txt b { font-size:15px; color:var(--text, inherit); }
+      .getapp-txt span { font-size:12.5px; line-height:1.5; color:var(--muted); }
+      .getapp-desk b, .getapp-mob b, .getapp-hint b { color:var(--primary); font-weight:700; }
+      .getapp-mob, .getapp-btn, .getapp-hint { display:none; }
+      .getapp-btn { align-self:flex-start; margin-top:4px; font:inherit; font-weight:800; font-size:13.5px; cursor:pointer;
+        border:0; border-radius:10px; padding:9px 16px; color:#2a1708; background:linear-gradient(180deg,var(--accent,#f3a35f),#e8863a); }
+      .getapp-hint { font-size:12px; color:var(--muted); line-height:1.5; }
+      @media (max-width:767px){
+        .getapp { align-items:flex-start; }
+        .getapp-qr, .getapp-desk { display:none; }
+        .getapp-mob { display:block; } .getapp-btn { display:inline-block; }
+      }
+    </style>
+    <script>
+    (function(){
+      // Capture the Android install prompt globally so the footer button can use it too.
+      window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); window.jbDeferredInstall=e; });
+      // Count QR-driven visits (scan -> /?via=qr) in the funnel.
+      try { if (/[?&]via=qr(&|$)/.test(location.search) && window.jbEv) window.jbEv('qr_scan'); } catch(e){}
+      var btn=document.getElementById('getapp-install'), hint=document.getElementById('getapp-hint');
+      if(!btn) return;
+      function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream; }
+      function standalone(){ try{ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true; }catch(e){ return false; } }
+      if(standalone()){ var w=btn.closest('.getapp'); if(w) w.style.display='none'; return; }
+      btn.addEventListener('click', function(){
+        if(window.jbEv) try{ window.jbEv('install_click'); }catch(e){}
+        var d=window.jbDeferredInstall;
+        if(d){ d.prompt(); d.userChoice.then(function(){ window.jbDeferredInstall=null; }); return; }
+        if(isIOS()){ if(hint){ hint.innerHTML='Tap the <b>Share</b> icon, then <b>Add to Home Screen</b>.'; hint.hidden=false; } return; }
+        if(hint){ hint.innerHTML='Open your browser menu, then choose <b>Add to Home Screen</b> (or <b>Install app</b>).'; hint.hidden=false; }
+      });
+    })();
+    </script>
     <footer>
       JobBreak {{ version }}. Results are probability ranges, not verdicts.
       Sources on the <a href="/methodology">How it works</a> page.<br>
