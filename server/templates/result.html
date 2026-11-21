@@ -915,6 +915,9 @@
   if (subOpts && btn && btn.parentNode) { btn.parentNode.insertAdjacentElement('afterend', subOpts); }
   if (btn) btn.addEventListener('click', function () {
     if (entitled('tier2')) { generate('tier2', btn); return; }
+    // Non-payers get the same $4.99-first paywall (one-time lead + one-tap wallets, with
+    // yearly/monthly under "Other plans") as the rest of the funnel, not a subscription-only block.
+    if (window.jbOpenPaywall) { window.jbOpenPaywall(); return; }
     if (subOpts) { subOpts.hidden = false; subOpts.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
     else { generate('tier2', btn); }
   });
@@ -1310,6 +1313,9 @@
     if (stu || (ENT && ENT !== 'free')) { startResultTour(); }  // students & subscribers: full breakdown
     else { startFreeSlide(); }                                  // employees: one free slide, then paywall
   });
+  // Expose the $4.99-first paywall so other controls (e.g. "Personalise this plan with AI")
+  // open the same offer (one-time lead + one-tap wallets) instead of a subscription-only block.
+  window.jbOpenPaywall = function () { openUpsell(unlockBreakdown); };
 })();
 </script>
 {% endblock %}
