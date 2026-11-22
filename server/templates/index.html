@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Will AI Replace Your Job? Check Your Job Extinction Risk | JobBreak{% endblock %}
-{% block description %}Will AI or robots take your job, and when? Get your Job Extinction Risk (0 to 100) from real O*NET and BLS data, with a timeline and what to do about it. Free, no signup.{% endblock %}
+{% block description %}Will AI or robots take your job, and when? Get your AI Resilience Level (1 to 10, where 10 = safe and 1 = extinct) from real O*NET and BLS data, with a timeline and what to do about it. Free, no signup.{% endblock %}
 {% block body_class %}wide{% endblock %}
 {% block content %}
 {% include "_intro.html" %}
@@ -69,7 +69,7 @@
     </div>
   </div>
   {% endif %}
-  <div class="gate-q">{{ t('gate.q', 'Will <span class="hot">AI</span> replace your job?') }}</div>
+  <div class="gate-q">{{ t('gate.q', 'Can <span class="hot">AI or robots</span> replace your job?') }}</div>
   <p class="gate-sub">{{ t('gate.sub', 'Type your job for an instant resilience level &mdash; 1 to 10, where 10 is safe and 1 is extinct, and when it is coming, from real data. Or choose how to start.') }}</p>
   <div class="lp-eyebrow">{{ t('lp.scan', '<span class="car">&#9656;</span> Scan your job &mdash; pull your real-life stats') }}</div>
   <div class="lp-search">
@@ -281,15 +281,15 @@
     <div class="cs-col">
       <div class="cs-col-h risk">More at risk</div>
       <div class="cs-scroll"><div class="cs-track">
-        {% for o in most_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="exp">{{ o.base }}</b></a>{% endfor %}
-        {% for o in most_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="exp">{{ o.base }}</b></a>{% endfor %}
+        {% for o in most_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="exp">{{ o.level }}</b></a>{% endfor %}
+        {% for o in most_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="exp">{{ o.level }}</b></a>{% endfor %}
       </div></div>
     </div>
     <div class="cs-col">
       <div class="cs-col-h safe">More resilient</div>
       <div class="cs-scroll"><div class="cs-track down">
-        {% for o in least_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="safe">{{ o.base }}</b></a>{% endfor %}
-        {% for o in least_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="safe">{{ o.base }}</b></a>{% endfor %}
+        {% for o in least_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="safe">{{ o.level }}</b></a>{% endfor %}
+        {% for o in least_exposed %}<a class="cs-card" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span>{{ o.title }}</span><b class="safe">{{ o.level }}</b></a>{% endfor %}
       </div></div>
     </div>
   </div>
@@ -304,8 +304,8 @@
     <div class="side-title risk">Careers more at risk</div>
     <div class="side-sub">Live ratings &mdash; tap any job</div>
     <div class="ticker"><div class="ticker-inner">
-      {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.base }}</span></a>{% endfor %}
-      {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.base }}</span></a>{% endfor %}
+      {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.level }}</span></a>{% endfor %}
+      {% for o in most_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score exp">{{ o.level }}</span></a>{% endfor %}
     </div></div>
   </aside>
   <div class="center">
@@ -513,8 +513,8 @@
       <div style="color:var(--muted);font-size:12.5px;margin-top:3px;line-height:1.35">Every career's AI-risk data, no charge. Explore safe options &#8250;</div>
     </a>
     <div class="ticker rev"><div class="ticker-inner">
-      {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}
-      {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.base }}</span></a>{% endfor %}
+      {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.level }}</span></a>{% endfor %}
+      {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.level }}</span></a>{% endfor %}
     </div></div>
   </aside>
 </div>
@@ -526,12 +526,12 @@
 </div>
 
 <div class="score-foot">
-  <span><strong>How your {{ rating_label }} works:</strong> it is exposure, not a probability: a 0 to 100
-  index of how automatable a job's work is &mdash; 80 means more exposed than 80% of occupations &mdash;
-  blending AI exposure (Eloundou 2023), robotics (O*NET), and how routine versus interpersonal the work is,
-  with weights set by a backtest against real jobs data. The <em>when</em> is a separate timeline.
-  <a href="/methodology">How it works</a></span>
-  <div class="scale"><span>0 low</span><div class="scale-bar"></div><span>100 high</span></div>
+  <span><strong>How your {{ rating_label }} works:</strong> it is a resilience level from 1 to 10
+  (<strong>10 = safe, 1 = extinct</strong>), not a probability &mdash; built from a 0 to 100 index of how
+  automatable a job's work is, blending AI exposure (Eloundou 2023), robotics (O*NET), and how routine
+  versus interpersonal the work is, with weights set by a backtest against real jobs data. The <em>when</em>
+  is a separate timeline. <a href="/methodology">How it works</a></span>
+  <div class="scale"><span>1 extinct</span><div class="scale-bar"></div><span>10 safe</span></div>
 </div>
 
 <section class="faq">

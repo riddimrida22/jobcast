@@ -393,7 +393,8 @@ def create_app() -> Flask:
         scored = []
         for o in engine.snapshot.all_occupations():
             base = round(engine.display_exposure(o))   # display rescale, same as the result-page headline
-            scored.append({"soc": o["soc"], "title": o["title"], "base": base})
+            scored.append({"soc": o["soc"], "title": o["title"], "base": base,
+                           "level": engine.resilience_level(base)})   # flipped 1-10 (10=safe)
         most = sorted(scored, key=lambda x: -x["base"])[:n]
         least = sorted(scored, key=lambda x: x["base"])[:n]
         return most, least
@@ -509,7 +510,7 @@ def create_app() -> Flask:
         from . import card as card_mod
         from flask import Response
         png = card_mod.render_card(
-            occ["title"], result.get("base_exposure", 0),
+            occ["title"], result.get("base_level", 0),
             ((result.get("timeline") or {}).get("band") or {}).get("label", ""))
         return Response(png, mimetype="image/png",
                         headers={"Cache-Control": "public, max-age=86400"})

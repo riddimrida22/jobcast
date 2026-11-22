@@ -2,7 +2,8 @@
 
 A user (identified by email) gets a short referral code. Friends who arrive on their
 link (?r=code) and then PAY are credited to that referrer. At THRESHOLD paid referrals the
-referrer earns a one-time REWARD_PERCENT%-off code (issued from the Stripe webhook).
+referrer's own purchase is refunded in full ("money back") and they receive a one-time
+free-year code (both issued from the Stripe webhook).
 
 Only PAID conversions count - credited from checkout.session.completed - so the reward
 cannot be farmed with free sign-ups. SQLite so counts survive restarts and stay correct
@@ -16,7 +17,6 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 
 THRESHOLD = 5
-REWARD_PERCENT = 50
 
 # Codes lead with the app NAME so the code itself advertises JobBreak every time it is
 # shared, said, or screenshotted (BB: "the promo code itself is an ad / get the name of the

@@ -13,6 +13,7 @@ data/cache/
 
 # Secrets: never commit.
 .env
+.env.*
 *.key
 secrets.*
 

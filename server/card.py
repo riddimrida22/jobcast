@@ -1,7 +1,7 @@
 """Generate a shareable Open Graph score card (1200x630 PNG) for an occupation.
 Pure Pillow, no system libraries, so it builds on the slim Python image. The card
-shows the brand, job title, the exposure score (coloured by level), an exposure bar,
-and the timeline band, so a shared link renders a real visual card, not just text."""
+shows the brand, job title, the AI resilience level 1-10 (10 = safe, coloured by level),
+a resilience bar, and the timeline band, so a shared link renders a real visual card."""
 
 import io
 from pathlib import Path
@@ -24,10 +24,11 @@ def _font(bold, size):
     return ImageFont.truetype(str(_FONTS / name), size)
 
 
-def _level_color(score):
-    if score >= 66:
+def _level_color(level):
+    # Resilience: HIGH is good. 1-3 extinction/endangered (red), 4-6 exposed (amber), 7-10 safe (green).
+    if level <= 3:
         return RED
-    if score >= 40:
+    if level <= 6:
         return AMBER
     return GREEN
 
@@ -51,10 +52,10 @@ def _wrap(draw, text, font, max_w, max_lines=2):
     return lines[:max_lines]
 
 
-def render_card(title, score, band_label):
-    """Return PNG bytes for the given occupation title, 0-100 score, and timeline band label."""
+def render_card(title, level, band_label):
+    """Return PNG bytes for the given occupation title, 1-10 resilience level, and timeline band."""
     W, H = 1200, 630
-    score = int(round(score or 0))
+    level = max(1, min(10, int(round(level or 0))))
     img = Image.new("RGB", (W, H), NAVY)
     d = ImageDraw.Draw(img)
     pad = 72
@@ -73,21 +74,21 @@ def render_card(title, score, band_label):
         d.text((pad, y), ln, font=tf, fill=WHITE)
         y += 70
 
-    # big score, coloured by level
-    sc = _level_color(score)
+    # big level, coloured by level (high = safe = green)
+    sc = _level_color(level)
     nf = _font(True, 168)
     y += 18
-    num = str(score)
+    num = str(level)
     d.text((pad, y), num, font=nf, fill=sc)
     nw = d.textlength(num, font=nf)
-    d.text((pad + nw + 26, y + 34), "of 100", font=_font(False, 44), fill=MUTED)
-    d.text((pad + nw + 26, y + 92), "automation exposure", font=_font(False, 38), fill=MUTED)
+    d.text((pad + nw + 26, y + 34), "/ 10", font=_font(False, 44), fill=MUTED)
+    d.text((pad + nw + 26, y + 92), "AI resilience  (10 = safe)", font=_font(False, 38), fill=MUTED)
 
-    # exposure bar
+    # resilience bar (fuller = safer)
     bar_y = y + 196
     bar_w = W - 2 * pad
     d.rounded_rectangle([pad, bar_y, pad + bar_w, bar_y + 24], radius=12, fill=PANEL)
-    fill_w = int(bar_w * min(100, max(0, score)) / 100)
+    fill_w = int(bar_w * level / 10)
     if fill_w > 0:
         d.rounded_rectangle([pad, bar_y, pad + max(24, fill_w), bar_y + 24], radius=12, fill=sc)
 

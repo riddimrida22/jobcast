@@ -386,6 +386,8 @@ class Engine:
                 "title": cand["title"],
                 "max_exposure": cand_disp,
                 "your_exposure": your_disp,
+                "your_level": self.resilience_level(your_disp),   # 1-10 resilience (10=safe)
+                "max_level": self.resilience_level(cand_disp),    # the safer role's level (higher=safer)
                 "risk_drop": round(your_disp - cand_disp, 1),   # display-scale drop, matches the numbers
                 "risk_drop_raw": risk_drop,
                 "qualified_pct": round(qualified * 100),
@@ -420,6 +422,7 @@ class Engine:
         safer_than_pct = (round(100 * sum(1 for e in all_exp if e > your_raw) / len(all_exp))
                           if all_exp else None)
         return {"ok": True, "your_exposure": your_exposure,
+                "your_level": self.resilience_level(your_exposure),   # 1-10 resilience (10=safe)
                 "occupation": occ["title"], "soc": your_soc,
                 "used_user_skills": has_user_skills,
                 "has_green": bool(green),
@@ -835,10 +838,12 @@ class Engine:
             # to the adjacency entry's own ai/robo. max_exposure is shown on the display scale.
             adj_raw = self.combined_exposure(full if full else adj)
             if adj_raw < raw_base - 0.01:
+                adj_disp = self.display_score(adj_raw)
                 out.append({"soc": adj["soc"], "title": adj["title"],
                             "ai_software": round(adj["ai"] * 100, 1),
                             "physical_robotics": round(adj["robo"] * 100, 1),
-                            "max_exposure": self.display_score(adj_raw),
+                            "max_exposure": adj_disp,
+                            "level": self.resilience_level(adj_disp),
                             "_raw": adj_raw,
                             "projection_pct": (full or {}).get("projection_pct")})
         out.sort(key=lambda a: a["_raw"])
