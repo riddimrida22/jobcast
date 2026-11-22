@@ -24,13 +24,15 @@ def _base_url() -> str:
     return (os.environ.get("JOBCAST_BASE_URL") or "https://jobbreak.ai").rstrip("/")
 
 
-def outlook(occ: Dict[str, Any]) -> Tuple[Optional[float], Optional[float]]:
-    """(exposure, demand) for an occupation, using the same numbers the UI shows."""
+def outlook(occ: Dict[str, Any], engine=None) -> Tuple[Optional[float], Optional[float]]:
+    """(exposure, demand) for an occupation, using the same number the UI shows: the v2
+    calibrated blend when an engine is given, else the v1 max(ai, robo) fallback."""
     if not occ:
         return None, None
-    ai = occ.get("ai") or 0.0
-    robo = occ.get("robo") or 0.0
-    exposure = round(max(ai, robo) * 100, 1)
+    if engine is not None:
+        exposure = round(engine.combined_exposure(occ), 1)
+    else:
+        exposure = round(max(occ.get("ai") or 0.0, occ.get("robo") or 0.0) * 100, 1)
     demand = occ.get("projection_pct")
     if demand is not None:
         demand = round(float(demand), 1)
@@ -76,7 +78,7 @@ def run_check(engine, threshold: float = EXPOSURE_THRESHOLD, dry_run: bool = Fal
         if not occ:
             missing += 1
             continue
-        new_exp, new_dem = outlook(occ)
+        new_exp, new_dem = outlook(occ, engine)
         old_exp, old_dem = w.get("last_exposure"), w.get("last_demand")
         if old_exp is None:                         # first time seen: set the baseline, no email
             store.set_state(w["id"], new_exp, new_dem)
