@@ -61,6 +61,28 @@
       <div class="tile"><div class="k">Job alerts armed</div><div class="v">{{ "{:,}".format(watches.job_watches) }}</div></div>
     </div>
 
+    <div class="tiles" style="grid-template-columns:repeat(3,1fr)">
+      <div class="tile"><div class="k">Job searches ({{ days }}d)</div><div class="v">{{ "{:,}".format(job_totals.searches) }}</div></div>
+      <div class="tile"><div class="k">Distinct jobs</div><div class="v">{{ "{:,}".format(job_totals.jobs) }}</div></div>
+      <div class="tile"><div class="k">Got a safer move</div><div class="v">{{ ((100*job_totals.green_n/job_totals.searches)|round|int) if job_totals.searches else 0 }}<small>%</small></div></div>
+    </div>
+
+    <h2>Most searched jobs</h2>
+    {% if jobs %}
+    {% set jmax = (jobs|map(attribute='n')|max) or 1 %}
+    <table>
+      <tr><th>Job</th><th class="num">Searches</th><th class="num">Avg score</th><th class="num">Safer move</th></tr>
+      {% for j in jobs %}
+      <tr>
+        <td class="bar"><span class="fill" style="width:{{ (100*j.n/jmax)|round(0,'floor') }}%"></span><span>{{ j.title }}</span></td>
+        <td class="num">{{ "{:,}".format(j.n) }}</td>
+        <td class="num">{{ j.avg_score if j.avg_score is not none else '-' }}</td>
+        <td class="num">{{ j.green_n }}/{{ j.n }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}<div class="empty">No job searches recorded yet.</div>{% endif %}
+
     <h2>Top pages</h2>
     {% if s.top_paths %}
     <table>

@@ -17,7 +17,7 @@ import sys
 import json
 from typing import Dict, Any, List, Optional
 
-TIER_N = {"free": 1, "tier1": 1, "tier2": 3, "tier3": 5}
+TIER_N = {"free": 1, "tier1": 1, "tier2": 4, "tier3": 5}
 
 # AI-written advice is reserved for paid tiers; free gets the deterministic strategies.
 AI_TIERS = {"tier1", "tier2", "tier3"}
@@ -75,12 +75,14 @@ LEVELS = {"High", "Medium", "Low"}
 
 _SCHEMA = (
     "Output STRICT JSON only: an array of {n} objects, each with keys "
-    "\"headline\" (2 to 4 words), "
-    "\"action\" (one imperative sentence, at most 16 words), "
-    "\"evidence\" (one concrete, specific insight that makes this smarter than a generic web search, "
-    "at most 18 words; empty string if you have none), "
-    "\"source\" (the name of the real publication/site the evidence came from, e.g. 'BLS' or "
-    "'Austin Community College'; empty string if the step uses no external figure), "
+    "\"headline\" (2 to 5 words), "
+    "\"action\" (one specific imperative sentence that names a concrete thing to do - a tool, "
+    "credential, role, or move - at most 24 words), "
+    "\"evidence\" (the single most useful SPECIFIC, SOURCED fact behind this step: a named program, "
+    "institution, tool, or a real figure or outcome from a source you searched - never a general "
+    "observation; at most 34 words; empty string only if you truly have none), "
+    "\"source\" (the name of the real publication/site/institution the evidence came from, e.g. 'BLS', "
+    "'Coursera', or 'Austin Community College'; empty string if the step uses no external figure), "
     "\"horizon\" (exactly one of: Now, 0-6 months, 6-18 months, 1-3 years), "
     "\"impact\" (exactly one of: High, Medium, Low - how much this protects their livelihood), "
     "\"effort\" (exactly one of: Low, Medium, High), "
@@ -90,30 +92,34 @@ _SCHEMA = (
 )
 
 SYSTEM = (
-    "You are a careful career strategist for JobBreak. Using ONLY the facts in the user message, produce "
+    "You are a sharp career strategist for JobBreak. Using ONLY the facts in the user message, produce "
     "{n} concrete, personalised steps to protect this person's livelihood from automation, most important "
     "first. Hard rules: never invent statistics, probabilities, or numbers; reference only the facts given; "
     "frame everything as options, never a certainty that a job will be lost; name the adjacent roles and "
     "the person's own skills and field where relevant. Ground the plan in THIS person's real work: name at "
     "least one of their most_exposed_tasks (verbatim or lightly trimmed) and, where it helps, a resilient "
-    "task; every step must be something that would not fit a different occupation. Ban generic filler such "
-    "as 'stay adaptable', 'embrace lifelong learning', 'upskill', or 'leverage your strengths'. Keep words "
-    "minimal and meaningful - a card, not a paragraph. Leave \"evidence\" and \"source\" empty. " + _SCHEMA
+    "task; every step must be something that would not fit a different occupation. Make each action specific "
+    "enough to start this week - a named tool, credential, or move, not a direction. Ban generic filler such "
+    "as 'stay adaptable', 'embrace lifelong learning', 'upskill', or 'leverage your strengths'. Each card is "
+    "a tight, meaningful unit - vivid, not a paragraph. Leave \"evidence\" and \"source\" empty. " + _SCHEMA
 )
 
 RESEARCH_SYSTEM = (
     "You are a sharp, resourceful career strategist for JobBreak. Your job is to give this specific person "
     "advice far better than a generic web search: tailored to their occupation, age, experience, location, "
-    "and skills, connecting dots they would not find themselves. Use the web_search tool to gather REAL, "
-    "CURRENT, CITED facts relevant to THEM - local and national demand, concrete transition pathways from "
-    "their job, specific training programs or apprenticeships (ideally near their location), typical pay and "
-    "outcomes, and how workers like them have adapted. Then produce {n} concrete, personalised steps, most "
-    "important first. Absolute rules: never fabricate a number, rate, or claim - every specific figure must "
-    "come from a source you actually searched, named in \"source\"; frame everything as options and ranges, "
-    "never a certainty that a job will be lost. Ground every step in THIS person's real work: name at least "
-    "one of their most_exposed_tasks and tie the move to it; never give advice that would fit any occupation "
-    "(no 'stay adaptable', 'embrace lifelong learning', or 'upskill' filler). Put the single most useful, "
-    "specific, sourced insight for each step in \"evidence\" (concrete, not generic). Keep words minimal. " + _SCHEMA
+    "and skills, connecting dots they would not find themselves. Use the web_search tool (several searches) "
+    "to gather REAL, CURRENT, CITED specifics for THEM - local and national demand, concrete transition "
+    "pathways out of their job, NAMED training programs, certificates, or apprenticeships (ideally near their "
+    "location, with their real provider, length, and cost where you can find it), typical pay for the move, "
+    "and how workers like them actually adapted. Then produce {n} concrete, personalised steps, most important "
+    "first. Absolute rules: never fabricate a number, rate, program, or claim - every specific must come from "
+    "a source you actually searched, named in \"source\"; frame everything as options and ranges, never a "
+    "certainty that a job will be lost. Ground every step in THIS person's real work: name at least one of "
+    "their most_exposed_tasks and tie the move to it; never give advice that would fit any occupation (no "
+    "'stay adaptable', 'embrace lifelong learning', or 'upskill' filler). Each step's \"evidence\" must carry "
+    "a real, specific, sourced payload - a named program or institution, a figure, or a documented outcome - "
+    "the kind of thing that makes the person feel they got insider knowledge, not a platitude. Prefer "
+    "different, complementary sources across the steps. Keep each card tight and vivid, not a paragraph. " + _SCHEMA
 )
 
 
@@ -188,7 +194,7 @@ def generate_plan(assessment: Dict[str, Any], profile: Dict[str, Any],
 
     def call(use_search: bool):
         kwargs = dict(
-            model=model, max_tokens=min(5000, 900 + 450 * n),
+            model=model, max_tokens=min(6000, 1100 + 550 * n),
             system=(RESEARCH_SYSTEM if use_search else SYSTEM).format(n=n),
             messages=[{"role": "user", "content": content}],
         )

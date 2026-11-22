@@ -365,6 +365,101 @@
   {# The green option: lead the paid result with a safer, reachable career the person already
      qualifies for. Shown interactively to paid/preview users; a locked teaser otherwise. #}
   {% set paid = (entitlement and entitlement != 'free') or (not stripe_enabled) %}
+
+  {# ---- Paid scientific report: the gut-punch (the YEAR AI reaches this job + which tasks go
+     first) with the working shown, so the paid payoff reads rigorous. All numbers are the
+     engine's own data; nothing here is model-written. Fear -> curiosity, then the green option
+     (hope) follows below. #}
+  {% if paid %}
+  {% set bid = r.timeline.band.id %}
+  {% if bid == 'near_term_high' %}{% set yr_lo, yr_hi, yr_phrase, yr_zone = 2027, 2029, 'within about 1 to 3 years', 'soon' %}
+  {% elif bid == 'partial_5_10yr' %}{% set yr_lo, yr_hi, yr_phrase, yr_zone = 2031, 2036, 'in about 5 to 10 years', 'mid' %}
+  {% else %}{% set yr_lo, yr_hi, yr_phrase, yr_zone = 2037, 0, 'not before the late 2030s', 'far' %}{% endif %}
+  {% set tsorted = r.tasks | sort(attribute='max', reverse=true) %}
+  {% set exposed_n = (r.tasks | selectattr('exposed') | list | length) %}
+  {% set total_n = r.tasks | length %}
+  {% set z_lo = yr_lo - 2026 %}{% set z_hi = (yr_hi if yr_hi else 2042) - 2026 %}
+  {% set zone_left = (z_lo / 16 * 100)|round(1) %}
+  {% set zone_w = (((z_hi - z_lo) / 16 * 100) if (z_hi - z_lo) > 1 else 8)|round(1) %}
+  <style>
+    .sr { border-radius:16px; border:1px solid var(--line); padding:18px 18px 16px; margin:4px 0 18px;
+      background:linear-gradient(180deg,rgba(176,66,43,.10),rgba(176,66,43,.02)); }
+    .sr.far { background:linear-gradient(180deg,rgba(20,123,116,.10),rgba(20,123,116,.02)); }
+    .sr.mid { background:linear-gradient(180deg,rgba(243,163,95,.12),rgba(243,163,95,.02)); }
+    .sr-ey { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--red); margin-bottom:8px; }
+    .sr.far .sr-ey { color:var(--green); } .sr.mid .sr-ey { color:#c88a2e; }
+    .sr-year { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; }
+    .sr-year-big { font-size:clamp(40px,12vw,64px); font-weight:900; line-height:.95; letter-spacing:-.02em; color:var(--red); font-variant-numeric:tabular-nums; }
+    .sr.far .sr-year-big { color:var(--green); } .sr.mid .sr-year-big { color:#c88a2e; }
+    .sr-year-cap { font-size:14px; color:var(--ink); line-height:1.4; max-width:320px; }
+    .sr-year-cap b { font-weight:800; }
+    .sr-tl { margin:16px 0 4px; }
+    .sr-tl-track { position:relative; height:12px; border-radius:7px; background:rgba(127,127,127,.16); overflow:hidden; }
+    .sr-tl-zone { position:absolute; top:0; bottom:0; border-radius:7px; background:linear-gradient(90deg,#f0553e,#b0422b); opacity:.9; }
+    .sr.far .sr-tl-zone { background:linear-gradient(90deg,#3fb6a8,#147b74); } .sr.mid .sr-tl-zone { background:linear-gradient(90deg,#f3a35f,#c88a2e); }
+    .sr-tl-now { position:absolute; top:-3px; bottom:-3px; left:0; width:2px; background:var(--ink); }
+    .sr-tl-now::after { content:'today'; position:absolute; top:-15px; left:-2px; font-size:9.5px; font-weight:700; color:var(--muted); }
+    .sr-tl-axis { display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted); font-weight:600; margin-top:9px; }
+    .sr-first { font-size:14.5px; color:var(--ink); margin:16px 0 10px; line-height:1.45; }
+    .sr-first b { color:var(--red); font-weight:800; }
+    .sr-tasks { display:grid; gap:11px; }
+    .sr-task { }
+    .sr-task-name { font-size:12.5px; font-weight:600; color:var(--ink); margin-bottom:5px; line-height:1.3; }
+    .sr-task.hot .sr-task-name::before { content:''; display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--red); margin-right:6px; vertical-align:middle; }
+    .sr-tb { display:flex; align-items:center; gap:8px; margin:3px 0; }
+    .sr-tb-lab { width:38px; flex:none; font-size:10.5px; font-weight:700; color:var(--muted); text-align:right; }
+    .sr-tb-track { position:relative; flex:1; height:11px; border-radius:6px; background:rgba(127,127,127,.14); overflow:hidden; }
+    .sr-tb-track i { display:block; height:100%; border-radius:6px; }
+    .sr-tb-ai { background:linear-gradient(90deg,#f0a35f,#e8794a); }
+    .sr-tb-robo { background:linear-gradient(90deg,#8ca2d8,#5d8ac4); }
+    .sr-tb-val { width:24px; flex:none; font-size:11px; font-weight:800; text-align:right; font-variant-numeric:tabular-nums; color:var(--ink); }
+    .sr-note { font-size:11px; color:var(--muted); margin:9px 0 0; }
+    .sr-method { font-size:11.5px; color:var(--muted); line-height:1.55; margin:14px 0 0; padding-top:12px; border-top:1px solid var(--line); }
+    .sr-method b { color:var(--ink); font-weight:700; }
+  </style>
+  <div class="sr sr-{{ yr_zone }}" id="sci-report">
+    <span class="sr-ey">When AI reaches your job</span>
+    <div class="sr-year">
+      <div class="sr-year-big">{{ yr_lo }}{% if yr_hi %}&ndash;{{ yr_hi }}{% else %}+{% endif %}</div>
+      <div class="sr-year-cap">the likely window when AI and robots can do the core of <b>{{ r.occupation.title }}</b> &mdash; {{ yr_phrase }}.</div>
+    </div>
+    <div class="sr-tl">
+      <div class="sr-tl-track">
+        <div class="sr-tl-zone" style="left:{{ zone_left }}%;width:{{ zone_w }}%"></div>
+        <div class="sr-tl-now"></div>
+      </div>
+      <div class="sr-tl-axis"><span>2026</span><span>2030</span><span>2034</span><span>2038</span><span>2042+</span></div>
+    </div>
+    {% if exposed_n %}
+    <p class="sr-first"><b>{{ exposed_n }} of your {{ total_n }}</b> core tasks are already within reach of today's AI. These go first:</p>
+    {% else %}
+    <p class="sr-first">None of your {{ total_n }} core tasks is fully within reach yet &mdash; here is where the pressure is building:</p>
+    {% endif %}
+    <div class="sr-tasks">
+      {% for t in tsorted[:5] %}
+      <div class="sr-task {{ 'hot' if t.exposed else '' }}">
+        <div class="sr-task-name">{{ t.name }}</div>
+        <div class="sr-tb"><span class="sr-tb-lab">AI</span><div class="sr-tb-track"><i class="sr-tb-ai" style="width:{{ t.ai }}%"></i></div><span class="sr-tb-val">{{ t.ai|round|int }}</span></div>
+        <div class="sr-tb"><span class="sr-tb-lab">robots</span><div class="sr-tb-track"><i class="sr-tb-robo" style="width:{{ t.robo }}%"></i></div><span class="sr-tb-val">{{ t.robo|round|int }}</span></div>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="sr-note">Bars are 0 to 100: how much of each task AI (orange) or robotics (blue) can already do. 50+ means most of the task is in reach.</p>
+    <div class="sr-proof">
+      <div class="sr-flow">
+        <div class="sr-step"><b>{{ total_n }}</b><span>core tasks</span><span class="sr-arrow">&rarr;</span></div>
+        <div class="sr-step"><b>AI &amp; robots</b><span>score each 0&ndash;100</span><span class="sr-arrow">&rarr;</span></div>
+        <div class="sr-step"><b>{{ r.base_exposure|round|int }}</b><span>highest exposure = your risk</span><span class="sr-arrow">&rarr;</span></div>
+        <div class="sr-step"><b>{{ yr_lo }}{% if yr_hi %}&ndash;{{ yr_hi }}{% else %}+{% endif %}</b><span>on the adoption curve</span></div>
+      </div>
+      <p class="sr-contrast"><b>This isn't a chatbot's guess or a web search.</b> It's your number, computed from real O*NET and BLS data for <em>your</em> job, with the working shown &mdash; verified data, not a vibe.</p>
+      <details class="sr-more">
+        <summary>More detail on the method</summary>
+        <p class="sr-method" style="margin-top:10px;border:0;padding:0"><b>How this is computed.</b> Every task is scored for AI exposure (task-level language-model capability, after Eloundou et&nbsp;al.) and for robotics (an O*NET physical work-context proxy). Your {{ rating_label }} is the higher of the two across all tasks, {{ r.base_exposure|round|int }} of 100 (range {{ r.exposure_range.ai_software[0]|round|int }} to {{ r.exposure_range.ai_software[1]|round|int }}). The year places that score on the technology-adoption curve, then shifts it for local demand in {{ r.location.metro }} ({{ r.timeline.local_demand_trend }}). Scores come from O*NET task and work-context data and peer-reviewed AI-exposure research; nothing here is written by an AI. These are sourced ranges for planning, not predictions.</p>
+      </details>
+    </div>
+  </div>
+  {% endif %}
   <style>
     .green-opt { border:1px solid var(--line); border-radius:16px; background:linear-gradient(180deg,rgba(63,178,127,.10),rgba(63,178,127,.03)); padding:18px 18px 16px; margin:4px 0 18px; }
     .go-ey { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--green,#3fb27f); margin-bottom:6px; }
@@ -418,6 +513,52 @@
     .gt-method { font-size:11.5px; color:var(--muted); margin:14px 0 0; line-height:1.5; }
     .gt-empty { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:15px; }
     .gt-empty b { color:var(--green,#3fb27f); }
+    .gt-soft-intro { font-size:13px; color:var(--muted); margin:0 0 10px; line-height:1.45; }
+    .gt-hope { font-size:14px; color:var(--ink); font-weight:600; margin:0 0 12px; line-height:1.5; }
+    .gt-hope b { color:var(--green,#2f9e68); font-weight:800; }
+    /* the reveal: a short, satisfying scan before the payoff lands */
+    .go-reveal { display:flex; align-items:center; gap:14px; padding:14px 2px; }
+    .gr-ring svg { display:block; }
+    .gr-ring .gr-track { fill:none; stroke:rgba(127,127,127,.18); stroke-width:5; }
+    .gr-ring .gr-arc { fill:none; stroke:var(--green,#3fb27f); stroke-width:5; stroke-linecap:round;
+      stroke-dasharray:46 92; transform-origin:center; animation:gr-spin .9s linear infinite; }
+    @keyframes gr-spin { to { transform:rotate(360deg); } }
+    .gr-status { font-size:14.5px; font-weight:700; color:var(--ink); }
+    .gr-shuffle { font-size:13px; color:var(--green,#3fb27f); font-weight:800; min-height:18px; letter-spacing:.01em; }
+    @keyframes go-pop { 0% { opacity:0; transform:translateY(10px) scale(.985); } 100% { opacity:1; transform:none; } }
+    .go-pop { animation:go-pop .5s cubic-bezier(.2,.8,.2,1) both; }
+    /* celebratory "ahead of the curve" banner for an already-safe role */
+    .gt-ahead { border:1px solid rgba(63,178,127,.4); border-radius:14px; padding:16px; margin-bottom:14px;
+      background:linear-gradient(180deg,rgba(63,178,127,.14),rgba(63,178,127,.03)); }
+    .gt-ahead-top { display:flex; align-items:center; gap:12px; }
+    .gt-ahead-badge { flex:none; width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(180deg,#45c389,#2f9e68); box-shadow:0 5px 16px rgba(47,158,104,.4); }
+    .gt-ahead-badge svg { width:28px; height:28px; stroke:#fff; fill:none; stroke-width:2.4; }
+    .gt-ahead-ey { font-size:11px; font-weight:800; letter-spacing:.11em; text-transform:uppercase; color:var(--green,#2f9e68); }
+    .gt-ahead-h { font-size:clamp(17px,4.4vw,20px); font-weight:900; margin:1px 0 0; line-height:1.15; }
+    .gt-ahead-sub { font-size:13.5px; color:var(--ink); margin:10px 0 0; line-height:1.45; }
+    .gt-ahead-sub b { color:var(--green,#2f9e68); }
+    .gt-edge { margin:12px 0 0; }
+    .gt-edge h4 { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 7px; }
+    .gt-edge-chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .gt-edge-chips span { font-size:12.5px; font-weight:600; padding:5px 10px; border-radius:999px;
+      color:var(--green,#2f9e68); background:rgba(63,178,127,.12); border:1px solid rgba(63,178,127,.3); }
+    /* progressive disclosure: schematic + "More details" */
+    .sr-proof { margin:14px 0 0; padding-top:12px; border-top:1px solid var(--line); }
+    .sr-flow { display:flex; align-items:stretch; gap:6px; flex-wrap:wrap; }
+    .sr-step { flex:1; min-width:84px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 10px; position:relative; }
+    .sr-step b { display:block; font-size:16px; font-weight:900; line-height:1; color:var(--ink); font-variant-numeric:tabular-nums; }
+    .sr-step span { display:block; font-size:10.5px; color:var(--muted); margin-top:3px; line-height:1.3; }
+    .sr-step .sr-arrow { position:absolute; right:-9px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:13px; z-index:1; }
+    .sr-step:last-child .sr-arrow { display:none; }
+    details.sr-more { margin:12px 0 0; }
+    details.sr-more > summary { cursor:pointer; font-size:12.5px; font-weight:700; color:var(--primary); list-style:none; display:inline-flex; align-items:center; gap:5px; }
+    details.sr-more > summary::-webkit-details-marker { display:none; }
+    details.sr-more > summary::before { content:'\25B8'; font-size:11px; transition:transform .15s; }
+    details.sr-more[open] > summary::before { transform:rotate(90deg); }
+    .sr-contrast { font-size:12.5px; color:var(--ink); line-height:1.5; margin:12px 0 0; padding:11px 13px;
+      border-radius:10px; background:var(--card); border:1px solid var(--line); border-left:3px solid var(--primary); }
+    .sr-contrast b { font-weight:800; }
     /* skills modal */
     .skm { position:fixed; inset:0; z-index:1200; background:rgba(8,12,20,.72); display:flex; align-items:center; justify-content:center; padding:16px; }
     .skm[hidden] { display:none; }
@@ -435,13 +576,16 @@
 
   <div id="green-option" class="green-opt" data-paid="{{ '1' if paid else '0' }}">
     <div id="go-intro">
-      <span class="go-ey">Your safer move</span>
-      <h3 class="go-h">Find the AI-safe career you already qualify for</h3>
-      <p class="go-sub">Tell us what you're good at. We match the skills you already have to a lower-risk career you can realistically move into &mdash; and show exactly how much of it you already qualify for, and how far your risk drops.</p>
+      <span class="go-ey">It's not all doom and gloom</span>
+      <h3 class="go-h">The skills you already have transfer to an AI-safe career</h3>
+      <p class="go-sub">Tell us what you're good at. We match <b>your</b> skills against the data to find a lower-risk career you can realistically move into &mdash; and show exactly how much of it you already qualify for, the one or two skills to add, and how far your risk drops. Not a web search: your skills, computed.</p>
       <button type="button" id="go-start" class="go-cta">{{ 'Add my skills' if paid else 'Unlock my safer career' }} &#8250;</button>
       {% if not paid %}<div class="go-lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Part of JobBreak Monitor &mdash; one-time $4.99</div>{% endif %}
     </div>
-    <div id="go-loading" class="go-loading" hidden>Matching your skills to safer careers&hellip;</div>
+    <div id="go-loading" class="go-reveal" hidden aria-live="polite">
+      <div class="gr-ring"><svg viewBox="0 0 54 54" width="54" height="54"><circle class="gr-track" cx="27" cy="27" r="22"/><circle class="gr-arc" cx="27" cy="27" r="22"/></svg></div>
+      <div class="gr-text"><div class="gr-status" id="gr-status">Reading your skills&hellip;</div><div class="gr-shuffle" id="gr-shuffle">&nbsp;</div></div>
+    </div>
     <div id="go-results" hidden></div>
   </div>
 
@@ -478,7 +622,19 @@
       return { title: {{ r.occupation.title|tojson }} };
     }
     // ---- skills modal ----
-    function openModal() { if (modal) { modal.hidden = false; document.body.style.overflow = 'hidden'; } }
+    // The whole green flow lives inside the "What to do" tab panel (#p-strategy). That panel is
+    // display:none until its tab is active, so the modal and results are invisible while another
+    // tab is showing. Activate this tab before opening the modal, or a freshly paid customer
+    // landing on /plan sees nothing at all.
+    function showThisTab() {
+      var tab = document.querySelector('.tab[data-panel="p-strategy"]');
+      var panel = document.getElementById('p-strategy');
+      if (!tab || !panel) return;
+      document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('active'); });
+      document.querySelectorAll('.panel').forEach(function (x) { x.classList.remove('active'); });
+      tab.classList.add('active'); panel.classList.add('active');
+    }
+    function openModal() { if (modal) { showThisTab(); modal.hidden = false; document.body.style.overflow = 'hidden'; } }
     function closeModal() { if (modal) { modal.hidden = true; document.body.style.overflow = ''; } }
     var xBtn = document.getElementById('skm-x'); if (xBtn) xBtn.addEventListener('click', closeModal);
     if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
@@ -504,20 +660,46 @@
       extra.forEach(function (s) { s = s.trim(); if (s) skills.push(s); });
       closeModal(); run(skills);
     });
+    // ---- the reveal: a short, satisfying scan so the payoff feels earned, not instant ----
+    var SHUF = ['Dental Hygienist', 'Solar Technician', 'Paralegal', 'Physical Therapist', 'Electrician',
+                'HVAC Technician', 'Logistics Analyst', 'Site Inspector', 'Care Coordinator', 'Bookkeeper'];
+    var rev = null;
+    function stopRev() { if (rev) { clearInterval(rev.si); clearInterval(rev.shi); rev = null; } }
+    function startReveal() {
+      var st = document.getElementById('gr-status'), sh = document.getElementById('gr-shuffle');
+      loading.hidden = false;
+      var msgs = ['Reading your skills…', 'Scanning 1,000+ careers…', 'Cross-checking AI exposure…', 'Scoring your safest moves…'];
+      var mi = 0; if (st) st.textContent = msgs[0];
+      var si = setInterval(function () { mi = (mi + 1) % msgs.length; if (st) st.textContent = msgs[mi]; }, 680);
+      var shi = setInterval(function () { if (sh) sh.textContent = SHUF[Math.floor(Math.random() * SHUF.length)]; }, 95);
+      rev = { si: si, shi: shi, t0: Date.now() };
+    }
+    function finishReveal(d, done) {
+      var st = document.getElementById('gr-status'), sh = document.getElementById('gr-shuffle');
+      var wait = Math.max(0, 1900 - (Date.now() - (rev ? rev.t0 : Date.now())));
+      setTimeout(function () {
+        stopRev();
+        var ts = (d.targets || []);
+        if (ts.length) { if (st) st.textContent = 'Found your safer move'; if (sh) sh.textContent = ts[0].title; }
+        else if (d.already_low) { if (st) st.textContent = 'Good news'; if (sh) sh.textContent = 'You’re ahead of the curve'; }
+        else { if (st) st.textContent = 'Here is where you stand'; if (sh) sh.textContent = ' '; }
+        setTimeout(function () { loading.hidden = true; done(); }, 540);
+      }, wait);
+    }
     function run(skills) {
-      intro.hidden = true; results.hidden = true; loading.hidden = false;
+      intro.hidden = true; results.hidden = true;
+      startReveal();
       window.jbEv && window.jbEv('green_match');
       var prof = profile(); prof.skills_list = skills; prof.skills = (skills || []).join(', ');
       fetch('/v1/green', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: prof.title, country: prof.country, skills: skills }) })
         .then(function (r) { return r.json(); })
         .then(function (d) {
-          loading.hidden = true;
-          if (d && d.error === 'payment_required') { intro.hidden = false; if (window.jbOpenPaywall) window.jbOpenPaywall(); return; }
-          if (!d || !d.ok) { intro.hidden = false; return; }
-          render(d);
+          if (d && d.error === 'payment_required') { stopRev(); loading.hidden = true; intro.hidden = false; if (window.jbOpenPaywall) window.jbOpenPaywall(); return; }
+          if (!d || !d.ok) { stopRev(); loading.hidden = true; intro.hidden = false; return; }
+          finishReveal(d, function () { render(d); });
         })
-        .catch(function () { loading.hidden = true; intro.hidden = false; });
+        .catch(function () { stopRev(); loading.hidden = true; intro.hidden = false; });
     }
     function bar(cls, val) {
       var w = Math.max(4, Math.min(100, val));
@@ -527,8 +709,8 @@
     function leadCard(t, sym) {
       var C = 2 * Math.PI * 42, off = C * (1 - (t.qualified_pct || 0) / 100);
       var qualLine = t.qualified_m
-        ? 'You already qualify for <b>' + t.qualified_k + ' of ' + t.qualified_m + ' core skills</b>.'
-        : 'A closely related role at much lower automation risk.';
+        ? 'Your skills transfer &mdash; you already qualify for <b>' + t.qualified_k + ' of ' + t.qualified_m + ' core skills</b>.'
+        : 'A closely related role your skills transfer into, at much lower automation risk.';
       var have = (t.have_skills || []).map(function (s) { return '<span class="gt-chip have">' + esc(s) + '</span>'; }).join('');
       var add = (t.add_skills || []).map(function (s) { return '<span class="gt-chip add">+ ' + esc(s) + '</span>'; }).join('');
       var pay = money(sym, t.median_wage);
@@ -539,7 +721,7 @@
             '<circle cx="48" cy="48" r="42" fill="none" stroke="#3fb27f" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '"/>' +
           '</svg><div class="gt-pct"><b>' + (t.qualified_pct || 0) + '%</b><span>qualified</span></div></div>' +
           '<div class="gt-headwrap">' +
-            '<div class="gt-role-ey">Your safer move</div>' +
+            '<div class="gt-role-ey">' + (t.soft ? 'A step safer' : 'Your safer move') + '</div>' +
             '<div class="gt-role">' + esc(t.title) + '</div>' +
             '<div class="gt-qual">' + qualLine + '</div>' +
           '</div>' +
@@ -561,20 +743,54 @@
         '<div class="gt-mini-meta">risk ' + Math.round(t.your_exposure) + ' &rarr; ' + Math.round(t.max_exposure) +
         (pay ? ' &middot; ' + pay : '') + '</div></div></div>';
     }
+    // Celebratory payoff for an already-safe role: the win, the proof (safer-than-X%), and the
+    // human edge - so a low-risk paying customer still gets something exciting, not a flat note.
+    function aheadBanner(d) {
+      var pct = (typeof d.safer_than_pct === 'number') ? d.safer_than_pct : null;
+      var edge = (d.resilient_tasks || []).map(function (s) { return '<span>' + esc(s) + '</span>'; }).join('');
+      return '<div class="gt-ahead">' +
+        '<div class="gt-ahead-top">' +
+          '<div class="gt-ahead-badge"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>' +
+          '<div><div class="gt-ahead-ey">Ahead of the curve</div>' +
+          '<div class="gt-ahead-h">Your job is one of the safer ones</div></div>' +
+        '</div>' +
+        '<p class="gt-ahead-sub">At <b>' + Math.round(d.your_exposure) + ' of 100</b>, ' +
+          (pct !== null ? 'you are safer than <b>' + pct + '% of all jobs we score</b>. ' : '') +
+          'It’s not all doom and gloom &mdash; your skills are resilient and transfer. Your edge is the human work AI cannot do.</p>' +
+        (edge ? '<div class="gt-edge"><h4>Your AI-resistant edge</h4><div class="gt-edge-chips">' + edge + '</div></div>' : '') +
+      '</div>';
+    }
+    function pop() {
+      results.hidden = false;
+      results.classList.remove('go-pop'); void results.offsetWidth; results.classList.add('go-pop');
+      window.jbEv && window.jbEv('green_shown');
+    }
     function render(d) {
       var sym = (d.currency && d.currency.symbol) || '$';
       var ts = d.targets || [];
+      var html = d.already_low ? aheadBanner(d) : '';
       if (!ts.length) {
-        results.innerHTML = '<div class="gt-empty"><p style="margin:0 0 6px"><b>Good news:</b> at ' +
-          Math.round(d.your_exposure) + ' of 100, your role is already on the lower-risk side, so there isn\'t a clearly safer career you\'d need to jump to.</p>' +
-          '<p class="muted" style="margin:0">See the <strong>Safer paths</strong> tab for adjacent roles if you want to lower your exposure further.</p></div>';
-        results.hidden = false; return;
+        if (d.already_low) {
+          html += '<p class="muted" style="margin:0">To lock it in, keep leaning into those tasks and the credentials in your plan below. The <strong>Safer paths</strong> tab lists related roles if you want to drop your exposure even further.</p>';
+        } else {
+          // Honest - never a blanket "you're already safe" for a mid-risk job.
+          html += '<div class="gt-empty"><p style="margin:0 0 6px"><b>Straight answer:</b> at ' + Math.round(d.your_exposure) +
+            ' of 100, we could not find a role that matches your current skills <em>and</em> sits at clearly lower risk &mdash; your field is fairly evenly exposed, so the safest move is not a different job title.</p>' +
+            '<p class="muted" style="margin:0">Your strongest play is below: shift toward your least-exposed tasks and the credentials in your plan. The <strong>Safer paths</strong> tab shows the closest related roles.</p></div>';
+        }
+        results.innerHTML = html; pop(); return;
       }
-      var html = leadCard(ts[0], sym);
+      if (d.already_low) {
+        html += '<p class="gt-soft-intro">Want to be even safer? Here is a reachable move that drops your exposure further:</p>';
+      } else if (d.soft_only) {
+        html += '<p class="gt-soft-intro">No dramatically safer role matches your skills, but here is the closest related role at lower risk &mdash; a realistic step down in exposure:</p>';
+      } else {
+        html += '<p class="gt-hope">It’s not all doom and gloom &mdash; the skills you already have <b>transfer</b>. Here is the AI-safe career they unlock:</p>';
+      }
+      html += leadCard(ts[0], sym);
       if (ts.length > 1) html += '<div class="gt-more">' + ts.slice(1).map(function (t) { return miniCard(t, sym); }).join('') + '</div>';
       html += '<p class="gt-method">Matches are computed from O*NET related-occupation and core-task data crossed with this model\'s automation-exposure scores &mdash; from your skills, not estimated by an AI. Figures are ranges for planning, not a guarantee.</p>';
-      results.innerHTML = html; results.hidden = false;
-      window.jbEv && window.jbEv('green_shown');
+      results.innerHTML = html; pop();
     }
     // Auto-open the capture when a freshly paid customer lands here to build their plan.
     if (FLAGS.start && FLAGS.paid) {

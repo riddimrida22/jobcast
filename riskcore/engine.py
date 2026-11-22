@@ -294,7 +294,12 @@ class Engine:
         # both only when they are meaningfully safer. The task overlap below then ranks them and
         # names which skills already carry and which to add. Residual "All Other" catch-all
         # occupations are excluded: they carry no task basis and are not real target careers.
-        SAFER_MARGIN = 8                            # points of risk drop to count as safer
+        # A "clearly safer" move is a 6-point drop (meaningfully safer on the 0-100 scale). A
+        # 2-to-6-point drop is a softer, still-real fallback - a closely related role at somewhat
+        # lower risk - surfaced only when no clearly safer move exists, so the paid payoff still
+        # names a reachable, honest option instead of falsely claiming the person is already safe.
+        GREEN_MARGIN = 6
+        SOFT_MARGIN = 2
         candidates: Dict[str, Dict[str, Any]] = {}
         adjacent_socs = set()
         for adj in occ.get("adjacent", []):
@@ -318,14 +323,14 @@ class Engine:
             cz = cand.get("job_zone")
             if your_zone is not None and cz is not None and cz > your_zone + 1:
                 continue                            # out of educational reach
-            if self._max_exposure(cand) <= your_exposure - SAFER_MARGIN:
+            if self._max_exposure(cand) <= your_exposure - SOFT_MARGIN:
                 candidates[soc] = cand
 
         targets = []
         for soc, cand in candidates.items():
             cand_exp = self._max_exposure(cand)
             risk_drop = round(your_exposure - cand_exp, 1)
-            if risk_drop < SAFER_MARGIN:            # must be meaningfully safer to be "green"
+            if risk_drop < SOFT_MARGIN:             # must be at least somewhat safer
                 continue
             is_adjacent = soc in adjacent_socs
             covered, to_add = [], []
@@ -373,14 +378,37 @@ class Engine:
                 "job_zone": cand.get("job_zone"),
                 "adjacent": is_adjacent,
                 "growth": cand.get("projection_pct"),
+                "soft": risk_drop < GREEN_MARGIN,
                 "_score": round(score, 2),
             })
 
-        targets.sort(key=lambda t: t["_score"], reverse=True)
+        # Lead with clearly-safer ("green") moves; only fall back to softer, still-real options
+        # when there are none, so a strong result is never buried under a marginal one. When
+        # nothing qualifies at all, callers use already_low to tell "already low-risk" apart from
+        # "no reachable safer move in this field" - never a false "you're already safe".
+        green = [t for t in targets if not t["soft"]]
+        soft = [t for t in targets if t["soft"]]
+        green.sort(key=lambda t: t["_score"], reverse=True)
+        soft.sort(key=lambda t: t["_score"], reverse=True)
+        chosen = green[:max(1, n)] if green else soft[:2]
+        # The person's most AI-resistant work - their human edge - so the client can prove it when
+        # the role is already safe ("ahead of the curve") instead of showing a bare empty state.
+        resilient = sorted(base.get("tasks", []), key=lambda d: d.get("max", 0))
+        resilient_tasks = [self._short_task(t["name"]) for t in resilient
+                           if t.get("max", 100) < 45][:3]
+        # Where this role sits versus every job we score (a simple, true "safer than X%" line).
+        all_exp = [self._max_exposure(o) for o in self.snapshot.all_occupations()]
+        safer_than_pct = (round(100 * sum(1 for e in all_exp if e > your_exposure) / len(all_exp))
+                          if all_exp else None)
         return {"ok": True, "your_exposure": your_exposure,
                 "occupation": occ["title"], "soc": your_soc,
                 "used_user_skills": has_user_skills,
-                "targets": targets[:max(1, n)]}
+                "has_green": bool(green),
+                "soft_only": (not green) and bool(soft),
+                "already_low": your_exposure < 35,
+                "resilient_tasks": resilient_tasks,
+                "safer_than_pct": safer_than_pct,
+                "targets": chosen}
 
     def _occ_task_names(self, occ: Dict[str, Any]) -> List[str]:
         """Core-task statements for an occupation, cached by SOC (the green match scans the whole
@@ -424,6 +452,7 @@ class Engine:
         decomposition = [
             {"id": t["id"], "name": t["name"],
              "ai": round(t["ai"] * 100, 1), "robo": round(t["robo"] * 100, 1),
+             "max": round(max(t["ai"], t["robo"]) * 100, 1),
              "exposed": max(t["ai"], t["robo"]) >= 0.5}
             for t in occ.get("tasks", [])
         ]
