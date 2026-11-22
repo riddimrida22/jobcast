@@ -107,10 +107,53 @@ def profile_from(source) -> Profile:
     )
 
 
+def _build_jane(engine):
+    """The homepage worked example ('Jane'), computed from live engine data so the trailer for the
+    paid payoff is real and defensible, never hardcoded numbers. A high-risk clerical role with a
+    clear ONE-skill move to a much safer, better-paid career - the whole fear->hope->happiness arc.
+    Computed once by the caller. Returns None if the role is not in the snapshot."""
+    try:
+        prof = Profile(title="Legal Secretary")
+        a = engine.assess(prof)
+        occ = engine.snapshot.match_title("Legal Secretary")
+        if not a.get("ok") or occ is None:
+            return None
+        g = engine.green_option(prof, user_skills=[t["name"] for t in occ.get("tasks", [])], n=1)
+        if not g.get("targets"):
+            return None
+        t = g["targets"][0]
+        ta = engine.assess(Profile(title=t["title"]))
+
+        def shorten(s):
+            s = (s or "").replace(" by performing tasks such as ", " - ")
+            s = s.split(",")[0].strip().rstrip(".")
+            return s
+        add = t.get("add_skills") or []
+        return {
+            "name": "Jane", "age": 41,
+            "from_title": a["occupation"]["title"], "from_score": round(a["base_exposure"]),
+            "from_ai": round(a["exposure"]["ai_software"]),
+            "from_robo": round(a["exposure"]["physical_robotics"]),
+            "from_band": a["timeline"]["band"]["label"],
+            "from_pay": a["wages"].get("occupation_median_wage"),
+            "to_title": t["title"], "to_score": round(t["max_exposure"]),
+            "to_band": ((ta.get("timeline") or {}).get("band") or {}).get("label") if ta.get("ok") else None,
+            "to_pay": t.get("median_wage"),
+            "qualified_pct": t["qualified_pct"], "qualified_k": t["qualified_k"],
+            "qualified_m": t["qualified_m"], "drop": round(t["risk_drop"]),
+            "hero_skill": shorten(add[0]) if add else None,
+            "have_skills": [shorten(s) for s in (t.get("have_skills") or [])[:3]],
+        }
+    except Exception as e:
+        print(f"[jane] build failed: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+        return None
+
+
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024  # 6 MB resume cap
     engine = load_default_engine()
+    jane_demo = _build_jane(engine)
 
     # Restricted-demo gate (env-controlled, off by default):
     #  JOBCAST_DEMO_USER / JOBCAST_DEMO_PASS -> branded login page over the whole site,
@@ -345,7 +388,7 @@ def create_app() -> Flask:
         most, least = _rankings()
         return render_template("index.html", version=VERSION, licensed=engine.snapshot.licensed,
                                occupations=_occupations(), families=engine.snapshot.families(),
-                               most_exposed=most, least_exposed=least,
+                               most_exposed=most, least_exposed=least, jane=jane_demo,
                                notice=engine.snapshot.data.get("development_notice"))
 
     @app.post("/assess")
