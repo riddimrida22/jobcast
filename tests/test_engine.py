@@ -96,10 +96,13 @@ def test_green_option_is_safer_and_reachable(engine):
                             user_skills=["verify records", "customer service"])
     assert g["ok"] is True
     assert g["targets"], "a high-risk clerical role should have green targets"
+    # A high-risk clerical role has clearly-safer ("green") moves, so none should be soft.
+    assert g["has_green"] is True
     for t in g["targets"]:
         # Every target must be a genuine risk drop (safer), and never a catch-all bucket.
         assert t["max_exposure"] < t["your_exposure"]
-        assert t["risk_drop"] >= 8
+        assert t["risk_drop"] >= 6            # "meaningfully safer" (GREEN_MARGIN)
+        assert t["soft"] is False
         assert "all other" not in t["title"].lower()
         assert 0 <= t["qualified_pct"] <= 100
         assert t["qualified_k"] <= t["qualified_m"]
@@ -122,6 +125,18 @@ def test_green_option_skills_change_qualification(engine):
 def test_green_option_unknown_title(engine):
     g = engine.green_option(Profile(title="wizard"))
     assert g["ok"] is False
+
+
+def test_green_option_reports_safety_context(engine):
+    # The result always carries the fields the UI needs to frame an honest empty / soft state,
+    # never a bare targets list that could read as a false "you're already safe".
+    g = engine.green_option(Profile(title="data entry"))
+    assert set(("has_green", "soft_only", "already_low")) <= set(g)
+    assert g["already_low"] == (g["your_exposure"] < 35)
+    # has_green and soft_only are mutually exclusive, and soft_only implies at least one target.
+    assert not (g["has_green"] and g["soft_only"])
+    if g["soft_only"]:
+        assert g["targets"] and all(t["soft"] for t in g["targets"])
 
 
 def test_green_option_deterministic(engine):

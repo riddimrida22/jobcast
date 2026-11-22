@@ -21,3 +21,5 @@ data/signups.jsonl
 data/subscriptions.jsonl
 data/watches.db
 *.db
+data/*.db-shm
+data/*.db-wal
