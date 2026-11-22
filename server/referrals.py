@@ -18,6 +18,12 @@ from typing import Optional, Dict, Any
 THRESHOLD = 5
 REWARD_PERCENT = 50
 
+# Codes lead with the app NAME so the code itself advertises JobBreak every time it is
+# shared, said, or screenshotted (BB: "the promo code itself is an ad / get the name of the
+# app out"). The shareable form always pairs the code with the url (see share_url/share_text).
+BRAND_PREFIX = "JOBBREAK"
+SHARE_BASE = "https://jobbreak.ai"
+
 
 def _db_path() -> Path:
     from .datadir import data_dir
@@ -51,6 +57,26 @@ def valid_code(code: str) -> bool:
     return bool(code) and len(code) <= 16 and str(code).isalnum()
 
 
+def _new_brand_code() -> str:
+    """A name-forward referral code: the app name + a short unique suffix, kept <=16 ALPHANUMERIC
+    so `valid_code` accepts it and Stripe can mirror it as a promotion code. The name rides along
+    on every share, turning the code itself into a brand impression."""
+    return BRAND_PREFIX + secrets.token_hex(3).upper()  # e.g. JOBBREAK1A2B3C -> 14 chars
+
+
+def share_url(code: str) -> str:
+    """One-tap shareable deep link. Opening it first-touch-tags the referrer (see the ?c= handler
+    in the app); once the coupon is wired it also auto-applies the launch discount. The url rides
+    WITH the code, so a shared link always carries the name and the destination."""
+    return SHARE_BASE + "/?c=" + code if valid_code(code) else SHARE_BASE
+
+
+def share_text(code: str) -> str:
+    """What a Copy/Share button copies: name + url + code + offer together, NEVER a bare code,
+    so the code can't travel without advertising the app."""
+    return "JobBreak - find out the year AI comes for your job. " + share_url(code) + " (40% off)"
+
+
 def code_for_email(email: str) -> Optional[str]:
     """Get or create this email's referral code (one per email)."""
     email = (email or "").strip().lower()
@@ -60,8 +86,8 @@ def code_for_email(email: str) -> Optional[str]:
         row = conn.execute("SELECT code FROM referrers WHERE email=?", (email,)).fetchone()
         if row:
             return row["code"]
-        for _ in range(5):  # retry on the astronomically unlikely code collision
-            code = secrets.token_hex(4)  # 8 hex chars
+        for _ in range(8):  # retry on the astronomically unlikely code collision
+            code = _new_brand_code()  # name-forward: JOBBREAK + unique suffix
             try:
                 conn.execute(
                     "INSERT INTO referrers (code, email, created_ts) VALUES (?,?,?)",
