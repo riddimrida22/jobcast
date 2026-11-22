@@ -107,15 +107,24 @@ def profile_from(source) -> Profile:
     )
 
 
+# The worked-example occupation. Picked because, under the calibrated v2 model, it tells the whole
+# arc cleanly: a high-risk, instantly-relatable role ("the job AI eats") with a strong ONE-skill move
+# to a SAFER and BETTER-PAID career. Data entry scores ~54 (near-term-high) and its best green move,
+# Interviewers, is both safer and higher-paid - so fear -> transferable skill -> safer-and-not-poorer
+# holds. If the calibration ever changes this, re-check with analysis and repoint here (see the
+# jane-pick analysis in the PR that fixed the v2 regression).
+JANE_TITLE = "Data Entry Keyers"
+
+
 def _build_jane(engine):
     """The homepage worked example ('Jane'), computed from live engine data so the trailer for the
-    paid payoff is real and defensible, never hardcoded numbers. A high-risk clerical role with a
-    clear ONE-skill move to a much safer, better-paid career - the whole fear->hope->happiness arc.
-    Computed once by the caller. Returns None if the role is not in the snapshot."""
+    paid payoff is real and defensible, never hardcoded numbers - the SAME calibrated score the rest
+    of the site shows, so a visitor never sees one job with two numbers. Returns None if the role is
+    not in the snapshot or has no clearly-safer move."""
     try:
-        prof = Profile(title="Legal Secretary")
+        prof = Profile(title=JANE_TITLE)
         a = engine.assess(prof)
-        occ = engine.snapshot.match_title("Legal Secretary")
+        occ = engine.snapshot.match_title(JANE_TITLE)
         if not a.get("ok") or occ is None:
             return None
         g = engine.green_option(prof, user_skills=[t["name"] for t in occ.get("tasks", [])], n=1)
@@ -377,7 +386,7 @@ def create_app() -> Flask:
     def _rankings(n=20):
         scored = []
         for o in engine.snapshot.all_occupations():
-            base = round(max(o.get("ai") or 0, o.get("robo") or 0) * 100)
+            base = round(engine.combined_exposure(o))   # v2 calibrated blend, same as the result page
             scored.append({"soc": o["soc"], "title": o["title"], "base": base})
         most = sorted(scored, key=lambda x: -x["base"])[:n]
         least = sorted(scored, key=lambda x: x["base"])[:n]
@@ -452,7 +461,7 @@ def create_app() -> Flask:
             jobs.append({
                 "soc": o["soc"],
                 "title": o["title"],
-                "base": round(max(o.get("ai") or 0, o.get("robo") or 0) * 100),
+                "base": round(engine.combined_exposure(o)),   # v2 calibrated blend
                 "wage": o.get("median_wage_national") or 0,
             })
         return render_template("jobs.html", version=VERSION, licensed=engine.snapshot.licensed,
@@ -540,7 +549,7 @@ def create_app() -> Flask:
                 zone = o.get("job_zone")
                 if zone not in zones:
                     continue
-                safe = round(100 - max(o.get("ai") or 0, o.get("robo") or 0) * 100)
+                safe = round(100 - engine.combined_exposure(o))   # v2 calibrated blend
                 if safe < 55:
                     continue
                 out.append({"soc": o["soc"], "title": o["title"], "safe": safe,
@@ -630,7 +639,7 @@ def create_app() -> Flask:
         try:
             from . import store
             from .alerts import outlook
-            exp, dem = outlook(occ) if occ else (None, None)
+            exp, dem = outlook(occ, engine) if occ else (None, None)
             store.add_watch(email, occ and soc, source=context or "signup",
                             exposure=exp, demand=dem)
         except Exception as e:  # never let a store hiccup drop the signup
@@ -819,7 +828,7 @@ def create_app() -> Flask:
                     try:
                         from . import store
                         from .alerts import outlook
-                        exp, dem = outlook(occ)
+                        exp, dem = outlook(occ, engine)
                         store.add_watch(email, soc, source="monitor", exposure=exp, demand=dem)
                     except Exception as e:
                         print(f"[billing] watch failed: {e}", file=sys.stderr, flush=True)
