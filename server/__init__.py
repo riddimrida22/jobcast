@@ -607,7 +607,10 @@ def create_app() -> Flask:
         email = (request.form.get("email") or "").strip().lower()
         code = (request.form.get("code") or "").strip()
         if student.verify(email, code):
-            session["jb_tier"] = student.TIER      # one free unlock per verified .edu email
+            # Students get GENERIC info only (score + safer-careers), NOT the paid breakdown
+            # (funnel-score-then-sale). A 'student' tier is not in TIER_RANK, so it stays below
+            # every paid gate; result.html renders the student-generic block for it.
+            session["jb_tier"] = "student"
             return redirect("/plan")
         return render_template("students_free.html", step="code", email=email, error="bad_code",
                                version=VERSION, licensed=engine.snapshot.licensed)
