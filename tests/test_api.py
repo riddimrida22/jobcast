@@ -81,8 +81,8 @@ def test_home_scores_consistent_with_engine(client):
     # Headline is the DISPLAY rescale (percentile), consistent with every other surface.
     assert jane["from_score"] == round(e.display_exposure(occ))      # one consistent number
     assert jane["to_score"] < jane["from_score"]                    # the move is genuinely safer
-    m = re.search(r"scored <b>(\d+)/100", html)
-    assert m and int(m.group(1)) == jane["from_score"]              # the page shows that number
+    m = re.search(r"Level (\d+)/10", html)
+    assert m and int(m.group(1)) == jane["from_level"]              # the page shows that level (1-10, 10=safe)
 
 
 def test_jane_payoff_is_safer_and_not_poorer():
