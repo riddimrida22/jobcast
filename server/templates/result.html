@@ -683,6 +683,11 @@
 </script>
 {% endif %}
 
+{# FREE = the score only. Everything below (the breakdown, timeline, plan, green option,
+   tasks, drivers, geo, method) is the PAID research - rendered server-side ONLY for a paid
+   or entitled user, so a free visitor's page never contains it (no client-side leak via a
+   direct /jobs link or a sample chip). Free users get the clean offer in the {% else %}. #}
+{% if paid %}
 <div class="tabs" role="tablist">
   <button class="tab active" data-panel="p-overview">Overview</button>
   {% if r.strategies %}<button class="tab" data-panel="p-strategy">What To Do</button>{% endif %}
@@ -1593,6 +1598,16 @@
   <div class="src-chips">{% for s in r.sources %}<span class="chip">{{ s.name }}</span>{% endfor %}</div>
   <p class="muted" style="margin-top:10px">Snapshot {{ r.snapshot.id }}. Full method and backtest on <a href="/methodology">How it works</a>.</p>
 </div>
+{% else %}
+{# FREE OFFER: the score is the hook (hero above); this is the single clear path to the paid
+   research. One button -> the pay sequence. No research is shown. #}
+<div class="free-offer card" style="text-align:center;padding:30px 22px;max-width:580px;margin:16px auto 0">
+  <div style="font-size:12.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin-bottom:8px">{{ t('fo.eyebrow', 'Your full breakdown is ready') }}</div>
+  <h2 style="margin:0 0 8px;font-size:23px;line-height:1.15">{{ t('fo.h', 'See what to do about it') }}</h2>
+  <p class="muted" style="margin:0 auto 20px;max-width:470px;line-height:1.55">{{ t('fo.sub', 'Unlock your AI-researched breakdown and your safer move - the career you already qualify for at lower risk, with the timeline and the step-by-step plan.') }} {{ t('fo.price', 'One-time $4.99.') }}</p>
+  <button type="button" class="fo-cta" onclick="if(window.jbOpenPaywall){window.jbOpenPaywall();}" style="background:var(--accent);color:#2a1708;border:none;border-radius:999px;padding:15px 34px;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 8px 24px rgba(243,163,95,.32)">{{ t('fo.cta', 'See what to do') }} &rsaquo;</button>
+</div>
+{% endif %}
 
 <p style="margin-top:16px"><a href="/">Check another job</a></p>
 
@@ -1875,8 +1890,6 @@
   var ov = document.getElementById('reveal');
   if (!ov) return;
   var flag; try { flag = sessionStorage.getItem('jb_reveal'); } catch (e) {}
-  if (flag !== '1') return;
-  try { sessionStorage.removeItem('jb_reveal'); } catch (e) {}
   var data = {}; try { data = JSON.parse(document.getElementById('reveal-data').textContent) || {}; } catch (e) {}
   var exp = Math.round(+data.exposure || 0);
   var lvl = Math.round(+data.level || 0);  // resilience LEVEL 1-10 (10 = safe, 1 = extinct); HIGH is GOOD
@@ -1884,6 +1897,11 @@
   var STRIPE = {{ stripe_enabled|tojson }}, ENT = {{ entitlement|tojson }};
   // Tour (generic) funnels to "localize & personalize"; personal result goes to the paywall.
   var SEO = {{ seo|default(false)|tojson }}, OCC_TITLE = {{ disp_title|tojson }}, RATING = {{ rating_label|tojson }};
+  // Reveal ANIMATION plays only when arriving from the guided flow (jb_reveal). The paywall
+  // functions further down are defined REGARDLESS, so a direct free visit's "See what to do"
+  // button still opens the sale.
+  if (flag === '1') {
+  try { sessionStorage.removeItem('jb_reveal'); } catch (e) {}
   ov.hidden = false; ov.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
   window.jbEv && window.jbEv('reveal');
   var steps = ['{{ "Mapping the tasks..." if seo else "Mapping your tasks..." }}', 'Scoring AI exposure...', 'Checking the robots...', '{{ "Reading the timeline..." if seo else "Reading your timeline..." }}', 'Comparing to the labor data...', 'Almost there...'];
@@ -1892,6 +1910,7 @@
   if (bar) requestAnimationFrame(function () { bar.style.transition = 'width 3.2s ease'; bar.style.width = '100%'; });
   var stepTimer = setInterval(function () { si = (si + 1) % steps.length; if (stepEl) stepEl.textContent = steps[si]; }, 560);
   setTimeout(function () { clearInterval(stepTimer); reveal(); }, 3300);
+  }
   function reveal() {
     var cr = document.getElementById('rv-crunch'); if (cr) cr.hidden = true;
     var done = document.getElementById('rv-done'); if (done) done.hidden = false;
