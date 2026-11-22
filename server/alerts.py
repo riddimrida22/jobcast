@@ -30,7 +30,7 @@ def outlook(occ: Dict[str, Any], engine=None) -> Tuple[Optional[float], Optional
     if not occ:
         return None, None
     if engine is not None:
-        exposure = round(engine.combined_exposure(occ), 1)
+        exposure = round(engine.display_exposure(occ), 1)
     else:
         exposure = round(max(occ.get("ai") or 0.0, occ.get("robo") or 0.0) * 100, 1)
     demand = occ.get("projection_pct")

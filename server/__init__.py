@@ -138,18 +138,19 @@ def _build_jane(engine):
             s = s.split(",")[0].strip().rstrip(".")
             return s
         add = t.get("add_skills") or []
+        from_score, to_score = round(a["base_exposure"]), round(t["max_exposure"])
         return {
             "name": "Jane", "age": 41,
-            "from_title": a["occupation"]["title"], "from_score": round(a["base_exposure"]),
+            "from_title": a["occupation"]["title"], "from_score": from_score,
             "from_ai": round(a["exposure"]["ai_software"]),
             "from_robo": round(a["exposure"]["physical_robotics"]),
             "from_band": a["timeline"]["band"]["label"],
             "from_pay": a["wages"].get("occupation_median_wage"),
-            "to_title": t["title"], "to_score": round(t["max_exposure"]),
+            "to_title": t["title"], "to_score": to_score,
             "to_band": ((ta.get("timeline") or {}).get("band") or {}).get("label") if ta.get("ok") else None,
             "to_pay": t.get("median_wage"),
             "qualified_pct": t["qualified_pct"], "qualified_k": t["qualified_k"],
-            "qualified_m": t["qualified_m"], "drop": round(t["risk_drop"]),
+            "qualified_m": t["qualified_m"], "drop": from_score - to_score,  # matches the shown numbers
             "hero_skill": shorten(add[0]) if add else None,
             "have_skills": [shorten(s) for s in (t.get("have_skills") or [])[:3]],
         }
@@ -386,7 +387,7 @@ def create_app() -> Flask:
     def _rankings(n=20):
         scored = []
         for o in engine.snapshot.all_occupations():
-            base = round(engine.combined_exposure(o))   # v2 calibrated blend, same as the result page
+            base = round(engine.display_exposure(o))   # display rescale, same as the result-page headline
             scored.append({"soc": o["soc"], "title": o["title"], "base": base})
         most = sorted(scored, key=lambda x: -x["base"])[:n]
         least = sorted(scored, key=lambda x: x["base"])[:n]
@@ -461,7 +462,7 @@ def create_app() -> Flask:
             jobs.append({
                 "soc": o["soc"],
                 "title": o["title"],
-                "base": round(engine.combined_exposure(o)),   # v2 calibrated blend
+                "base": round(engine.display_exposure(o)),   # display rescale (percentile)
                 "wage": o.get("median_wage_national") or 0,
             })
         return render_template("jobs.html", version=VERSION, licensed=engine.snapshot.licensed,
@@ -549,7 +550,7 @@ def create_app() -> Flask:
                 zone = o.get("job_zone")
                 if zone not in zones:
                     continue
-                safe = round(100 - engine.combined_exposure(o))   # v2 calibrated blend
+                safe = round(100 - engine.display_exposure(o))   # display rescale (percentile)
                 if safe < 55:
                     continue
                 out.append({"soc": o["soc"], "title": o["title"], "safe": safe,

@@ -12,11 +12,10 @@ def test_data_entry_is_high_ai_exposure(engine):
     assert r["ok"] is True
     assert r["exposure"]["ai_software"] > 60
     assert r["exposure"]["ai_software"] > r["exposure"]["physical_robotics"]
-    # v2: the headline is the calibrated multi-factor blend, not an unfitted max(ai, robo).
-    # Data entry (high AI exposure, very routine, low interpersonal) lands clearly high-risk.
-    assert r["base_exposure"] > 50
-    # The blend sits between the two displayed axes, never above the higher one.
-    assert min(r["exposure"].values()) <= r["base_exposure"] <= max(r["exposure"].values())
+    # The headline is the calibrated blend, rescaled for display to the occupation's percentile
+    # among all jobs. Data entry (high AI exposure, very routine, low interpersonal) is one of the
+    # most exposed occupations, so it lands high on the display scale.
+    assert r["base_exposure"] > 70
 
 
 def test_truck_driver_is_high_robotics_exposure(engine):
@@ -167,6 +166,27 @@ def test_interpersonal_work_lowers_headline_below_ai_axis(engine):
     # Data entry (very routine, low interpersonal) is scored clearly riskier than nursing.
     d = engine.assess(Profile(title="data entry"))
     assert d["base_exposure"] > r["base_exposure"]
+
+
+def test_display_scale_is_monotonic_and_full_range(engine):
+    # The headline is a display rescale (percentile) of the raw blend: it must preserve order
+    # (never reorder the validated ranking) and spread scores across close to the full 0-100.
+    occs = engine.snapshot.all_occupations()
+    pairs = sorted((engine.combined_exposure(o), engine.display_exposure(o)) for o in occs)
+    disp = [d for _, d in pairs]
+    assert disp == sorted(disp)                       # monotonic: raw order -> display order
+    assert min(disp) <= 20 and max(disp) >= 80        # uses much more of the 0-100 range than raw
+    raw = [r for r, _ in pairs]
+    assert (max(raw) - min(raw)) < (max(disp) - min(disp))   # the display genuinely stretches
+
+
+def test_display_headline_consistent_across_surfaces(engine):
+    from riskcore import Profile
+    # assess() headline == display_exposure for the same occupation (no two-numbers bug).
+    for title in ("data entry", "nurse", "truck driver"):
+        occ = engine.snapshot.match_title(title)
+        r = engine.assess(Profile(title=title))
+        assert round(r["base_exposure"]) == round(engine.display_exposure(occ))
 
 
 def test_green_targets_are_more_interpersonal_or_less_routine(engine):

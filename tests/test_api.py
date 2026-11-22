@@ -59,7 +59,8 @@ def test_home_scores_consistent_with_engine(client):
     if jane is None:
         return  # role not in this snapshot; nothing to assert
     occ = e.snapshot.match_title(JANE_TITLE)
-    assert jane["from_score"] == round(e.combined_exposure(occ))     # one consistent number
+    # Headline is the DISPLAY rescale (percentile), consistent with every other surface.
+    assert jane["from_score"] == round(e.display_exposure(occ))      # one consistent number
     assert jane["to_score"] < jane["from_score"]                    # the move is genuinely safer
     m = re.search(r"scored <b>(\d+)/100", html)
     assert m and int(m.group(1)) == jane["from_score"]              # the page shows that number
