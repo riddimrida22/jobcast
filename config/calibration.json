@@ -1,14 +1,46 @@
 {
   "note": "Summary of the offline backtest (analysis/calibrate.py, full detail in CALIBRATION.md). Surfaced on the methodology page so the validation is public.",
   "n_occupations": 702,
-  "horizon": "2020-2025 (BLS OEWS)",
+  "horizon": "2020-2025 (OEWS May)",
   "outcome": "5-year national employment change (percent)",
-  "r2_cross_validated": 0.046,
+  "primary_metric": "rank quality (Spearman, AUC, decile lift); R2 shown but not the target",
+  "deployed_model": {
+    "spearman": 0.321,
+    "auc_decline": 0.686,
+    "decile_top_risk_mean_change": -8.0,
+    "decile_bottom_risk_mean_change": 17.4
+  },
+  "shipped_v1_baseline_auc": 0.649,
   "band_backtest": [
-    { "band": "Largely unaffected", "n": 71, "mean_emp_change_pct": 7.7 },
-    { "band": "Partial, 5 to 10 years", "n": 533, "mean_emp_change_pct": 6.2 },
-    { "band": "Near-term, high", "n": 98, "mean_emp_change_pct": -3.8 }
+    {
+      "band": "Largely unaffected",
+      "n": 262,
+      "mean_emp_change_pct": 13.4,
+      "median_emp_change_pct": 11.5
+    },
+    {
+      "band": "Partial, 5 to 10 years",
+      "n": 295,
+      "mean_emp_change_pct": 2.1,
+      "median_emp_change_pct": 0.9
+    },
+    {
+      "band": "Near-term, high",
+      "n": 145,
+      "mean_emp_change_pct": -4.5,
+      "median_emp_change_pct": -7.3
+    }
   ],
-  "headline": "Occupations in our highest-risk band lost jobs on average over 2020-2025, while the lowest-risk band grew the most - the risk ranking separates real outcomes in the right order. Individual prediction is weak (cross-validated R2 ~ 0.05), so results are shown as ranges, not point verdicts.",
-  "caveat": "The 2020 base year is the COVID shock and AI's large labor effects are recent, so this validates direction and plumbing, not a precise score."
+  "convergent_validity": {
+    "aioe_soc": {
+      "label": "Felten-Raj-Seamans AIOE",
+      "available": true,
+      "n": 657,
+      "spearman_vs_ai_subscore": 0.862,
+      "spearman_vs_deployed_blend": -0.022,
+      "note": "Rank correlation with an independent measure we did not fit on: first vs our Eloundou AI sub-score (like-for-like), then vs the full displacement blend."
+    }
+  },
+  "headline": "Across 702 occupations, our risk ranking separates real 2020-2025 outcomes: the highest-risk decile lost 8.0% of jobs on average while the lowest-risk decile grew 17.4%, and it ranks a declining occupation above a growing one 69% of the time (AUC 0.686). Individual prediction stays weak, so results are shown as ranges, not point verdicts.",
+  "caveat": "The 2020 base year is the COVID shock; employment change partly reflects pandemic recovery, not automation. Raw AI exposure is statistically insignificant here; AI's large labour effects are recent/prospective, so a weak in-sample AI signal is expected and honest."
 }

@@ -118,7 +118,11 @@ class Engine:
         # US uses zip->metro geography; other countries are national-only for now.
         metro_id = self.snapshot.metro_for_zip(profile.zip_code) if country == countries.DEFAULT else None
         axes, decomposition = self._score_axes(occ, profile)
-        base_exposure = max(axes["ai_software"], axes["physical_robotics"])
+        # v2: the headline is the calibrated multi-factor blend (config exposure_model), not an
+        # unfitted max(ai, robo). ai/robo come in seniority-adjusted via the axes; the task-
+        # structure factors (routine, interpersonal) come from the occupation.
+        base_exposure = self.combined_exposure(
+            occ, ai100=axes["ai_software"], robo100=axes["physical_robotics"])
         timeline = self._timeline(occ, metro_id, base_exposure, profile)
         wages = self._wages(occ, metro_id, profile, country)
         adjacency = self._adjacency(occ, base_exposure)
@@ -220,7 +224,7 @@ class Engine:
             # occupations with no job zone slip past the filter.
             if max_zone and (zone is None or zone > max_zone):
                 continue
-            base = max(o.get("ai") or 0, o.get("robo") or 0) * 100
+            base = self.combined_exposure(o)          # v2 calibrated blend, not max(ai, robo)
             safe = 100 - base
             if safe < SAFE_FLOOR:
                 continue
@@ -234,12 +238,10 @@ class Engine:
             g = max(-20.0, min(15.0, growth))
             gnorm = (g + 20.0) / 35.0 * 100.0             # 0..100 within the clamped band
             paynorm = min(wage, 200000) / 2000.0          # 0..100
-            if priority == "safe":
-                fit = safe * 0.65 + paynorm * 0.20 + gnorm * 0.15
-            elif priority == "pay":
-                fit = safe * 0.30 + paynorm * 0.55 + gnorm * 0.15
-            else:
-                fit = safe * 0.50 + paynorm * 0.30 + gnorm * 0.20
+            ff = self.weights.get("future_fit", {})
+            w = ff.get(priority if priority in ("safe", "pay") else "balanced",
+                       {"safe": 0.50, "pay": 0.30, "growth": 0.20})
+            fit = safe * w["safe"] + paynorm * w["pay"] + gnorm * w["growth"]
             out.append({"soc": soc, "title": o["title"], "base_exposure": round(base),
                         "resilience": round(safe), "median_wage": wage, "job_zone": zone,
                         "edu": edu.get(zone, "Varies"), "growth": round(growth, 1), "fit": round(fit, 1),
@@ -309,6 +311,8 @@ class Engine:
             # is still offered. Either way the data is O*NET-derived, never invented.
             cand = full or {"soc": adj["soc"], "title": adj.get("title", ""),
                             "ai": adj.get("ai"), "robo": adj.get("robo"),
+                            "interpersonal": adj.get("interpersonal"),
+                            "routine_structured": adj.get("routine_structured"),
                             "tasks": [], "job_zone": None, "median_wage_national": None}
             if _is_catch_all(cand):
                 continue
@@ -362,7 +366,10 @@ class Engine:
                 reach *= 0.6
             # Reachability leads the ranking (0.15 floor so a large drop still counts), so the
             # safest job the person can mostly already do wins over a safer one they cannot.
-            score = risk_drop * (0.15 + 0.85 * qualified) * reach
+            # A durability tilt then favours destinations whose safety is human-centred (high
+            # interpersonal, low routine) - the two backtest-validated factors - so the paid
+            # payoff points people toward resilient work, not just a slightly lower number.
+            score = risk_drop * (0.15 + 0.85 * qualified) * reach * self._durability(cand)
             targets.append({
                 "soc": soc,
                 "title": cand["title"],
@@ -410,6 +417,54 @@ class Engine:
                 "safer_than_pct": safer_than_pct,
                 "targets": chosen}
 
+    # ---- v2 calibrated exposure blend ------------------------------------
+    def combined_exposure(self, occ: Dict[str, Any],
+                          ai100: Optional[float] = None, robo100: Optional[float] = None) -> float:
+        """The headline automation-exposure score (0-100) for an occupation, the calibrated v2
+        blend defined in config/weights.json ("exposure_model"): a transparent weighted average
+        of four task-intrinsic sub-scores, every term oriented so higher = more automatable
+        (interpersonal enters as protection, 100 - interpersonal). The weights are set by the
+        cross-validated backtest (analysis/calibrate.py, CALIBRATION.md); nothing here fits a
+        model or calls a language model.
+
+        ai100/robo100 let the caller pass already-adjusted axis scores (e.g. seniority-scaled);
+        otherwise they come from the occupation's own ai/robo (occupation-level, else task mean).
+        If the config has no exposure_model, or the occupation lacks the task-structure factors,
+        we fall back to the v1 definition max(ai, robo) so the score never silently breaks.
+        """
+        if ai100 is None or robo100 is None:
+            ai, robo = occ.get("ai"), occ.get("robo")
+            if ai is None and robo is None:
+                tasks = occ.get("tasks", [])
+                if tasks:
+                    ai = sum(t.get("ai", 0) for t in tasks) / len(tasks)
+                    robo = sum(t.get("robo", 0) for t in tasks) / len(tasks)
+            ai100 = (ai or 0.0) * 100 if ai100 is None else ai100
+            robo100 = (robo or 0.0) * 100 if robo100 is None else robo100
+        model = self.weights.get("exposure_model") or {}
+        w = model.get("weights") if model.get("method") == "weighted_blend_0_100" else None
+        routine, interp = occ.get("routine_structured"), occ.get("interpersonal")
+        if not w or routine is None or interp is None:
+            return _clamp(max(ai100, robo100))
+        protection = 100.0 - interp * 100.0
+        score = (w["ai"] * ai100 + w["robo"] * robo100
+                 + w["routine_structured"] * routine * 100.0
+                 + w["interpersonal_protection"] * protection)
+        return _clamp(score)
+
+    def _durability(self, cand: Dict[str, Any]) -> float:
+        """Green-match tilt toward destinations whose safety is DURABLE: high interpersonal
+        (strongest validated protector) and low routine_structured (strongest validated risk).
+        Centred at 0.5 so an average role is neutral; bounded by config. 1.0 when the factors
+        are absent (then combined_exposure already fell back to max(ai, robo))."""
+        g = self.weights.get("green_match") or {}
+        interp, routine = cand.get("interpersonal"), cand.get("routine_structured")
+        if interp is None or routine is None or not g:
+            return 1.0
+        mult = (1.0 + g.get("interpersonal_bonus", 0.0) * (interp - 0.5)
+                - g.get("routine_penalty", 0.0) * (routine - 0.5))
+        return max(g.get("min_multiplier", 0.7), min(g.get("max_multiplier", 1.4), mult))
+
     def _occ_task_names(self, occ: Dict[str, Any]) -> List[str]:
         """Core-task statements for an occupation, cached by SOC (the green match scans the whole
         snapshot, so this keeps repeated requests cheap)."""
@@ -421,16 +476,10 @@ class Engine:
         return hit
 
     def _max_exposure(self, occ: Dict[str, Any]) -> float:
-        """Combined automation exposure (0-100) for an occupation, matching how assess() derives
-        the headline: occupation-level ai/robo when present, else the task mean."""
-        if occ.get("ai") is not None or occ.get("robo") is not None:
-            return max(occ.get("ai") or 0.0, occ.get("robo") or 0.0) * 100
-        tasks = occ.get("tasks", [])
-        if tasks:
-            ai = sum(t.get("ai", 0) for t in tasks) / len(tasks)
-            robo = sum(t.get("robo", 0) for t in tasks) / len(tasks)
-            return max(ai, robo) * 100
-        return 0.0
+        """Combined automation exposure (0-100) for an occupation - the same calibrated v2 blend
+        assess() reports as the headline, so adjacency and the green match compare like with like
+        (a role is 'safer' only if its calibrated exposure is lower, not just its max(ai, robo))."""
+        return self.combined_exposure(occ)
 
     # ---- scoring internals ----------------------------------------------
     def _score_axes(self, occ: Dict[str, Any], profile: Profile):
@@ -717,14 +766,17 @@ class Engine:
     def _adjacency(self, occ, base_exposure) -> List[Dict[str, Any]]:
         out = []
         for adj in occ.get("adjacent", []):
-            adj_max = max(adj["ai"], adj["robo"]) * 100
-            if adj_max < base_exposure - 0.01:
-                full = self.snapshot.occupation(adj["soc"]) or {}
+            full = self.snapshot.occupation(adj["soc"])
+            # Score the adjacent role on the same calibrated blend. Prefer the full occupation
+            # (it carries the task-structure factors); fall back to the adjacency entry's own
+            # ai/robo, where combined_exposure degrades to max(ai, robo).
+            adj_exp = self.combined_exposure(full if full else adj)
+            if adj_exp < base_exposure - 0.01:
                 out.append({"soc": adj["soc"], "title": adj["title"],
                             "ai_software": round(adj["ai"] * 100, 1),
                             "physical_robotics": round(adj["robo"] * 100, 1),
-                            "max_exposure": round(adj_max, 1),
-                            "projection_pct": full.get("projection_pct")})
+                            "max_exposure": round(adj_exp, 1),
+                            "projection_pct": (full or {}).get("projection_pct")})
         out.sort(key=lambda a: a["max_exposure"])
         return out
 

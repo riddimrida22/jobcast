@@ -95,6 +95,61 @@ def load_robo(zip_path: Path = ONET_ZIP) -> Dict[str, float]:
     return out
 
 
+# O*NET elements for the two calibration-validated task-structure factors (see CALIBRATION.md).
+# Routine & structured work (Work Context, scale CX) raises automation risk; interpersonal work
+# (Work Activities, scale IM) is the strongest protector. Normalised (v-1)/4 from the 1-5 scale.
+_ROUTINE_ELEMENTS = {"Importance of Repeating Same Tasks",
+                     "Structured versus Unstructured Work",
+                     "Pace Determined by Speed of Equipment"}
+_INTERPERSONAL_ELEMENTS = {"Assisting and Caring for Others",
+                           "Establishing and Maintaining Interpersonal Relationships",
+                           "Performing for or Working Directly with the Public"}
+
+
+def _onet_table(zf: zipfile.ZipFile, basename: str):
+    """Read an O*NET text table by EXACT basename. endswith is a trap: 'Abilities to Work
+    Context.txt' also ends with 'Work Context.txt'."""
+    name = next(n for n in zf.namelist() if n.split("/")[-1] == basename)
+    raw = zf.read(name).decode("utf-8", "replace").splitlines()
+    hdr = raw[0].split("\t")
+    return raw, {h: i for i, h in enumerate(hdr)}
+
+
+def load_work_design(zip_path: Path = ONET_ZIP) -> Dict[str, Dict[str, float]]:
+    """O*NET-SOC -> {'routine_structured', 'interpersonal'} (each 0..1), the two task-structure
+    factors the backtest validated. Used to attach calibrated-model inputs to each occupation."""
+    with zipfile.ZipFile(zip_path) as zf:
+        wc_raw, wc = _onet_table(zf, "Work Context.txt")
+        wa_raw, wa = _onet_table(zf, "Work Activities.txt")
+    routine: Dict[str, list] = {}
+    for line in wc_raw[1:]:
+        c = line.split("\t")
+        if c[wc["Scale ID"]] != "CX" or c[wc["Element Name"]] not in _ROUTINE_ELEMENTS:
+            continue
+        try:
+            routine.setdefault(c[wc["O*NET-SOC Code"]], []).append(
+                (float(c[wc["Data Value"]]) - 1.0) / 4.0)
+        except ValueError:
+            continue
+    inter: Dict[str, list] = {}
+    for line in wa_raw[1:]:
+        c = line.split("\t")
+        if c[wa["Scale ID"]] != "IM" or c[wa["Element Name"]] not in _INTERPERSONAL_ELEMENTS:
+            continue
+        try:
+            inter.setdefault(c[wa["O*NET-SOC Code"]], []).append(
+                (float(c[wa["Data Value"]]) - 1.0) / 4.0)
+        except ValueError:
+            continue
+    codes = set(routine) | set(inter)
+    out: Dict[str, Dict[str, float]] = {}
+    for code in codes:
+        r = routine.get(code); i = inter.get(code)
+        out[code] = {"routine_structured": round(sum(r) / len(r), 4) if r else None,
+                     "interpersonal": round(sum(i) / len(i), 4) if i else None}
+    return out
+
+
 def load_task_ai(path: Path = TASK_LABELS) -> Dict[str, float]:
     """Task ID -> AI exposure (0..1) from Eloundou's per-task labels (human preferred)."""
     import csv

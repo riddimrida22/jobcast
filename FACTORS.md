@@ -5,8 +5,11 @@ rule from CLAUDE.md: every factor must trace to published data or research and h
 A factor with no credible source is left out, because it would make the tool less defensible, not more.
 
 Each factor below lists:
-- **Effect**: does it move the base exposure SCORE, the TIMELINE, or the ADVICE? (Base score comes only
-  from task exposure; personal and institutional factors move timeline and advice, never the base score.)
+- **Effect**: does it move the base exposure SCORE, the TIMELINE, or the ADVICE? (As of v2 the base score
+  is a calibrated blend of task-intrinsic signals - AI exposure, physical/robotics exposure, routine &
+  structured work, and interpersonal work - with weights set by a backtest against real BLS employment
+  change, not an unfitted max of two axes; see CALIBRATION.md. Personal and institutional factors move
+  timeline and advice, never the base score.)
 - **Source**: the published data or research behind it.
 - **Phase**: v1 (wired now), v1.x (next), or later.
 
@@ -35,9 +38,9 @@ model carries per-occupation applicability flags to drive it.
 | Task composition of the occupation | SCORE | O*NET task list | v1 |
 | Per-task AI/software exposure | SCORE (AI axis) | Eloundou et al. 2023 | v1 |
 | Per-task physical/robotics exposure | SCORE (robotics axis) | O*NET work context + robotics literature | v1 |
-| Routine vs non-routine, manual vs cognitive | SCORE | Autor/Levy/Murnane framework | v1.x |
-| Engineering bottlenecks: perception and manipulation, creativity, social intelligence | SCORE (caps exposure) | Frey & Osborne 2013 | v1.x |
-| Degree of in-person human interaction / caregiving | SCORE (lowers) | O*NET work context | v1.x |
+| Routine & structured work (repetition, structure, machine pace) | SCORE (raises) | O*NET Work Context; backtest-validated (strongest risk factor, p=0.005) | **v2 (wired)** |
+| Engineering bottlenecks: perception and manipulation, creativity, social intelligence | SCORE (caps exposure) | Frey & Osborne 2017 | v1.x |
+| Degree of in-person human interaction / caregiving | SCORE (lowers) | O*NET Work Activities; backtest-validated (strongest protector, p<0.0001) | **v2 (wired)** |
 | Unstructured vs structured physical environment | SCORE (robotics) | O*NET work context | v1.x |
 | Fine dexterity / manipulation demands | SCORE (robotics, lowers) | O*NET abilities | v1.x |
 | Judgment, accountability, ethical/legal responsibility | SCORE (lowers) | O*NET + Frey & Osborne | v1.x |

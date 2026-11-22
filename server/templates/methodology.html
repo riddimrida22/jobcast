@@ -12,21 +12,24 @@ A language model never sets the rating; it only explains.</p>
     <div class="flow-arrow">&rsaquo;</div>
     <div class="flow-step"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>O*NET tasks</div>
     <div class="flow-arrow">&rsaquo;</div>
-    <div class="flow-step"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M10 10h4v4h-4zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>AI + robotics exposure</div>
+    <div class="flow-step"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M10 10h4v4h-4zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>Calibrated exposure</div>
     <div class="flow-arrow">&rsaquo;</div>
     <div class="flow-step"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Timeline band</div>
     <div class="flow-arrow">&rsaquo;</div>
     <div class="flow-step"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Sourced range</div>
   </div>
-  <p class="muted" style="margin-bottom:0">AI exposure from Eloundou et al. (2023); robotics from O*NET
-  work context; the timeline shifts for local demand (BLS OEWS), union coverage, and age.</p>
+  <p class="muted" style="margin-bottom:0">The score blends four task-intrinsic signals: AI exposure
+  (Eloundou et al. 2023), physical/robotics exposure (O*NET work context), how routine and structured
+  the work is, and how interpersonal it is (the strongest protector in our backtest). The blend weights
+  are set by that backtest, not guessed; the timeline then shifts for local demand (BLS OEWS), union
+  coverage, and age.</p>
 </div>
 
 {% if calibration %}
 <div class="card">
   <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg><h2 style="margin:0">Does it hold up?</h2></div>
-  <p class="muted" style="margin-top:0">Average 5-year employment change by our risk band
-     ({{ calibration.n_occupations }} occupations). The highest-risk band actually lost jobs.</p>
+  <p class="muted" style="margin-top:0">We checked the risk ranking against real BLS employment change,
+     2020&ndash;2025 ({{ calibration.n_occupations }} occupations). Average change by risk band:</p>
   {% set cols = ['#147b74', '#c88a2e', '#b0422b'] %}
   <svg viewBox="0 0 420 200" style="width:100%;max-width:460px;display:block;margin:0 auto">
     <line x1="8" y1="110" x2="412" y2="110" stroke="var(--line)" stroke-width="1.5"></line>
@@ -44,9 +47,21 @@ A language model never sets the rating; it only explains.</p>
       <text x="{{ cx + 40 }}" y="195" text-anchor="middle" font-size="11" fill="var(--muted)">{{ b.band }}</text>
     {% endfor %}
   </svg>
-  <p class="muted" style="margin-bottom:0">Individual outcomes are predicted weakly (cross-validated
-     R-squared about {{ calibration.r2_cross_validated }}), which is why results are shown as ranges,
-     not verdicts. The 2020 base year spans COVID, so this validates the ranking, not a precise rating.</p>
+  {% if calibration.deployed_model %}
+  <p class="muted" style="margin-bottom:6px">The ranking sorts a declining job above a growing one about
+     {{ (calibration.deployed_model.auc_decline * 100)|round|int }}% of the time (AUC
+     {{ calibration.deployed_model.auc_decline }}); the highest-risk tenth of jobs lost
+     {{ (-calibration.deployed_model.decile_top_risk_mean_change)|round(1) }}% on average while the lowest
+     grew {{ calibration.deployed_model.decile_bottom_risk_mean_change }}%.</p>
+  {% endif %}
+  {% if calibration.convergent_validity and calibration.convergent_validity.aioe_soc and calibration.convergent_validity.aioe_soc.spearman_vs_ai_subscore %}
+  <p class="muted" style="margin-bottom:6px">Our AI-exposure measure agrees strongly (rank correlation
+     {{ calibration.convergent_validity.aioe_soc.spearman_vs_ai_subscore }}) with an independent one
+     (Felten&ndash;Raj&ndash;Seamans) we do not fit on.</p>
+  {% endif %}
+  <p class="muted" style="margin-bottom:0">Individual outcomes stay noisy, which is why results are shown
+     as ranges, not verdicts. The 2020 base year spans COVID and AI's largest effects are still ahead, so
+     this validates the ranking, not a precise rating. Full detail: CALIBRATION.md.</p>
 </div>
 {% endif %}
 
