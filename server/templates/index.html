@@ -25,11 +25,53 @@
   /* Clear the absolute top controls bar when the gate's content is tall (the quick-pick
      chips push the headline up), so the title never sits under the country/language row. */
   #gate-aud { padding-top:66px; }
+
+  /* ---- RIGHT NOW: curated why-now signals, as a HUD ticker above the scanner ---- */
+  .hud { width:min(96vw,720px); margin:0 auto 18px; }
+  .hud-head { display:flex; align-items:center; gap:8px; justify-content:center; margin:0 0 7px;
+    font:700 11px/1 ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace; letter-spacing:.14em;
+    text-transform:uppercase; color:#8fd7e4; }
+  .hud-dot { width:7px; height:7px; border-radius:50%; background:#2fe0d4; flex:none;
+    animation:hudPulse 1.6s ease-out infinite; }
+  @keyframes hudPulse { 0%{box-shadow:0 0 0 0 rgba(47,224,212,.55);} 70%{box-shadow:0 0 0 7px rgba(47,224,212,0);} 100%{box-shadow:0 0 0 0 rgba(47,224,212,0);} }
+  .hud-asof { color:#6f879e; font-weight:600; letter-spacing:.05em; text-transform:none; }
+  .hud-strip { position:relative; overflow:hidden; border:1px solid rgba(47,224,212,.22); border-radius:11px;
+    background:linear-gradient(180deg,rgba(13,30,48,.6),rgba(9,20,34,.5));
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
+    mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent); }
+  .hud-row { display:inline-flex; white-space:nowrap; padding:9px 0; animation:hudScroll 48s linear infinite; }
+  .hud-strip:hover .hud-row { animation-play-state:paused; }
+  @keyframes hudScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  .hud-item { display:inline-flex; align-items:center; gap:9px; padding:0 22px; border-right:1px solid rgba(255,255,255,.06); font-size:13px; color:#dbe7f2; }
+  .hud-item .hk { font:700 10px/1 ui-monospace,Menlo,Consolas,monospace; letter-spacing:.08em; color:#06201f;
+    background:#2fe0d4; border-radius:4px; padding:4px 6px; flex:none; }
+  .hud-item .hs { color:#7f97ad; font-size:11px; }
+  /* ---- Scanner framing on the job box ---- */
+  .lp-eyebrow { width:min(92vw,520px); margin:0 auto 7px; text-align:center;
+    font:700 11.5px/1 ui-monospace,Menlo,Consolas,monospace; letter-spacing:.1em; text-transform:uppercase; color:#9fe4ef; }
+  .lp-eyebrow .car { color:#2fe0d4; }
+  .lp-search::after { content:""; position:absolute; left:10px; right:10px; top:9px; height:2px; border-radius:2px;
+    background:linear-gradient(90deg,transparent,rgba(47,224,212,.85),transparent); opacity:0;
+    animation:scanLine 2.8s ease-in-out infinite; pointer-events:none; }
+  @keyframes scanLine { 0%{top:9px;opacity:0;} 14%{opacity:.9;} 50%{top:calc(100% - 11px);opacity:.9;} 66%{opacity:0;} 100%{top:9px;opacity:0;} }
+  .lp-search #lp-q:focus { outline:none; border-color:rgba(47,224,212,.8); box-shadow:0 0 0 4px rgba(47,224,212,.15); }
+  @media (prefers-reduced-motion:reduce){ .hud-row{animation:none;} .hud-strip{overflow-x:auto;} .lp-search::after{animation:none;opacity:0;} }
 </style>
 <div class="gate" id="gate-aud" role="dialog" aria-label="Welcome to JobBreak">
   {% include "_controls.html" %}
+  {% if signals and signals['items'] %}
+  <div class="hud" aria-label="Current AI signals">
+    <div class="hud-head"><span class="hud-dot" aria-hidden="true"></span>Right now<span class="hud-asof">curated &middot; updated {{ signals.as_of }}</span></div>
+    <div class="hud-strip">
+      <div class="hud-row">
+        {% for s in signals['items'] + signals['items'] %}<span class="hud-item"><span class="hk">{{ s.kind }}</span>{{ s.text }}<span class="hs">{{ s.source }}</span></span>{% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
   <div class="gate-q">{{ t('gate.q', 'Will <span class="hot">AI</span> replace your job?') }}</div>
   <p class="gate-sub">{{ t('gate.sub', 'Type your job for an instant score &mdash; 0 to 100, and when it is coming, from real data. Or choose how to start.') }}</p>
+  <div class="lp-eyebrow">{{ t('lp.scan', '<span class="car">&#9656;</span> Scan your job &mdash; pull your real-life stats') }}</div>
   <div class="lp-search">
     <input id="lp-q" type="text" autocomplete="off" placeholder="{{ t('lp.ph', 'Type your job, e.g. electrician, nurse, accountant') }}"
            role="combobox" aria-controls="lp-qlist" aria-expanded="false" aria-label="Type your job">

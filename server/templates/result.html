@@ -46,6 +46,17 @@
   .hero-score.hero-hi .hs-num b, .hero-score.hero-hi .hs-lvl { color:var(--red,#ff5a4d); }
   .hero-score.hero-mid .hs-num b, .hero-score.hero-mid .hs-lvl { color:var(--accent,#e8794a); }
   .hero-score.hero-lo .hs-num b, .hero-score.hero-lo .hs-lvl { color:var(--green,#3fb27f); }
+  /* HUD readout under the score: an exposure meter + mono "stat screen" chips. */
+  .hud-readout { margin:-6px 0 16px; }
+  .hr-meter { height:9px; border-radius:6px; background:var(--track); overflow:hidden; }
+  .hr-meter i { display:block; height:100%; border-radius:6px; width:0; transition:width .5s ease; background:var(--muted); }
+  .hud-readout.hero-hi .hr-meter i { background:linear-gradient(90deg,#ff9a6a,var(--red,#b0422b)); }
+  .hud-readout.hero-mid .hr-meter i { background:linear-gradient(90deg,#f3c98a,var(--accent,#e8794a)); }
+  .hud-readout.hero-lo .hr-meter i { background:linear-gradient(90deg,#8fd9bd,var(--green,#147b74)); }
+  .hr-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:9px; }
+  .hr-chip { font:700 10.5px/1 ui-monospace,Menlo,Consolas,monospace; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--muted); background:var(--row-head); border:1px solid var(--hair); border-radius:999px; padding:6px 11px; }
+  .hr-chip b { color:var(--ink); } .hr-chip .hv { color:var(--ink); }
 </style>
 <!-- Dramatic reveal: plays only when arriving from the guided flow or tour -->
 <div id="reveal" class="rv" hidden aria-hidden="true">
@@ -191,6 +202,15 @@
   <div class="hs-meta">
     <div class="hs-lvl" id="hs-lvl">{{ vlvl }}</div>
     <div class="hs-sub">{{ t('ov.rating', rating_label) }} &middot; more exposed than {{ be|round|int }}% of jobs</div>
+  </div>
+</div>
+{% set win_lab = '2027&ndash;2029' if bid == 'near_term_high' else ('2031&ndash;2036' if bid == 'partial_5_10yr' else 'late 2030s+') %}
+<div class="hud-readout hero-{{ 'hi' if bid == 'near_term_high' else ('mid' if bid == 'partial_5_10yr' else 'lo') }}" id="hud-readout" aria-hidden="true">
+  <div class="hr-meter"><i id="hs-meter-i" style="width:{{ be|round|int }}%"></i></div>
+  <div class="hr-chips">
+    <span class="hr-chip"><b>Exposure meter</b></span>
+    <span class="hr-chip"><b>Window</b> <span class="hv" id="hr-win">{{ win_lab|safe }}</span></span>
+    <span class="hr-chip"><b>Source</b> O*NET &middot; BLS</span>
   </div>
 </div>
 <p class="verdict"><strong>{{ t('seo.short', 'The short version:') }}</strong> {{ t('seo.v.pre', 'this role is') }} {{ vlvl }} {{ t('seo.v.mid', 'to automation,') }} {{ vtim }}{{ t('seo.v.suf', '. It is a sourced range, not a verdict, and the detail is below.') }}</p>
@@ -447,6 +467,7 @@
     if (band === 'partial_5_10yr') return { lo: 2031, hi: 2036, phrase: 'in about 5 to 10 years' };
     return { lo: 2037, hi: 0, phrase: 'not before the late 2030s' };
   }
+  function winLabel(band) { var w = yearWin(band); return w.hi ? (w.lo + '–' + w.hi) : 'late 2030s+'; }
   function trendClass(t) { return t === 'growing' ? 'up' : (t === 'declining' ? 'down' : (t === 'mixed' ? 'mixed' : 'flat')); }
   function setTxt(id, txt) { var el = document.getElementById(id); if (el) { el.textContent = txt; flash(el); } return el; }
 
@@ -458,6 +479,10 @@
     if (hero) { hero.className = 'hero-score ' + heroClass(be); }
     setTxt('hs-num', Math.round(be));
     setTxt('hs-lvl', level(be));
+    // HUD readout: exposure meter + the collapse-window chip follow the fresh number.
+    var ro = document.getElementById('hud-readout'); if (ro) ro.className = 'hud-readout ' + heroClass(be);
+    var meter = document.getElementById('hs-meter-i'); if (meter) meter.style.width = Math.round(be) + '%';
+    var win = document.getElementById('hr-win'); if (win && nr.timeline && nr.timeline.band) win.textContent = winLabel(nr.timeline.band.id);
     // gauges
     var ai = nr.exposure.ai_software, robo = nr.exposure.physical_robotics;
     setTxt('gx-ai-num', round1(ai)); setTxt('gx-robo-num', round1(robo));

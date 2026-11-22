@@ -396,9 +396,11 @@ def create_app() -> Flask:
     @app.get("/")
     def index():
         most, least = _rankings()
+        from . import ticker as _ticker
         return render_template("index.html", version=VERSION, licensed=engine.snapshot.licensed,
                                occupations=_occupations(), families=engine.snapshot.families(),
                                most_exposed=most, least_exposed=least, jane=jane_demo,
+                               signals=_ticker.signals(),
                                notice=engine.snapshot.data.get("development_notice"))
 
     @app.post("/assess")
