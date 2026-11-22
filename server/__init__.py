@@ -663,7 +663,9 @@ def create_app() -> Flask:
         st = referrals.status(email)
         if not st.get("code"):
             return jsonify({"ok": False, "error": "invalid_email"}), 400
-        return jsonify({"ok": True, "link": _canonical_base() + "/?r=" + st["code"],
+        # The share link uses the ?c= alias and a name-forward code, so the copied link carries
+        # the app name + url + code together - the code itself advertises JobBreak on every share.
+        return jsonify({"ok": True, "link": _canonical_base() + "/?c=" + st["code"],
                         "count": st["count"], "threshold": st["threshold"],
                         "rewarded": st["rewarded"]})
 
