@@ -70,7 +70,7 @@
   </div>
   {% endif %}
   <div class="gate-q">{{ t('gate.q', 'Will <span class="hot">AI</span> replace your job?') }}</div>
-  <p class="gate-sub">{{ t('gate.sub', 'Type your job for an instant score &mdash; 0 to 100, and when it is coming, from real data. Or choose how to start.') }}</p>
+  <p class="gate-sub">{{ t('gate.sub', 'Type your job for an instant resilience level &mdash; 1 to 10, where 10 is safe and 1 is extinct, and when it is coming, from real data. Or choose how to start.') }}</p>
   <div class="lp-eyebrow">{{ t('lp.scan', '<span class="car">&#9656;</span> Scan your job &mdash; pull your real-life stats') }}</div>
   <div class="lp-search">
     <input id="lp-q" type="text" autocomplete="off" placeholder="{{ t('lp.ph', 'Type your job, e.g. electrician, nurse, accountant') }}"
@@ -90,10 +90,10 @@
   <div class="jd-trigger jd-hero">
     <button type="button" class="jd-open" id="jd-open">
       <span class="jd-pulse" aria-hidden="true"></span>
-      <span class="jd-badge" aria-hidden="true"><b class="jd-b-from">{{ jane.from_score }}</b><span class="jd-b-arrow">&#8594;</span><b class="jd-b-safe">safe</b></span>
+      <span class="jd-badge" aria-hidden="true"><b class="jd-b-from">{{ jane.from_level }}</b><span class="jd-b-arrow">&#8594;</span><b class="jd-b-safe">safe</b></span>
       <span class="jd-txt">
         <span class="jd-ey">&#9654; Watch a 30-second example</span>
-        <span class="jd-h">Jane's job scored <b>{{ jane.from_score }}/100</b> &mdash; see the one skill that takes her to safe &#8250;</span>
+        <span class="jd-h">Jane's job is <b>Level {{ jane.from_level }}/10</b> &mdash; see the one skill that takes her to safe &#8250;</span>
       </span>
     </button>
   </div>
@@ -195,11 +195,11 @@
       <div class="jda-beat-ey">Meet Jane, {{ jane.age }}</div>
       <div class="jda-role">{{ jane.from_title }}</div>
       <div class="jda-doomrow">
-        <div class="jda-bignum red">{{ jane.from_score }}<small>/100</small></div>
+        <div class="jda-bignum red">{{ jane.from_level }}<small>/10</small></div>
         <div class="jda-doomtxt"><span class="jda-pill red">{{ jane.from_band }}</span>
           <p>AI can already do most of her core tasks. Her job is in the danger zone.</p></div>
       </div>
-      <div class="jda-meter"><i style="width:{{ jane.from_score }}%"></i></div>
+      <div class="jda-meter"><i style="width:{{ jane.from_level * 10 }}%"></i></div>
     </div>
 
     <div class="jda-turn">
@@ -215,11 +215,11 @@
     <div class="jda-beat jda-win">
       <div class="jda-winrow">
         <div class="jda-transform">
-          <span class="jda-bignum red sm">{{ jane.from_score }}</span>
+          <span class="jda-bignum red sm">{{ jane.from_level }}</span>
           <span class="jda-arrow">&rarr;</span>
-          <span class="jda-bignum green sm">{{ jane.to_score }}</span>
+          <span class="jda-bignum green sm">{{ jane.to_level }}</span>
         </div>
-        <span class="jda-drop">risk down {{ jane.drop }}</span>
+        <span class="jda-drop">level up {{ jane.level_up }}</span>
       </div>
       <div class="jda-newrole"><span class="jda-pill green">{{ jane.to_band }}</span><b>{{ jane.to_title }}</b></div>
       {% if jane.from_pay and jane.to_pay %}

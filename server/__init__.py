@@ -139,8 +139,13 @@ def _build_jane(engine):
             return s
         add = t.get("add_skills") or []
         from_score, to_score = round(a["base_exposure"]), round(t["max_exposure"])
+        # Flipped 1-10 resilience LEVEL (10 = safe, 1 = extinct); the safer move RAISES the level.
+        from_level = a.get("base_level")
+        to_level = ta.get("base_level") if ta.get("ok") else from_level
         return {
             "name": "Jane", "age": 41,
+            "from_level": from_level, "to_level": to_level,
+            "level_up": (to_level - from_level) if (to_level is not None and from_level is not None) else 0,
             "from_title": a["occupation"]["title"], "from_score": from_score,
             "from_ai": round(a["exposure"]["ai_software"]),
             "from_robo": round(a["exposure"]["physical_robotics"]),

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Will AI replace {{ r.occupation.title }}? Risk {{ r.base_exposure|round|int }}/100 | JobBreak{% endblock %}
-{% block description %}Will AI or robots replace {{ r.occupation.title }}? Job Extinction Risk {{ r.base_exposure|round|int }} of 100 - the exposed tasks, a timeline, and what to do about it. Free check on JobBreak.{% endblock %}
+{% block title %}Will AI replace {{ r.occupation.title }}? Resilience Level {{ r.base_level }}/10 | JobBreak{% endblock %}
+{% block description %}Will AI or robots replace {{ r.occupation.title }}? AI Resilience Level {{ r.base_level }} of 10 (10 = safe, 1 = extinct) - the exposed tasks, a timeline, and what to do about it. Free check on JobBreak.{% endblock %}
 {% block og_media %}
   {% set ogcard = request.host_url ~ 'jobs/' ~ r.occupation.soc ~ '/card.png' %}
   <meta name="twitter:card" content="summary_large_image">
@@ -89,13 +89,13 @@
       </div>
     </div>
     <div class="rv-badge" id="rv-badge"></div>
-    <div class="rv-num"><b id="rv-num">0</b><small>{{ t('ov.rating', rating_label) }} &middot; {{ t('ov.of100', 'of 100') }}</small></div>
+    <div class="rv-num"><b id="rv-num">0</b><small>/ 10 &middot; {{ t('lvl.scale', '10 = safe, 1 = extinct') }}</small></div>
     <div class="rv-msg" id="rv-msg"></div>
     <button type="button" class="rv-go" id="rv-go">See the full breakdown</button>
     <button type="button" id="rv-share" style="margin-top:14px;background:none;border:none;color:inherit;opacity:.85;font:inherit;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>{{ t('share.reveal') }}</button>
   </div>
 </div>
-<script id="reveal-data" type="application/json">{{ {"exposure": r.base_exposure, "band": r.timeline.band.id, "title": r.occupation.title} | tojson }}</script>
+<script id="reveal-data" type="application/json">{{ {"exposure": r.base_exposure, "level": r.base_level, "band": r.timeline.band.id, "title": r.occupation.title} | tojson }}</script>
 <script id="tasks-data" type="application/json">[{% for t in r.tasks %}{"name": {{ t.name|tojson }}, "mx": {{ (t.ai if t.ai >= t.robo else t.robo)|round|int }}, "exposed": {{ t.exposed|tojson }}}{{ "," if not loop.last }}{% endfor %}]</script>
 
 <!-- Full-screen upsell: pitch the AI plan, then a demo of the order flow -->
@@ -161,7 +161,7 @@
 <div id="rlock" hidden aria-hidden="true">
   <div class="rl-card">
     <span class="rl-ey">{{ t('rl.ey') }}</span>
-    <div class="rl-score"><b id="rl-num">0</b><small>{{ t('ov.of100', 'of 100') }}</small></div>
+    <div class="rl-score"><b id="rl-num">0</b><small>/ 10</small></div>
     <h2 class="rl-h">{{ t('rl.h') }}</h2>
     <p class="rl-sub">{{ t('rl.sub') }}</p>
     <ul class="rl-list">
@@ -197,11 +197,14 @@
    else (t('seo.tim.partial', 'and meaningful change looks likely over the next 5 to 10 years') if bid == 'partial_5_10yr'
    else t('seo.tim.far', 'and a near-term shift looks unlikely')) %}
 {% set paid = (entitlement and entitlement != 'free') or (not stripe_enabled) %}
-<div id="hero-score" class="hero-score hero-{{ 'hi' if bid == 'near_term_high' else ('mid' if bid == 'partial_5_10yr' else 'lo') }}" aria-label="Your Job Extinction Risk score">
-  <div class="hs-num"><b id="hs-num">{{ be|round|int }}</b><span>/100</span></div>
+{% set lvl = r.base_level %}
+{# Resilience LEVEL 1-10: 10 = safe, 1 = extinct. HIGH IS GOOD, so colour follows the level: low = danger (red). #}
+{% set lvlword = t('lvl.w.extinct', 'Extinction risk') if lvl <= 2 else (t('lvl.w.endangered', 'Endangered') if lvl <= 4 else (t('lvl.w.exposed', 'Exposed') if lvl <= 6 else (t('lvl.w.resilient', 'Resilient') if lvl <= 8 else t('lvl.w.safe', 'Future-proof')))) %}
+<div id="hero-score" class="hero-score hero-{{ 'hi' if lvl <= 3 else ('mid' if lvl <= 6 else 'lo') }}" aria-label="Your AI resilience level, 10 is safe and 1 is extinct">
+  <div class="hs-num"><b id="hs-num">{{ lvl }}</b><span>/10</span></div>
   <div class="hs-meta">
-    <div class="hs-lvl" id="hs-lvl">{{ vlvl }}</div>
-    <div class="hs-sub">{{ t('ov.rating', rating_label) }} &middot; more exposed than {{ be|round|int }}% of jobs</div>
+    <div class="hs-lvl" id="hs-lvl">{{ lvlword }}</div>
+    <div class="hs-sub">{{ t('lvl.scale', '10 = safe, 1 = extinct') }} &middot; {{ t('lvl.safer', 'safer than') }} {{ (100 - be)|round|int }}% {{ t('lvl.ofjobs', 'of jobs') }}</div>
   </div>
 </div>
 {% set win_lab = '2027&ndash;2029' if bid == 'near_term_high' else ('2031&ndash;2036' if bid == 'partial_5_10yr' else 'late 2030s+') %}
@@ -237,7 +240,7 @@
 <script>
   (function () {
     var url = {{ (request.host_url ~ 'jobs/' ~ r.occupation.soc) | tojson }};
-    var text = {{ ('My work (' ~ disp_title ~ ') is ' ~ r.base_exposure ~ ' of 100 exposed to AI and robots. What is yours?') | tojson }};
+    var text = {{ ('My job (' ~ disp_title ~ ') scored ' ~ r.base_level ~ '/10 on AI resilience - 10 is safe, 1 is extinct. What is yours?') | tojson }};
     var note = document.getElementById('share-note');
     function doShare() {
       if (navigator.share) {
@@ -460,8 +463,8 @@
   function money(v) { return v ? SYM + Math.round(v).toLocaleString() : ''; }
   function round1(v) { return Math.round((+v) * 10) / 10; }
   function flash(el) { if (!el) return; el.classList.remove('sharp-flash'); void el.offsetWidth; el.classList.add('sharp-flash'); }
-  function level(be) { return be >= 66 ? 'highly exposed' : (be >= 40 ? 'moderately exposed' : 'less exposed'); }
-  function heroClass(be) { return be >= 66 ? 'hero-hi' : (be >= 40 ? 'hero-mid' : 'hero-lo'); }
+  function levelWord(lvl) { return lvl <= 2 ? 'Extinction risk' : (lvl <= 4 ? 'Endangered' : (lvl <= 6 ? 'Exposed' : (lvl <= 8 ? 'Resilient' : 'Future-proof'))); }
+  function heroClass(lvl) { return lvl <= 3 ? 'hero-hi' : (lvl <= 6 ? 'hero-mid' : 'hero-lo'); }  // low level = danger (red)
   function yearWin(band) {
     if (band === 'near_term_high') return { lo: 2027, hi: 2029, phrase: 'within about 1 to 3 years' };
     if (band === 'partial_5_10yr') return { lo: 2031, hi: 2036, phrase: 'in about 5 to 10 years' };
@@ -475,12 +478,13 @@
   function applyAssessment(nr) {
     if (!nr || !nr.ok) return;
     var be = nr.base_exposure;
+    var lvl = (nr.base_level != null) ? nr.base_level : Math.max(1, Math.min(10, Math.ceil((100 - be) / 10)));
     var hero = document.getElementById('hero-score');
-    if (hero) { hero.className = 'hero-score ' + heroClass(be); }
-    setTxt('hs-num', Math.round(be));
-    setTxt('hs-lvl', level(be));
-    // HUD readout: exposure meter + the collapse-window chip follow the fresh number.
-    var ro = document.getElementById('hud-readout'); if (ro) ro.className = 'hud-readout ' + heroClass(be);
+    if (hero) { hero.className = 'hero-score ' + heroClass(lvl); }
+    setTxt('hs-num', lvl);
+    setTxt('hs-lvl', levelWord(lvl));
+    // HUD readout: the meter + the collapse-window chip follow the fresh number.
+    var ro = document.getElementById('hud-readout'); if (ro) ro.className = 'hud-readout ' + heroClass(lvl);
     var meter = document.getElementById('hs-meter-i'); if (meter) meter.style.width = Math.round(be) + '%';
     var win = document.getElementById('hr-win'); if (win && nr.timeline && nr.timeline.band) win.textContent = winLabel(nr.timeline.band.id);
     // gauges
@@ -686,6 +690,14 @@
 
 <!-- OVERVIEW -->
 <div id="p-overview" class="panel active card">
+  {# Free-teaser (guided tour / body.rstage) view: the headline resilience level is the hook;
+     the paid exposure split, timeline and pay stay hidden. Shows only during the tour. #}
+  <div class="ov-teaser" aria-hidden="true">
+    <div class="ov-teaser-num" style="color:{{ '#ff5a4d' if lvl <= 3 else ('#e8794a' if lvl <= 6 else '#3fb27f') }}"><b>{{ lvl }}</b><span>/10</span></div>
+    <div class="ov-teaser-word" style="color:{{ '#ff5a4d' if lvl <= 3 else ('#e8794a' if lvl <= 6 else '#3fb27f') }}">{{ lvlword }}</div>
+    <p class="ov-teaser-scale">{{ t('lvl.scale', '10 = safe, 1 = extinct') }}</p>
+    <p class="ov-teaser-sub">{{ t('ov.teaser.sub', 'Your resilience level, from real government data. Tap Next for the full breakdown.') }}</p>
+  </div>
   <div class="gauges">
     <div class="gauge">
       <svg viewBox="0 0 120 120" role="img" aria-label="AI exposure {{ r.exposure.ai_software }} of 100">
@@ -822,6 +834,7 @@
       </div>
       <div class="sr-tl-axis"><span>2026</span><span>2030</span><span>2034</span><span>2038</span><span>2042+</span></div>
     </div>
+    {% if tsorted %}
     {% if exposed_n %}
     <p class="sr-first"><b>{{ exposed_n }} of your {{ total_n }}</b> core tasks are already within reach of today's AI. These go first:</p>
     {% else %}
@@ -837,6 +850,12 @@
       {% endfor %}
     </div>
     <p class="sr-note">Bars are 0 to 100: how much of each task AI (orange) or robotics (blue) can already do. 50+ means most of the task is in reach.</p>
+    {% else %}
+    <div class="sr-partial">
+      <p class="sr-first" style="margin-bottom:6px"><b>About this title:</b> &ldquo;{{ disp_title or r.occupation.title }}&rdquo; isn&rsquo;t a separate occupation in the government data, so we scored it from its closest official match &mdash; <b>{{ r.occupation.title }}</b>. Your score and timeline above come from that group&rsquo;s real data.</p>
+      <p class="sr-note" style="margin-top:0">We don&rsquo;t have a task-by-task breakdown for this exact title. For the full per-task detail, search a more specific job title &mdash; try <b>{{ r.occupation.title }}</b> or a closer occupation.</p>
+    </div>
+    {% endif %}
     <div class="sr-proof">
       <div class="sr-flow">
         <div class="sr-step"><b>{{ total_n }}</b><span>core tasks</span><span class="sr-arrow">&rarr;</span></div>
@@ -1852,6 +1871,7 @@
   try { sessionStorage.removeItem('jb_reveal'); } catch (e) {}
   var data = {}; try { data = JSON.parse(document.getElementById('reveal-data').textContent) || {}; } catch (e) {}
   var exp = Math.round(+data.exposure || 0);
+  var lvl = Math.round(+data.level || 0);  // resilience LEVEL 1-10 (10 = safe, 1 = extinct); HIGH is GOOD
   // Payment state: when Stripe is live the paywall goes to real checkout; subscribers skip it.
   var STRIPE = {{ stripe_enabled|tojson }}, ENT = {{ entitlement|tojson }};
   // Tour (generic) funnels to "localize & personalize"; personal result goes to the paywall.
@@ -1867,7 +1887,7 @@
   function reveal() {
     var cr = document.getElementById('rv-crunch'); if (cr) cr.hidden = true;
     var done = document.getElementById('rv-done'); if (done) done.hidden = false;
-    var tier = exp >= 62 ? 'storm' : (exp < 45 ? 'safe' : 'mixed');
+    var tier = lvl <= 3 ? 'storm' : (lvl >= 7 ? 'safe' : 'mixed');  // low level = danger
     ov.classList.add(tier);
     var badge = document.getElementById('rv-badge'), msg = document.getElementById('rv-msg');
     if (tier === 'safe') { badge.textContent = '{{ t("rv.badge.safe") }}'; msg.textContent = '{{ t("rv.msg.safe") }}'; party(); }
@@ -1875,12 +1895,12 @@
     else { badge.textContent = '{{ t("rv.badge.mixed") }}'; msg.textContent = '{{ t("rv.msg.mixed") }}'; }
     var ext = document.getElementById('rv-extinct');
     if (ext) {
-      if (exp >= 80) { var en = document.getElementById('rv-ext-name'); if (en) en.textContent = OCC_TITLE; ext.hidden = false; }
+      if (lvl <= 2) { var en = document.getElementById('rv-ext-name'); if (en) en.textContent = OCC_TITLE; ext.hidden = false; }
       else { ext.hidden = true; }
     }
     var gobtn = document.getElementById('rv-go');
     if (gobtn) { var isStu; try { isStu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {} gobtn.textContent = isStu ? '{{ t("rv.cta.full") }}' : (tier === 'storm' ? '{{ t("rv.cta.now") }}' : '{{ t("rv.cta.breakdown") }}'); }
-    countTo(document.getElementById('rv-num'), exp, 1200);
+    countTo(document.getElementById('rv-num'), lvl, 1200);
   }
   function countTo(el, target, ms) {
     if (!el) return; var start = null;
@@ -2081,7 +2101,7 @@
   // read). The full breakdown stays locked behind the paywall until they pass it.
   function showLock() {
     var lk = document.getElementById('rlock'); if (!lk) return;
-    var n = document.getElementById('rl-num'); if (n) n.textContent = Math.round(exp);
+    var n = document.getElementById('rl-num'); if (n) n.textContent = lvl;
     var role = document.getElementById('rl-role');
     if (role) role.textContent = {{ ("this role" if seo else "your role") | tojson }};
     lk.hidden = false; lk.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';

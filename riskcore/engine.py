@@ -148,6 +148,7 @@ class Engine:
             "exposure": axes,
             "exposure_range": confidence,
             "base_exposure": round(base_exposure, 1),
+            "base_level": self.resilience_level(base_exposure),
             "key_drivers": drivers,
             "strategies": strategies,
             "timeline": timeline,
@@ -495,6 +496,16 @@ class Engine:
                          ai100: Optional[float] = None, robo100: Optional[float] = None) -> float:
         """The headline number shown for an occupation: the display rescale of its raw blend."""
         return self.display_score(self.combined_exposure(occ, ai100, robo100))
+
+    # ---- resilience LEVEL (flipped 1-10 display; 10 = safe, 1 = extinct) ---
+    # The UI headline is an intuitive level where HIGH IS GOOD: 10 = AI-proof / safe,
+    # 1 = extinct. Derived monotonically from the 0-100 display exposure (high = bad), so it
+    # never reorders anything and never touches the validated ranking: level 10 at ~0 exposure
+    # down to level 1 at ~100. Each 10-point exposure band maps to one of the ten levels.
+    def resilience_level(self, display_exposure_0_100: float) -> int:
+        import math
+        safety = 100.0 - _clamp(display_exposure_0_100)
+        return max(1, min(10, int(math.ceil(safety / 10.0))))
 
     def _durability(self, cand: Dict[str, Any]) -> float:
         """Green-match tilt toward destinations whose safety is DURABLE: high interpersonal
