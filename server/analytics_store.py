@@ -48,6 +48,21 @@ def _conn() -> sqlite3.Connection:
     )
     conn.execute("CREATE INDEX IF NOT EXISTS ix_pv_ts ON pageviews(ts)")
     conn.execute("CREATE INDEX IF NOT EXISTS ix_pv_day ON pageviews(day)")
+    # What people actually search: the job they checked, its score, and whether we could offer
+    # a safer "green" move. Data-only (soc/title/score are public occupation facts, no PII), so
+    # we can see demand and where the green payoff lands. Same store, same persistent disk.
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS assessments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ts INTEGER NOT NULL,
+            day TEXT NOT NULL,
+            soc TEXT NOT NULL DEFAULT '',
+            title TEXT NOT NULL DEFAULT '',
+            score INTEGER,
+            green TEXT NOT NULL DEFAULT ''
+        )"""
+    )
+    conn.execute("CREATE INDEX IF NOT EXISTS ix_as_ts ON assessments(ts)")
     return conn
 
 
@@ -63,6 +78,58 @@ def record(path: str, ref: str = "", vid: str = "", ts: int = None) -> None:
             )
     except Exception as e:  # analytics must never break a request
         print(f"[analytics] record failed: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+
+
+def record_assessment(soc: str, title: str, score, green: str = "", ts: int = None) -> None:
+    """Best-effort: log one job search. green is one of 'green' | 'soft' | 'low' | 'none' | ''
+    (how the safer-move match resolved). Never raises."""
+    try:
+        now = int(ts if ts is not None else time.time())
+        day = datetime.fromtimestamp(now, timezone.utc).strftime("%Y-%m-%d")
+        sc = int(round(score)) if isinstance(score, (int, float)) else None
+        with _conn() as conn:
+            conn.execute(
+                "INSERT INTO assessments (ts, day, soc, title, score, green) VALUES (?,?,?,?,?,?)",
+                (now, day, (soc or "")[:20], (title or "")[:120], sc, (green or "")[:8]),
+            )
+    except Exception as e:
+        print(f"[analytics] record_assessment failed: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+
+
+def top_jobs(days: int = 30, limit: int = 30) -> List[Dict[str, Any]]:
+    """Most-searched jobs over the window, with how many searches, the average score, and how
+    often a safer green move was found. Best-effort; returns [] if unavailable."""
+    try:
+        cutoff = int(time.time()) - days * 86400
+        with _conn() as conn:
+            rows = conn.execute(
+                "SELECT soc, title, COUNT(*) n, "
+                "       CAST(ROUND(AVG(score)) AS INT) avg_score, "
+                "       SUM(CASE WHEN green IN ('green','soft') THEN 1 ELSE 0 END) green_n "
+                "FROM assessments WHERE ts>=? AND title<>'' "
+                "GROUP BY soc, title ORDER BY n DESC, avg_score DESC LIMIT ?",
+                (cutoff, limit),
+            ).fetchall()
+        return [{"soc": r["soc"], "title": r["title"], "n": r["n"],
+                 "avg_score": r["avg_score"], "green_n": r["green_n"] or 0} for r in rows]
+    except Exception as e:
+        print(f"[analytics] top_jobs failed: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+        return []
+
+
+def assessment_totals(days: int = 30) -> Dict[str, int]:
+    """Window totals for the search log: how many searches, distinct jobs, and the share that
+    got a green move. Best-effort."""
+    try:
+        cutoff = int(time.time()) - days * 86400
+        with _conn() as conn:
+            r = conn.execute(
+                "SELECT COUNT(*) n, COUNT(DISTINCT soc) jobs, "
+                "SUM(CASE WHEN green IN ('green','soft') THEN 1 ELSE 0 END) green_n "
+                "FROM assessments WHERE ts>=?", (cutoff,)).fetchone()
+        return {"searches": r["n"] or 0, "jobs": r["jobs"] or 0, "green_n": r["green_n"] or 0}
+    except Exception:
+        return {"searches": 0, "jobs": 0, "green_n": 0}
 
 
 def _window(conn, cutoff: int) -> Dict[str, int]:

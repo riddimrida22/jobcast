@@ -362,6 +362,17 @@ def create_app() -> Flask:
         soc = (result.get("occupation") or {}).get("soc")
         if soc:
             session["jb_soc"] = soc          # so a later "notify me" / checkout watches this job
+        # Log the search (data-only: job + score + how the safer-move match resolved) so we can
+        # see demand and where the green payoff lands. Best-effort; never blocks the render.
+        try:
+            g = engine.green_option(profile, n=1)
+            gstate = ("green" if g.get("has_green") else "soft" if g.get("soft_only")
+                      else "low" if g.get("already_low") else "none")
+            from . import analytics_store as an
+            an.record_assessment(soc, (result.get("occupation") or {}).get("title", ""),
+                                 result.get("base_exposure"), gstate)
+        except Exception:
+            pass
         # Off-list careers: when the typed title clearly isn't the matched occupation name,
         # tell the user we scored the closest career we track (keeps the number defensible).
         typed = (profile.title or "").strip()
@@ -899,6 +910,7 @@ def create_app() -> Flask:
         if days not in (7, 30, 90, 365):
             days = 30
         return render_template("admin_stats.html", s=an.summary(days), watches=wc,
+                               jobs=an.top_jobs(days), job_totals=an.assessment_totals(days),
                                key=admin_key, days=days, version=VERSION, noindex=True)
 
     @app.get("/admin/checkouts")

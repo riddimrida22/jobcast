@@ -391,12 +391,23 @@ class Engine:
         green.sort(key=lambda t: t["_score"], reverse=True)
         soft.sort(key=lambda t: t["_score"], reverse=True)
         chosen = green[:max(1, n)] if green else soft[:2]
+        # The person's most AI-resistant work - their human edge - so the client can prove it when
+        # the role is already safe ("ahead of the curve") instead of showing a bare empty state.
+        resilient = sorted(base.get("tasks", []), key=lambda d: d.get("max", 0))
+        resilient_tasks = [self._short_task(t["name"]) for t in resilient
+                           if t.get("max", 100) < 45][:3]
+        # Where this role sits versus every job we score (a simple, true "safer than X%" line).
+        all_exp = [self._max_exposure(o) for o in self.snapshot.all_occupations()]
+        safer_than_pct = (round(100 * sum(1 for e in all_exp if e > your_exposure) / len(all_exp))
+                          if all_exp else None)
         return {"ok": True, "your_exposure": your_exposure,
                 "occupation": occ["title"], "soc": your_soc,
                 "used_user_skills": has_user_skills,
                 "has_green": bool(green),
                 "soft_only": (not green) and bool(soft),
                 "already_low": your_exposure < 35,
+                "resilient_tasks": resilient_tasks,
+                "safer_than_pct": safer_than_pct,
                 "targets": chosen}
 
     def _occ_task_names(self, occ: Dict[str, Any]) -> List[str]:
