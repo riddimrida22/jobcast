@@ -97,7 +97,10 @@
     nav a { color:#cdd9ea; text-decoration:none; margin-left:4px; font-size:14px; font-weight:600;
             padding:7px 13px; border-radius:999px; transition:background .15s ease, color .15s ease; }
     nav a:hover { color:#fff; background:rgba(255,255,255,.12); }
-    nav a.nav-home { display:inline-flex; align-items:center; gap:6px; margin-left:0; }
+    /* The floating .home-fab (top-left) is the home control on desktop, so the nav's own Home
+       link is redundant there - hide it. On phones the fab is hidden (below), so the nav Home
+       is shown again as the only home control. */
+    nav a.nav-home { display:none; align-items:center; gap:6px; margin-left:0; }
     nav a.nav-home svg { width:17px; height:17px; }
 
     .dev-banner { background:var(--accent-soft); border-bottom:1px solid #f0cfa6; color:#7a4f16;
@@ -502,7 +505,7 @@
     .home-fab svg { width:18px; height:18px; }
     /* On phones the fixed home button overlapped the header wordmark; the header's own
        logo and Home link already cover navigation, so drop the floating one there. */
-    @media (max-width:560px){ .home-fab { display:none !important; } }
+    @media (max-width:560px){ .home-fab { display:none !important; } nav a.nav-home { display:inline-flex !important; } }
     /* Persistent buy bar across the top of every page */
     .buybar { display:flex; align-items:center; justify-content:center; gap:8px 16px; flex-wrap:wrap;
       text-decoration:none; padding:10px 16px; text-align:center; color:#fff; font-size:14px; line-height:1.3;
