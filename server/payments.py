@@ -57,6 +57,10 @@ def publishable_key():
 def _client():
     import stripe
     stripe.api_key = _secret()
+    # Pin the Stripe API version. The newest default (2026-10-28) changed the promotion-code
+    # create params, so coupon-based codes broke on stripe-python v17; `stripe>=7.0` is unpinned,
+    # so a rebuild could pull it. Pinning keeps every call deterministic across SDK upgrades.
+    stripe.api_version = "2023-10-16"
     return stripe
 
 
@@ -98,20 +102,61 @@ def create_checkout_session(tier, period, success_url, cancel_url, email=None, r
         return None, "stripe_error"
 
 
-def create_reward_promo_code(percent=50):
-    """Create a one-time percent-off coupon plus a single-use promotion code, for a
-    referral reward. Returns (code, None) or (None, error). Customers redeem it at
-    checkout, which already has allow_promotion_codes=True."""
+def create_promo_code(percent, code=None, max_redemptions=1, name=None, duration="once",
+                      duration_in_months=None):
+    """Create a percent-off coupon plus a promotion code customers redeem at checkout (which
+    already has allow_promotion_codes=True). `code=None` auto-generates; `max_redemptions=None`
+    means unlimited (a public launch/awareness code), default 1 (a single-use reward). For a
+    multi-month subscription discount pass duration="repeating" + duration_in_months.
+    Returns (code, None) or (None, error)."""
     try:
         stripe = _client()
-        coupon = stripe.Coupon.create(percent_off=percent, duration="once",
-                                       name="JobBreak referral reward")
-        code = "REF" + secrets.token_hex(3).upper()
-        promo = stripe.PromotionCode.create(coupon=coupon.id, code=code, max_redemptions=1)
-        return _get(promo, "code") or code, None
+        coupon_kwargs = {"percent_off": percent, "duration": duration, "name": name or "JobBreak"}
+        if duration == "repeating" and duration_in_months:
+            coupon_kwargs["duration_in_months"] = duration_in_months
+        coupon = stripe.Coupon.create(**coupon_kwargs)
+        the_code = code or ("REF" + secrets.token_hex(3).upper())
+        kwargs = {"coupon": coupon.id, "code": the_code}
+        if max_redemptions is not None:
+            kwargs["max_redemptions"] = max_redemptions
+        promo = stripe.PromotionCode.create(**kwargs)
+        return _get(promo, "code") or the_code, None
     except Exception as e:
-        print(f"[payments] reward promo create failed: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+        print(f"[payments] promo create failed: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
         return None, "stripe_error"
+
+
+def create_reward_promo_code(percent=50):
+    """A single-use referral-reward code (thin wrapper over create_promo_code)."""
+    return create_promo_code(percent, name="JobBreak referral reward", max_redemptions=1)
+
+
+def create_free_year_code():
+    """The refer-5 reward: a single-use 100%-off, 12-month coupon = a FREE YEAR of Monitor.
+    Returns (code, None) or (None, error)."""
+    return create_promo_code(100, duration="repeating", duration_in_months=12,
+                             max_redemptions=1, name="JobBreak referral reward - free year")
+
+
+# --- Launch / awareness code: the app NAME is the code -------------------------------------
+# "use code JOBBREAK for 40% off" repeats the brand name as the CTA in every ad and post, so the
+# code itself advertises the app (BB: "get the name of the app out"). $4.99 -> $2.99.
+LAUNCH_CODE = "JOBBREAK"
+LAUNCH_PERCENT = 40
+
+
+def ensure_launch_code(code=LAUNCH_CODE, percent=LAUNCH_PERCENT):
+    """Idempotently ensure the public launch/awareness promo code exists (unlimited redemptions).
+    Safe to call repeatedly: if it already exists we return it without creating a duplicate.
+    Returns (code, None) or (None, error)."""
+    try:
+        existing = _client().PromotionCode.list(code=code, limit=1)
+        if (_get(existing, "data") or []):
+            return code, None                      # already live
+    except Exception:
+        pass                                       # not found / list failed -> try to create
+    return create_promo_code(percent, code=code, max_redemptions=None,
+                             name="JobBreak launch (" + code + ")")
 
 
 def retrieve_session(session_id):
