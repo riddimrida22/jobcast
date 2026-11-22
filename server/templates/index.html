@@ -47,7 +47,11 @@
   }
 
   /* ---- RIGHT NOW: curated why-now signals, as a HUD ticker above the scanner ---- */
-  .hud { width:min(96vw,720px); margin:0 auto 18px; }
+  /* Gobbler as a slim strip under the streamer (fits the one-screen layout). */
+  .gate-gob { width:min(92vw,560px); margin:2px auto 2px; }
+  .gate-gob .slogan-banner { margin:0 auto; }
+  .gate-gob .gob-actnow { display:none; }
+  .hud { width:min(96vw,720px); margin:0 auto 10px; }
   .hud-head { display:flex; align-items:center; gap:8px; justify-content:center; margin:0 0 7px;
     font:700 11px/1 ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace; letter-spacing:.14em;
     text-transform:uppercase; color:#8fd7e4; }
@@ -89,6 +93,9 @@
     </div>
   </div>
   {% endif %}
+  {# The "gobbler" robot animation right under the streamer - the robot chomping jobs while
+     safe ones escape to the JOBBREAK wall. Hidden on short viewports (fit-to-screen). #}
+  <div class="gate-gob">{% include "_hero_gif.html" %}</div>
   <div class="gate-q">{{ t('gate.q', 'Can <span class="hot">AI or robots</span> replace your job?') }}</div>
   <p class="gate-sub">{{ t('gate.sub', 'Type your job for an instant resilience level &mdash; 1 to 10, where 10 is safe and 1 is extinct, and when it is coming, from real data. Or choose how to start.') }}</p>
   <div class="lp-eyebrow">{{ t('lp.scan', '<span class="car">&#9656;</span> Scan your job &mdash; pull your real-life stats') }}</div>
