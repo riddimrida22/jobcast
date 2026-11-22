@@ -44,6 +44,18 @@
     <a href="/jobs/27-1024.00">Graphic designer</a>
     <a href="/jobs/47-2111.00">Electrician</a>
   </div>
+  {% if jane %}
+  <div class="jd-trigger jd-hero">
+    <button type="button" class="jd-open" id="jd-open">
+      <span class="jd-pulse" aria-hidden="true"></span>
+      <span class="jd-badge" aria-hidden="true"><b class="jd-b-from">{{ jane.from_score }}</b><span class="jd-b-arrow">&#8594;</span><b class="jd-b-safe">safe</b></span>
+      <span class="jd-txt">
+        <span class="jd-ey">&#9654; Watch a 30-second example</span>
+        <span class="jd-h">Jane's job scored <b>{{ jane.from_score }}/100</b> &mdash; see the one skill that takes her to safe &#8250;</span>
+      </span>
+    </button>
+  </div>
+  {% endif %}
   <div class="lp-or"><span>{{ t('lp.or', 'or') }}</span></div>
   <div class="gate-paths">
     <a class="gate-card primary" href="#" id="aud-employee">
@@ -57,19 +69,23 @@
       <div class="gc-sub">{{ t('stu.sub', 'Find careers that pay well and are hard for AI to take, ranked from real data.') }}</div>
     </a>
   </div>
-  {% if jane %}
-  <div class="jd-trigger">
-    <button type="button" class="jd-open" id="jd-open">
-      <span class="jd-pulse" aria-hidden="true"></span>
-      <span class="jd-ey">&#9654; See a 30-second example</span>
-      <span class="jd-h">Jane's job is <b>{{ jane.from_score }}/100</b> &mdash; watch one skill take her to safe &#8250;</span>
-    </button>
-  </div>
-  {% endif %}
   <div class="gate-skip" style="margin-top:16px"><a href="#" class="js-intro-open">{{ t('intro.open', 'New to this? Watch the 30-second intro &#8250;') }}</a></div>
 </div>
 <style>
   .jd-trigger { width:min(92vw,520px); margin:16px auto 0; }
+  .jd-hero { width:min(94vw,560px); margin:18px auto 2px; }
+  .jd-hero .jd-open { flex-direction:row; align-items:center; gap:15px; text-align:left; padding:16px 18px;
+    background:linear-gradient(180deg,rgba(243,163,95,.26),rgba(243,163,95,.08)); border:1.5px solid rgba(243,163,95,.7);
+    box-shadow:0 10px 30px rgba(243,163,95,.22); }
+  .jd-badge { flex:none; display:flex; align-items:center; gap:7px; padding:9px 13px; border-radius:12px;
+    background:rgba(6,14,24,.45); border:1px solid rgba(255,255,255,.12); }
+  .jd-badge .jd-b-from { font-size:26px; font-weight:900; color:#ff7a5a; line-height:1; font-variant-numeric:tabular-nums; }
+  .jd-badge .jd-b-arrow { color:#9db0c6; font-size:16px; font-weight:700; }
+  .jd-badge .jd-b-safe { font-size:14px; font-weight:900; color:#5ec98c; text-transform:uppercase; letter-spacing:.03em; }
+  .jd-hero .jd-txt { display:flex; flex-direction:column; gap:4px; min-width:0; }
+  .jd-hero .jd-ey { font-size:12px; }
+  .jd-hero .jd-h { font-size:16px; }
+  @media (max-width:430px){ .jd-hero .jd-open { flex-direction:column; text-align:center; } }
   .jd-open { position:relative; width:100%; display:flex; flex-direction:column; gap:4px; text-align:center; cursor:pointer;
     background:linear-gradient(180deg,rgba(243,163,95,.18),rgba(243,163,95,.06)); border:1px solid rgba(243,163,95,.55);
     border-radius:13px; padding:13px 16px; color:#eaf1f9; font:inherit; box-shadow:0 6px 20px rgba(243,163,95,.14); overflow:hidden; }
