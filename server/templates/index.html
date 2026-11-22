@@ -22,9 +22,12 @@
   .lp-quick .lpq-lab { width:100%; text-align:center; color:#8ea3bc; font-size:12px; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px; }
   .lp-quick a { color:#eaf1f9; text-decoration:none; font-size:14px; font-weight:600; padding:8px 13px; border-radius:999px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); }
   .lp-quick a:hover { background:rgba(255,255,255,.15); }
-  /* Clear the absolute top controls bar when the gate's content is tall (the quick-pick
-     chips push the headline up), so the title never sits under the country/language row. */
+  /* Clear the absolute top controls bar so the title never sits under the country/language
+     row. On wide screens the centered "Right now" streamer clears those right-side controls
+     with room to spare, so lift it to the top there; narrower screens keep the full clearance
+     (the streamer would otherwise reach the controls). */
   #gate-aud { padding-top:66px; }
+  @media (min-width:1150px){ #gate-aud { padding-top:26px; } }
 
   /* ---- RIGHT NOW: curated why-now signals, as a HUD ticker above the scanner ---- */
   .hud { width:min(96vw,720px); margin:0 auto 18px; }
