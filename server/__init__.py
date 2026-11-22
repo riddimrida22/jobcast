@@ -968,6 +968,23 @@ def create_app() -> Flask:
                                jobs=an.top_jobs(days), job_totals=an.assessment_totals(days),
                                key=admin_key, days=days, version=VERSION, noindex=True)
 
+    @app.get("/admin/ensure-launch-code")
+    def admin_ensure_launch_code():
+        """Idempotently mint the public launch/awareness promo code (JOBBREAK, 40% off). Protected
+        by JOBCAST_ADMIN_KEY (?key=...). Run against Stripe TEST first, then live on deploy."""
+        admin_key = os.environ.get("JOBCAST_ADMIN_KEY")
+        if not admin_key or request.args.get("key") != admin_key:
+            from flask import abort
+            abort(404)
+        from . import payments as pay
+        if not pay.configured():
+            return Response("stripe not configured\n", mimetype="text/plain")
+        code, err = pay.ensure_launch_code()
+        if code:
+            return Response("launch code ready: %s (%d%% off)\n" % (code, pay.LAUNCH_PERCENT),
+                            mimetype="text/plain")
+        return Response("failed: %s\n" % (err or "unknown"), mimetype="text/plain")
+
     @app.get("/admin/checkouts")
     def admin_checkouts():
         """Diagnostic: the last few real Stripe Checkout sessions and exactly what the

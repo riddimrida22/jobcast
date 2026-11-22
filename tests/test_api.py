@@ -170,3 +170,47 @@ def test_green_endpoint_accepts_comma_skills(client):
     r = client.post("/v1/green", json={"title": "data entry", "skills": "verify records, reports"})
     assert r.status_code == 200
     assert r.get_json()["ok"] is True
+
+
+# --- Launch coupon: the universal JOBBREAK awareness code (the name IS the code) ---
+
+def test_create_promo_code_public_code(monkeypatch):
+    from server import payments
+    calls = {}
+
+    class FakeStripe:
+        class Coupon:
+            @staticmethod
+            def create(**kw):
+                calls["coupon"] = kw
+                return type("C", (), {"id": "co_1"})
+
+        class PromotionCode:
+            @staticmethod
+            def create(**kw):
+                calls["promo"] = kw
+                return {"code": kw["code"]}
+
+    monkeypatch.setattr(payments, "_client", lambda: FakeStripe)
+    code, err = payments.create_promo_code(40, code="JOBBREAK", max_redemptions=None)
+    assert err is None and code == "JOBBREAK"
+    assert calls["coupon"]["percent_off"] == 40
+    assert "max_redemptions" not in calls["promo"]   # unlimited for the public awareness code
+
+
+def test_ensure_launch_code_idempotent(monkeypatch):
+    from server import payments
+
+    class FakeStripe:
+        class PromotionCode:
+            @staticmethod
+            def list(**kw):
+                return {"data": [{"code": "JOBBREAK"}]}
+
+    monkeypatch.setattr(payments, "_client", lambda: FakeStripe)
+    code, err = payments.ensure_launch_code()
+    assert code == "JOBBREAK" and err is None
+
+
+def test_ensure_launch_code_route_requires_key(client):
+    assert client.get("/admin/ensure-launch-code").status_code == 404
