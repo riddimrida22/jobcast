@@ -170,3 +170,33 @@ def test_green_endpoint_accepts_comma_skills(client):
     r = client.post("/v1/green", json={"title": "data entry", "skills": "verify records, reports"})
     assert r.status_code == 200
     assert r.get_json()["ok"] is True
+
+
+# --- Referral codes are name-forward micro-ads: the app name + the url ride along ---
+
+def test_brand_code_is_name_forward_and_valid():
+    from server import referrals
+    seen = set()
+    for _ in range(50):
+        code = referrals._new_brand_code()
+        assert code.startswith("JOBBREAK")       # the app name leads -> every share advertises it
+        assert referrals.valid_code(code)         # <=16 alphanumeric -> Stripe can mirror it
+        assert len(code) <= 16
+        seen.add(code)
+    assert len(seen) > 45                          # effectively unique
+
+
+def test_share_url_and_text_carry_name_and_url():
+    from server import referrals
+    code = "JOBBREAK1A2B3C"
+    assert referrals.share_url(code) == "https://jobbreak.ai/?c=JOBBREAK1A2B3C"
+    text = referrals.share_text(code)
+    assert "jobbreak.ai" in text and code in text and "JobBreak" in text  # never a bare code
+    # an invalid code falls back to the base url, never a broken link
+    assert referrals.share_url("bad code!") == referrals.SHARE_BASE
+
+
+def test_c_param_sets_referral_cookie(client):
+    r = client.get("/?c=JOBBREAK1A2B3C")
+    cookies = r.headers.getlist("Set-Cookie")
+    assert any("jb_ref=JOBBREAK1A2B3C" in c for c in cookies)

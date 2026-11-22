@@ -603,10 +603,11 @@ def create_app() -> Flask:
 
     @app.after_request
     def _attach_ref_cookie(resp):
-        # First-touch referral attribution: a friend landing on ?r=<code> is tagged for 30
-        # days, so when they later subscribe the checkout carries the referrer (see /checkout).
+        # First-touch referral attribution: a friend landing on ?r=<code> (or the share-link
+        # alias ?c=<code>) is tagged for 30 days, so when they later subscribe the checkout
+        # carries the referrer (see /checkout). ?c= is what the shareable code links use.
         try:
-            r = request.args.get("r")
+            r = request.args.get("r") or request.args.get("c")
             if r and r.isalnum() and len(r) <= 16 and not request.cookies.get("jb_ref"):
                 resp.set_cookie("jb_ref", r, max_age=60 * 60 * 24 * 30,
                                 httponly=True, samesite="Lax")
