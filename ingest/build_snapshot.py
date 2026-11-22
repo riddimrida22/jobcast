@@ -11,7 +11,7 @@ import argparse
 import os
 from typing import Dict, Any, List
 
-from . import onet, bls_cpi, oews_files, zip_metro, exposure
+from . import onet, bls_cpi, oews_files, zip_metro, exposure, external
 from .common import download_to_cache, write_snapshot, ROOT
 
 ELOUNDOU_URL = "https://raw.githubusercontent.com/openai/GPTs-are-GPTs/main/data/occ_level.csv"
@@ -60,7 +60,11 @@ SOURCES = [
     {"id": "eloundou_2023", "name": "Eloundou et al. (2023), GPTs are GPTs", "version": "2023",
      "use": "AI/software task exposure (measure beta), human annotators."},
     {"id": "onet_work_context", "name": "O*NET Work Context", "version": "29.1",
-     "use": "Physical/manual variables for the robotics-exposure proxy."},
+     "use": "Physical/manual variables for the robotics proxy; routine/structured-work factor."},
+    {"id": "onet_work_activities", "name": "O*NET Work Activities", "version": "29.1",
+     "use": "Interpersonal-work factor (the strongest validated protector; see CALIBRATION.md)."},
+    {"id": "bls_projections", "name": "BLS Employment Projections", "version": "2025-2035",
+     "use": "SOC-keyed projected employment change (occupation demand outlook)."},
     {"id": "bls_cpi", "name": "BLS CPI-U", "version": "live",
      "use": "Inflation adjustment for the wage-trajectory signal."},
 ]
@@ -75,14 +79,50 @@ def build(base_year: int = 2025, limit: int = 0) -> Dict[str, Any]:
     coverage = exposure.attach_exposure(occupations)
     print("exposure coverage:", coverage)
 
-    projections = _load_projections()
-    matched = 0
+    # v2 task-structure factors (the two the backtest validated): interpersonal protection and
+    # routine/structured work, per O*NET-SOC. Missing codes fall back to their 6-digit SOC mean
+    # so the calibrated blend has near-complete coverage.
+    work_design = exposure.load_work_design()
+    by_soc6: Dict[str, Dict[str, list]] = {}
+    for code, d in work_design.items():
+        s6 = onet.soc6(code)
+        for k in ("interpersonal", "routine_structured"):
+            if d.get(k) is not None:
+                by_soc6.setdefault(s6, {}).setdefault(k, []).append(d[k])
+    soc6_mean = {s6: {k: round(sum(v) / len(v), 4) for k, v in kv.items()}
+                 for s6, kv in by_soc6.items()}
+    wd_direct = wd_fallback = 0
+    for code, occ in occupations.items():
+        d = work_design.get(code, {})
+        fb = soc6_mean.get(occ["soc"], {})
+        for k in ("interpersonal", "routine_structured"):
+            val = d.get(k)
+            if val is None:
+                val = fb.get(k)
+            occ[k] = val
+        if work_design.get(code, {}).get("interpersonal") is not None:
+            wd_direct += 1
+        elif occ.get("interpersonal") is not None:
+            wd_fallback += 1
+    print(f"work-design factors: {wd_direct} direct, {wd_fallback} via SOC6 mean")
+
+    # Projected employment change: prefer the SOC-keyed BLS Employment Projections (proper join),
+    # fall back to the older occupation-NAME match for codes it does not cover.
+    ep_proj = external.load_ep_projections()
+    name_proj = _load_projections()
+    matched_soc = matched_name = 0
     for occ in occupations.values():
-        p = projections.get(_norm(occ["title"]))
+        p = ep_proj.get(occ["soc"])
         if p is not None:
             occ["projection_pct"] = p
-            matched += 1
-    print(f"BLS projections matched: {matched}/{len(occupations)}")
+            matched_soc += 1
+        else:
+            p2 = name_proj.get(_norm(occ["title"]))
+            if p2 is not None:
+                occ["projection_pct"] = p2
+                matched_name += 1
+    print(f"BLS projections matched: {matched_soc} by SOC (EP), {matched_name} by name "
+          f"(fallback) / {len(occupations)}")
 
     if limit:
         occupations = dict(list(occupations.items())[:limit])
@@ -119,7 +159,9 @@ def build(base_year: int = 2025, limit: int = 0) -> Dict[str, Any]:
             occ = occupations.get(rc)
             if occ and "ai" in occ:
                 out.append({"soc": rc, "title": occ["title"],
-                            "ai": occ["ai"], "robo": occ["robo"]})
+                            "ai": occ["ai"], "robo": occ["robo"],
+                            "interpersonal": occ.get("interpersonal"),
+                            "routine_structured": occ.get("routine_structured")})
         return out
 
     families = {code.split("-")[0]: SOC_MAJOR_GROUPS.get(code.split("-")[0], code.split("-")[0])
@@ -131,6 +173,8 @@ def build(base_year: int = 2025, limit: int = 0) -> Dict[str, Any]:
             "soc": code, "soc6": occ["soc"], "title": occ["title"], "job_zone": occ["job_zone"],
             "aliases": occ["aliases"],
             "ai": occ.get("ai"), "robo": occ.get("robo"),   # occupation-level fallback
+            "interpersonal": occ.get("interpersonal"),        # v2 calibrated-blend factors
+            "routine_structured": occ.get("routine_structured"),
             "tasks": [{"id": t["id"], "name": t["name"], "ai": t["ai"], "robo": t["robo"]}
                       for t in occ["tasks"]],
             "adjacent": adj_for(code),

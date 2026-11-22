@@ -12,7 +12,11 @@ def test_data_entry_is_high_ai_exposure(engine):
     assert r["ok"] is True
     assert r["exposure"]["ai_software"] > 60
     assert r["exposure"]["ai_software"] > r["exposure"]["physical_robotics"]
-    assert r["base_exposure"] == max(r["exposure"].values())
+    # v2: the headline is the calibrated multi-factor blend, not an unfitted max(ai, robo).
+    # Data entry (high AI exposure, very routine, low interpersonal) lands clearly high-risk.
+    assert r["base_exposure"] > 50
+    # The blend sits between the two displayed axes, never above the higher one.
+    assert min(r["exposure"].values()) <= r["base_exposure"] <= max(r["exposure"].values())
 
 
 def test_truck_driver_is_high_robotics_exposure(engine):
@@ -142,3 +146,40 @@ def test_green_option_reports_safety_context(engine):
 def test_green_option_deterministic(engine):
     p = Profile(title="data entry")
     assert engine.green_option(p, user_skills=["a", "b"]) == engine.green_option(p, user_skills=["a", "b"])
+
+
+# ---- v2 calibrated exposure model ------------------------------------------
+def test_v2_blend_is_configured_and_bounded(engine):
+    # The headline score comes from the calibrated blend in config, not an unfitted max(ai, robo).
+    em = engine.weights.get("exposure_model")
+    assert em and em.get("method") == "weighted_blend_0_100"
+    w = em["weights"]
+    assert abs(sum(w.values()) - 1.0) < 1e-6          # weights are a proper average
+    for occ in engine.snapshot.all_occupations():
+        assert 0.0 <= engine.combined_exposure(occ) <= 100.0
+
+
+def test_interpersonal_work_lowers_headline_below_ai_axis(engine):
+    # A caring, interpersonal role (nurse) has its headline pulled below its raw AI/robotics
+    # exposure, because interpersonal work is the strongest backtest-validated protector.
+    r = engine.assess(Profile(title="nurse"))
+    assert r["base_exposure"] < max(r["exposure"].values())
+    # Data entry (very routine, low interpersonal) is scored clearly riskier than nursing.
+    d = engine.assess(Profile(title="data entry"))
+    assert d["base_exposure"] > r["base_exposure"]
+
+
+def test_green_targets_are_more_interpersonal_or_less_routine(engine):
+    # The re-weighted match should point toward durable, human-centred safer work.
+    g = engine.green_option(Profile(title="data entry"),
+                            user_skills=["verify records", "customer service"])
+    assert g["targets"]
+    occ = engine.snapshot.match_title("data entry")
+    your_interp = occ.get("interpersonal")
+    top = g["targets"][0]
+    full = engine.snapshot.occupation(top["soc"]) or {}
+    adj = next((a for a in occ.get("adjacent", []) if a["soc"] == top["soc"]), {})
+    dest_interp = full.get("interpersonal", adj.get("interpersonal"))
+    # The leading safer destination is at least as interpersonal as the starting role.
+    if your_interp is not None and dest_interp is not None:
+        assert dest_interp >= your_interp - 0.01

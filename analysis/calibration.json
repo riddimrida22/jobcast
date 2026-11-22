@@ -2,87 +2,424 @@
   "n_occupations": 702,
   "horizon": "2020-2025 (OEWS May)",
   "outcome": "5-year national employment change (percent)",
-  "r2_in_sample": 0.06,
-  "r2_cross_validated": 0.046,
-  "coefficients_standardized": [
+  "primary_metric": "rank quality (Spearman, AUC, decile lift); R2 shown but not the target",
+  "fits": {
+    "baseline": {
+      "features": [
+        "ai",
+        "robo",
+        "log_median",
+        "log_emp0"
+      ],
+      "n": 702,
+      "r2_in_sample": 0.058,
+      "coefficients_standardized": [
+        {
+          "feature": "ai",
+          "std_coef": 0.61,
+          "se": 1.149,
+          "t": 0.53,
+          "p": 0.5957
+        },
+        {
+          "feature": "robo",
+          "std_coef": -0.222,
+          "se": 1.163,
+          "t": -0.19,
+          "p": 0.8488
+        },
+        {
+          "feature": "log_median",
+          "std_coef": 4.658,
+          "se": 1.124,
+          "t": 4.15,
+          "p": 0.0
+        },
+        {
+          "feature": "log_emp0",
+          "std_coef": 4.441,
+          "se": 0.996,
+          "t": 4.46,
+          "p": 0.0
+        }
+      ],
+      "rank_metrics_oof": {
+        "spearman": 0.304,
+        "auc_decline": 0.649,
+        "decile_top_risk_mean_change": -9.1,
+        "decile_bottom_risk_mean_change": 19.2,
+        "n_declined": 302,
+        "n_grew": 400
+      }
+    },
+    "expanded": {
+      "features": [
+        "ai",
+        "robo",
+        "interpersonal",
+        "routine_structured",
+        "job_zone",
+        "creative",
+        "log_median",
+        "log_emp0"
+      ],
+      "n": 702,
+      "r2_in_sample": 0.132,
+      "coefficients_standardized": [
+        {
+          "feature": "ai",
+          "std_coef": -0.803,
+          "se": 1.241,
+          "t": -0.65,
+          "p": 0.518
+        },
+        {
+          "feature": "robo",
+          "std_coef": 2.801,
+          "se": 1.516,
+          "t": 1.85,
+          "p": 0.0651
+        },
+        {
+          "feature": "interpersonal",
+          "std_coef": 5.874,
+          "se": 1.017,
+          "t": 5.78,
+          "p": 0.0
+        },
+        {
+          "feature": "routine_structured",
+          "std_coef": -3.931,
+          "se": 1.399,
+          "t": -2.81,
+          "p": 0.0051
+        },
+        {
+          "feature": "job_zone",
+          "std_coef": 0.303,
+          "se": 1.809,
+          "t": 0.17,
+          "p": 0.8669
+        },
+        {
+          "feature": "creative",
+          "std_coef": 0.454,
+          "se": 1.185,
+          "t": 0.38,
+          "p": 0.7021
+        },
+        {
+          "feature": "log_median",
+          "std_coef": 4.953,
+          "se": 1.448,
+          "t": 3.42,
+          "p": 0.0007
+        },
+        {
+          "feature": "log_emp0",
+          "std_coef": 3.523,
+          "se": 0.975,
+          "t": 3.61,
+          "p": 0.0003
+        }
+      ],
+      "rank_metrics_oof": {
+        "spearman": 0.427,
+        "auc_decline": 0.727,
+        "decile_top_risk_mean_change": -5.0,
+        "decile_bottom_risk_mean_change": 18.2,
+        "n_declined": 302,
+        "n_grew": 400
+      }
+    },
+    "parsimonious": {
+      "features": [
+        "ai",
+        "robo",
+        "interpersonal",
+        "routine_structured",
+        "log_median",
+        "log_emp0"
+      ],
+      "n": 702,
+      "r2_in_sample": 0.132,
+      "coefficients_standardized": [
+        {
+          "feature": "ai",
+          "std_coef": -0.655,
+          "se": 1.117,
+          "t": -0.59,
+          "p": 0.5578
+        },
+        {
+          "feature": "robo",
+          "std_coef": 2.743,
+          "se": 1.505,
+          "t": 1.82,
+          "p": 0.0687
+        },
+        {
+          "feature": "interpersonal",
+          "std_coef": 5.963,
+          "se": 0.992,
+          "t": 6.01,
+          "p": 0.0
+        },
+        {
+          "feature": "routine_structured",
+          "std_coef": -4.064,
+          "se": 1.355,
+          "t": -3.0,
+          "p": 0.0028
+        },
+        {
+          "feature": "log_median",
+          "std_coef": 5.233,
+          "se": 1.126,
+          "t": 4.65,
+          "p": 0.0
+        },
+        {
+          "feature": "log_emp0",
+          "std_coef": 3.475,
+          "se": 0.969,
+          "t": 3.59,
+          "p": 0.0004
+        }
+      ],
+      "rank_metrics_oof": {
+        "spearman": 0.433,
+        "auc_decline": 0.729,
+        "decile_top_risk_mean_change": -5.3,
+        "decile_bottom_risk_mean_change": 18.0,
+        "n_declined": 302,
+        "n_grew": 400
+      }
+    }
+  },
+  "factors_earned_their_place": [
     {
-      "feature": "intercept",
-      "std_coef": 4.933,
-      "se": 0.963,
-      "t": 5.12,
+      "feature": "interpersonal",
+      "std_coef": 5.874,
       "p": 0.0
     },
     {
+      "feature": "routine_structured",
+      "std_coef": -3.931,
+      "p": 0.0051
+    }
+  ],
+  "factors_dropped": [
+    {
       "feature": "ai",
-      "std_coef": -0.711,
-      "se": 1.73,
-      "t": -0.41,
-      "p": 0.6813
+      "std_coef": -0.803,
+      "p": 0.518
     },
     {
       "feature": "robo",
-      "std_coef": -1.762,
-      "se": 1.711,
-      "t": -1.03,
-      "p": 0.3034
+      "std_coef": 2.801,
+      "p": 0.0651
     },
     {
-      "feature": "log_median",
-      "std_coef": 4.591,
-      "se": 1.078,
-      "t": 4.26,
-      "p": 0.0
+      "feature": "job_zone",
+      "std_coef": 0.303,
+      "p": 0.8669
     },
     {
-      "feature": "log_emp0",
-      "std_coef": 4.454,
-      "se": 0.989,
-      "t": 4.5,
-      "p": 0.0
+      "feature": "creative",
+      "std_coef": 0.454,
+      "p": 0.7021
     }
   ],
-  "correlations": {
-    "ai": {
-      "pearson_r": 0.117,
-      "pearson_p": 0.0019,
-      "spearman_r": 0.163
+  "deployed_model": {
+    "method": "weighted_blend_0_100",
+    "note": "Headline automation-exposure score (0-100). Interpretable weighted average of four task-intrinsic sub-scores, all oriented so higher = more automatable. interpersonal enters as protection (100 - interpersonal). Weights for the two data-validated factors are derived from the cross-validated calibration (analysis/calibrate.py); ai/robo carry a research-set prior. The engine reads these weights; it never fits a model or calls an LLM to score.",
+    "weights": {
+      "ai": 0.15,
+      "robo": 0.1,
+      "routine_structured": 0.3,
+      "interpersonal_protection": 0.45
     },
-    "robo": {
-      "pearson_r": -0.124,
-      "pearson_p": 0.001,
-      "spearman_r": -0.159
+    "derivation": {
+      "validated_budget": 0.75,
+      "research_prior": {
+        "ai": 0.15,
+        "robo": 0.1
+      },
+      "interpersonal_std_coef": 5.963,
+      "routine_structured_std_coef": -4.064
     },
-    "log_median": {
-      "pearson_r": 0.168,
-      "pearson_p": 0.0,
-      "spearman_r": 0.185
+    "timeline_bands_fitted": [
+      {
+        "id": "largely_unaffected",
+        "label": "Largely unaffected",
+        "max_exposure": 41
+      },
+      {
+        "id": "partial_5_10yr",
+        "label": "Partial, 5 to 10 years",
+        "max_exposure": 50
+      },
+      {
+        "id": "near_term_high",
+        "label": "Near-term, high",
+        "max_exposure": 100
+      }
+    ]
+  },
+  "deployed_rank_metrics": {
+    "spearman": 0.321,
+    "auc_decline": 0.686,
+    "decile_top_risk_mean_change": -8.0,
+    "decile_bottom_risk_mean_change": 17.4,
+    "n_declined": 302,
+    "n_grew": 400
+  },
+  "timeline_band_backtest": [
+    {
+      "band": "Largely unaffected",
+      "n": 262,
+      "mean_emp_change_pct": 13.4,
+      "median_emp_change_pct": 11.5
     },
-    "log_emp0": {
-      "pearson_r": 0.147,
-      "pearson_p": 0.0001,
-      "spearman_r": 0.247
+    {
+      "band": "Partial, 5 to 10 years",
+      "n": 295,
+      "mean_emp_change_pct": 2.1,
+      "median_emp_change_pct": 0.9
+    },
+    {
+      "band": "Near-term, high",
+      "n": 145,
+      "mean_emp_change_pct": -4.5,
+      "median_emp_change_pct": -7.3
+    }
+  ],
+  "convergent_validity": {
+    "aioe_soc": {
+      "label": "Felten-Raj-Seamans AIOE",
+      "available": true,
+      "n": 657,
+      "spearman_vs_ai_subscore": 0.862,
+      "spearman_vs_deployed_blend": -0.022,
+      "note": "Rank correlation with an independent measure we did not fit on: first vs our Eloundou AI sub-score (like-for-like), then vs the full displacement blend."
+    },
+    "webb_soc": {
+      "label": "Webb 2020",
+      "available": false
     }
   },
-  "timeline_band_backtest": {
-    "Partial, 5 to 10 years": {
-      "n": 533,
-      "mean_emp_change_pct": 6.2,
-      "median_emp_change_pct": 5.3
+  "post_2022_window": {
+    "window": "2022-2025 (OEWS May)",
+    "n": 738,
+    "ai_only_fit": [
+      {
+        "feature": "ai",
+        "std_coef": -0.128,
+        "se": 0.738,
+        "t": -0.17,
+        "p": 0.8624
+      },
+      {
+        "feature": "robo",
+        "std_coef": -1.242,
+        "se": 0.731,
+        "t": -1.7,
+        "p": 0.0895
+      },
+      {
+        "feature": "log_median",
+        "std_coef": 1.428,
+        "se": 0.704,
+        "t": 2.03,
+        "p": 0.0431
+      },
+      {
+        "feature": "log_emp0",
+        "std_coef": 2.641,
+        "se": 0.63,
+        "t": 4.2,
+        "p": 0.0
+      }
+    ],
+    "parsimonious_fit": {
+      "features": [
+        "ai",
+        "robo",
+        "interpersonal",
+        "routine_structured",
+        "log_median",
+        "log_emp0"
+      ],
+      "n": 738,
+      "r2_in_sample": 0.1,
+      "coefficients_standardized": [
+        {
+          "feature": "ai",
+          "std_coef": -0.741,
+          "se": 0.72,
+          "t": -1.03,
+          "p": 0.3032
+        },
+        {
+          "feature": "robo",
+          "std_coef": 0.976,
+          "se": 0.958,
+          "t": 1.02,
+          "p": 0.3086
+        },
+        {
+          "feature": "interpersonal",
+          "std_coef": 3.152,
+          "se": 0.636,
+          "t": 4.95,
+          "p": 0.0
+        },
+        {
+          "feature": "routine_structured",
+          "std_coef": -3.064,
+          "se": 0.874,
+          "t": -3.51,
+          "p": 0.0005
+        },
+        {
+          "feature": "log_median",
+          "std_coef": 1.792,
+          "se": 0.709,
+          "t": 2.53,
+          "p": 0.0117
+        },
+        {
+          "feature": "log_emp0",
+          "std_coef": 2.034,
+          "se": 0.618,
+          "t": 3.29,
+          "p": 0.001
+        }
+      ],
+      "rank_metrics_oof": {
+        "spearman": 0.348,
+        "auc_decline": 0.688,
+        "decile_top_risk_mean_change": -6.7,
+        "decile_bottom_risk_mean_change": 7.5,
+        "n_declined": 299,
+        "n_grew": 439
+      }
     },
-    "Largely unaffected": {
-      "n": 71,
-      "mean_emp_change_pct": 7.7,
-      "median_emp_change_pct": 9.7
-    },
-    "Near-term, high": {
-      "n": 98,
-      "mean_emp_change_pct": -3.8,
-      "median_emp_change_pct": -6.6
+    "deployed_rank_metrics": {
+      "spearman": 0.316,
+      "auc_decline": 0.666,
+      "decile_top_risk_mean_change": -4.2,
+      "decile_bottom_risk_mean_change": 10.2,
+      "n_declined": 299,
+      "n_grew": 439
     }
   },
   "caveats": [
     "The 2020 base year is the COVID shock; employment change partly reflects pandemic recovery, not automation.",
-    "Five years is a short horizon and AI's large labor effects are recent/prospective; weak in-sample signal is expected and honest.",
-    "Employment change is one outcome; wage and hours effects are not modeled here."
+    "Physical/robot-exposed work rebounded in this window, so `robo`'s fitted coefficient is weak and the wrong sign for a displacement story; ai/robo therefore keep modest research-set weights (Eloundou; Frey & Osborne) rather than a confounded fit.",
+    "Raw AI exposure is statistically insignificant here; AI's large labour effects are recent/prospective, so a weak in-sample AI signal is expected and honest.",
+    "R2 is low in absolute terms because individual occupation outcomes are noisy; the product is a ranking, so we report and optimise rank metrics instead.",
+    "The two factors that earn their place out of sample are `interpersonal` (protector) and `routine_structured` (risk); `job_zone` and `creative` did not and are dropped."
   ]
 }
