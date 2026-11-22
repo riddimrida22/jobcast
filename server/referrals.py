@@ -44,6 +44,12 @@ def _conn() -> sqlite3.Connection:
             ts INTEGER
         )"""
     )
+    # Migration: the referrer's OWN unlock checkout session, so the refer-5 reward can refund it
+    # ("money back"). Added after the fact -> ALTER if the column is missing.
+    try:
+        conn.execute("ALTER TABLE referrers ADD COLUMN own_session TEXT")
+    except sqlite3.OperationalError:
+        pass  # column already exists
     return conn
 
 
@@ -71,6 +77,32 @@ def code_for_email(email: str) -> Optional[str]:
             except sqlite3.IntegrityError:
                 continue
     return None
+
+
+def record_purchase(email: str, stripe_session: str) -> None:
+    """Record this buyer's OWN unlock checkout session (set once), so if they later reach the
+    referral threshold we can refund it as 'money back'. Ensures they have a referral code too.
+    Best-effort; never raises."""
+    try:
+        code = code_for_email(email)
+        if not code or not stripe_session:
+            return
+        with _conn() as conn:
+            conn.execute(
+                "UPDATE referrers SET own_session=? "
+                "WHERE code=? AND (own_session IS NULL OR own_session='')",
+                (stripe_session, code))
+    except Exception:
+        pass
+
+
+def own_session_for(ref_code: str) -> Optional[str]:
+    """The referrer's own unlock session id (to refund for the money-back reward), or None."""
+    if not valid_code(ref_code):
+        return None
+    with _conn() as conn:
+        row = conn.execute("SELECT own_session FROM referrers WHERE code=?", (ref_code,)).fetchone()
+    return (row["own_session"] if row else None) or None
 
 
 def email_for_code(code: str) -> Optional[str]:

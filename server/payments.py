@@ -98,15 +98,19 @@ def create_checkout_session(tier, period, success_url, cancel_url, email=None, r
         return None, "stripe_error"
 
 
-def create_promo_code(percent, code=None, max_redemptions=1, name=None, duration="once"):
+def create_promo_code(percent, code=None, max_redemptions=1, name=None, duration="once",
+                      duration_in_months=None):
     """Create a percent-off coupon plus a promotion code customers redeem at checkout (which
     already has allow_promotion_codes=True). `code=None` auto-generates; `max_redemptions=None`
-    means unlimited (a public launch/awareness code), default 1 (a single-use reward).
+    means unlimited (a public launch/awareness code), default 1 (a single-use reward). For a
+    multi-month subscription discount pass duration="repeating" + duration_in_months.
     Returns (code, None) or (None, error)."""
     try:
         stripe = _client()
-        coupon = stripe.Coupon.create(percent_off=percent, duration=duration,
-                                       name=name or "JobBreak")
+        coupon_kwargs = {"percent_off": percent, "duration": duration, "name": name or "JobBreak"}
+        if duration == "repeating" and duration_in_months:
+            coupon_kwargs["duration_in_months"] = duration_in_months
+        coupon = stripe.Coupon.create(**coupon_kwargs)
         the_code = code or ("REF" + secrets.token_hex(3).upper())
         kwargs = {"coupon": coupon.id, "code": the_code}
         if max_redemptions is not None:
@@ -121,6 +125,13 @@ def create_promo_code(percent, code=None, max_redemptions=1, name=None, duration
 def create_reward_promo_code(percent=50):
     """A single-use referral-reward code (thin wrapper over create_promo_code)."""
     return create_promo_code(percent, name="JobBreak referral reward", max_redemptions=1)
+
+
+def create_free_year_code():
+    """The refer-5 reward: a single-use 100%-off, 12-month coupon = a FREE YEAR of Monitor.
+    Returns (code, None) or (None, error)."""
+    return create_promo_code(100, duration="repeating", duration_in_months=12,
+                             max_redemptions=1, name="JobBreak referral reward - free year")
 
 
 # --- Launch / awareness code: the app NAME is the code -------------------------------------

@@ -214,3 +214,42 @@ def test_ensure_launch_code_idempotent(monkeypatch):
 
 def test_ensure_launch_code_route_requires_key(client):
     assert client.get("/admin/ensure-launch-code").status_code == 404
+
+
+# --- Refer-5 reward upgrade: money back + a free year ---
+
+def test_referral_own_session_roundtrip(tmp_path, monkeypatch):
+    from server import referrals
+    monkeypatch.setattr(referrals, "_db_path", lambda: tmp_path / "ref.db")
+    referrals.record_purchase("maya@example.com", "cs_test_123")
+    code = referrals.code_for_email("maya@example.com")
+    assert code and referrals.own_session_for(code) == "cs_test_123"
+    # set-once: a later purchase must NOT overwrite the unlock we'd refund
+    referrals.record_purchase("maya@example.com", "cs_test_999")
+    assert referrals.own_session_for(code) == "cs_test_123"
+
+
+def test_create_free_year_code(monkeypatch):
+    from server import payments
+    calls = {}
+
+    class FakeStripe:
+        class Coupon:
+            @staticmethod
+            def create(**kw):
+                calls["coupon"] = kw
+                return type("C", (), {"id": "co_1"})
+
+        class PromotionCode:
+            @staticmethod
+            def create(**kw):
+                calls["promo"] = kw
+                return {"code": kw["code"]}
+
+    monkeypatch.setattr(payments, "_client", lambda: FakeStripe)
+    code, err = payments.create_free_year_code()
+    assert err is None and code
+    assert calls["coupon"]["percent_off"] == 100
+    assert calls["coupon"]["duration"] == "repeating"
+    assert calls["coupon"]["duration_in_months"] == 12
+    assert calls["promo"]["max_redemptions"] == 1

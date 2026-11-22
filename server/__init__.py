@@ -923,6 +923,15 @@ def create_app() -> Flask:
                 "subscription": pay._get(obj, "subscription"),
                 "tier": gtier or (md.get("tier") if hasattr(md, "get") else None),
                 "ts": int(time.time())})
+            # Record the buyer's OWN unlock session, so if they later reach the referral
+            # threshold their reward can refund it ("money back"). Best-effort.
+            buyer_email = details.get("email") if hasattr(details, "get") else None
+            if buyer_email:
+                try:
+                    from . import referrals as _refs
+                    _refs.record_purchase(buyer_email, pay._get(obj, "id") or "")
+                except Exception as e:
+                    print(f"[referral] record_purchase failed: {e}", file=sys.stderr, flush=True)
             # Referral: a PAID conversion credits the referrer (keyed by the Stripe session
             # id, so a webhook retry never double-counts). At the threshold, issue a one-time
             # reward code and email it. Wrapped so a referral hiccup never fails the webhook.
@@ -932,16 +941,26 @@ def create_app() -> Flask:
                     from . import referrals
                     referrals.credit(ref, pay._get(obj, "id") or "")
                     if referrals.needs_reward(ref):
-                        code, _err = pay.create_reward_promo_code(referrals.REWARD_PERCENT)
+                        # Refer-5 reward (upgraded): MONEY BACK on their own unlock + a FREE YEAR
+                        # of Monitor. The refund is best-effort; the free-year code is the kept
+                        # reward recorded against the referrer.
+                        own = referrals.own_session_for(ref)
+                        if own:
+                            try:
+                                pay.refund_session(own)
+                            except Exception as e:
+                                print(f"[referral] reward refund failed: {e}", file=sys.stderr, flush=True)
+                        code, _err = pay.create_free_year_code()
                         if code and referrals.mark_rewarded(ref, code):
                             remail = referrals.email_for_code(ref)
                             if remail:
                                 from . import emailer
                                 emailer.send(
                                     remail,
-                                    "You earned 50% off JobBreak Monitor",
-                                    "Five friends you referred have subscribed - thank you.\n\n"
-                                    "Here is your one-time 50% off code: " + code + "\n\n"
+                                    "Your JobBreak reward: money back + a free year",
+                                    "Five friends you referred have bought JobBreak - thank you.\n\n"
+                                    "Your reward: we are refunding what you paid, and here is a code\n"
+                                    "for a FREE YEAR of JobBreak Monitor: " + code + "\n\n"
                                     "Enter it at checkout: https://jobbreak.ai\n")
                 except Exception as e:
                     print(f"[referral] credit/reward failed: {e}", file=sys.stderr, flush=True)
