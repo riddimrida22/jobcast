@@ -12,6 +12,7 @@
 {# On a result page the visitor already has their answer: hide the site-wide promo/free bars so
    the score sits right at the top, and let the in-page paywall do the selling after the free taste. #}
 {% block promobars %}{% endblock %}
+{% block body_class %}resultpage{% endblock %}
 {% block content %}
 {% if seo %}<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":{{ ("Will AI or robots replace " ~ r.occupation.title ~ "?") | tojson }},"acceptedAnswer":{"@type":"Answer","text":{{ (r.occupation.title ~ " scores AI Resilience Level " ~ r.base_level ~ " of 10 (10 = safe, 1 = extinct), from O*NET task data and peer-reviewed AI-exposure research - a lower level means more of the role's tasks are automatable. JobBreak shows the full sourced breakdown and a timeline.") | tojson }}}}]}</script>{% endif %}
 {% set check %}<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>{% endset %}
@@ -217,6 +218,7 @@
   </div>
 </div>
 <p class="verdict"><strong>{{ t('seo.short', 'The short version:') }}</strong> {{ t('seo.v.pre', 'this role is') }} {{ vlvl }} {{ t('seo.v.mid', 'to automation,') }} {{ vtim }}{{ t('seo.v.suf', '. It is a sourced range, not a verdict, and the detail is below.') }}</p>
+<aside class="rrail">
 {% if seo %}
 <div class="tour-localize">
   <div class="tl-txt"><b>{{ t('seo.tl.pre', 'This is the national picture for') }} {{ disp_title }}.</b> {{ t('seo.tl.post', "See your Job Extinction Risk: add your state and situation and we'll localize and personalize it.") }}</div>
@@ -304,6 +306,7 @@
   })();
 </script>
 
+</aside>{# /.rrail #}
 {% if paid and not seo %}
 {# ---- Progressive profiling: post-pay "Sharpen your result". The free funnel stays frictionless
    (job -> score -> paywall); here, a paying customer can add the data they skipped, and each
@@ -684,13 +687,13 @@
 
 <div class="tabs" role="tablist">
   <button class="tab active" data-panel="p-overview">Overview</button>
-  {% if r.strategies %}<button class="tab" data-panel="p-strategy">What to do</button>{% endif %}
-  <button class="tab" data-panel="p-tasks">{{ 'Tasks' if seo else 'My tasks' }}</button>
-  {% if r.key_drivers %}<button class="tab" data-panel="p-drivers">What drives it</button>{% endif %}
-  {% if not seo %}<button class="tab" data-panel="p-pay">Pay &amp; place</button>{% endif %}
-  {% if r.adjacent_lower_risk %}<button class="tab" data-panel="p-paths">Safer paths</button>{% endif %}
-  {% if r.geo and (r.geo.countries|length > 1 or r.geo.states) %}<button class="tab" data-panel="p-geo">Where it pays</button>{% endif %}
-  <button class="tab" data-panel="p-scored">How it's worked out</button>
+  {% if r.strategies %}<button class="tab" data-panel="p-strategy">What To Do</button>{% endif %}
+  <button class="tab" data-panel="p-tasks">{{ 'Tasks' if seo else 'My Tasks' }}</button>
+  {% if r.key_drivers %}<button class="tab" data-panel="p-drivers">What Drives It</button>{% endif %}
+  {% if not seo %}<button class="tab" data-panel="p-pay">Pay &amp; Place</button>{% endif %}
+  {% if r.adjacent_lower_risk %}<button class="tab" data-panel="p-paths">Safer Paths</button>{% endif %}
+  {% if r.geo and (r.geo.countries|length > 1 or r.geo.states) %}<button class="tab" data-panel="p-geo">Where It Pays</button>{% endif %}
+  <button class="tab" data-panel="p-scored">How It's Worked Out</button>
 </div>
 
 <!-- OVERVIEW -->
@@ -768,7 +771,7 @@
 <!-- WHAT TO DO -->
 {% if r.strategies %}
 <div id="p-strategy" class="panel card">
-  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><h2 style="margin:0">What to do about it</h2></div>
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><h2 style="margin:0">What To Do About It</h2></div>
 
   {% if not seo %}
   {# The green option: lead the paid result with a safer, reachable career the person already
@@ -1441,7 +1444,7 @@
 
 <!-- TASKS -->
 <div id="p-tasks" class="panel card">
-  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg><h2 style="margin:0">{{ 'Which tasks are exposed' if seo else 'Which of my tasks are exposed' }}</h2></div>
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg><h2 style="margin:0">{{ 'Which Tasks Are Exposed' if seo else 'Which Of My Tasks Are Exposed' }}</h2></div>
   <p class="muted" style="margin:0 0 10px">{{ t('tasks.hint', 'Each task is scored 0–99 — how much of it AI or robots can already do. Higher means more exposed.') }}</p>
   {% for t in r.tasks %}
   {% set mx = t.ai if t.ai >= t.robo else t.robo %}
@@ -1457,7 +1460,7 @@
 <!-- DRIVERS -->
 {% if r.key_drivers %}
 <div id="p-drivers" class="panel card">
-  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M3 12h7M14 12h7M12 5l-3 7 3 7"/></svg><h2 style="margin:0">{{ 'What drives the result' if seo else 'What is driving my result' }}</h2></div>
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M3 12h7M14 12h7M12 5l-3 7 3 7"/></svg><h2 style="margin:0">{{ 'What Drives The Result' if seo else 'What Is Driving My Result' }}</h2></div>
   <div class="muted" style="display:grid;grid-template-columns:1fr 14px 1fr;font-size:12px;margin-bottom:6px">
     <div style="text-align:right;padding-right:12px">lowers risk</div><div></div><div style="padding-left:12px">raises risk</div>
   </div>
@@ -1476,7 +1479,7 @@
 <!-- PAY & PLACE -->
 {% if not seo %}
 <div id="p-pay" class="panel card">
-  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><h2 style="margin:0">Pay and local market</h2></div>
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><h2 style="margin:0">Pay And Local Market</h2></div>
   <div class="stat-tiles">
     <div class="stile" id="pt-median"{% if not r.wages.occupation_median_wage %} hidden{% endif %}><div class="st-val" id="pt-median-val">{% if r.wages.occupation_median_wage %}{{ r.currency.symbol }}{{ "{:,.0f}".format(r.wages.occupation_median_wage) }}{% endif %}</div><div class="st-lab" id="pt-median-lab">Median pay, {{ r.location.metro }}</div></div>
     <div class="stile"><div class="st-val" id="pt-demand-val">{{ r.timeline.local_demand_trend }}</div><div class="st-lab">Local demand</div></div>
@@ -1494,7 +1497,7 @@
 <!-- SAFER PATHS -->
 {% if r.adjacent_lower_risk %}
 <div id="p-paths" class="panel card">
-  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8"/></svg><h2 style="margin:0">Lower-risk adjacent roles</h2></div>
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8"/></svg><h2 style="margin:0">Lower-Risk Adjacent Roles</h2></div>
   {% for a in r.adjacent_lower_risk %}
   <div class="hrow">
     <div class="hlabel">{{ a.title }}</div>
@@ -1538,7 +1541,7 @@
   #p-geo .geo-cta { display:inline-block; margin-top:16px; font-weight:800; text-decoration:none; color:var(--accent); }
 </style>
 <div id="p-geo" class="panel card">
-  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><h2 style="margin:0">Where this job pays and holds up</h2></div>
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><h2 style="margin:0">Where This Job Pays And Holds Up</h2></div>
   <p class="geo-sub">The {{ rating_label }} is the same wherever you live &mdash; it is about the work, not the place. What changes from place to place is pay and how local demand is moving.</p>
 
   {% if r.geo.countries and r.geo.countries|length > 1 %}
@@ -1579,7 +1582,7 @@
 
 <!-- HOW IT'S SCORED -->
 <div id="p-scored" class="panel card">
-  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><h2 style="margin:0">How your {{ rating_label }} is worked out</h2></div>
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><h2 style="margin:0">How Your {{ rating_label }} Is Worked Out</h2></div>
   <div class="calc-flow">
     <div class="calc-step"><span class="cs-n">1</span><div class="cs-body"><b>Map tasks</b><span>{{ r.tasks|length }} O*NET tasks</span></div></div>
     <div class="calc-step"><span class="cs-n">2</span><div class="cs-body"><b>Rate each</b><span>AI + robotics, 0&ndash;100</span></div></div>

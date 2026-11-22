@@ -86,8 +86,8 @@
 
     header.site { background:linear-gradient(180deg,var(--shell),var(--shell-dark)); color:#fff;
                   box-shadow:0 2px 14px rgba(11,26,46,.28); position:sticky; top:0; z-index:20; }
-    header.site .wrap { padding:15px 20px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; }
-    .brand { font-weight:700; font-size:22px; letter-spacing:.2px; text-decoration:none; color:#fff; overflow:visible; white-space:nowrap; }
+    header.site .wrap { padding:15px 20px; margin:0 auto; display:flex; justify-content:space-between; align-items:flex-start; }
+    .brand { font-weight:700; font-size:33px; letter-spacing:.2px; text-decoration:none; color:#fff; overflow:visible; white-space:nowrap; line-height:1; }
     /* "Break" hinges at the bottom-left (bottom of Job's b) and swings from aligned down to 90 and back. */
     .brand .brk { display:inline-block; transform-origin:left bottom; color:var(--accent);
                   animation:swing 3s ease-in-out infinite; }
@@ -650,12 +650,12 @@
     button.secondary { background:#fff; color:var(--primary); border:1px solid var(--line);
                        box-shadow:none; margin:6px 8px 0 0; padding:9px 16px; font-size:14px; }
     button.secondary:hover { background:var(--primary-soft); filter:none; }
-    #theme-toggle { margin:0 0 0 20px; padding:0; width:36px; height:36px; flex:0 0 auto;
+    #theme-toggle { margin:0 0 0 6px; padding:0; width:26px; height:26px; flex:0 0 auto;
                     display:inline-flex; align-items:center; justify-content:center;
-                    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.28);
-                    box-shadow:none; border-radius:999px; color:#fff; }
-    #theme-toggle:hover { background:rgba(255,255,255,.2); filter:none; transform:none; }
-    #theme-toggle svg { width:19px; height:19px; display:block; }
+                    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.22);
+                    box-shadow:none; border-radius:6px; color:rgba(255,255,255,.72); vertical-align:middle; }
+    #theme-toggle:hover { background:rgba(255,255,255,.2); filter:none; transform:none; color:#fff; }
+    #theme-toggle svg { width:15px; height:15px; display:block; }
     #theme-toggle .ico-moon { display:none; }
     [data-theme="dark"] #theme-toggle .ico-sun { display:none; }
     [data-theme="dark"] #theme-toggle .ico-moon { display:block; }
@@ -723,6 +723,16 @@
 
     /* wide home with scrolling side panels */
     .wide .wrap { max-width:1260px; }
+
+    /* Result page: use the screen width and float the promo/CTA into a right rail on desktop,
+       so the tabs and the actual result sit at the top-left and the page stops being a tall scroll. */
+    .rrail { margin:0; }
+    @media (min-width:1000px) {
+      .resultpage .wrap { max-width:min(1240px, 95vw); }
+      .resultpage .rrail { float:right; width:340px; margin:2px 0 16px 28px; }
+      .resultpage .rrail > *:first-child { margin-top:0; }
+      .resultpage .tabs { clear:none; }
+    }
     .home-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(430px,560px) minmax(0,1fr); gap:18px; align-items:start; }
     .side { position:sticky; top:86px; }
     .side-title { font-size:16.5px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; margin:0 0 4px; line-height:1.2;
