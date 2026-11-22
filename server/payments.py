@@ -57,6 +57,10 @@ def publishable_key():
 def _client():
     import stripe
     stripe.api_key = _secret()
+    # Pin the Stripe API version. The newest default (2026-10-28) changed the promotion-code
+    # create params, so coupon-based codes broke on stripe-python v17; `stripe>=7.0` is unpinned,
+    # so a rebuild could pull it. Pinning keeps every call deterministic across SDK upgrades.
+    stripe.api_version = "2023-10-16"
     return stripe
 
 
