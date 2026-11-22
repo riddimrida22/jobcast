@@ -71,6 +71,27 @@ def test_green_endpoint_returns_targets(client):
         assert t["max_exposure"] < t["your_exposure"]
 
 
+def test_progressive_profiling_fields_sharpen_result(client):
+    """The post-pay 'Sharpen your result' UI re-posts to /v1/assess with the skipped fields and
+    redraws from the response, so each field must measurably change the assessment."""
+    base = client.post("/v1/assess", json={"title": "Data Entry Keyers"}).get_json()
+    assert base["ok"] is True
+
+    # ZIP -> a metro, with local pay and demand (replaces the national averages).
+    loc = client.post("/v1/assess", json={"title": "Data Entry Keyers", "zip_code": "10001"}).get_json()
+    assert loc["location"]["metro"] != base["location"]["metro"]
+    assert loc["wages"]["occupation_median_wage"]
+
+    # Experience -> the seniority shift eases exposure (headline score drops, never rises).
+    exp = client.post("/v1/assess",
+                      json={"title": "Data Entry Keyers", "experience_years": 25}).get_json()
+    assert exp["base_exposure"] < base["base_exposure"]
+
+    # Age -> a concrete count of remaining working years for the timeline.
+    age = client.post("/v1/assess", json={"title": "Data Entry Keyers", "age": 40}).get_json()
+    assert age["timeline"]["remaining_working_years"] is not None
+
+
 def test_green_endpoint_requires_title(client):
     r = client.post("/v1/green", json={"skills": ["x"]})
     assert r.status_code == 400
