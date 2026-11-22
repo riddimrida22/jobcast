@@ -197,7 +197,8 @@
 {% set vtim = t('seo.tim.near', 'and the bigger shift looks near-term') if bid == 'near_term_high'
    else (t('seo.tim.partial', 'and meaningful change looks likely over the next 5 to 10 years') if bid == 'partial_5_10yr'
    else t('seo.tim.far', 'and a near-term shift looks unlikely')) %}
-{% set paid = (entitlement and entitlement != 'free') or (not stripe_enabled) %}
+{% set student = (entitlement == 'student') %}
+{% set paid = (entitlement and entitlement not in ('free', 'student')) or (not stripe_enabled) %}
 {% set lvl = r.base_level %}
 {# Resilience LEVEL 1-10: 10 = safe, 1 = extinct. HIGH IS GOOD, so colour follows the level: low = danger (red). #}
 {% set lvlword = t('lvl.w.extinct', 'Extinction risk') if lvl <= 2 else (t('lvl.w.endangered', 'Endangered') if lvl <= 4 else (t('lvl.w.exposed', 'Exposed') if lvl <= 6 else (t('lvl.w.resilient', 'Resilient') if lvl <= 8 else t('lvl.w.safe', 'Future-proof')))) %}
@@ -1598,6 +1599,20 @@
   <div class="src-chips">{% for s in r.sources %}<span class="chip">{{ s.name }}</span>{% endfor %}</div>
   <p class="muted" style="margin-top:10px">Snapshot {{ r.snapshot.id }}. Full method and backtest on <a href="/methodology">How it works</a>.</p>
 </div>
+{% elif student %}
+{# VERIFIED STUDENT: generic info only - the score (hero above) + AI-safer careers in this
+   field + general guidance. NOT the paid breakdown (no personalized timeline, plan or green match). #}
+<div class="student-generic card" style="max-width:640px;margin:16px auto 0;padding:24px 22px">
+  <div style="font-size:12.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin-bottom:8px">{{ t('sg.eyebrow', 'Student access') }}</div>
+  <h2 style="margin:0 0 8px;font-size:21px">{{ t('sg.h', 'AI-safer careers to consider') }}</h2>
+  <p class="muted" style="margin:0 0 14px;line-height:1.55">{{ t('sg.sub', 'General guidance for students: careers related to this field that are harder for AI and robots to automate (higher level = safer, 10 = safe).') }}</p>
+  {% if r.adjacent_lower_risk %}
+  {% for a in r.adjacent_lower_risk[:6] %}
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><span>{{ a.title }}</span><b style="color:{{ '#ff5a4d' if a.level <= 3 else ('#e8794a' if a.level <= 6 else '#3fb27f') }}">Level {{ a.level }}/10</b></div>
+  {% endfor %}
+  {% endif %}
+  <p class="muted" style="margin:14px 0 0;line-height:1.55">{{ t('sg.guide', "Lean into skills AI can't easily replace - interpersonal, hands-on and creative work. The full personalized breakdown, timeline and step-by-step plan are part of the paid plan.") }}</p>
+</div>
 {% else %}
 {# FREE OFFER: the score is the hook (hero above); this is the single clear path to the paid
    research. One button -> the pay sequence. No research is shown. #}
@@ -1607,6 +1622,20 @@
   <p class="muted" style="margin:0 auto 20px;max-width:470px;line-height:1.55">{{ t('fo.sub', 'Unlock your AI-researched breakdown and your safer move - the career you already qualify for at lower risk, with the timeline and the step-by-step plan.') }} {{ t('fo.price', 'One-time $4.99.') }}</p>
   <button type="button" class="fo-cta" onclick="if(window.jbOpenPaywall){window.jbOpenPaywall();}" style="background:var(--accent);color:#2a1708;border:none;border-radius:999px;padding:15px 34px;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 8px 24px rgba(243,163,95,.32)">{{ t('fo.cta', 'See what to do') }} &rsaquo;</button>
 </div>
+<script>
+  /* Students don't get the $4.99 sale - they get the free .edu path to generic info. Swap the
+     offer in place when the visitor came in as a student. */
+  (function () {
+    var stu; try { stu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {}
+    if (!stu) return;
+    var fo = document.querySelector('.free-offer'); if (!fo) return;
+    fo.innerHTML =
+      '<div style="font-size:12.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin-bottom:8px">Student? Free access</div>'
+      + '<h2 style="margin:0 0 8px;font-size:23px;line-height:1.15">See your AI-safer careers &mdash; free</h2>'
+      + '<p class="muted" style="margin:0 auto 20px;max-width:470px;line-height:1.55">Verify your .edu email and get your safer-career guidance free. No payment.</p>'
+      + '<a href="/students/free" class="fo-cta" style="display:inline-block;text-decoration:none;background:var(--accent);color:#2a1708;border-radius:999px;padding:15px 34px;font-weight:800;font-size:16px;box-shadow:0 8px 24px rgba(243,163,95,.32)">Verify my .edu email &rsaquo;</a>';
+  })();
+</script>
 {% endif %}
 
 <p style="margin-top:16px"><a href="/">Check another job</a></p>
@@ -1931,6 +1960,8 @@
   }
   function countTo(el, target, ms) {
     if (!el) return; var start = null;
+    // If the tab is backgrounded, rAF is paused - just show the final number so it never sticks at 0.
+    if (document.hidden) { el.textContent = Math.round(target); return; }
     function tick(t) { if (!start) start = t; var p = Math.min(1, (t - start) / ms);
       el.textContent = Math.round(target * (0.5 - Math.cos(p * Math.PI) / 2)); if (p < 1) requestAnimationFrame(tick); }
     requestAnimationFrame(tick);
@@ -2206,8 +2237,12 @@
   if (go) go.addEventListener('click', function () {
     ov.hidden = true; document.body.style.overflow = '';
     var stu; try { stu = sessionStorage.getItem('jb_aud') === 'stu'; } catch (e) {}
-    if (stu || (ENT && ENT !== 'free')) { startResultTour(); }  // students & subscribers: full breakdown
-    else { startFreeSlide(); }                                  // employees: one free slide, then paywall
+    // Paid subscribers tour the research (it's in the page). Students dismiss to their clean
+    // score + ".edu for free" offer. Free employees go straight to the $4.99 sale. Nobody runs
+    // a tour/slide over the research the server gated - that was the broken dim-"0" bug.
+    if (ENT && ENT !== 'free' && ENT !== 'student') { startResultTour(); }
+    else if (stu) { /* dismissed above; the clean score + student offer is rendered below */ }
+    else { if (window.jbOpenPaywall) window.jbOpenPaywall(); }
   });
   // Expose the $4.99-first paywall so other controls (e.g. "Personalise this plan with AI")
   // open the same offer (one-time lead + one-tap wallets) instead of a subscription-only block.
