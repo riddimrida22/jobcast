@@ -200,3 +200,115 @@ def test_c_param_sets_referral_cookie(client):
     r = client.get("/?c=JOBBREAK1A2B3C")
     cookies = r.headers.getlist("Set-Cookie")
     assert any("jb_ref=JOBBREAK1A2B3C" in c for c in cookies)
+
+
+# --- Launch coupon: the universal JOBBREAK awareness code (the name IS the code) ---
+
+def test_create_promo_code_public_code(monkeypatch):
+    from server import payments
+    calls = {}
+
+    class FakeStripe:
+        class Coupon:
+            @staticmethod
+            def create(**kw):
+                calls["coupon"] = kw
+                return type("C", (), {"id": "co_1"})
+
+        class PromotionCode:
+            @staticmethod
+            def create(**kw):
+                calls["promo"] = kw
+                return {"code": kw["code"]}
+
+    monkeypatch.setattr(payments, "_client", lambda: FakeStripe)
+    code, err = payments.create_promo_code(40, code="JOBBREAK", max_redemptions=None)
+    assert err is None and code == "JOBBREAK"
+    assert calls["coupon"]["percent_off"] == 40
+    assert "max_redemptions" not in calls["promo"]   # unlimited for the public awareness code
+
+
+def test_ensure_launch_code_idempotent(monkeypatch):
+    from server import payments
+
+    class FakeStripe:
+        class PromotionCode:
+            @staticmethod
+            def list(**kw):
+                return {"data": [{"code": "JOBBREAK"}]}
+
+    monkeypatch.setattr(payments, "_client", lambda: FakeStripe)
+    code, err = payments.ensure_launch_code()
+    assert code == "JOBBREAK" and err is None
+
+
+def test_ensure_launch_code_route_requires_key(client):
+    assert client.get("/admin/ensure-launch-code").status_code == 404
+
+
+# --- Refer-5 reward upgrade: money back + a free year ---
+
+def test_referral_own_session_roundtrip(tmp_path, monkeypatch):
+    from server import referrals
+    monkeypatch.setattr(referrals, "_db_path", lambda: tmp_path / "ref.db")
+    referrals.record_purchase("maya@example.com", "cs_test_123")
+    code = referrals.code_for_email("maya@example.com")
+    assert code and referrals.own_session_for(code) == "cs_test_123"
+    # set-once: a later purchase must NOT overwrite the unlock we'd refund
+    referrals.record_purchase("maya@example.com", "cs_test_999")
+    assert referrals.own_session_for(code) == "cs_test_123"
+
+
+def test_create_free_year_code(monkeypatch):
+    from server import payments
+    calls = {}
+
+    class FakeStripe:
+        class Coupon:
+            @staticmethod
+            def create(**kw):
+                calls["coupon"] = kw
+                return type("C", (), {"id": "co_1"})
+
+        class PromotionCode:
+            @staticmethod
+            def create(**kw):
+                calls["promo"] = kw
+                return {"code": kw["code"]}
+
+    monkeypatch.setattr(payments, "_client", lambda: FakeStripe)
+    code, err = payments.create_free_year_code()
+    assert err is None and code
+    assert calls["coupon"]["percent_off"] == 100
+    assert calls["coupon"]["duration"] == "repeating"
+    assert calls["coupon"]["duration_in_months"] == 12
+    assert calls["promo"]["max_redemptions"] == 1
+
+
+# --- Free for students: a .edu gate closed to non-students ---
+
+def test_student_eligibility():
+    from server import student
+    assert student.eligible("maya@mit.edu")[0] is True
+    assert student.eligible("maya@gmail.com") == (False, "need_edu")
+    assert student.eligible("")[0] is False
+
+
+def test_student_verify_flow(tmp_path, monkeypatch):
+    from server import student
+    monkeypatch.setattr(student, "_db_path", lambda: tmp_path / "s.db")
+    code = student.request_code("maya@school.edu")
+    assert code and len(code) == 6
+    assert student.verify("maya@school.edu", "nope") is False    # wrong code
+    assert student.verify("maya@school.edu", code) is True       # correct -> granted
+    assert student.verify("maya@school.edu", code) is False      # one-shot, can't reuse
+    assert student.request_code("maya@school.edu") is None       # one free unlock per email
+
+
+def test_students_free_page(client):
+    assert client.get("/students/free").status_code == 200
+
+
+def test_students_free_rejects_non_edu(client):
+    r = client.post("/students/free/request", data={"email": "a@gmail.com"})
+    assert r.status_code == 200           # re-renders with an error, grants nothing

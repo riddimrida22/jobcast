@@ -568,6 +568,44 @@ def create_app() -> Flask:
                                rail_early=rail_early, rail_degree=rail_degree,
                                most_exposed=most, least_exposed=least)
 
+    @app.get("/students/free")
+    def students_free():
+        return render_template("students_free.html", step="email",
+                               version=VERSION, licensed=engine.snapshot.licensed)
+
+    @app.post("/students/free/request")
+    def students_free_request():
+        from . import student
+        email = (request.form.get("email") or "").strip().lower()
+        ok, why = student.eligible(email)
+        if not ok:
+            return render_template("students_free.html", step="email", error=why,
+                                   version=VERSION, licensed=engine.snapshot.licensed)
+        code = student.request_code(email)
+        if not code:
+            return render_template("students_free.html", step="email", error="already_used",
+                                   version=VERSION, licensed=engine.snapshot.licensed)
+        try:
+            from . import emailer
+            emailer.send(email, "Your JobBreak student code",
+                         "Enter this code to unlock JobBreak free for students: " + code + "\n\n"
+                         "It expires in 30 minutes.\n")
+        except Exception as e:
+            print(f"[student] code email failed: {e}", file=sys.stderr, flush=True)
+        return render_template("students_free.html", step="code", email=email,
+                               version=VERSION, licensed=engine.snapshot.licensed)
+
+    @app.post("/students/free/verify")
+    def students_free_verify():
+        from . import student
+        email = (request.form.get("email") or "").strip().lower()
+        code = (request.form.get("code") or "").strip()
+        if student.verify(email, code):
+            session["jb_tier"] = student.TIER      # one free unlock per verified .edu email
+            return redirect("/plan")
+        return render_template("students_free.html", step="code", email=email, error="bad_code",
+                               version=VERSION, licensed=engine.snapshot.licensed)
+
     from . import i18n
 
     @app.before_request
@@ -924,6 +962,15 @@ def create_app() -> Flask:
                 "subscription": pay._get(obj, "subscription"),
                 "tier": gtier or (md.get("tier") if hasattr(md, "get") else None),
                 "ts": int(time.time())})
+            # Record the buyer's OWN unlock session, so if they later reach the referral
+            # threshold their reward can refund it ("money back"). Best-effort.
+            buyer_email = details.get("email") if hasattr(details, "get") else None
+            if buyer_email:
+                try:
+                    from . import referrals as _refs
+                    _refs.record_purchase(buyer_email, pay._get(obj, "id") or "")
+                except Exception as e:
+                    print(f"[referral] record_purchase failed: {e}", file=sys.stderr, flush=True)
             # Referral: a PAID conversion credits the referrer (keyed by the Stripe session
             # id, so a webhook retry never double-counts). At the threshold, issue a one-time
             # reward code and email it. Wrapped so a referral hiccup never fails the webhook.
@@ -933,16 +980,26 @@ def create_app() -> Flask:
                     from . import referrals
                     referrals.credit(ref, pay._get(obj, "id") or "")
                     if referrals.needs_reward(ref):
-                        code, _err = pay.create_reward_promo_code(referrals.REWARD_PERCENT)
+                        # Refer-5 reward (upgraded): MONEY BACK on their own unlock + a FREE YEAR
+                        # of Monitor. The refund is best-effort; the free-year code is the kept
+                        # reward recorded against the referrer.
+                        own = referrals.own_session_for(ref)
+                        if own:
+                            try:
+                                pay.refund_session(own)
+                            except Exception as e:
+                                print(f"[referral] reward refund failed: {e}", file=sys.stderr, flush=True)
+                        code, _err = pay.create_free_year_code()
                         if code and referrals.mark_rewarded(ref, code):
                             remail = referrals.email_for_code(ref)
                             if remail:
                                 from . import emailer
                                 emailer.send(
                                     remail,
-                                    "You earned 50% off JobBreak Monitor",
-                                    "Five friends you referred have subscribed - thank you.\n\n"
-                                    "Here is your one-time 50% off code: " + code + "\n\n"
+                                    "Your JobBreak reward: money back + a free year",
+                                    "Five friends you referred have bought JobBreak - thank you.\n\n"
+                                    "Your reward: we are refunding what you paid, and here is a code\n"
+                                    "for a FREE YEAR of JobBreak Monitor: " + code + "\n\n"
                                     "Enter it at checkout: https://jobbreak.ai\n")
                 except Exception as e:
                     print(f"[referral] credit/reward failed: {e}", file=sys.stderr, flush=True)
@@ -968,6 +1025,23 @@ def create_app() -> Flask:
         return render_template("admin_stats.html", s=an.summary(days), watches=wc,
                                jobs=an.top_jobs(days), job_totals=an.assessment_totals(days),
                                key=admin_key, days=days, version=VERSION, noindex=True)
+
+    @app.get("/admin/ensure-launch-code")
+    def admin_ensure_launch_code():
+        """Idempotently mint the public launch/awareness promo code (JOBBREAK, 40% off). Protected
+        by JOBCAST_ADMIN_KEY (?key=...). Run against Stripe TEST first, then live on deploy."""
+        admin_key = os.environ.get("JOBCAST_ADMIN_KEY")
+        if not admin_key or request.args.get("key") != admin_key:
+            from flask import abort
+            abort(404)
+        from . import payments as pay
+        if not pay.configured():
+            return Response("stripe not configured\n", mimetype="text/plain")
+        code, err = pay.ensure_launch_code()
+        if code:
+            return Response("launch code ready: %s (%d%% off)\n" % (code, pay.LAUNCH_PERCENT),
+                            mimetype="text/plain")
+        return Response("failed: %s\n" % (err or "unknown"), mimetype="text/plain")
 
     @app.get("/admin/checkouts")
     def admin_checkouts():
