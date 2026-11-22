@@ -452,6 +452,7 @@
         <div class="sr-step"><b>{{ r.base_exposure|round|int }}</b><span>highest exposure = your risk</span><span class="sr-arrow">&rarr;</span></div>
         <div class="sr-step"><b>{{ yr_lo }}{% if yr_hi %}&ndash;{{ yr_hi }}{% else %}+{% endif %}</b><span>on the adoption curve</span></div>
       </div>
+      <p class="sr-contrast"><b>This isn't a chatbot's guess or a web search.</b> It's your number, computed from real O*NET and BLS data for <em>your</em> job, with the working shown &mdash; verified data, not a vibe.</p>
       <details class="sr-more">
         <summary>More detail on the method</summary>
         <p class="sr-method" style="margin-top:10px;border:0;padding:0"><b>How this is computed.</b> Every task is scored for AI exposure (task-level language-model capability, after Eloundou et&nbsp;al.) and for robotics (an O*NET physical work-context proxy). Your {{ rating_label }} is the higher of the two across all tasks, {{ r.base_exposure|round|int }} of 100 (range {{ r.exposure_range.ai_software[0]|round|int }} to {{ r.exposure_range.ai_software[1]|round|int }}). The year places that score on the technology-adoption curve, then shifts it for local demand in {{ r.location.metro }} ({{ r.timeline.local_demand_trend }}). Scores come from O*NET task and work-context data and peer-reviewed AI-exposure research; nothing here is written by an AI. These are sourced ranges for planning, not predictions.</p>
@@ -513,6 +514,8 @@
     .gt-empty { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:15px; }
     .gt-empty b { color:var(--green,#3fb27f); }
     .gt-soft-intro { font-size:13px; color:var(--muted); margin:0 0 10px; line-height:1.45; }
+    .gt-hope { font-size:14px; color:var(--ink); font-weight:600; margin:0 0 12px; line-height:1.5; }
+    .gt-hope b { color:var(--green,#2f9e68); font-weight:800; }
     /* the reveal: a short, satisfying scan before the payoff lands */
     .go-reveal { display:flex; align-items:center; gap:14px; padding:14px 2px; }
     .gr-ring svg { display:block; }
@@ -553,6 +556,9 @@
     details.sr-more > summary::-webkit-details-marker { display:none; }
     details.sr-more > summary::before { content:'\25B8'; font-size:11px; transition:transform .15s; }
     details.sr-more[open] > summary::before { transform:rotate(90deg); }
+    .sr-contrast { font-size:12.5px; color:var(--ink); line-height:1.5; margin:12px 0 0; padding:11px 13px;
+      border-radius:10px; background:var(--card); border:1px solid var(--line); border-left:3px solid var(--primary); }
+    .sr-contrast b { font-weight:800; }
     /* skills modal */
     .skm { position:fixed; inset:0; z-index:1200; background:rgba(8,12,20,.72); display:flex; align-items:center; justify-content:center; padding:16px; }
     .skm[hidden] { display:none; }
@@ -570,9 +576,9 @@
 
   <div id="green-option" class="green-opt" data-paid="{{ '1' if paid else '0' }}">
     <div id="go-intro">
-      <span class="go-ey">Your safer move</span>
-      <h3 class="go-h">Find the AI-safe career you already qualify for</h3>
-      <p class="go-sub">Tell us what you're good at. We match the skills you already have to a lower-risk career you can realistically move into &mdash; and show exactly how much of it you already qualify for, and how far your risk drops.</p>
+      <span class="go-ey">It's not all doom and gloom</span>
+      <h3 class="go-h">The skills you already have transfer to an AI-safe career</h3>
+      <p class="go-sub">Tell us what you're good at. We match <b>your</b> skills against the data to find a lower-risk career you can realistically move into &mdash; and show exactly how much of it you already qualify for, the one or two skills to add, and how far your risk drops. Not a web search: your skills, computed.</p>
       <button type="button" id="go-start" class="go-cta">{{ 'Add my skills' if paid else 'Unlock my safer career' }} &#8250;</button>
       {% if not paid %}<div class="go-lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Part of JobBreak Monitor &mdash; one-time $4.99</div>{% endif %}
     </div>
@@ -703,8 +709,8 @@
     function leadCard(t, sym) {
       var C = 2 * Math.PI * 42, off = C * (1 - (t.qualified_pct || 0) / 100);
       var qualLine = t.qualified_m
-        ? 'You already qualify for <b>' + t.qualified_k + ' of ' + t.qualified_m + ' core skills</b>.'
-        : 'A closely related role at much lower automation risk.';
+        ? 'Your skills transfer &mdash; you already qualify for <b>' + t.qualified_k + ' of ' + t.qualified_m + ' core skills</b>.'
+        : 'A closely related role your skills transfer into, at much lower automation risk.';
       var have = (t.have_skills || []).map(function (s) { return '<span class="gt-chip have">' + esc(s) + '</span>'; }).join('');
       var add = (t.add_skills || []).map(function (s) { return '<span class="gt-chip add">+ ' + esc(s) + '</span>'; }).join('');
       var pay = money(sym, t.median_wage);
@@ -750,7 +756,7 @@
         '</div>' +
         '<p class="gt-ahead-sub">At <b>' + Math.round(d.your_exposure) + ' of 100</b>, ' +
           (pct !== null ? 'you are safer than <b>' + pct + '% of all jobs we score</b>. ' : '') +
-          'AI is unlikely to take the core of this role soon &mdash; your edge is the human work it cannot do.</p>' +
+          'It’s not all doom and gloom &mdash; your skills are resilient and transfer. Your edge is the human work AI cannot do.</p>' +
         (edge ? '<div class="gt-edge"><h4>Your AI-resistant edge</h4><div class="gt-edge-chips">' + edge + '</div></div>' : '') +
       '</div>';
     }
@@ -778,6 +784,8 @@
         html += '<p class="gt-soft-intro">Want to be even safer? Here is a reachable move that drops your exposure further:</p>';
       } else if (d.soft_only) {
         html += '<p class="gt-soft-intro">No dramatically safer role matches your skills, but here is the closest related role at lower risk &mdash; a realistic step down in exposure:</p>';
+      } else {
+        html += '<p class="gt-hope">It’s not all doom and gloom &mdash; the skills you already have <b>transfer</b>. Here is the AI-safe career they unlock:</p>';
       }
       html += leadCard(ts[0], sym);
       if (ts.length > 1) html += '<div class="gt-more">' + ts.slice(1).map(function (t) { return miniCard(t, sym); }).join('') + '</div>';
