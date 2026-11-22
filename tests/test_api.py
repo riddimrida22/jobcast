@@ -46,6 +46,25 @@ def test_home_page(client):
     assert b'id="lp-q"' in r.data
 
 
+def test_ticker_signals_shape():
+    # The landing "RIGHT NOW" HUD strip is driven by curated, dated signals. Each item must
+    # carry the three fields the template renders, and the strip must declare an updated date.
+    from server import ticker
+    sig = ticker.signals()
+    assert sig["as_of"]
+    assert sig["items"], "ticker must have at least one signal"
+    for it in sig["items"]:
+        assert it["kind"] and it["text"] and it["source"]
+
+
+def test_home_renders_ticker(client):
+    # The curated signals must reach the landing (structural hook, not copy), so the why-now
+    # HUD strip and its "updated" date are actually on the page.
+    r = client.get("/")
+    assert b'class="hud-strip"' in r.data
+    assert b"updated" in r.data
+
+
 def test_home_scores_consistent_with_engine(client):
     # Regression: the "careers more at risk" ticker used max(ai, robo) while the Jane worked
     # example used the v2 calibrated blend, so one job showed two different numbers on one page.
