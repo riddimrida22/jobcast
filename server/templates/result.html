@@ -13,7 +13,7 @@
    the score sits right at the top, and let the in-page paywall do the selling after the free taste. #}
 {% block promobars %}{% endblock %}
 {% block content %}
-{% if seo %}<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":{{ ("Will AI or robots replace " ~ r.occupation.title ~ "?") | tojson }},"acceptedAnswer":{"@type":"Answer","text":{{ (r.occupation.title ~ " scores " ~ r.base_exposure ~ " of 100 for automation exposure, from O*NET task data and peer-reviewed AI-exposure research - higher means more of the role's tasks are automatable. JobBreak shows the full sourced breakdown and a timeline.") | tojson }}}}]}</script>{% endif %}
+{% if seo %}<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":{{ ("Will AI or robots replace " ~ r.occupation.title ~ "?") | tojson }},"acceptedAnswer":{"@type":"Answer","text":{{ (r.occupation.title ~ " scores AI Resilience Level " ~ r.base_level ~ " of 10 (10 = safe, 1 = extinct), from O*NET task data and peer-reviewed AI-exposure research - a lower level means more of the role's tasks are automatable. JobBreak shows the full sourced breakdown and a timeline.") | tojson }}}}]}</script>{% endif %}
 {% set check %}<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>{% endset %}
 
 <style>
@@ -208,10 +208,10 @@
   </div>
 </div>
 {% set win_lab = '2027&ndash;2029' if bid == 'near_term_high' else ('2031&ndash;2036' if bid == 'partial_5_10yr' else 'late 2030s+') %}
-<div class="hud-readout hero-{{ 'hi' if bid == 'near_term_high' else ('mid' if bid == 'partial_5_10yr' else 'lo') }}" id="hud-readout" aria-hidden="true">
-  <div class="hr-meter"><i id="hs-meter-i" style="width:{{ be|round|int }}%"></i></div>
+<div class="hud-readout hero-{{ 'hi' if lvl <= 3 else ('mid' if lvl <= 6 else 'lo') }}" id="hud-readout" aria-hidden="true">
+  <div class="hr-meter"><i id="hs-meter-i" style="width:{{ lvl * 10 }}%"></i></div>
   <div class="hr-chips">
-    <span class="hr-chip"><b>Exposure meter</b></span>
+    <span class="hr-chip"><b>Resilience</b></span>
     <span class="hr-chip"><b>Window</b> <span class="hv" id="hr-win">{{ win_lab|safe }}</span></span>
     <span class="hr-chip"><b>Source</b> O*NET &middot; BLS</span>
   </div>
@@ -442,7 +442,7 @@
   <div class="sh-done-all" id="sh-done-all" hidden></div>
 </div>
 <script id="sharpen-base" type="application/json">{{ {
-  "base": r.base_exposure, "ai": r.exposure.ai_software, "robo": r.exposure.physical_robotics,
+  "base": r.base_exposure, "level": r.base_level, "ai": r.exposure.ai_software, "robo": r.exposure.physical_robotics,
   "band": r.timeline.band.id, "wage": r.wages.occupation_median_wage, "metro": r.location.metro,
   "demand": r.timeline.local_demand_trend, "sym": r.currency.symbol,
   "half": r.exposure_range.half_width } | tojson }}</script>
@@ -485,7 +485,7 @@
     setTxt('hs-lvl', levelWord(lvl));
     // HUD readout: the meter + the collapse-window chip follow the fresh number.
     var ro = document.getElementById('hud-readout'); if (ro) ro.className = 'hud-readout ' + heroClass(lvl);
-    var meter = document.getElementById('hs-meter-i'); if (meter) meter.style.width = Math.round(be) + '%';
+    var meter = document.getElementById('hs-meter-i'); if (meter) meter.style.width = (lvl * 10) + '%';
     var win = document.getElementById('hr-win'); if (win && nr.timeline && nr.timeline.band) win.textContent = winLabel(nr.timeline.band.id);
     // gauges
     var ai = nr.exposure.ai_software, robo = nr.exposure.physical_robotics;
@@ -559,16 +559,21 @@
   }
   function revealAgeExp(nr) {
     var newBe = nr.base_exposure, oldBe = BASE.base;
+    var newLvl = (nr.base_level != null) ? nr.base_level : null;
+    var oldLvl = (BASE.level != null) ? BASE.level : null;
+    var lvlMoved = (newLvl != null && oldLvl != null && newLvl !== oldLvl);
     var ry = nr.timeline.remaining_working_years;
     var html = '<div class="sh-reveal"><p class="sh-reveal-h">A sharper timeline</p>';
     var parts = [];
     if (ry != null) parts.push('about <b>' + ry + ' working years</b> left');
-    if (Math.abs(newBe - oldBe) >= 0.1) {
-      parts.push('your risk eases from <b>' + Math.round(oldBe) + '</b> to <b>' + Math.round(newBe) + '</b> as experience shifts you toward oversight work');
+    if (lvlMoved) {
+      parts.push('your resilience ' + (newLvl > oldLvl ? 'rises' : 'dips') + ' from <b>Level ' + oldLvl + '</b> to <b>Level ' + newLvl + '</b> as experience shifts you toward oversight work');
+    } else if (Math.abs(newBe - oldBe) >= 0.1 && newLvl != null) {
+      parts.push('experience shifts you toward oversight work, easing your exposure within <b>Level ' + newLvl + '</b>');
     }
     html += '<p>' + (parts.length ? parts.join(', and ').replace(/^./, function (c) { return c.toUpperCase(); }) : 'Your timeline is now tuned to your situation') + '.</p>';
     if (nr.timeline.overlap_note) html += '<p style="margin-top:8px">' + esc(nr.timeline.overlap_note) + '</p>';
-    if (Math.abs(newBe - oldBe) >= 0.1) html += cmpBars('Before', Math.round(oldBe), 'With you', Math.round(newBe), function (v) { return v + ' / 100'; });
+    if (lvlMoved) html += cmpBars('Before', oldLvl, 'With you', newLvl, function (v) { return 'Level ' + v; });
     return html + '</div>';
   }
 
@@ -860,13 +865,13 @@
       <div class="sr-flow">
         <div class="sr-step"><b>{{ total_n }}</b><span>core tasks</span><span class="sr-arrow">&rarr;</span></div>
         <div class="sr-step"><b>AI &amp; robots</b><span>score each 0&ndash;100</span><span class="sr-arrow">&rarr;</span></div>
-        <div class="sr-step"><b>{{ r.base_exposure|round|int }}</b><span>highest exposure = your risk</span><span class="sr-arrow">&rarr;</span></div>
+        <div class="sr-step"><b>{{ r.base_exposure|round|int }}</b><span>highest = exposure score</span><span class="sr-arrow">&rarr;</span></div>
         <div class="sr-step"><b>{{ yr_lo }}{% if yr_hi %}&ndash;{{ yr_hi }}{% else %}+{% endif %}</b><span>on the adoption curve</span></div>
       </div>
       <p class="sr-contrast"><b>This isn't a chatbot's guess or a web search.</b> It's your number, computed from real O*NET and BLS data for <em>your</em> job, with the working shown &mdash; verified data, not a vibe.</p>
       <details class="sr-more">
         <summary>More detail on the method</summary>
-        <p class="sr-method" style="margin-top:10px;border:0;padding:0"><b>How this is computed.</b> Every task is scored for AI exposure (task-level language-model capability, after Eloundou et&nbsp;al.) and for robotics (an O*NET physical work-context proxy). Your {{ rating_label }} is the higher of the two across all tasks, {{ r.base_exposure|round|int }} of 100 (range {{ r.exposure_range.ai_software[0]|round|int }} to {{ r.exposure_range.ai_software[1]|round|int }}). The year places that score on the technology-adoption curve, then shifts it for local demand in {{ r.location.metro }} ({{ r.timeline.local_demand_trend }}). Scores come from O*NET task and work-context data and peer-reviewed AI-exposure research; nothing here is written by an AI. These are sourced ranges for planning, not predictions.</p>
+        <p class="sr-method" style="margin-top:10px;border:0;padding:0"><b>How this is computed.</b> Every task is scored for AI exposure (task-level language-model capability, after Eloundou et&nbsp;al.) and for robotics (an O*NET physical work-context proxy). Your exposure score is the higher of the two across all tasks, {{ r.base_exposure|round|int }} of 100 (range {{ r.exposure_range.ai_software[0]|round|int }} to {{ r.exposure_range.ai_software[1]|round|int }}); your resilience level bands where that sits across all occupations, from 1 (extinct) to 10 (safe). The year places that score on the technology-adoption curve, then shifts it for local demand in {{ r.location.metro }} ({{ r.timeline.local_demand_trend }}). Scores come from O*NET task and work-context data and peer-reviewed AI-exposure research; nothing here is written by an AI. These are sourced ranges for planning, not predictions.</p>
       </details>
     </div>
   </div>
@@ -1141,9 +1146,9 @@
           '</div>' +
         '</div>' +
         '<div class="gt-drop">' +
-          '<div class="gt-drop-row"><span class="gt-drop-lab">Your job</span>' + bar('now', t.your_exposure) + '<span class="gt-drop-val">' + Math.round(t.your_exposure) + '</span></div>' +
-          '<div class="gt-drop-row"><span class="gt-drop-lab">' + esc((t.title || '').split(',')[0]) + '</span>' + bar('safe', t.max_exposure) + '<span class="gt-drop-val">' + Math.round(t.max_exposure) + '</span></div>' +
-          '<p class="gt-drop-cap">Risk drops <b>' + Math.round(t.your_exposure) + ' &rarr; ' + Math.round(t.max_exposure) + '</b> (down ' + Math.round(t.risk_drop) + ' of 100).</p>' +
+          '<div class="gt-drop-row"><span class="gt-drop-lab">Your job</span>' + bar('now', (t.your_level || 0) * 10) + '<span class="gt-drop-val">L' + (t.your_level || 0) + '</span></div>' +
+          '<div class="gt-drop-row"><span class="gt-drop-lab">' + esc((t.title || '').split(',')[0]) + '</span>' + bar('safe', (t.max_level || 0) * 10) + '<span class="gt-drop-val">L' + (t.max_level || 0) + '</span></div>' +
+          '<p class="gt-drop-cap">Resilience rises <b>Level ' + (t.your_level || 0) + ' &rarr; ' + (t.max_level || 0) + '</b> (up ' + Math.max(0, (t.max_level || 0) - (t.your_level || 0)) + ' level' + (Math.abs((t.max_level || 0) - (t.your_level || 0)) === 1 ? '' : 's') + ' &middot; 10 = safe).</p>' +
         '</div>' +
         (have ? '<div class="gt-skills"><h4>Skills you already bring</h4><div class="gt-chips">' + have + '</div></div>' : '') +
         (add ? '<div class="gt-skills"><h4>Skills to add</h4><div class="gt-chips">' + add + '</div></div>' : '') +
@@ -1154,7 +1159,7 @@
       var pay = money(sym, t.median_wage);
       return '<div class="gt-mini"><div class="gt-mini-pct">' + (t.qualified_pct || 0) + '%</div>' +
         '<div class="gt-mini-body"><div class="gt-mini-role">' + esc(t.title) + '</div>' +
-        '<div class="gt-mini-meta">risk ' + Math.round(t.your_exposure) + ' &rarr; ' + Math.round(t.max_exposure) +
+        '<div class="gt-mini-meta">Level ' + (t.your_level || 0) + ' &rarr; ' + (t.max_level || 0) +
         (pay ? ' &middot; ' + pay : '') + '</div></div></div>';
     }
     // Celebratory payoff for an already-safe role: the win, the proof (safer-than-X%), and the
@@ -1168,7 +1173,7 @@
           '<div><div class="gt-ahead-ey">Ahead of the curve</div>' +
           '<div class="gt-ahead-h">Your job is one of the safer ones</div></div>' +
         '</div>' +
-        '<p class="gt-ahead-sub">At <b>' + Math.round(d.your_exposure) + ' of 100</b>, ' +
+        '<p class="gt-ahead-sub">At <b>Level ' + (d.your_level || 0) + '/10</b>, ' +
           (pct !== null ? 'you are safer than <b>' + pct + '% of all jobs we score</b>. ' : '') +
           'It’s not all doom and gloom &mdash; your skills are resilient and transfer. Your edge is the human work AI cannot do.</p>' +
         (edge ? '<div class="gt-edge"><h4>Your AI-resistant edge</h4><div class="gt-edge-chips">' + edge + '</div></div>' : '') +
@@ -1188,8 +1193,8 @@
           html += '<p class="muted" style="margin:0">To lock it in, keep leaning into those tasks and the credentials in your plan below. The <strong>Safer paths</strong> tab lists related roles if you want to drop your exposure even further.</p>';
         } else {
           // Honest - never a blanket "you're already safe" for a mid-risk job.
-          html += '<div class="gt-empty"><p style="margin:0 0 6px"><b>Straight answer:</b> at ' + Math.round(d.your_exposure) +
-            ' of 100, we could not find a role that matches your current skills <em>and</em> sits at clearly lower risk &mdash; your field is fairly evenly exposed, so the safest move is not a different job title.</p>' +
+          html += '<div class="gt-empty"><p style="margin:0 0 6px"><b>Straight answer:</b> at Level ' + (d.your_level || 0) +
+            '/10, we could not find a role that matches your current skills <em>and</em> sits at a clearly safer level &mdash; your field is fairly evenly exposed, so the safest move is not a different job title.</p>' +
             '<p class="muted" style="margin:0">Your strongest play is below: shift toward your least-exposed tasks and the credentials in your plan. The <strong>Safer paths</strong> tab shows the closest related roles.</p></div>';
         }
         results.innerHTML = html; pop(); return;
@@ -1357,7 +1362,7 @@
       </g>
     </symbol>
   </defs></svg>
-  <script id="opportunity-data" type="application/json">{{ {"current_title": r.occupation.title, "current_exposure": r.base_exposure, "roles": r.adjacent_lower_risk[:6]} | tojson }}</script>
+  <script id="opportunity-data" type="application/json">{{ {"current_title": r.occupation.title, "current_exposure": r.base_exposure, "current_level": r.base_level, "roles": r.adjacent_lower_risk[:6]} | tojson }}</script>
   <div id="strat-list" class="deck">
   {% for st in r.strategies %}
     <div class="deck-card">
@@ -1374,8 +1379,8 @@
   <div id="sshow" class="sshow" hidden aria-modal="true" role="dialog" aria-label="Plan slideshow">
     <button type="button" class="ss-close" id="ss-close" aria-label="Close slideshow">&times;</button>
     <div class="ss-scale" aria-hidden="true">
-      <div class="ssc-job"><b>{{ disp_title }}</b><span>exposure {{ r.base_exposure|round|int }} of 100</span></div>
-      <div class="ssc-row"><span>safe</span><div class="ssc-track"><i class="ssc-mark" style="left:{{ r.base_exposure|round|int }}%"></i></div><span>exposed</span></div>
+      <div class="ssc-job"><b>{{ disp_title }}</b><span>AI resilience Level {{ r.base_level }}/10</span></div>
+      <div class="ssc-row"><span>extinct</span><div class="ssc-track"><i class="ssc-mark" style="left:{{ (r.base_level * 10)|round|int }}%"></i></div><span>safe</span></div>
     </div>
     <div class="ss-count" id="ss-count"></div>
     <button type="button" class="ss-arrow prev" id="ss-prev" aria-label="Previous step">&#8249;</button>
@@ -1493,8 +1498,8 @@
   {% for a in r.adjacent_lower_risk %}
   <div class="hrow">
     <div class="hlabel">{{ a.title }}</div>
-    <div class="htrack"><div class="hfill prot" style="width:{{ a.max_exposure }}%"></div></div>
-    <div class="hval">{{ a.max_exposure }}</div>
+    <div class="htrack"><div class="hfill prot" style="width:{{ a.level * 10 }}%"></div></div>
+    <div class="hval">L{{ a.level }}</div>
   </div>
   {% endfor %}
   {% if not seo %}
@@ -1663,23 +1668,23 @@
   var OPP = {};
   try { OPP = JSON.parse(document.getElementById('opportunity-data').textContent) || {}; } catch (e) {}
   function hasOpp() { return OPP && OPP.roles && OPP.roles.length; }
-  function oppRow(title, exp, cls, g) {
+  function oppRow(title, lvl, cls, g) {
     var tag = (typeof g === 'number') ? '<span class="opp-grow' + (g >= 0 ? '' : ' neg') + '">' + (g >= 0 ? '+' : '') + g + '%</span>' : '';
-    var w = Math.max(3, Math.min(100, exp));
-    return '<div class="opp-row"><div class="opp-lab">' + esc(title) + ' <b class="opp-val">' + exp + '</b>' + tag + '</div>' +
+    var w = Math.max(6, Math.min(100, (lvl || 0) * 10));
+    return '<div class="opp-row"><div class="opp-lab">' + esc(title) + ' <b class="opp-val">L' + (lvl || 0) + '</b>' + tag + '</div>' +
       '<div class="opp-track"><div class="opp-bar ' + cls + '" style="width:' + w + '%"></div></div></div>';
   }
   function chartCard() {
     if (!hasOpp()) return '';
-    var rows = oppRow((OPP.current_title || '{{ "This role" if seo else "Your job" }}') + '{{ "" if seo else " (you)" }}', OPP.current_exposure, 'risk');
+    var rows = oppRow((OPP.current_title || '{{ "This role" if seo else "Your job" }}') + '{{ "" if seo else " (you)" }}', OPP.current_level, 'risk');
     OPP.roles.slice(0, 5).forEach(function (r) {
-      rows += oppRow(r.title, r.max_exposure, 'safe', (typeof r.projection_pct === 'number' ? r.projection_pct : undefined));
+      rows += oppRow(r.title, r.level, 'safe', (typeof r.projection_pct === 'number' ? r.projection_pct : undefined));
     });
     return '<div class="deck-card opp-card">' +
       '<div class="deck-top"><span class="deck-num star">&#9733;</span><span class="deck-hz">Opportunity</span></div>' +
       '<div class="deck-head">{{ "Safer paths from this role" if seo else "Safer paths from your job" }}</div>' +
       '<div class="opp-chart">' + rows + '</div>' +
-      '<div class="opp-note">Bar = automation exposure (shorter is safer). Green = BLS projected demand growth to 2030.</div>' +
+      '<div class="opp-note">Bar = AI resilience level, 1 to 10 (longer is safer). Green = BLS projected demand growth to 2030.</div>' +
       '</div>';
   }
   var currentSteps = [];
