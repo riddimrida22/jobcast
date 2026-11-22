@@ -101,6 +101,7 @@ class Engine:
         # Per-country wage overlays (country code -> {soc_median, ...}). US needs none.
         self.overlays = _load_overlays() if overlays is None else overlays
         self._task_name_cache: Dict[str, List[str]] = {}   # soc -> core task names (green match)
+        self._display_sorted: Optional[List[float]] = None   # sorted raw scores, for the display rescale
 
     # ---- public API ------------------------------------------------------
     def assess(self, profile: Profile) -> Dict[str, Any]:
@@ -117,15 +118,17 @@ class Engine:
         country = countries.resolve(profile.country)
         # US uses zip->metro geography; other countries are national-only for now.
         metro_id = self.snapshot.metro_for_zip(profile.zip_code) if country == countries.DEFAULT else None
-        axes, decomposition = self._score_axes(occ, profile)
-        # v2: the headline is the calibrated multi-factor blend (config exposure_model), not an
+        axes, decomposition, raw_axes = self._score_axes(occ, profile)
+        # The headline is the calibrated multi-factor blend (config exposure_model), not an
         # unfitted max(ai, robo). ai/robo come in seniority-adjusted via the axes; the task-
-        # structure factors (routine, interpersonal) come from the occupation.
-        base_exposure = self.combined_exposure(
-            occ, ai100=axes["ai_software"], robo100=axes["physical_robotics"])
-        timeline = self._timeline(occ, metro_id, base_exposure, profile)
+        # structure factors (routine, interpersonal) come from the occupation. We keep the RAW
+        # blend for the validated band boundaries and all ordering, and show its display rescale
+        # (percentile across occupations) as the headline so the number uses the full 0-100 range.
+        raw_base = self.combined_exposure(occ, ai100=raw_axes[0], robo100=raw_axes[1])
+        base_exposure = self.display_score(raw_base)
+        timeline = self._timeline(occ, metro_id, raw_base, profile)
         wages = self._wages(occ, metro_id, profile, country)
-        adjacency = self._adjacency(occ, base_exposure)
+        adjacency = self._adjacency(occ, raw_base)
         confidence = self._confidence_band(axes)
         drivers = self._key_drivers(occ, axes, decomposition, timeline, wages, profile)
         strategies = self._strategies(occ, axes, base_exposure, timeline, wages, adjacency,
@@ -224,10 +227,11 @@ class Engine:
             # occupations with no job zone slip past the filter.
             if max_zone and (zone is None or zone > max_zone):
                 continue
-            base = self.combined_exposure(o)          # v2 calibrated blend, not max(ai, robo)
+            base = self.combined_exposure(o)          # raw blend: drives the filter, fit and order
             safe = 100 - base
             if safe < SAFE_FLOOR:
                 continue
+            disp = self.display_score(base)           # shown numbers use the display scale
             growth = o.get("projection_pct")              # BLS 2020-2030 projected % change
             if growth is None:
                 growth = o.get("wage_trend_5yr_real_pct") or 0
@@ -242,8 +246,8 @@ class Engine:
             w = ff.get(priority if priority in ("safe", "pay") else "balanced",
                        {"safe": 0.50, "pay": 0.30, "growth": 0.20})
             fit = safe * w["safe"] + paynorm * w["pay"] + gnorm * w["growth"]
-            out.append({"soc": soc, "title": o["title"], "base_exposure": round(base),
-                        "resilience": round(safe), "median_wage": wage, "job_zone": zone,
+            out.append({"soc": soc, "title": o["title"], "base_exposure": round(disp),
+                        "resilience": round(100 - disp), "median_wage": wage, "job_zone": zone,
                         "edu": edu.get(zone, "Varies"), "growth": round(growth, 1), "fit": round(fit, 1),
                         "family": self.snapshot.family_name(self.snapshot.family_code(soc))})
         # Order each list by the dimension its label promises, so the headline number
@@ -274,7 +278,12 @@ class Engine:
         if not base.get("ok"):
             return {"ok": False, "error": "occupation_not_found"}
         occ = self.snapshot.match_title(profile.title)
-        your_exposure = base["base_exposure"]
+        # Selection and the safer/greener thresholds run on the RAW blend (validated ordering and
+        # margins); every number returned to the UI is on the display scale, consistent with the
+        # headline. your_disp is the shown headline; your_raw drives the comparisons.
+        your_disp = base["base_exposure"]
+        your_raw = self.combined_exposure(occ)
+        your_exposure = your_disp
         your_soc = occ["soc"]
         your_zone = occ.get("job_zone")
         your_family = self.snapshot.family_code(your_soc)
@@ -327,13 +336,13 @@ class Engine:
             cz = cand.get("job_zone")
             if your_zone is not None and cz is not None and cz > your_zone + 1:
                 continue                            # out of educational reach
-            if self._max_exposure(cand) <= your_exposure - SOFT_MARGIN:
+            if self._max_exposure(cand) <= your_raw - SOFT_MARGIN:
                 candidates[soc] = cand
 
         targets = []
         for soc, cand in candidates.items():
-            cand_exp = self._max_exposure(cand)
-            risk_drop = round(your_exposure - cand_exp, 1)
+            cand_exp = self._max_exposure(cand)             # raw, for selection + ranking
+            risk_drop = round(your_raw - cand_exp, 1)       # raw drop drives soft/green + score
             if risk_drop < SOFT_MARGIN:             # must be at least somewhat safer
                 continue
             is_adjacent = soc in adjacent_socs
@@ -370,12 +379,14 @@ class Engine:
             # interpersonal, low routine) - the two backtest-validated factors - so the paid
             # payoff points people toward resilient work, not just a slightly lower number.
             score = risk_drop * (0.15 + 0.85 * qualified) * reach * self._durability(cand)
+            cand_disp = self.display_score(cand_exp)        # shown target number
             targets.append({
                 "soc": soc,
                 "title": cand["title"],
-                "max_exposure": round(cand_exp, 1),
-                "your_exposure": your_exposure,
-                "risk_drop": risk_drop,
+                "max_exposure": cand_disp,
+                "your_exposure": your_disp,
+                "risk_drop": round(your_disp - cand_disp, 1),   # display-scale drop, matches the numbers
+                "risk_drop_raw": risk_drop,
                 "qualified_pct": round(qualified * 100),
                 "qualified_k": len(covered),
                 "qualified_m": m,
@@ -405,7 +416,7 @@ class Engine:
                            if t.get("max", 100) < 45][:3]
         # Where this role sits versus every job we score (a simple, true "safer than X%" line).
         all_exp = [self._max_exposure(o) for o in self.snapshot.all_occupations()]
-        safer_than_pct = (round(100 * sum(1 for e in all_exp if e > your_exposure) / len(all_exp))
+        safer_than_pct = (round(100 * sum(1 for e in all_exp if e > your_raw) / len(all_exp))
                           if all_exp else None)
         return {"ok": True, "your_exposure": your_exposure,
                 "occupation": occ["title"], "soc": your_soc,
@@ -451,6 +462,39 @@ class Engine:
                  + w["routine_structured"] * routine * 100.0
                  + w["interpersonal_protection"] * protection)
         return _clamp(score)
+
+    # ---- display rescale (presentation only) -----------------------------
+    # combined_exposure (the calibrated blend) is honest but COMPRESSED - the most-exposed
+    # occupation scores in the low 60s, so headline numbers cluster and nothing reads as the
+    # scary "near-term, high" the product is about. The fix is a presentation-layer transform:
+    # we report each occupation's PERCENTILE among all occupations we score ("more exposed than
+    # X% of jobs"). It is strictly MONOTONIC, so it never reorders anything and never touches the
+    # validated ranking, the calibration, or the raw band boundaries; it only stretches the shown
+    # number onto the full 0-100 range. See the methodology page and docs/DISPLAY_SCALE.md.
+    DISPLAY_FLOOR = 3.0
+    DISPLAY_CEIL = 99.0
+
+    def _display_sorted_scores(self) -> List[float]:
+        if self._display_sorted is None:
+            self._display_sorted = sorted(self.combined_exposure(o)
+                                          for o in self.snapshot.all_occupations())
+        return self._display_sorted
+
+    def display_score(self, raw: float) -> float:
+        """Map a raw combined-exposure value to its percentile among all scored occupations,
+        clamped to [DISPLAY_FLOOR, DISPLAY_CEIL]. Monotonic and order-preserving."""
+        import bisect
+        xs = self._display_sorted_scores()
+        n = len(xs)
+        if n == 0:
+            return round(_clamp(raw), 1)
+        p = 100.0 * (bisect.bisect_left(xs, raw) + bisect.bisect_right(xs, raw)) / 2.0 / n
+        return round(max(self.DISPLAY_FLOOR, min(self.DISPLAY_CEIL, p)), 1)
+
+    def display_exposure(self, occ: Dict[str, Any],
+                         ai100: Optional[float] = None, robo100: Optional[float] = None) -> float:
+        """The headline number shown for an occupation: the display rescale of its raw blend."""
+        return self.display_score(self.combined_exposure(occ, ai100, robo100))
 
     def _durability(self, cand: Dict[str, Any]) -> float:
         """Green-match tilt toward destinations whose safety is DURABLE: high interpersonal
@@ -505,8 +549,11 @@ class Engine:
              "exposed": max(t["ai"], t["robo"]) >= 0.5}
             for t in occ.get("tasks", [])
         ]
-        return {"ai_software": round(ai_score, 1),
-                "physical_robotics": round(robo_score, 1)}, decomposition
+        # Return the UNROUNDED seniority-scaled axis scores too: the headline blend must use the
+        # exact same values the percentile map was built from, or a tiny rounding gap can push an
+        # occupation just past its own map entry (off-by-one percentile at the extremes).
+        return ({"ai_software": round(ai_score, 1),
+                 "physical_robotics": round(robo_score, 1)}, decomposition, (ai_score, robo_score))
 
     def _metro(self, occ, metro_id):
         """Metro {employment, median_wage, demand_trend} for this occupation: the
@@ -525,11 +572,16 @@ class Engine:
         frac = min(profile.experience_years / years_full, 1.0)
         return 1.0 - (frac * max_red)
 
-    def _timeline(self, occ, metro_id, base_exposure, profile: Profile):
+    def _timeline(self, occ, metro_id, raw_base, profile: Profile):
+        # Band is assigned on the RAW blend against the validated thresholds (config, raw scale);
+        # the headline number is shown rescaled, but the partition of jobs into bands is the one
+        # the backtest validated. Monotonic display means a near-term-high job still shows a high
+        # number. Demand/union may then shift the band by +/-1 (the timeline reflects WHEN, which
+        # local demand legitimately moves, distinct from the exposure number).
         bands = self.weights["timeline_bands"]
         idx = len(bands) - 1
         for i, b in enumerate(bands):
-            if base_exposure <= b["max_exposure"]:
+            if raw_base <= b["max_exposure"]:
                 idx = i
                 break
         trend = self._metro(occ, metro_id).get("demand_trend")
@@ -763,21 +815,24 @@ class Engine:
                                 "Frame them for where the work is heading, not just where it has been."})
         return s
 
-    def _adjacency(self, occ, base_exposure) -> List[Dict[str, Any]]:
+    def _adjacency(self, occ, raw_base) -> List[Dict[str, Any]]:
         out = []
         for adj in occ.get("adjacent", []):
             full = self.snapshot.occupation(adj["soc"])
-            # Score the adjacent role on the same calibrated blend. Prefer the full occupation
-            # (it carries the task-structure factors); fall back to the adjacency entry's own
-            # ai/robo, where combined_exposure degrades to max(ai, robo).
-            adj_exp = self.combined_exposure(full if full else adj)
-            if adj_exp < base_exposure - 0.01:
+            # Score the adjacent role on the same calibrated blend (raw, for the comparison);
+            # prefer the full occupation (it carries the task-structure factors), else fall back
+            # to the adjacency entry's own ai/robo. max_exposure is shown on the display scale.
+            adj_raw = self.combined_exposure(full if full else adj)
+            if adj_raw < raw_base - 0.01:
                 out.append({"soc": adj["soc"], "title": adj["title"],
                             "ai_software": round(adj["ai"] * 100, 1),
                             "physical_robotics": round(adj["robo"] * 100, 1),
-                            "max_exposure": round(adj_exp, 1),
+                            "max_exposure": self.display_score(adj_raw),
+                            "_raw": adj_raw,
                             "projection_pct": (full or {}).get("projection_pct")})
-        out.sort(key=lambda a: a["max_exposure"])
+        out.sort(key=lambda a: a["_raw"])
+        for a in out:
+            a.pop("_raw", None)
         return out
 
     @staticmethod

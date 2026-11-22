@@ -180,16 +180,17 @@
 
 {% set be = r.base_exposure %}
 {% set bid = r.timeline.band.id %}
-{% set vlvl = t('seo.lvl.high', 'highly exposed') if be >= 66 else (t('seo.lvl.mod', 'moderately exposed') if be >= 40 else t('seo.lvl.less', 'less exposed')) %}
+{# Level follows the validated band, so the words match the band pill and the displayed number. #}
+{% set vlvl = t('seo.lvl.high', 'highly exposed') if bid == 'near_term_high' else (t('seo.lvl.mod', 'moderately exposed') if bid == 'partial_5_10yr' else t('seo.lvl.less', 'less exposed')) %}
 {% set vtim = t('seo.tim.near', 'and the bigger shift looks near-term') if bid == 'near_term_high'
    else (t('seo.tim.partial', 'and meaningful change looks likely over the next 5 to 10 years') if bid == 'partial_5_10yr'
    else t('seo.tim.far', 'and a near-term shift looks unlikely')) %}
 {% set paid = (entitlement and entitlement != 'free') or (not stripe_enabled) %}
-<div id="hero-score" class="hero-score hero-{{ 'hi' if be >= 66 else ('mid' if be >= 40 else 'lo') }}" aria-label="Your Job Extinction Risk score">
+<div id="hero-score" class="hero-score hero-{{ 'hi' if bid == 'near_term_high' else ('mid' if bid == 'partial_5_10yr' else 'lo') }}" aria-label="Your Job Extinction Risk score">
   <div class="hs-num"><b id="hs-num">{{ be|round|int }}</b><span>/100</span></div>
   <div class="hs-meta">
     <div class="hs-lvl" id="hs-lvl">{{ vlvl }}</div>
-    <div class="hs-sub">{{ t('ov.rating', rating_label) }}</div>
+    <div class="hs-sub">{{ t('ov.rating', rating_label) }} &middot; more exposed than {{ be|round|int }}% of jobs</div>
   </div>
 </div>
 <p class="verdict"><strong>{{ t('seo.short', 'The short version:') }}</strong> {{ t('seo.v.pre', 'this role is') }} {{ vlvl }} {{ t('seo.v.mid', 'to automation,') }} {{ vtim }}{{ t('seo.v.suf', '. It is a sourced range, not a verdict, and the detail is below.') }}</p>

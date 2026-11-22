@@ -25,6 +25,19 @@ A language model never sets the rating; it only explains.</p>
   coverage, and age.</p>
 </div>
 
+<div class="card">
+  <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg><h2 style="margin:0">What the 0 to 100 means</h2></div>
+  <p style="margin-top:0">The number is a <strong>relative exposure index</strong>, not a probability. A
+  score of 80 means this job is <strong>more exposed to automation than 80% of the occupations we rate</strong>
+  &mdash; it is the job's position in the ranking, stretched onto a 0 to 100 scale so the differences are
+  easy to read.</p>
+  <p class="muted" style="margin-bottom:0">The <em>ranking</em> is the part we validate against real
+  employment data (above); the 0 to 100 is simply a plain-English way to show where you sit in it. It does
+  not say your personal chance of losing your job, which is why we show it as a range, not a verdict. The
+  two dials below &mdash; AI/software and physical/robotics &mdash; are the raw component exposures that feed
+  the blend.</p>
+</div>
+
 {% if calibration %}
 <div class="card">
   <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg><h2 style="margin:0">Does it hold up?</h2></div>
