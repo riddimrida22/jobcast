@@ -492,13 +492,11 @@
     var win = document.getElementById('hr-win'); if (win && nr.timeline && nr.timeline.band) win.textContent = winLabel(nr.timeline.band.id);
     // gauges
     var ai = nr.exposure.ai_software, robo = nr.exposure.physical_robotics;
-    setTxt('gx-ai-num', round1(ai)); setTxt('gx-robo-num', round1(robo));
-    var aiArc = document.getElementById('gx-ai-arc'); if (aiArc) aiArc.style.strokeDashoffset = (326.7 * (1 - ai / 100)).toFixed(1);
-    var roArc = document.getElementById('gx-robo-arc'); if (roArc) roArc.style.strokeDashoffset = (326.7 * (1 - robo / 100)).toFixed(1);
-    if (nr.exposure_range) {
-      setTxt('gx-ai-range', 'range ' + nr.exposure_range.ai_software[0] + ' to ' + nr.exposure_range.ai_software[1]);
-      setTxt('gx-robo-range', 'range ' + nr.exposure_range.physical_robotics[0] + ' to ' + nr.exposure_range.physical_robotics[1]);
-    }
+    var aiLvl = Math.max(1, Math.min(10, Math.ceil((100 - ai) / 10)));
+    var roLvl = Math.max(1, Math.min(10, Math.ceil((100 - robo) / 10)));
+    setTxt('gx-ai-num', aiLvl); setTxt('gx-robo-num', roLvl);
+    var aiArc = document.getElementById('gx-ai-arc'); if (aiArc) aiArc.style.strokeDashoffset = (326.7 * (1 - aiLvl / 10)).toFixed(1);
+    var roArc = document.getElementById('gx-robo-arc'); if (roArc) roArc.style.strokeDashoffset = (326.7 * (1 - roLvl / 10)).toFixed(1);
     // pay + place
     var med = nr.wages && nr.wages.occupation_median_wage, metro = (nr.location && nr.location.metro) || '';
     if (med) {
@@ -706,26 +704,28 @@
     <p class="ov-teaser-scale">{{ t('lvl.scale', '10 = safe, 1 = extinct') }}</p>
     <p class="ov-teaser-sub">{{ t('ov.teaser.sub', 'Your resilience level, from real government data. Tap Next for the full breakdown.') }}</p>
   </div>
+  {% set ai_lvl = [10, [1, (((100 - r.exposure.ai_software) / 10) | round(0, 'ceil') | int)] | max] | min %}
+  {% set robo_lvl = [10, [1, (((100 - r.exposure.physical_robotics) / 10) | round(0, 'ceil') | int)] | max] | min %}
   <div class="gauges">
     <div class="gauge">
-      <svg viewBox="0 0 120 120" role="img" aria-label="AI exposure {{ r.exposure.ai_software }} of 100">
+      <svg viewBox="0 0 120 120" role="img" aria-label="AI resilience level {{ ai_lvl }} of 10, 10 is safe">
         <circle class="g-track" cx="60" cy="60" r="52"></circle>
         <circle class="g-prog g-ai" id="gx-ai-arc" cx="60" cy="60" r="52"
-          style="stroke-dasharray:326.7;stroke-dashoffset:{{ (326.7*(1 - r.exposure.ai_software/100))|round(1) }}"></circle>
-        <text class="g-num" id="gx-ai-num" x="60" y="60">{{ r.exposure.ai_software }}</text>
-        <text class="g-pct" x="60" y="78">{{ t('ov.of100', 'of 100') }}</text>
+          style="stroke-dasharray:326.7;stroke-dashoffset:{{ (326.7*(1 - ai_lvl/10))|round(1) }}"></circle>
+        <text class="g-num" id="gx-ai-num" x="60" y="60">{{ ai_lvl }}</text>
+        <text class="g-pct" x="60" y="78">/ 10</text>
       </svg>
-      <div class="g-caption">{{ t('ov.dial.ai', 'AI / software') }}<small id="gx-ai-range">{{ t('ov.range', 'range') }} {{ r.exposure_range.ai_software[0] }} {{ t('ov.to', 'to') }} {{ r.exposure_range.ai_software[1] }}</small></div>
+      <div class="g-caption">{{ t('ov.dial.ai', 'AI / software') }}<small id="gx-ai-range">{{ t('lvl.scale', '10 = safe, 1 = extinct') }}</small></div>
     </div>
     <div class="gauge">
-      <svg viewBox="0 0 120 120" role="img" aria-label="Robotics exposure {{ r.exposure.physical_robotics }} of 100">
+      <svg viewBox="0 0 120 120" role="img" aria-label="Robot resilience level {{ robo_lvl }} of 10, 10 is safe">
         <circle class="g-track" cx="60" cy="60" r="52"></circle>
         <circle class="g-prog g-robo" id="gx-robo-arc" cx="60" cy="60" r="52"
-          style="stroke-dasharray:326.7;stroke-dashoffset:{{ (326.7*(1 - r.exposure.physical_robotics/100))|round(1) }}"></circle>
-        <text class="g-num" id="gx-robo-num" x="60" y="60">{{ r.exposure.physical_robotics }}</text>
-        <text class="g-pct" x="60" y="78">{{ t('ov.of100', 'of 100') }}</text>
+          style="stroke-dasharray:326.7;stroke-dashoffset:{{ (326.7*(1 - robo_lvl/10))|round(1) }}"></circle>
+        <text class="g-num" id="gx-robo-num" x="60" y="60">{{ robo_lvl }}</text>
+        <text class="g-pct" x="60" y="78">/ 10</text>
       </svg>
-      <div class="g-caption">{{ t('ov.dial.robo', 'Physical / robotics') }}<small id="gx-robo-range">{{ t('ov.range', 'range') }} {{ r.exposure_range.physical_robotics[0] }} {{ t('ov.to', 'to') }} {{ r.exposure_range.physical_robotics[1] }}</small></div>
+      <div class="g-caption">{{ t('ov.dial.robo', 'Physical / robotics') }}<small id="gx-robo-range">{{ t('lvl.scale', '10 = safe, 1 = extinct') }}</small></div>
     </div>
   </div>
 
