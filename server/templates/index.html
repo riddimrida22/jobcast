@@ -295,8 +295,8 @@
     </select>
   </div>
   <div id="wz-quick-wrap" style="display:none;margin-top:18px">
-    <button type="button" id="wz-quick" style="width:100%;font:inherit;font-weight:800;font-size:16px;border:0;border-radius:12px;padding:14px;cursor:pointer;color:#2a1708;background:linear-gradient(180deg,var(--accent),#e8863a);box-shadow:0 8px 22px rgba(243,163,95,.4)">See my result now &#8250;</button>
-    <p class="muted" style="text-align:center;font-size:12.5px;margin:9px 0 0">The next questions are optional &mdash; they localize and sharpen your score.</p>
+    <button type="button" id="wz-quick" style="width:100%;font:inherit;font-weight:800;font-size:16px;border:0;border-radius:12px;padding:14px;cursor:pointer;color:#2a1708;background:linear-gradient(180deg,var(--accent),#e8863a);box-shadow:0 8px 22px rgba(243,163,95,.4)">Skip to my result &#8250;</button>
+    <p class="muted" style="text-align:center;font-size:12.5px;margin:9px 0 0">That's all we need. The next questions are optional &mdash; and you can add them later to sharpen your result.</p>
   </div>
 
   </section>
@@ -936,7 +936,9 @@
   // only required field can go straight to the score; the remaining steps stay optional.
   var quickWrap = document.getElementById('wz-quick-wrap');
   var quickB = document.getElementById('wz-quick');
-  function jobChosen() { return !!(titleSearch && titleSearch.value.trim() && titleSel && titleSel.value); }
+  // Show the skip-to-result button the moment any job is entered - a typed/off-list job counts,
+  // not only an exact on-list pick, so a hurried user is never forced through the optional steps.
+  function jobChosen() { return !!(titleSearch && titleSearch.value.trim()); }
   function syncQuick() { if (quickWrap) quickWrap.style.display = jobChosen() ? 'block' : 'none'; }
   function submitNow() {
     if (!okStep()) return;

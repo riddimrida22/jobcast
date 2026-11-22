@@ -184,10 +184,11 @@
 {% set vtim = t('seo.tim.near', 'and the bigger shift looks near-term') if bid == 'near_term_high'
    else (t('seo.tim.partial', 'and meaningful change looks likely over the next 5 to 10 years') if bid == 'partial_5_10yr'
    else t('seo.tim.far', 'and a near-term shift looks unlikely')) %}
-<div class="hero-score hero-{{ 'hi' if be >= 66 else ('mid' if be >= 40 else 'lo') }}" aria-label="Your Job Extinction Risk score">
-  <div class="hs-num"><b>{{ be|round|int }}</b><span>/100</span></div>
+{% set paid = (entitlement and entitlement != 'free') or (not stripe_enabled) %}
+<div id="hero-score" class="hero-score hero-{{ 'hi' if be >= 66 else ('mid' if be >= 40 else 'lo') }}" aria-label="Your Job Extinction Risk score">
+  <div class="hs-num"><b id="hs-num">{{ be|round|int }}</b><span>/100</span></div>
   <div class="hs-meta">
-    <div class="hs-lvl">{{ vlvl }}</div>
+    <div class="hs-lvl" id="hs-lvl">{{ vlvl }}</div>
     <div class="hs-sub">{{ t('ov.rating', rating_label) }}</div>
   </div>
 </div>
@@ -279,6 +280,373 @@
   })();
 </script>
 
+{% if paid and not seo %}
+{# ---- Progressive profiling: post-pay "Sharpen your result". The free funnel stays frictionless
+   (job -> score -> paywall); here, a paying customer can add the data they skipped, and each
+   addition visibly re-computes the live result above and below. All numbers come from the engine
+   (/v1/assess), never invented. zip -> local pay + demand; age/experience -> sharper timeline;
+   skills -> the green-option match (reuses the capture below). #}
+<style>
+  .sharpen { border:1px solid var(--line); border-radius:16px; margin:2px 0 16px; overflow:hidden;
+    background:linear-gradient(180deg,rgba(93,138,196,.10),rgba(93,138,196,.02)); }
+  .sharpen[hidden] { display:none; }
+  .sh-head { display:flex; align-items:center; gap:12px; padding:15px 16px 13px; }
+  .sh-spark { flex:none; width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg,#6f9ad6,#4d79c0); box-shadow:0 4px 12px rgba(77,121,192,.34); }
+  .sh-spark svg { width:21px; height:21px; stroke:#fff; fill:none; stroke-width:2; }
+  .sh-htext { flex:1; min-width:0; }
+  .sh-ey { font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#6f9ad6; }
+  .sh-h { font-size:clamp(16px,4vw,19px); font-weight:900; margin:1px 0 0; line-height:1.2; }
+  .sh-prog { flex:none; text-align:right; font-size:11.5px; color:var(--muted); font-weight:700; }
+  .sh-prog b { display:block; font-size:19px; color:var(--ink); line-height:1; }
+  .sh-sub { font-size:13px; color:var(--muted); margin:0; padding:0 16px 12px; line-height:1.45; }
+  .sh-tiles { display:grid; gap:10px; padding:0 14px 14px; }
+  .sh-tile { border:1px solid var(--line); border-radius:13px; background:var(--card); padding:13px 14px; }
+  .sh-tile-top { display:flex; align-items:center; gap:12px; }
+  .sh-tile-ic { flex:none; width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    background:rgba(93,138,196,.14); font-size:18px; }
+  .sh-tile-body { flex:1; min-width:0; }
+  .sh-tile-h { font-size:14.5px; font-weight:800; line-height:1.2; }
+  .sh-tile-what { font-size:12.5px; color:var(--muted); margin-top:2px; line-height:1.35; }
+  .sh-add { flex:none; border:none; cursor:pointer; font:inherit; font-weight:800; font-size:13.5px; color:#fff;
+    padding:9px 15px; border-radius:10px; background:linear-gradient(180deg,#5d8ac4,#4169ac); white-space:nowrap; }
+  .sh-add:disabled { opacity:.55; cursor:default; }
+  .sh-edit { margin-top:12px; display:none; }
+  .sh-tile.open .sh-edit { display:block; }
+  .sh-edit label { display:block; font-size:11.5px; font-weight:700; color:var(--muted); margin:0 0 5px; text-transform:uppercase; letter-spacing:.03em; }
+  .sh-edit input[type=text], .sh-edit select { width:100%; box-sizing:border-box; padding:10px 12px; border-radius:9px;
+    border:1px solid var(--line); background:var(--bg,#0d131c); color:inherit; font:inherit; }
+  .sh-edit-row { display:flex; gap:9px; flex-wrap:wrap; }
+  .sh-edit-row > div { flex:1; min-width:130px; }
+  .sh-apply { margin-top:11px; width:100%; border:none; cursor:pointer; font:inherit; font-weight:800; font-size:14.5px; color:#fff;
+    padding:11px; border-radius:10px; background:linear-gradient(180deg,#45c389,#2f9e68); box-shadow:0 4px 12px rgba(47,158,104,.3); }
+  .sh-apply:disabled { opacity:.6; cursor:default; }
+  .sh-tile.done { background:linear-gradient(180deg,rgba(63,178,127,.12),rgba(63,178,127,.02)); border-color:rgba(63,178,127,.32); }
+  .sh-tile.done .sh-tile-ic { background:rgba(63,178,127,.18); }
+  /* the "what changed" reveal */
+  .sh-reveal { margin-top:12px; border-top:1px dashed var(--line); padding-top:12px; animation:sh-pop .5s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes sh-pop { 0% { opacity:0; transform:translateY(8px); } 100% { opacity:1; transform:none; } }
+  .sh-reveal-h { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--green,#2f9e68); margin:0 0 8px; }
+  .sh-reveal p { font-size:13.5px; color:var(--ink); margin:0; line-height:1.5; }
+  .sh-reveal p b { font-weight:800; }
+  .sh-cmp { display:grid; gap:7px; margin:10px 0 4px; }
+  .sh-cmp-row { display:flex; align-items:center; gap:9px; font-size:12.5px; }
+  .sh-cmp-lab { width:70px; flex:none; color:var(--muted); font-weight:700; }
+  .sh-cmp-track { flex:1; height:14px; border-radius:7px; background:rgba(127,127,127,.14); overflow:hidden; }
+  .sh-cmp-track i { display:block; height:100%; border-radius:7px; }
+  .sh-cmp-track i.a { background:linear-gradient(90deg,#9fb2cc,#7f93ad); }
+  .sh-cmp-track i.b { background:linear-gradient(90deg,#5ec98c,#2f9e68); }
+  .sh-cmp-val { width:72px; flex:none; text-align:right; font-weight:800; font-variant-numeric:tabular-nums; }
+  .sh-chip { display:inline-block; font-size:11.5px; font-weight:800; padding:3px 9px; border-radius:999px; }
+  .sh-chip.up { color:#1f7a4d; background:rgba(94,201,140,.2); } .sh-chip.down { color:#a83a2d; background:rgba(224,83,58,.16); }
+  .sh-chip.mixed { color:#7a6a3a; background:rgba(243,163,95,.2); } .sh-chip.flat { color:var(--muted); background:rgba(127,127,127,.14); }
+  .sh-done-all { padding:4px 16px 16px; }
+  .sh-done-all .sh-reveal { border-top:0; padding-top:0; }
+  @keyframes sharp-flash { 0% { background:rgba(94,201,140,.32); } 100% { background:transparent; } }
+  .sharp-flash { animation:sharp-flash 1.3s ease-out; border-radius:6px; }
+</style>
+<div class="sharpen" id="sharpen" hidden>
+  <div class="sh-head">
+    <span class="sh-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 6.3L21 11l-6.6 2.7L12 20l-2.4-6.3L3 11l6.6-2.7z"/></svg></span>
+    <div class="sh-htext">
+      <span class="sh-ey">You're in &middot; now make it yours</span>
+      <div class="sh-h">Sharpen your result</div>
+    </div>
+    <div class="sh-prog" id="sh-prog"></div>
+  </div>
+  <p class="sh-sub">You got your score in seconds. Add the details you skipped and watch the numbers above and below re-compute for <b>your</b> exact situation &mdash; every figure straight from the data, not a guess.</p>
+  <div class="sh-tiles" id="sh-tiles">
+    <div class="sh-tile" data-field="location" hidden>
+      <div class="sh-tile-top">
+        <span class="sh-tile-ic" aria-hidden="true">&#128205;</span>
+        <div class="sh-tile-body">
+          <div class="sh-tile-h">Add your location</div>
+          <div class="sh-tile-what">Swaps national averages for your local pay and demand.</div>
+        </div>
+        <button type="button" class="sh-add" data-open>Add</button>
+      </div>
+      <div class="sh-edit">
+        <label for="sh-zip">ZIP, or city and state</label>
+        <input type="text" id="sh-zip" maxlength="40" placeholder="e.g. 10001 or Austin, TX" autocomplete="postal-code">
+        <button type="button" class="sh-apply" data-field="location">Localize my result &#8250;</button>
+      </div>
+      <div class="sh-out"></div>
+    </div>
+    <div class="sh-tile" data-field="ageexp" hidden>
+      <div class="sh-tile-top">
+        <span class="sh-tile-ic" aria-hidden="true">&#9203;</span>
+        <div class="sh-tile-body">
+          <div class="sh-tile-h">Add your age &amp; experience</div>
+          <div class="sh-tile-what">Sharpens the timeline: how many working years are actually at risk.</div>
+        </div>
+        <button type="button" class="sh-add" data-open>Add</button>
+      </div>
+      <div class="sh-edit">
+        <div class="sh-edit-row">
+          <div>
+            <label for="sh-age">Age</label>
+            <select id="sh-age"><option value="">Prefer not to say</option>{% for a in range(18, 71) %}<option value="{{ a }}">{{ a }}</option>{% endfor %}</select>
+          </div>
+          <div>
+            <label for="sh-exp">Years of experience</label>
+            <select id="sh-exp">
+              <option value="">Prefer not to say</option>
+              <option value="1">Less than 2 years</option>
+              <option value="4">2 to 5 years</option>
+              <option value="8">6 to 10 years</option>
+              <option value="15">11 to 20 years</option>
+              <option value="25">More than 20 years</option>
+            </select>
+          </div>
+        </div>
+        <button type="button" class="sh-apply" data-field="ageexp">Sharpen my timeline &#8250;</button>
+      </div>
+      <div class="sh-out"></div>
+    </div>
+    <div class="sh-tile" data-field="skills" hidden>
+      <div class="sh-tile-top">
+        <span class="sh-tile-ic" aria-hidden="true">&#128736;&#65039;</span>
+        <div class="sh-tile-body">
+          <div class="sh-tile-h">Add your skills</div>
+          <div class="sh-tile-what">Pinpoints the safer career you already qualify for (in &ldquo;What to do&rdquo;).</div>
+        </div>
+        <button type="button" class="sh-add" data-field="skills">Add</button>
+      </div>
+      <div class="sh-out"></div>
+    </div>
+  </div>
+  <div class="sh-done-all" id="sh-done-all" hidden></div>
+</div>
+<script id="sharpen-base" type="application/json">{{ {
+  "base": r.base_exposure, "ai": r.exposure.ai_software, "robo": r.exposure.physical_robotics,
+  "band": r.timeline.band.id, "wage": r.wages.occupation_median_wage, "metro": r.location.metro,
+  "demand": r.timeline.local_demand_trend, "sym": r.currency.symbol,
+  "half": r.exposure_range.half_width } | tojson }}</script>
+<script>
+(function () {
+  // #profile-data sits near the foot of the page, so defer until the DOM is parsed or the
+  // profile reads back empty and every re-compute posts a title-less (404) request.
+  function init() {
+  var root = document.getElementById('sharpen');
+  if (!root) return;
+  var BASE = {}; try { BASE = JSON.parse(document.getElementById('sharpen-base').textContent) || {}; } catch (e) {}
+  var profEl = document.getElementById('profile-data');
+  var profile = {}; try { profile = JSON.parse(profEl.textContent) || {}; } catch (e) { profile = {}; }
+  var SYM = BASE.sym || '$';
+  var TOTAL = 3, added = 0;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function money(v) { return v ? SYM + Math.round(v).toLocaleString() : ''; }
+  function round1(v) { return Math.round((+v) * 10) / 10; }
+  function flash(el) { if (!el) return; el.classList.remove('sharp-flash'); void el.offsetWidth; el.classList.add('sharp-flash'); }
+  function level(be) { return be >= 66 ? 'highly exposed' : (be >= 40 ? 'moderately exposed' : 'less exposed'); }
+  function heroClass(be) { return be >= 66 ? 'hero-hi' : (be >= 40 ? 'hero-mid' : 'hero-lo'); }
+  function yearWin(band) {
+    if (band === 'near_term_high') return { lo: 2027, hi: 2029, phrase: 'within about 1 to 3 years' };
+    if (band === 'partial_5_10yr') return { lo: 2031, hi: 2036, phrase: 'in about 5 to 10 years' };
+    return { lo: 2037, hi: 0, phrase: 'not before the late 2030s' };
+  }
+  function trendClass(t) { return t === 'growing' ? 'up' : (t === 'declining' ? 'down' : (t === 'mixed' ? 'mixed' : 'flat')); }
+  function setTxt(id, txt) { var el = document.getElementById(id); if (el) { el.textContent = txt; flash(el); } return el; }
+
+  // Push a fresh assessment into the live page (hero, gauges, pay, timeline, the paid year hero).
+  function applyAssessment(nr) {
+    if (!nr || !nr.ok) return;
+    var be = nr.base_exposure;
+    var hero = document.getElementById('hero-score');
+    if (hero) { hero.className = 'hero-score ' + heroClass(be); }
+    setTxt('hs-num', Math.round(be));
+    setTxt('hs-lvl', level(be));
+    // gauges
+    var ai = nr.exposure.ai_software, robo = nr.exposure.physical_robotics;
+    setTxt('gx-ai-num', round1(ai)); setTxt('gx-robo-num', round1(robo));
+    var aiArc = document.getElementById('gx-ai-arc'); if (aiArc) aiArc.style.strokeDashoffset = (326.7 * (1 - ai / 100)).toFixed(1);
+    var roArc = document.getElementById('gx-robo-arc'); if (roArc) roArc.style.strokeDashoffset = (326.7 * (1 - robo / 100)).toFixed(1);
+    if (nr.exposure_range) {
+      setTxt('gx-ai-range', 'range ' + nr.exposure_range.ai_software[0] + ' to ' + nr.exposure_range.ai_software[1]);
+      setTxt('gx-robo-range', 'range ' + nr.exposure_range.physical_robotics[0] + ' to ' + nr.exposure_range.physical_robotics[1]);
+    }
+    // pay + place
+    var med = nr.wages && nr.wages.occupation_median_wage, metro = (nr.location && nr.location.metro) || '';
+    if (med) {
+      var ovPay = document.getElementById('ov-pay'); if (ovPay) ovPay.hidden = false;
+      setTxt('ovp-val', SYM + Math.round(med).toLocaleString());
+      setTxt('ovp-sub', 'median · ' + metro);
+      var ptm = document.getElementById('pt-median'); if (ptm) ptm.hidden = false;
+      setTxt('pt-median-val', SYM + Math.round(med).toLocaleString());
+      setTxt('pt-median-lab', 'Median pay, ' + metro);
+    }
+    setTxt('pt-demand-val', nr.timeline.local_demand_trend);
+    // timeline
+    setTxt('tl-band', nr.timeline.band.label);
+    setTxt('tl-demand', 'local demand ' + nr.timeline.local_demand_trend);
+    var ov = document.getElementById('tl-overlap');
+    if (ov) {
+      if (nr.timeline.overlap_note) {
+        ov.hidden = false;
+        ov.firstChild ? (ov.firstChild.nodeValue = nr.timeline.overlap_note + ' ') : (ov.textContent = nr.timeline.overlap_note);
+        var wy = document.getElementById('tl-wyears');
+        if (wy) {
+          if (nr.timeline.remaining_working_years != null) { wy.hidden = false; setTxt('tl-wyears-n', nr.timeline.remaining_working_years); }
+          else wy.hidden = true;
+        }
+        flash(ov);
+      } else { ov.hidden = true; }
+    }
+    // paid "when AI reaches your job" hero
+    var win = yearWin(nr.timeline.band.id);
+    setTxt('sr-year', win.lo + (win.hi ? '–' + win.hi : '+'));
+    setTxt('sr-year-phrase', win.phrase);
+    // keep the green flow and what-if in sync with the sharpened profile
+    try { profEl.textContent = JSON.stringify(profile); } catch (e) {}
+  }
+
+  // ---- reveals: show the value of the data just given ----
+  function cmpBars(labA, valA, labB, valB, fmt) {
+    var mx = Math.max(valA, valB, 1);
+    fmt = fmt || function (v) { return v; };
+    return '<div class="sh-cmp">' +
+      '<div class="sh-cmp-row"><span class="sh-cmp-lab">' + esc(labA) + '</span><div class="sh-cmp-track"><i class="a" style="width:' + Math.max(5, valA / mx * 100) + '%"></i></div><span class="sh-cmp-val">' + fmt(valA) + '</span></div>' +
+      '<div class="sh-cmp-row"><span class="sh-cmp-lab">' + esc(labB) + '</span><div class="sh-cmp-track"><i class="b" style="width:' + Math.max(5, valB / mx * 100) + '%"></i></div><span class="sh-cmp-val">' + fmt(valB) + '</span></div>' +
+      '</div>';
+  }
+  function revealLocation(nr) {
+    var med = nr.wages && nr.wages.occupation_median_wage, metro = (nr.location && nr.location.metro) || 'your area';
+    var nat = BASE.wage, trend = nr.timeline.local_demand_trend;
+    var html = '<div class="sh-reveal"><p class="sh-reveal-h">Your local market</p>';
+    if (med && nat && metro && metro !== BASE.metro) {
+      var pct = Math.round((med / nat - 1) * 100);
+      var vs = pct === 0 ? 'the same as the national median' : '<b>' + (pct > 0 ? '+' : '') + pct + '%</b> vs the national median';
+      html += '<p>In <b>' + esc(metro) + '</b>, the median for this role is <b>' + money(med) + '</b> &mdash; ' + vs + '. Local demand is <span class="sh-chip ' + trendClass(trend) + '">' + esc(trend) + '</span></p>';
+      html += cmpBars('National', Math.round(nat), metro.split(',')[0].slice(0, 14), Math.round(med), money);
+    } else if (med) {
+      html += '<p>We matched <b>' + esc(metro) + '</b>. Median pay is <b>' + money(med) + '</b> and local demand is <span class="sh-chip ' + trendClass(trend) + '">' + esc(trend) + '</span></p>';
+    } else {
+      html += '<p>We could not pin that to one of our metro areas, so pay stays at the national figure. Local demand reads <span class="sh-chip ' + trendClass(trend) + '">' + esc(trend) + '</span></p>';
+    }
+    if (nr.timeline.band.id !== BASE.band) html += '<p style="margin-top:8px">Your local demand even shifts the timeline to <b>' + esc(nr.timeline.band.label) + '</b>.</p>';
+    return html + '</div>';
+  }
+  function revealAgeExp(nr) {
+    var newBe = nr.base_exposure, oldBe = BASE.base;
+    var ry = nr.timeline.remaining_working_years;
+    var html = '<div class="sh-reveal"><p class="sh-reveal-h">A sharper timeline</p>';
+    var parts = [];
+    if (ry != null) parts.push('about <b>' + ry + ' working years</b> left');
+    if (Math.abs(newBe - oldBe) >= 0.1) {
+      parts.push('your risk eases from <b>' + Math.round(oldBe) + '</b> to <b>' + Math.round(newBe) + '</b> as experience shifts you toward oversight work');
+    }
+    html += '<p>' + (parts.length ? parts.join(', and ').replace(/^./, function (c) { return c.toUpperCase(); }) : 'Your timeline is now tuned to your situation') + '.</p>';
+    if (nr.timeline.overlap_note) html += '<p style="margin-top:8px">' + esc(nr.timeline.overlap_note) + '</p>';
+    if (Math.abs(newBe - oldBe) >= 0.1) html += cmpBars('Before', Math.round(oldBe), 'With you', Math.round(newBe), function (v) { return v + ' / 100'; });
+    return html + '</div>';
+  }
+
+  function setProgress() {
+    var p = document.getElementById('sh-prog');
+    if (p) p.innerHTML = '<b>' + added + '/' + TOTAL + '</b>added';
+  }
+  function maybeDoneAll() {
+    var remaining = root.querySelectorAll('.sh-tile:not(.done):not([hidden])').length;
+    if (!remaining) {
+      var da = document.getElementById('sh-done-all');
+      if (da) { da.hidden = false; da.innerHTML = '<div class="sh-reveal"><p class="sh-reveal-h">Fully sharpened</p><p>Every detail is in &mdash; the result above and below is now tuned to <b>your</b> exact situation, straight from the data.</p></div>'; }
+    }
+  }
+  function markDone(tile, summaryHtml) {
+    tile.classList.remove('open'); tile.classList.add('done');
+    var addBtn = tile.querySelector('.sh-add'); if (addBtn) { addBtn.textContent = 'Added ✓'; addBtn.disabled = true; }
+    var out = tile.querySelector('.sh-out'); if (out) out.innerHTML = summaryHtml || '';
+    added = Math.min(TOTAL, added + 1); setProgress();
+    maybeDoneAll();
+  }
+
+  function postAssess(extra, onDone) {
+    var merged = Object.assign({}, profile, extra);
+    fetch('/v1/assess', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(merged) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || !d.ok) { onDone(null); return; }
+        profile = merged;                 // stack additions
+        applyAssessment(d);
+        onDone(d);
+      })
+      .catch(function () { onDone(null); });
+  }
+
+  // ---- wire the tiles ----
+  // Show only the fields the user actually skipped.
+  var missing = {
+    location: !(profile.zip_code),
+    ageexp: !(profile.age || profile.experience_years),
+    skills: !(profile.skills)
+  };
+  var anyMissing = false;
+  Object.keys(missing).forEach(function (k) {
+    var tile = root.querySelector('.sh-tile[data-field="' + k + '"]');
+    if (tile && missing[k]) { tile.hidden = false; anyMissing = true; }
+  });
+  if (!anyMissing) { root.hidden = true; return; }
+  root.hidden = false;
+  setProgress();
+
+  root.querySelectorAll('.sh-add[data-open]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var tile = b.closest('.sh-tile'); tile.classList.toggle('open');
+      var inp = tile.querySelector('input,select'); if (inp) setTimeout(function () { try { inp.focus(); } catch (e) {} }, 40);
+    });
+  });
+
+  root.querySelectorAll('.sh-apply').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var field = btn.getAttribute('data-field');
+      var tile = btn.closest('.sh-tile');
+      var extra = {}, reveal = null;
+      if (field === 'location') {
+        var z = (document.getElementById('sh-zip').value || '').trim();
+        if (!z) { document.getElementById('sh-zip').focus(); return; }
+        extra.zip_code = z; reveal = revealLocation;
+      } else if (field === 'ageexp') {
+        var age = document.getElementById('sh-age').value, exp = document.getElementById('sh-exp').value;
+        if (!age && !exp) { document.getElementById('sh-age').focus(); return; }
+        if (age) extra.age = +age;
+        if (exp) extra.experience_years = +exp;
+        reveal = revealAgeExp;
+      }
+      btn.disabled = true; var old = btn.textContent; btn.textContent = 'Re-computing…';
+      window.jbEv && window.jbEv('sharpen_' + field);
+      postAssess(extra, function (d) {
+        btn.disabled = false; btn.textContent = old;
+        if (!d) { var o = tile.querySelector('.sh-out'); if (o) o.innerHTML = '<div class="sh-reveal"><p>We could not re-compute that just now. Please try again.</p></div>'; return; }
+        markDone(tile, reveal ? reveal(d) : '');
+      });
+    });
+  });
+
+  // Skills tile hands off to the green-option capture already on the page (in "What to do").
+  var skillsTile = root.querySelector('.sh-tile[data-field="skills"]');
+  if (skillsTile) {
+    var skBtn = skillsTile.querySelector('.sh-add[data-field="skills"]');
+    if (skBtn) skBtn.addEventListener('click', function () {
+      window.jbEv && window.jbEv('sharpen_skills');
+      var go = document.getElementById('go-start');
+      if (go) go.click();   // paid: opens the skills modal; result renders in the What-to-do tab
+      skillsTile.classList.add('done');
+      skBtn.textContent = 'Opened ✓'; skBtn.disabled = true;
+      var out = skillsTile.querySelector('.sh-out');
+      if (out) out.innerHTML = '<div class="sh-reveal"><p class="sh-reveal-h">Matching your skills</p><p>Your safer-career match is building in the <b>What to do</b> tab &mdash; the more real skills you keep, the sharper it gets.</p></div>';
+      added = Math.min(TOTAL, added + 1); setProgress(); maybeDoneAll();
+      var tab = document.querySelector('.tab[data-panel="p-strategy"]');
+      if (tab) tab.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+{% endif %}
+
 <div class="tabs" role="tablist">
   <button class="tab active" data-panel="p-overview">Overview</button>
   {% if r.strategies %}<button class="tab" data-panel="p-strategy">What to do</button>{% endif %}
@@ -296,32 +664,30 @@
     <div class="gauge">
       <svg viewBox="0 0 120 120" role="img" aria-label="AI exposure {{ r.exposure.ai_software }} of 100">
         <circle class="g-track" cx="60" cy="60" r="52"></circle>
-        <circle class="g-prog g-ai" cx="60" cy="60" r="52"
+        <circle class="g-prog g-ai" id="gx-ai-arc" cx="60" cy="60" r="52"
           style="stroke-dasharray:326.7;stroke-dashoffset:{{ (326.7*(1 - r.exposure.ai_software/100))|round(1) }}"></circle>
-        <text class="g-num" x="60" y="60">{{ r.exposure.ai_software }}</text>
+        <text class="g-num" id="gx-ai-num" x="60" y="60">{{ r.exposure.ai_software }}</text>
         <text class="g-pct" x="60" y="78">{{ t('ov.of100', 'of 100') }}</text>
       </svg>
-      <div class="g-caption">{{ t('ov.dial.ai', 'AI / software') }}<small>{{ t('ov.range', 'range') }} {{ r.exposure_range.ai_software[0] }} {{ t('ov.to', 'to') }} {{ r.exposure_range.ai_software[1] }}</small></div>
+      <div class="g-caption">{{ t('ov.dial.ai', 'AI / software') }}<small id="gx-ai-range">{{ t('ov.range', 'range') }} {{ r.exposure_range.ai_software[0] }} {{ t('ov.to', 'to') }} {{ r.exposure_range.ai_software[1] }}</small></div>
     </div>
     <div class="gauge">
       <svg viewBox="0 0 120 120" role="img" aria-label="Robotics exposure {{ r.exposure.physical_robotics }} of 100">
         <circle class="g-track" cx="60" cy="60" r="52"></circle>
-        <circle class="g-prog g-robo" cx="60" cy="60" r="52"
+        <circle class="g-prog g-robo" id="gx-robo-arc" cx="60" cy="60" r="52"
           style="stroke-dasharray:326.7;stroke-dashoffset:{{ (326.7*(1 - r.exposure.physical_robotics/100))|round(1) }}"></circle>
-        <text class="g-num" x="60" y="60">{{ r.exposure.physical_robotics }}</text>
+        <text class="g-num" id="gx-robo-num" x="60" y="60">{{ r.exposure.physical_robotics }}</text>
         <text class="g-pct" x="60" y="78">{{ t('ov.of100', 'of 100') }}</text>
       </svg>
-      <div class="g-caption">{{ t('ov.dial.robo', 'Physical / robotics') }}<small>{{ t('ov.range', 'range') }} {{ r.exposure_range.physical_robotics[0] }} {{ t('ov.to', 'to') }} {{ r.exposure_range.physical_robotics[1] }}</small></div>
+      <div class="g-caption">{{ t('ov.dial.robo', 'Physical / robotics') }}<small id="gx-robo-range">{{ t('ov.range', 'range') }} {{ r.exposure_range.physical_robotics[0] }} {{ t('ov.to', 'to') }} {{ r.exposure_range.physical_robotics[1] }}</small></div>
     </div>
   </div>
 
-  {% if r.wages.occupation_median_wage %}
-  <div class="ov-pay">
+  <div class="ov-pay" id="ov-pay"{% if not r.wages.occupation_median_wage %} hidden{% endif %}>
     <span class="ovp-lab">{{ t('ov.pay', 'Typical pay') }}</span>
-    <b class="ovp-val">{{ r.currency.symbol }}{{ "{:,.0f}".format(r.wages.occupation_median_wage) }}</b>
-    <span class="ovp-sub muted">{{ t('ov.paymed', 'median') }} &middot; {{ r.location.metro }}</span>
+    <b class="ovp-val" id="ovp-val">{% if r.wages.occupation_median_wage %}{{ r.currency.symbol }}{{ "{:,.0f}".format(r.wages.occupation_median_wage) }}{% endif %}</b>
+    <span class="ovp-sub muted" id="ovp-sub">{{ t('ov.paymed', 'median') }} &middot; {{ r.location.metro }}</span>
   </div>
-  {% endif %}
 
   <div class="ov-timeline">
   <p class="muted" style="text-align:center;margin:14px 0 2px">{{ t('ov.when', 'When the change is likely') }}</p>
@@ -347,11 +713,11 @@
     {% endif %}
   </svg>
   <p style="text-align:center;margin:6px 0 0">
-    <span class="band {{ bid }}">{{ t('ov.band.' ~ bid, r.timeline.band.label) }}</span>
-    <span class="muted">{{ t('ov.localdemand', 'local demand') }} {{ t('ov.trend.' ~ r.timeline.local_demand_trend, r.timeline.local_demand_trend) }}</span>
+    <span class="band {{ bid }}" id="tl-band">{{ t('ov.band.' ~ bid, r.timeline.band.label) }}</span>
+    <span class="muted" id="tl-demand">{{ t('ov.localdemand', 'local demand') }} {{ t('ov.trend.' ~ r.timeline.local_demand_trend, r.timeline.local_demand_trend) }}</span>
   </p>
-  {% if r.timeline.overlap_note %}<p style="text-align:center;margin:8px 0 0">{{ r.timeline.overlap_note }}
-    {% if r.timeline.remaining_working_years is not none %}<span class="muted">({{ t('ov.about', 'about') }} {{ r.timeline.remaining_working_years }} {{ t('ov.wyears', 'working years left') }})</span>{% endif %}</p>{% endif %}
+  <p id="tl-overlap" style="text-align:center;margin:8px 0 0"{% if not r.timeline.overlap_note %} hidden{% endif %}>{{ r.timeline.overlap_note or '' }}
+    <span class="muted" id="tl-wyears"{% if r.timeline.remaining_working_years is none %} hidden{% endif %}>({{ t('ov.about', 'about') }} <span id="tl-wyears-n">{{ r.timeline.remaining_working_years if r.timeline.remaining_working_years is not none else '' }}</span> {{ t('ov.wyears', 'working years left') }})</span></p>
   {% if r.timeline.union_note %}<p class="muted" style="text-align:center;margin:4px 0 0">{{ r.timeline.union_note }}</p>{% endif %}
   </div>
 </div>
@@ -420,8 +786,8 @@
   <div class="sr sr-{{ yr_zone }}" id="sci-report">
     <span class="sr-ey">When AI reaches your job</span>
     <div class="sr-year">
-      <div class="sr-year-big">{{ yr_lo }}{% if yr_hi %}&ndash;{{ yr_hi }}{% else %}+{% endif %}</div>
-      <div class="sr-year-cap">the likely window when AI and robots can do the core of <b>{{ r.occupation.title }}</b> &mdash; {{ yr_phrase }}.</div>
+      <div class="sr-year-big" id="sr-year">{{ yr_lo }}{% if yr_hi %}&ndash;{{ yr_hi }}{% else %}+{% endif %}</div>
+      <div class="sr-year-cap">the likely window when AI and robots can do the core of <b>{{ r.occupation.title }}</b> &mdash; <span id="sr-year-phrase">{{ yr_phrase }}</span>.</div>
     </div>
     <div class="sr-tl">
       <div class="sr-tl-track">
@@ -690,9 +1056,12 @@
       intro.hidden = true; results.hidden = true;
       startReveal();
       window.jbEv && window.jbEv('green_match');
-      var prof = profile(); prof.skills_list = skills; prof.skills = (skills || []).join(', ');
+      // Send the full (progressively sharpened) profile so the green baseline reflects any
+      // location/age/experience the user has added, not just title + skills.
+      var prof = profile();
+      var body = Object.assign({}, prof, { skills: skills });
       fetch('/v1/green', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: prof.title, country: prof.country, skills: skills }) })
+        body: JSON.stringify(body) })
         .then(function (r) { return r.json(); })
         .then(function (d) {
           if (d && d.error === 'payment_required') { stopRev(); loading.hidden = true; intro.hidden = false; if (window.jbOpenPaywall) window.jbOpenPaywall(); return; }
@@ -1059,10 +1428,8 @@
 <div id="p-pay" class="panel card">
   <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><h2 style="margin:0">Pay and local market</h2></div>
   <div class="stat-tiles">
-    {% if r.wages.occupation_median_wage %}
-    <div class="stile"><div class="st-val">{{ r.currency.symbol }}{{ "{:,.0f}".format(r.wages.occupation_median_wage) }}</div><div class="st-lab">Median pay, {{ r.location.metro }}</div></div>
-    {% endif %}
-    <div class="stile"><div class="st-val">{{ r.timeline.local_demand_trend }}</div><div class="st-lab">Local demand</div></div>
+    <div class="stile" id="pt-median"{% if not r.wages.occupation_median_wage %} hidden{% endif %}><div class="st-val" id="pt-median-val">{% if r.wages.occupation_median_wage %}{{ r.currency.symbol }}{{ "{:,.0f}".format(r.wages.occupation_median_wage) }}{% endif %}</div><div class="st-lab" id="pt-median-lab">Median pay, {{ r.location.metro }}</div></div>
+    <div class="stile"><div class="st-val" id="pt-demand-val">{{ r.timeline.local_demand_trend }}</div><div class="st-lab">Local demand</div></div>
     {% if r.wages.available %}
     <div class="stile"><div class="st-val {{ 'pos' if r.wages.real_change_pct >= 0 else 'neg' }}">{{ '+' if r.wages.real_change_pct >= 0 else '' }}{{ r.wages.real_change_pct }}%</div><div class="st-lab">Your real pay, 5 yrs</div></div>
     {% if r.wages.pay_vs_median_pct is not none %}
