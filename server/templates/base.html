@@ -1457,18 +1457,29 @@
   <script>
     (function () {
       var root = document.documentElement, btns = [];
+      // Storage access can THROW in some installed-app / PWA webview contexts (restricted
+      // storage, privacy mode). Wrap every read and write so a SecurityError never aborts this
+      // script - that abort was what left the theme toggle dead in the app while it worked on
+      // the web. The toggle still flips in-session even when persistence is unavailable.
+      function readTheme() { try { return localStorage.getItem("jobcast-theme"); } catch (e) { return null; } }
+      function saveTheme(v) { try { localStorage.setItem("jobcast-theme", v); } catch (e) {} }
       function apply(t) { if (t === "dark") root.setAttribute("data-theme", "dark"); else root.removeAttribute("data-theme");
         var lab = t === "dark" ? "Switch to light mode" : "Switch to dark mode";
         btns.forEach(function (b) { b.setAttribute("aria-label", lab); }); }
-      apply(localStorage.getItem("jobcast-theme") || "light");
-      document.addEventListener("DOMContentLoaded", function () {
+      apply(readTheme() || "light");
+      function wire() {
         btns = Array.prototype.slice.call(document.querySelectorAll(".theme-toggle"));
-        apply(localStorage.getItem("jobcast-theme") || "light");
-        btns.forEach(function (b) { b.addEventListener("click", function () {
-          var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
-          localStorage.setItem("jobcast-theme", next); apply(next);
-        }); });
-      });
+        apply(readTheme() || "light");
+        btns.forEach(function (b) {
+          if (b.dataset.themeWired) return; b.dataset.themeWired = "1";
+          b.addEventListener("click", function () {
+            var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+            saveTheme(next); apply(next);
+          });
+        });
+      }
+      if (document.readyState !== "loading") wire();
+      else document.addEventListener("DOMContentLoaded", wire);
     })();
   </script>
   <div class="wrap">
