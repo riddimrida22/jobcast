@@ -568,6 +568,44 @@ def create_app() -> Flask:
                                rail_early=rail_early, rail_degree=rail_degree,
                                most_exposed=most, least_exposed=least)
 
+    @app.get("/students/free")
+    def students_free():
+        return render_template("students_free.html", step="email",
+                               version=VERSION, licensed=engine.snapshot.licensed)
+
+    @app.post("/students/free/request")
+    def students_free_request():
+        from . import student
+        email = (request.form.get("email") or "").strip().lower()
+        ok, why = student.eligible(email)
+        if not ok:
+            return render_template("students_free.html", step="email", error=why,
+                                   version=VERSION, licensed=engine.snapshot.licensed)
+        code = student.request_code(email)
+        if not code:
+            return render_template("students_free.html", step="email", error="already_used",
+                                   version=VERSION, licensed=engine.snapshot.licensed)
+        try:
+            from . import emailer
+            emailer.send(email, "Your JobBreak student code",
+                         "Enter this code to unlock JobBreak free for students: " + code + "\n\n"
+                         "It expires in 30 minutes.\n")
+        except Exception as e:
+            print(f"[student] code email failed: {e}", file=sys.stderr, flush=True)
+        return render_template("students_free.html", step="code", email=email,
+                               version=VERSION, licensed=engine.snapshot.licensed)
+
+    @app.post("/students/free/verify")
+    def students_free_verify():
+        from . import student
+        email = (request.form.get("email") or "").strip().lower()
+        code = (request.form.get("code") or "").strip()
+        if student.verify(email, code):
+            session["jb_tier"] = student.TIER      # one free unlock per verified .edu email
+            return redirect("/plan")
+        return render_template("students_free.html", step="code", email=email, error="bad_code",
+                               version=VERSION, licensed=engine.snapshot.licensed)
+
     from . import i18n
 
     @app.before_request

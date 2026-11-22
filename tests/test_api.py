@@ -253,3 +253,32 @@ def test_create_free_year_code(monkeypatch):
     assert calls["coupon"]["duration"] == "repeating"
     assert calls["coupon"]["duration_in_months"] == 12
     assert calls["promo"]["max_redemptions"] == 1
+
+
+# --- Free for students: a .edu gate closed to non-students ---
+
+def test_student_eligibility():
+    from server import student
+    assert student.eligible("maya@mit.edu")[0] is True
+    assert student.eligible("maya@gmail.com") == (False, "need_edu")
+    assert student.eligible("")[0] is False
+
+
+def test_student_verify_flow(tmp_path, monkeypatch):
+    from server import student
+    monkeypatch.setattr(student, "_db_path", lambda: tmp_path / "s.db")
+    code = student.request_code("maya@school.edu")
+    assert code and len(code) == 6
+    assert student.verify("maya@school.edu", "nope") is False    # wrong code
+    assert student.verify("maya@school.edu", code) is True       # correct -> granted
+    assert student.verify("maya@school.edu", code) is False      # one-shot, can't reuse
+    assert student.request_code("maya@school.edu") is None       # one free unlock per email
+
+
+def test_students_free_page(client):
+    assert client.get("/students/free").status_code == 200
+
+
+def test_students_free_rejects_non_edu(client):
+    r = client.post("/students/free/request", data={"email": "a@gmail.com"})
+    assert r.status_code == 200           # re-renders with an error, grants nothing
