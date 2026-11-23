@@ -146,6 +146,7 @@ def _build_jane(engine):
             "name": "Jane", "age": 41,
             "from_level": from_level, "to_level": to_level,
             "level_up": (to_level - from_level) if (to_level is not None and from_level is not None) else 0,
+            "soc": occ.get("soc"),  # so the demo CTA can route into Jane's real score page
             "from_title": a["occupation"]["title"], "from_score": from_score,
             "from_ai": round(a["exposure"]["ai_software"]),
             "from_robo": round(a["exposure"]["physical_robotics"]),
