@@ -291,6 +291,23 @@ def create_app() -> Flask:
             "snapshot_date": engine.snapshot.snapshot_date,
         })
 
+    @app.get("/dev/reset")
+    def dev_reset():
+        """Testing helper: drop this browser's paid/student entitlement so the free
+        flow (score -> paywall) is visible again. Clears server session + client
+        storage, then bounces home. Unlinked on purpose; only affects the caller's
+        own session, never anyone else's."""
+        for _k in ("jb_tier", "jb_soc"):
+            session.pop(_k, None)
+        return Response(
+            "<!doctype html><meta charset=utf-8><title>Reset to free</title>"
+            "<body style=\"font:16px system-ui;background:#0e1620;color:#eaf1f9;"
+            "display:flex;align-items:center;justify-content:center;height:100vh;margin:0\">"
+            "Reset to a free session. Taking you to the start..."
+            "<script>try{sessionStorage.clear();localStorage.clear();}catch(e){}"
+            "setTimeout(function(){location.replace('/');},500);</script>",
+            mimetype="text/html")
+
     @app.get("/v1/suggest")
     def suggest():
         q = request.args.get("q", "")
