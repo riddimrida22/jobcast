@@ -122,10 +122,10 @@
   {# "I'm an employee" removed: typing or picking a job above IS the employee path (no
      redundant button). Student is the one distinct track. See funnel-score-then-sale. #}
   <div class="gate-paths">
-    <a class="gate-card" href="/students" id="aud-student">
-      <span class="gc-ey">{{ t('stu.ey', 'Still choosing') }}</span>
+    <a class="gate-card" href="/students/free" id="aud-student">
+      <span class="gc-ey">{{ t('stu.ey', 'Free for students') }}</span>
       <div class="gc-h">{{ t('stu.h', "I'm a student") }}</div>
-      <div class="gc-sub">{{ t('stu.sub', 'Find careers that pay well and are hard for AI to take, ranked from real data.') }}</div>
+      <div class="gc-sub">{{ t('stu.sub', 'Verify your school (.edu) email and get your full result free.') }}</div>
     </a>
   </div>
   <div class="gate-skip" style="margin-top:16px"><a href="#" class="js-intro-open">{{ t('intro.open', 'New to this? Watch the 30-second intro &#8250;') }}</a></div>
@@ -526,8 +526,8 @@
     <div class="side-title safe">Careers more resilient</div>
     <div class="side-sub">Live ratings &mdash; tap any job</div>
     <a href="/students" style="display:block;text-decoration:none;background:rgba(243,163,95,.12);border:1px solid rgba(243,163,95,.42);border-radius:12px;padding:12px 14px;margin:0 0 12px">
-      <div style="font-weight:800;color:var(--accent);font-size:14px">Free for students</div>
-      <div style="color:var(--muted);font-size:12.5px;margin-top:3px;line-height:1.35">Every career's AI-risk data, no charge. Explore safe options &#8250;</div>
+      <div style="font-weight:800;color:var(--accent);font-size:14px">Explore careers free</div>
+      <div style="color:var(--muted);font-size:12.5px;margin-top:3px;line-height:1.35">Every career's AI-risk data, no charge. Tap any job &#8250;</div>
     </a>
     <div class="ticker rev"><div class="ticker-inner">
       {% for o in least_exposed %}<a class="jobcard" href="/jobs/{{ o.soc }}" style="border-left:4px solid {{ famcol.get(o.soc[:2], '#9aa7b4') }}"><span class="jc-t">{{ o.title }}</span><span class="jc-score safe">{{ o.level }}</span></a>{% endfor %}

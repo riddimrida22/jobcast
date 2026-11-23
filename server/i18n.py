@@ -157,7 +157,7 @@ TRANSLATIONS = {
         "seo.terms.word": "Terms",
         # Buybar banner
         "bb.q": "Is your job safe from AI?",
-        "bb.txt": "Get your full Job Extinction Risk &amp; action plan",
+        "bb.txt": "Get your full plan &mdash; $2.99 with code JOBBREAK",
         "bb.cta": "$4.99 &#8250;",
     },
     "es": {
@@ -173,9 +173,9 @@ TRANSLATIONS = {
         "emp.ey": "Trabajas ahora",
         "emp.h": "Soy empleado",
         "emp.sub": "Mira qué tan expuesto está tu propio trabajo, o haz primero un recorrido rápido de cómo funciona.",
-        "stu.ey": "Aún decides",
+        "stu.ey": "Gratis para estudiantes",
         "stu.h": "Soy estudiante",
-        "stu.sub": "Encuentra carreras que pagan bien y son difíciles de automatizar, clasificadas con datos reales.",
+        "stu.sub": "Verifica tu correo escolar (.edu) y obtén tu resultado completo gratis.",
         # Intro explainer (Jobo)
         "intro.skip": "Omitir &rsaquo;",
         "intro.next": "Siguiente &rsaquo;",
@@ -322,7 +322,7 @@ TRANSLATIONS = {
         "seo.terms.word": "Términos",
         # Buybar banner
         "bb.q": "¿Tu trabajo está a salvo de la IA?",
-        "bb.txt": "Obtén tu Riesgo de extinción del empleo completo y un plan de acción",
+        "bb.txt": "Obtén tu plan completo &mdash; $2.99 con el código JOBBREAK",
         "bb.cta": "$4.99 &#8250;",
     },
     "fr": {
@@ -336,9 +336,9 @@ TRANSLATIONS = {
         "emp.ey": "Vous travaillez",
         "emp.h": "Je suis salarié",
         "emp.sub": "Voyez à quel point votre métier est exposé, ou faites d'abord un tour rapide du fonctionnement.",
-        "stu.ey": "Vous choisissez encore",
+        "stu.ey": "Gratuit pour les étudiants",
         "stu.h": "Je suis étudiant",
-        "stu.sub": "Trouvez des carrières bien payées et difficiles à automatiser, classées à partir de données réelles.",
+        "stu.sub": "Vérifiez votre e-mail scolaire (.edu) et obtenez votre résultat complet gratuitement.",
         "intro.skip": "Passer &rsaquo;",
         "intro.next": "Suivant &rsaquo;",
         "intro.go": "Voir où se situe mon métier &rsaquo;",
@@ -482,7 +482,7 @@ TRANSLATIONS = {
         "seo.terms.word": "Conditions",
         # Buybar banner
         "bb.q": "Votre emploi est-il à l'abri de l'IA ?",
-        "bb.txt": "Obtenez votre Risque de disparition du poste complet et un plan d'action",
+        "bb.txt": "Obtenez votre plan complet &mdash; 2,99 $ avec le code JOBBREAK",
         "bb.cta": "4,99 $ &#8250;",
     },
     "ht": {
@@ -496,9 +496,9 @@ TRANSLATIONS = {
         "emp.ey": "W ap travay kounye a",
         "emp.h": "Mwen se yon anplwaye",
         "emp.sub": "Gade konbyen travay ou ekspoze, oswa fè yon ti vizit rapid sou kijan li mache anvan.",
-        "stu.ey": "W ap chwazi toujou",
+        "stu.ey": "Gratis pou elèv",
         "stu.h": "Mwen se yon elèv",
-        "stu.sub": "Jwenn metye ki peye byen e ki difisil pou IA pran, klase ak vrè done.",
+        "stu.sub": "Verifye imèl lekòl ou (.edu) epi jwenn rezilta konplè ou gratis.",
         "intro.skip": "Sote &rsaquo;",
         "intro.next": "Pwochen &rsaquo;",
         "intro.go": "Gade kote travay mwen ye &rsaquo;",
@@ -642,7 +642,7 @@ TRANSLATIONS = {
         "seo.terms.word": "Kondisyon yo",
         # Buybar banner
         "bb.q": "Èske travay ou an pwoteje kont IA?",
-        "bb.txt": "Jwenn Risk pou travay la disparèt konplè ou a ak yon plan aksyon",
+        "bb.txt": "Jwenn plan konplè ou &mdash; $2.99 ak kòd JOBBREAK",
         "bb.cta": "$4.99 &#8250;",
     },
 }
