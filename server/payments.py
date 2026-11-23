@@ -85,7 +85,7 @@ def promo_code_id(code):
 
 
 def create_checkout_session(tier, period, success_url, cancel_url, email=None, ref=None,
-                            promo_code=None):
+                            promo_code=None, currency="usd"):
     """Return (session, None) on success or (None, error_code). The price is set inline
     (price_data from PRICE_CENTS), so it can be changed in code with no Stripe dashboard
     step. Entitlement is carried by metadata, not the price id.
@@ -93,13 +93,21 @@ def create_checkout_session(tier, period, success_url, cancel_url, email=None, r
     promo_code: a code the user typed on our own plan page. If it resolves to a live Stripe
     promotion code we PRE-APPLY it (discounts=[...]) so the discounted price shows on Stripe's
     page; otherwise we fall back to allow_promotion_codes=True (Stripe shows its own code box).
-    Stripe forbids passing both, so it is one or the other."""
+    Stripe forbids passing both, so it is one or the other.
+
+    currency: the ISO code (usd/gbp/cad) chosen from the user's country, so the checkout shows
+    ONE currency with no chooser. The same PRICE_CENTS figure is presented in that currency
+    (e.g. 499 -> $4.99 / GBP4.99 / CA$4.99); change PRICE_CENTS per-currency later if true local
+    pricing is wanted. A percent-off promo (JOBBREAK) applies in any currency."""
     cents = PRICE_CENTS.get((tier, period))
     if not cents:
         return None, "price_not_configured"
+    cur = (currency or "usd").strip().lower()
+    if cur not in ("usd", "gbp", "cad"):
+        cur = "usd"
     onetime = (period == "once")
     price_data = {
-        "currency": "usd",
+        "currency": cur,
         "unit_amount": cents,
         "product_data": {"name": "JobBreak full plan" if onetime else "JobBreak Monitor"},
     }
