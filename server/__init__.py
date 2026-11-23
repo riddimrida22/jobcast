@@ -1078,6 +1078,23 @@ def create_app() -> Flask:
                             mimetype="text/plain")
         return Response("failed: %s\n" % (err or "unknown"), mimetype="text/plain")
 
+    @app.get("/admin/ensure-creator-codes")
+    def admin_ensure_creator_codes():
+        """Idempotently mint the per-creator public promo codes (JOHN, TASHIANA, OLIVIA, DONOVAN,
+        DANIELLE; 40% off each) the Billo ad scripts tell viewers to use. Protected by
+        JOBCAST_ADMIN_KEY (?key=...). Safe to re-run; existing codes are left alone."""
+        admin_key = os.environ.get("JOBCAST_ADMIN_KEY")
+        if not admin_key or request.args.get("key") != admin_key:
+            from flask import abort
+            abort(404)
+        from . import payments as pay
+        if not pay.configured():
+            return Response("stripe not configured\n", mimetype="text/plain")
+        res = pay.ensure_creator_codes()
+        lines = ["%s: %s" % (c, s) for c, s in res.items()]
+        return Response("creator codes (%d%% off):\n" % pay.LAUNCH_PERCENT
+                        + "\n".join(lines) + "\n", mimetype="text/plain")
+
     @app.get("/admin/checkouts")
     def admin_checkouts():
         """Diagnostic: the last few real Stripe Checkout sessions and exactly what the
