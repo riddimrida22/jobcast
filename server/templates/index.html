@@ -245,7 +245,7 @@
       <p class="jda-foot">From the red zone to largely safe &mdash; with one reachable skill. Every number here is from our data, not guessed.</p>
     </div>
 
-    <button type="button" class="jd-cta" id="jd-cta">That's the paid result. Now see your job &#8250;</button>
+    <button type="button" class="jd-cta" id="jd-cta">See Jane's live result &#8250;</button>
   </div>
 </div>
 {% endif %}
@@ -1130,8 +1130,14 @@
   modal.addEventListener('click', function (e) { if (e.target === modal) hide(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !modal.hidden) hide(); });
   if (cta) cta.addEventListener('click', function () {
+    {% if jane and jane.soc %}
+    // Jane joins the same funnel as a typed job / chip: her real score screen (page 2) -> paywall.
+    try { sessionStorage.setItem('jb_reveal', '1'); sessionStorage.setItem('jb_tour', '1'); sessionStorage.setItem('jb_aud', 'emp'); } catch (e) {}
+    location.href = '/jobs/{{ jane.soc }}';
+    {% else %}
     hide(); var box = document.getElementById('lp-q');
     if (box) { box.focus(); box.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+    {% endif %}
   });
 })();
 </script>
