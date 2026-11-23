@@ -815,6 +815,7 @@ def create_app() -> Flask:
     @app.post("/checkout")
     def checkout():
         from . import payments as pay
+        from riskcore import countries
         if not pay.configured():
             return jsonify({"ok": False, "error": "payments_disabled"}), 503
         body = request.get_json(silent=True) or request.form
@@ -823,13 +824,17 @@ def create_app() -> Flask:
         if tier not in ("tier1", "tier2", "tier3") or period not in ("monthly", "yearly", "once"):
             return jsonify({"ok": False, "error": "bad_request"}), 400
         base = request.host_url.rstrip("/")
+        # One currency, chosen from the user's country pick (US->usd, UK->gbp, CA->cad), so the
+        # checkout shows a single currency and no chooser.
+        cur = countries.currency(getattr(g, "country", None)).get("code", "USD").lower()
         sess, err = pay.create_checkout_session(
             tier, period,
             success_url=base + "/billing/success?session_id={CHECKOUT_SESSION_ID}",
             cancel_url=base + "/billing/cancel",
             email=(body.get("email") or None),
             ref=request.cookies.get("jb_ref"),
-            promo_code=(body.get("code") or None))
+            promo_code=(body.get("code") or None),
+            currency=cur)
         if err or not sess:
             return jsonify({"ok": False, "error": err or "stripe_error"}), 400
         return jsonify({"ok": True, "url": sess.url})
