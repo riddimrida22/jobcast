@@ -156,6 +156,26 @@
     .sc-chip { font-size:12px; font-weight:700; color:#cdd9ea; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); border-radius:999px; padding:6px 13px; }
     .sc-go { font:inherit; font-weight:800; font-size:17px; cursor:pointer; border:0; border-radius:12px; padding:15px 40px; color:#2a1708; background:linear-gradient(180deg,var(--accent),#e8863a); box-shadow:0 10px 26px rgba(243,163,95,.45); }
 
+    /* Short screens: compact the student gateway (welcome, gate, scoring) so the entry
+       screens fit without scrolling, the same way the landing gate does. */
+    @media (min-width:760px) and (max-height:940px){
+      .gate { padding:20px; }
+      .gate-q { font-size:clamp(30px,5.4vw,54px); margin:0 0 8px; }
+      .gate-sub { font-size:15px; margin:0 0 20px; }
+      .gate-card { padding:17px 20px; }
+      .gate-card .gc-h { font-size:18px; margin:6px 0 5px; }
+      .gate-card .gc-sub { font-size:13px; line-height:1.4; }
+      .gate-skip { margin-top:16px; }
+      .welcome { gap:16px; padding:24px 20px; }
+      .welcome .wel-head h2 { font-size:clamp(24px,4vw,34px); margin:0 0 6px; }
+      .welcome .wel-head p { font-size:15px; }
+      .scoring { padding:26px 22px; }
+      .sc-h { font-size:clamp(24px,4.4vw,34px); margin:8px 0 8px; }
+      .sc-sub { font-size:15px; margin:0 0 16px; }
+      .sc-scale { margin:26px 0 10px; }
+      .sc-go { padding:13px 34px; font-size:16px; }
+    }
+
     /* ---- Guided tour: step banner + spotlight on the scrolling rails ---- */
     .tour-banner { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:900;
                    display:flex; align-items:center; gap:14px; max-width:92vw;
