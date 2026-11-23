@@ -193,6 +193,31 @@ def ensure_launch_code(code=LAUNCH_CODE, percent=LAUNCH_PERCENT):
                              name="JobBreak launch (" + code + ")")
 
 
+# Per-creator public discount codes for the Billo ad campaign. Each creator's first name is the
+# code they say on camera ("use code JOHN, 40% off"), so the code both gives the discount AND
+# repeats a brand shout. Same 40% as the launch code; reusable (unlimited redemptions).
+CREATOR_CODES = ["JOHN", "TASHIANA", "OLIVIA", "DONOVAN", "DANIELLE"]
+
+
+def ensure_creator_codes(codes=None, percent=LAUNCH_PERCENT):
+    """Idempotently ensure each per-creator public promo code exists (unlimited redemptions,
+    `percent` off). Returns {code: 'exists'|'created'|'failed: <err>'}. Safe to call repeatedly;
+    an already-live code is never duplicated."""
+    out = {}
+    for code in (codes or CREATOR_CODES):
+        try:
+            existing = _client().PromotionCode.list(code=code, limit=1)
+            if (_get(existing, "data") or []):
+                out[code] = "exists"
+                continue
+        except Exception:
+            pass
+        made, err = create_promo_code(percent, code=code, max_redemptions=None,
+                                      name="JobBreak creator (" + code + ")")
+        out[code] = "created" if made else ("failed: " + (err or "unknown"))
+    return out
+
+
 def retrieve_session(session_id):
     try:
         return _client().checkout.Session.retrieve(session_id, expand=["line_items"])
