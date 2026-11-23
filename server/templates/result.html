@@ -1022,6 +1022,7 @@
       <div class="gr-text"><div class="gr-status" id="gr-status">Reading your skills&hellip;</div><div class="gr-shuffle" id="gr-shuffle">&nbsp;</div></div>
     </div>
     <div id="go-results" hidden></div>
+    <button type="button" id="go-refine" class="go-cta go-refine" hidden style="margin-top:12px;background:transparent;color:var(--green,#2f9e68);border:1px solid rgba(63,178,127,.4)">{{ t('go.refine', 'Add your own skills to sharpen this') }} &#8250;</button>
   </div>
 
   <div id="skills-modal" class="skm" hidden aria-modal="true" role="dialog" aria-label="Add your skills">
@@ -1201,6 +1202,7 @@
     function pop() {
       results.hidden = false;
       results.classList.remove('go-pop'); void results.offsetWidth; results.classList.add('go-pop');
+      var rf = document.getElementById('go-refine'); if (rf && FLAGS.paid) rf.hidden = false;
       window.jbEv && window.jbEv('green_shown');
     }
     function render(d) {
@@ -1230,10 +1232,18 @@
       html += '<p class="gt-method">Matches are computed from O*NET related-occupation and core-task data crossed with this model\'s automation-exposure scores &mdash; from your skills, not estimated by an AI. Figures are ranges for planning, not a guarantee.</p>';
       results.innerHTML = html; pop();
     }
-    // Auto-open the capture when a freshly paid customer lands here to build their plan.
-    if (FLAGS.start && FLAGS.paid) {
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', openModal);
-      else openModal();
+    // Lead the paid experience with the safer-move match itself, computed from the role's own
+    // skills (not a gated "add your skills" step). The skills modal is now an optional refine.
+    var refineBtn = document.getElementById('go-refine');
+    if (refineBtn) refineBtn.addEventListener('click', openModal);
+    function defaultSkills() {
+      var out = []; document.querySelectorAll('.skm-ck').forEach(function (ck) { out.push(ck.value); });
+      return out;
+    }
+    if (FLAGS.paid) {
+      var autoRun = function () { run(defaultSkills()); };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', autoRun);
+      else autoRun();
     }
   })();
   </script>
