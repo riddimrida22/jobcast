@@ -219,6 +219,10 @@
   </div>
 </div>
 <p class="verdict"><strong>{{ t('seo.short', 'The short version:') }}</strong> {{ t('seo.v.pre', 'this role is') }} {{ vlvl }} {{ t('seo.v.mid', 'to automation,') }} {{ vtim }}{{ t('seo.v.suf', '. It is a sourced range, not a verdict, and the detail is below.') }}</p>
+{# The promo rail (localize CTA, trust, share, refer-a-friend) only shows for PAID users. The
+   FREE score page stays the clean hook - just the score + one "see what to do" offer (-> buy).
+   Students get their generic block. (funnel-score-then-sale: score = the only free thing.) #}
+{% if paid %}
 <aside class="rrail">
 {% if seo %}
 <div class="tour-localize">
@@ -307,7 +311,8 @@
   })();
 </script>
 
-</aside>{# /.rrail #}
+</aside>
+{% endif %}{# /.rrail #}
 {% if paid and not seo %}
 {# ---- Progressive profiling: post-pay "Sharpen your result". The free funnel stays frictionless
    (job -> score -> paywall); here, a paying customer can add the data they skipped, and each
@@ -1630,6 +1635,7 @@
   <h2 style="margin:0 0 8px;font-size:23px;line-height:1.15">{{ t('fo.h', 'See what to do about it') }}</h2>
   <p class="muted" style="margin:0 auto 20px;max-width:470px;line-height:1.55">{{ t('fo.sub', 'Unlock your AI-researched breakdown and your safer move - the career you already qualify for at lower risk, with the timeline and the step-by-step plan.') }} {{ t('fo.price', 'One-time $4.99.') }}</p>
   <button type="button" class="fo-cta" onclick="if(window.jbOpenPaywall){window.jbOpenPaywall();}" style="background:var(--accent);color:#2a1708;border:none;border-radius:999px;padding:15px 34px;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 8px 24px rgba(243,163,95,.32)">{{ t('fo.cta', 'See what to do') }} &rsaquo;</button>
+  <div style="margin-top:14px"><a href="#" onclick="event.preventDefault(); var u=location.href; if(navigator.share){navigator.share({title:document.title,url:u}).catch(function(){});}else if(navigator.clipboard){navigator.clipboard.writeText(u); this.textContent='Link copied';}" style="color:var(--muted);font-size:13px;text-decoration:none">{{ t('fo.share', 'Share my result') }}</a></div>
 </div>
 <script>
   /* Students don't get the $4.99 sale - they get the free .edu path to generic info. Swap the
