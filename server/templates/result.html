@@ -690,18 +690,20 @@
    direct /jobs link or a sample chip). Free users get the clean offer in the {% else %}. #}
 {% if paid %}
 <div class="tabs" role="tablist">
-  <button class="tab active" data-panel="p-overview">Overview</button>
-  {% if r.strategies %}<button class="tab" data-panel="p-strategy">What To Do</button>{% endif %}
+  {# Lead with the payoff: "What To Do" (the plan + the safer move / green option) is the default
+     tab, not the exposure dials. See funnel-score-then-sale (green option up top). #}
+  {% if r.strategies %}<button class="tab active" data-panel="p-strategy">What To Do</button>{% endif %}
+  <button class="tab{{ '' if r.strategies else ' active' }}" data-panel="p-overview">Overview</button>
   <button class="tab" data-panel="p-tasks">{{ 'Tasks' if seo else 'My Tasks' }}</button>
   {% if r.key_drivers %}<button class="tab" data-panel="p-drivers">What Drives It</button>{% endif %}
   {% if not seo %}<button class="tab" data-panel="p-pay">Pay &amp; Place</button>{% endif %}
   {% if r.adjacent_lower_risk %}<button class="tab" data-panel="p-paths">Safer Paths</button>{% endif %}
   {% if r.geo and (r.geo.countries|length > 1 or r.geo.states) %}<button class="tab" data-panel="p-geo">Where It Pays</button>{% endif %}
-  <button class="tab" data-panel="p-scored">How It's Worked Out</button>
+  <button class="tab" data-panel="p-scored">The science</button>
 </div>
 
 <!-- OVERVIEW -->
-<div id="p-overview" class="panel active card">
+<div id="p-overview" class="panel{{ ' active' if not r.strategies }} card">
   {# Free-teaser (guided tour / body.rstage) view: the headline resilience level is the hook;
      the paid exposure split, timeline and pay stay hidden. Shows only during the tour. #}
   <div class="ov-teaser" aria-hidden="true">
@@ -776,7 +778,7 @@
 
 <!-- WHAT TO DO -->
 {% if r.strategies %}
-<div id="p-strategy" class="panel card">
+<div id="p-strategy" class="panel{{ ' active' if r.strategies }} card">
   <div class="sect-title"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><h2 style="margin:0">What To Do About It</h2></div>
 
   {% if not seo %}
@@ -1598,6 +1600,13 @@
   </div>
   <div class="src-chips">{% for s in r.sources %}<span class="chip">{{ s.name }}</span>{% endfor %}</div>
   <p class="muted" style="margin-top:10px">Snapshot {{ r.snapshot.id }}. Full method and backtest on <a href="/methodology">How it works</a>.</p>
+</div>
+
+{# Referral push on the paid report: refer-5-who-buy = money back + a free year (funnel-score-then-sale). #}
+<div class="paid-refer-push card" style="text-align:center;padding:22px;max-width:620px;margin:18px auto 0;background:linear-gradient(180deg,rgba(94,201,140,.10),rgba(94,201,140,.02));border-color:rgba(94,201,140,.32)">
+  <b style="font-size:18px">{{ t('prp.h', 'Got value from this? Get your money back.') }}</b>
+  <p class="muted" style="margin:8px auto 14px;max-width:470px;line-height:1.5">{{ t('prp.sub', 'Refer 5 friends who buy JobBreak and we refund your purchase in full, plus a free year.') }}</p>
+  <button type="button" onclick="var e=document.getElementById('refer-email'); if(e){e.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(function(){e.focus();},300);}" style="background:var(--accent);color:#2a1708;border:none;border-radius:999px;padding:12px 26px;font-weight:800;font-size:15px;cursor:pointer">{{ t('prp.cta', 'Get my referral link') }} &rsaquo;</button>
 </div>
 {% elif student %}
 {# VERIFIED STUDENT: generic info only - the score (hero above) + AI-safer careers in this
