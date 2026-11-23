@@ -134,9 +134,12 @@
         <label class="up-plan up-plan-more"><input type="radio" name="up_plan" value="monthly"><span class="up-pn">{{ t('up.pl.monthly') }}</span><span class="up-price">$1.99<small>/mo</small></span></label>
       </div>
       <button type="button" class="up-more-toggle" id="up-more-toggle">{{ t('up.pl.more', 'Other plans &#8250;') }}</button>
-      <div class="up-paynote">{{ t('up.pl.tap', 'Tap to pay in one step') }}</div>
-      <div class="pay-badges"><span class="pb">Apple Pay</span><span class="pb">Google Pay</span><span class="pb">Card</span><span class="pb">Link</span></div>
-      <button type="button" class="up-cta" data-up-next>{{ t('up.pl.cta') }}</button>
+      <div class="up-promo-row">
+        <input type="text" id="up-code" class="up-code" placeholder="{{ t('up.pl.code.ph', 'Promo code') }}" autocomplete="off" autocapitalize="characters" aria-label="{{ t('up.pl.code.ph', 'Promo code') }}">
+        <button type="button" class="up-code-apply" id="up-code-apply">{{ t('up.pl.code.apply', 'Apply') }}</button>
+      </div>
+      <p class="up-code-note" id="up-code-note">{{ t('up.pl.code.note', 'Use code <b>JOBBREAK</b> for 40% off &mdash; $2.99') }}</p>
+      <button type="button" class="up-cta" data-up-next>{{ t('up.pl.cta2', 'Continue to payment') }} &rsaquo;</button>
     </div>
   </section>
   <section class="up-step" data-up="order">
@@ -2108,9 +2111,11 @@
         window.jbEv && window.jbEv('checkout');
         var y = up.querySelector('input[name=up_plan]:checked');
         var period = (y && y.value) || 'once';
+        var codeEl = document.getElementById('up-code');
+        var code = codeEl ? codeEl.value.trim() : '';
         var old = btn ? btn.textContent : '';
         if (btn) { btn.textContent = 'Opening secure checkout...'; btn.style.pointerEvents = 'none'; }
-        fetch('/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tier: 'tier2', period: period }) })
+        fetch('/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tier: 'tier2', period: period, code: code || undefined }) })
           .then(function (r) { return r.json(); }).then(function (d) {
             if (d.ok && d.url) { window.location.href = d.url; }
             else { if (btn) { btn.textContent = old; btn.style.pointerEvents = ''; } alert('Checkout is unavailable right now. Please try again.'); }
@@ -2143,6 +2148,27 @@
         var open = pw.classList.toggle('show-more');
         moreToggle.innerHTML = open ? '{{ t("up.pl.fewer", "Fewer options") }}' : '{{ t("up.pl.more", "Other plans &#8250;") }}';
       });
+      // Promo code: the advertised JOBBREAK code previews the discounted price right here;
+      // any other code is validated and applied by Stripe on the payment screen.
+      var codeInput = document.getElementById('up-code');
+      var codeApply = document.getElementById('up-code-apply');
+      var codeNote = document.getElementById('up-code-note');
+      var featPrice = up.querySelector('.up-plan.feat .up-price');
+      function applyCode() {
+        if (!codeNote) return;
+        var c = (codeInput && codeInput.value || '').trim().toUpperCase();
+        if (!c) return;
+        if (c === 'JOBBREAK') {
+          if (featPrice) featPrice.innerHTML = '<s>$4.99</s> $2.99';
+          codeNote.innerHTML = 'Code <b>JOBBREAK</b> applied — 40% off, $2.99';
+          codeNote.classList.add('ok');
+        } else {
+          codeNote.textContent = 'Code added — your discount shows at payment.';
+          codeNote.classList.remove('ok');
+        }
+      }
+      if (codeApply) codeApply.addEventListener('click', applyCode);
+      if (codeInput) codeInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); applyCode(); } });
       if (back) back.addEventListener('click', function () { show(ui - 1); });
       // Exit leaves the breakdown locked; finishing the preview flow (Stripe off) unlocks it.
       document.getElementById('up-x').addEventListener('click', function () { closeUp(); });

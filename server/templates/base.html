@@ -583,6 +583,19 @@
     /* Lead with the recommended plan; the others stay behind an "Other plans" toggle. */
     .up-plan-more { display:none; }
     .up-plans.show-more .up-plan-more { display:flex; }
+    /* Promo code on the plan step: one field + Apply, with the advertised launch code. */
+    .up-promo-row { display:flex; gap:8px; justify-content:center; margin:0 0 8px; }
+    .up-code { flex:0 1 220px; background:rgba(255,255,255,.08); border:1.5px solid rgba(255,255,255,.22);
+      color:#fff; border-radius:10px; padding:11px 14px; font:inherit; font-size:15px; text-transform:uppercase; letter-spacing:.04em; }
+    .up-code::placeholder { color:#9db0c6; text-transform:none; letter-spacing:0; }
+    .up-code:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(243,163,95,.2); }
+    .up-code-apply { font:inherit; font-weight:700; cursor:pointer; border:1.5px solid rgba(255,255,255,.22);
+      background:rgba(255,255,255,.06); color:#eaf1f9; border-radius:10px; padding:11px 18px; }
+    .up-code-apply:hover { border-color:var(--accent); color:#fff; }
+    .up-code-note { font-size:13px; color:#b9c7d8; margin:0 0 16px; }
+    .up-code-note b { color:var(--accent); }
+    .up-code-note.ok, .up-code-note.ok b { color:var(--green); }
+    .up-plan .up-price s { opacity:.5; font-weight:600; font-size:.62em; margin-right:4px; }
     .up-more-toggle { background:none; border:0; color:#9db0c6; font:inherit; font-size:13.5px; text-decoration:underline;
       cursor:pointer; margin:0 0 20px; }
     .up-more-toggle:hover { color:#fff; }

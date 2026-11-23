@@ -69,10 +69,31 @@ def price_id(tier, period):
     return os.environ.get(env) if env else None
 
 
-def create_checkout_session(tier, period, success_url, cancel_url, email=None, ref=None):
+def promo_code_id(code):
+    """The Stripe PromotionCode id for a customer-entered code, or None if it is blank,
+    unknown or inactive. Cheap, swallow-all guard so a bad code never blocks checkout."""
+    code = (code or "").strip()
+    if not code:
+        return None
+    try:
+        res = _client().PromotionCode.list(code=code, active=True, limit=1)
+        data = _get(res, "data") or []
+        return _get(data[0], "id") if data else None
+    except Exception as e:
+        print(f"[payments] promo lookup failed: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+        return None
+
+
+def create_checkout_session(tier, period, success_url, cancel_url, email=None, ref=None,
+                            promo_code=None):
     """Return (session, None) on success or (None, error_code). The price is set inline
     (price_data from PRICE_CENTS), so it can be changed in code with no Stripe dashboard
-    step. Entitlement is carried by metadata, not the price id."""
+    step. Entitlement is carried by metadata, not the price id.
+
+    promo_code: a code the user typed on our own plan page. If it resolves to a live Stripe
+    promotion code we PRE-APPLY it (discounts=[...]) so the discounted price shows on Stripe's
+    page; otherwise we fall back to allow_promotion_codes=True (Stripe shows its own code box).
+    Stripe forbids passing both, so it is one or the other."""
     cents = PRICE_CENTS.get((tier, period))
     if not cents:
         return None, "price_not_configured"
@@ -86,16 +107,21 @@ def create_checkout_session(tier, period, success_url, cancel_url, email=None, r
         price_data["recurring"] = {"interval": "year" if period == "yearly" else "month"}
     try:
         stripe = _client()
-        session = stripe.checkout.Session.create(
+        kwargs = dict(
             mode="payment" if onetime else "subscription",
             line_items=[{"price_data": price_data, "quantity": 1}],
             success_url=success_url,
             cancel_url=cancel_url,
-            allow_promotion_codes=True,
             customer_email=email or None,
             metadata={"tier": tier, "period": period,
                       **({"ref": ref} if ref else {})},
         )
+        pid = promo_code_id(promo_code)
+        if pid:
+            kwargs["discounts"] = [{"promotion_code": pid}]
+        else:
+            kwargs["allow_promotion_codes"] = True
+        session = stripe.checkout.Session.create(**kwargs)
         return session, None
     except Exception as e:
         print(f"[payments] checkout create failed: {type(e).__name__}: {e}", file=sys.stderr, flush=True)

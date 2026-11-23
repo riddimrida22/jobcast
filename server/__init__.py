@@ -827,7 +827,8 @@ def create_app() -> Flask:
             success_url=base + "/billing/success?session_id={CHECKOUT_SESSION_ID}",
             cancel_url=base + "/billing/cancel",
             email=(body.get("email") or None),
-            ref=request.cookies.get("jb_ref"))
+            ref=request.cookies.get("jb_ref"),
+            promo_code=(body.get("code") or None))
         if err or not sess:
             return jsonify({"ok": False, "error": err or "stripe_error"}), 400
         return jsonify({"ok": True, "url": sess.url})
