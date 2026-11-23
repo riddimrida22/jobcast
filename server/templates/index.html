@@ -1098,6 +1098,16 @@
   }
   initCombo('lp-q', 'lp-qlist');
   initCombo('cs-q', 'cs-qlist');
+  // Sample job chips route through the SAME staged score reveal as a typed job,
+  // so both entry paths land on the clean score screen (then the paywall), not the
+  // raw result page.
+  var quick = document.querySelector('.lp-quick');
+  if (quick) quick.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href^="/jobs/"]') : null;
+    if (!a) return;
+    e.preventDefault();
+    goSoc(a.getAttribute('href').replace('/jobs/', ''));
+  });
   var back = document.getElementById('cs-back');
   if (back) back.addEventListener('click', function () { location.href = '/'; });
 })();
