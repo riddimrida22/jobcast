@@ -200,7 +200,9 @@
   .jda-foot { font-size:11px; color:#8aa0ba; margin:12px 0 0; line-height:1.4; }
   .jd-cta { width:100%; margin-top:14px; font:inherit; font-weight:800; font-size:16px; border:0; border-radius:12px;
     padding:14px; cursor:pointer; color:#2a1708; background:linear-gradient(180deg,var(--accent,#f3a35f),#e8863a);
-    box-shadow:0 8px 22px rgba(243,163,95,.4); }
+    box-shadow:0 8px 22px rgba(243,163,95,.4);
+    /* Pin the CTA so it stays on screen while a tall demo scrolls on small phones (harmless when it already fits). */
+    position:sticky; bottom:10px; z-index:3; }
 </style>
 {% if jane %}
 <div class="jd-demo" id="jd-demo" hidden role="dialog" aria-modal="true" aria-label="Worked example: Jane">
