@@ -220,6 +220,7 @@ def create_app() -> Flask:
     def _inject():
         from . import payments as pay
         return {"noindex": noindex, "stripe_enabled": pay.configured(),
+                "stripe_pk": pay.publishable_key(),
                 "entitlement": session.get("jb_tier", "free"),
                 # Ad-platform tags (Meta Pixel, Google Ads). Dormant until the IDs are set as
                 # env vars, so nothing loads or changes on the site until an ad account exists.
@@ -827,17 +828,31 @@ def create_app() -> Flask:
         # One currency, chosen from the user's country pick (US->usd, UK->gbp, CA->cad), so the
         # checkout shows a single currency and no chooser.
         cur = countries.currency(getattr(g, "country", None)).get("code", "USD").lower()
+        success = base + "/billing/success?session_id={CHECKOUT_SESSION_ID}"
+        # Embedded pay screen mounts on our own page (Stripe's embedded Checkout widget) and needs
+        # a publishable key client-side. If one isn't configured we silently fall through to the
+        # hosted redirect, so checkout can never break over a missing pk.
+        want_embedded = bool(body.get("embedded")) and bool(pay.publishable_key())
         sess, err = pay.create_checkout_session(
             tier, period,
-            success_url=base + "/billing/success?session_id={CHECKOUT_SESSION_ID}",
+            success_url=success,
             cancel_url=base + "/billing/cancel",
             email=(body.get("email") or None),
             ref=request.cookies.get("jb_ref"),
             promo_code=(body.get("code") or None),
-            currency=cur)
+            currency=cur,
+            ui_mode="embedded" if want_embedded else "hosted",
+            return_url=success if want_embedded else None)
         if err or not sess:
             return jsonify({"ok": False, "error": err or "stripe_error"}), 400
-        return jsonify({"ok": True, "url": sess.url})
+        if want_embedded:
+            cs = pay._get(sess, "client_secret")
+            if cs:
+                return jsonify({"ok": True, "client_secret": cs, "pk": pay.publishable_key()})
+            # A session with no client_secret should not happen for ui_mode=embedded; if it does,
+            # don't hand the browser a dead screen - report an error so it can retry.
+            return jsonify({"ok": False, "error": "stripe_error"}), 400
+        return jsonify({"ok": True, "url": pay._get(sess, "url")})
 
     @app.post("/v1/ev")
     def track_event():

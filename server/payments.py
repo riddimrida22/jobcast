@@ -85,7 +85,7 @@ def promo_code_id(code):
 
 
 def create_checkout_session(tier, period, success_url, cancel_url, email=None, ref=None,
-                            promo_code=None, currency="usd"):
+                            promo_code=None, currency="usd", ui_mode="hosted", return_url=None):
     """Return (session, None) on success or (None, error_code). The price is set inline
     (price_data from PRICE_CENTS), so it can be changed in code with no Stripe dashboard
     step. Entitlement is carried by metadata, not the price id.
@@ -98,7 +98,14 @@ def create_checkout_session(tier, period, success_url, cancel_url, email=None, r
     currency: the ISO code (usd/gbp/cad) chosen from the user's country, so the checkout shows
     ONE currency with no chooser. The same PRICE_CENTS figure is presented in that currency
     (e.g. 499 -> $4.99 / GBP4.99 / CA$4.99); change PRICE_CENTS per-currency later if true local
-    pricing is wanted. A percent-off promo (JOBBREAK) applies in any currency."""
+    pricing is wanted. A percent-off promo (JOBBREAK) applies in any currency.
+
+    ui_mode: "hosted" (default) builds a redirect Checkout Session carrying success_url/cancel_url
+    and returns a session with a `url`. "embedded" builds a Session that mounts inside our own
+    page (Stripe's embedded Checkout widget) and returns a session with a `client_secret`; it takes
+    a single `return_url` (where Stripe sends the top window once payment completes) instead of
+    success_url/cancel_url. Everything else - mode, price, metadata, promo - is identical, so the
+    webhook + /billing/success path is shared."""
     cents = PRICE_CENTS.get((tier, period))
     if not cents:
         return None, "price_not_configured"
@@ -118,12 +125,17 @@ def create_checkout_session(tier, period, success_url, cancel_url, email=None, r
         kwargs = dict(
             mode="payment" if onetime else "subscription",
             line_items=[{"price_data": price_data, "quantity": 1}],
-            success_url=success_url,
-            cancel_url=cancel_url,
             customer_email=email or None,
             metadata={"tier": tier, "period": period,
                       **({"ref": ref} if ref else {})},
         )
+        if ui_mode == "embedded":
+            # Mounted on our own page; one return_url, no success/cancel redirect pair.
+            kwargs["ui_mode"] = "embedded"
+            kwargs["return_url"] = return_url
+        else:
+            kwargs["success_url"] = success_url
+            kwargs["cancel_url"] = cancel_url
         pid = promo_code_id(promo_code)
         if pid:
             kwargs["discounts"] = [{"promotion_code": pid}]

@@ -142,6 +142,14 @@
       <button type="button" class="up-cta" data-up-next>{{ t('up.pl.cta2', 'Continue to payment') }} &rsaquo;</button>
     </div>
   </section>
+  <!-- Embedded pay screen: Stripe's secure checkout mounts right here, on our own page (no
+       redirect). Falls back to Stripe's hosted page if no publishable key is configured. -->
+  <section class="up-step" data-up="pay">
+    <h2 class="up-q">{{ t('up.pay.q', 'Secure checkout') }}</h2>
+    <p class="up-note up-pay-status" id="up-pay-status">{{ t('up.pay.loading', 'Loading secure checkout&hellip;') }}</p>
+    <div class="up-pay-box" id="up-pay-box"></div>
+    <p class="up-note">{{ t('up.pay.note', 'Processed securely by Stripe. We never see your card details.') }}</p>
+  </section>
   <section class="up-step" data-up="order">
     <h2 class="up-q">Your order</h2>
     <div class="up-order">
@@ -1951,7 +1959,7 @@
   var exp = Math.round(+data.exposure || 0);
   var lvl = Math.round(+data.level || 0);  // resilience LEVEL 1-10 (10 = safe, 1 = extinct); HIGH is GOOD
   // Payment state: when Stripe is live the paywall goes to real checkout; subscribers skip it.
-  var STRIPE = {{ stripe_enabled|tojson }}, ENT = {{ entitlement|tojson }};
+  var STRIPE = {{ stripe_enabled|tojson }}, ENT = {{ entitlement|tojson }}, STRIPE_PK = {{ stripe_pk|tojson }};
   // Tour (generic) funnels to "localize & personalize"; personal result goes to the paywall.
   var SEO = {{ seo|default(false)|tojson }}, OCC_TITLE = {{ disp_title|tojson }}, RATING = {{ rating_label|tojson }};
   // Reveal ANIMATION plays only when arriving from the guided flow (jb_reveal). The paywall
@@ -2104,9 +2112,33 @@
       var back = document.getElementById('up-back'), dots = document.getElementById('up-dots'), nav = up.querySelector('.up-nav');
       var ui = 0;
       dots.innerHTML = steps.map(function () { return '<i></i>'; }).join('');
-      function closeUp() { up.hidden = true; up.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; }
+      var _embedded = null, _stripeJs = null;
+      function loadStripeJs() {
+        if (_stripeJs) return _stripeJs;
+        _stripeJs = new Promise(function (resolve, reject) {
+          if (window.Stripe) { resolve(window.Stripe); return; }
+          var s = document.createElement('script');
+          s.src = 'https://js.stripe.com/v3/';
+          s.onload = function () { resolve(window.Stripe); };
+          s.onerror = function () { reject(new Error('stripe_js')); };
+          document.head.appendChild(s);
+        });
+        return _stripeJs;
+      }
+      function destroyEmbedded() { if (_embedded) { try { _embedded.destroy(); } catch (e) {} _embedded = null; } }
+      function closeUp() { destroyEmbedded(); up.hidden = true; up.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; }
       function show(n) {
-        ui = Math.max(0, Math.min(steps.length - 1, n));
+        var prev = steps[ui] && steps[ui].getAttribute('data-up');
+        var target = Math.max(0, Math.min(steps.length - 1, n));
+        // The embedded pay screen only exists in the live (Stripe-on) flow. In preview mode the
+        // sequential walk steps OVER it, in whichever direction we're moving, so the demo keeps
+        // going plans -> order -> done.
+        if (!STRIPE && steps[target] && steps[target].getAttribute('data-up') === 'pay') {
+          target = (target >= ui) ? Math.min(steps.length - 1, target + 1) : Math.max(0, target - 1);
+        }
+        ui = target;
+        // Leaving the pay screen (e.g. Back) tears down the mounted Stripe widget.
+        if (prev === 'pay' && steps[ui].getAttribute('data-up') !== 'pay') destroyEmbedded();
         steps.forEach(function (s, k) { s.classList.toggle('active', k === ui); });
         dots.querySelectorAll('i').forEach(function (d, k) { d.classList.toggle('on', k === ui); });
         nav.classList.toggle('first', ui === 0);
@@ -2116,7 +2148,42 @@
           if (pl) { var v = y && y.value; pl.textContent = v === 'yearly' ? '$12 / year' : (v === 'once' ? '$4.99 one-time' : '$1.99 / month'); }
         }
       }
-      // Real Stripe hosted Checkout: Apple Pay, Google Pay, card and Link all appear there.
+      // Embedded Stripe Checkout mounted on OUR page (no redirect). Reads the selected plan +
+      // promo code, asks the server for a client_secret, then mounts the widget. If no publishable
+      // key is configured the server returns a hosted url instead and we redirect, so the sale is
+      // never blocked.
+      function mountPay() {
+        var status = document.getElementById('up-pay-status');
+        var box = document.getElementById('up-pay-box'); if (box) box.innerHTML = '';
+        destroyEmbedded();
+        if (status) { status.textContent = '{{ t("up.pay.loading", "Loading secure checkout…") }}'; status.classList.remove('err'); }
+        window.jbEv && window.jbEv('checkout');
+        var y = up.querySelector('input[name=up_plan]:checked');
+        var period = (y && y.value) || 'once';
+        var codeEl = document.getElementById('up-code');
+        var code = codeEl ? codeEl.value.trim() : '';
+        fetch('/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tier: 'tier2', period: period, embedded: true, code: code || undefined }) })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.ok && d.client_secret && d.pk) {
+              return loadStripeJs().then(function (Stripe) {
+                return Stripe(d.pk).initEmbeddedCheckout({ clientSecret: d.client_secret });
+              }).then(function (checkout) {
+                _embedded = checkout; checkout.mount('#up-pay-box');
+                if (status) status.textContent = '';
+              });
+            }
+            if (d.ok && d.url) { window.location.href = d.url; return; }   // hosted fallback (no pk)
+            throw new Error((d && d.error) || 'checkout');
+          })
+          .catch(function () {
+            if (status) { status.textContent = '{{ t("up.pay.err", "We could not load secure checkout. Please go back and try again.") }}'; status.classList.add('err'); }
+          });
+      }
+      // "Continue to payment" -> our embedded pay screen (the step right after the plan picker).
+      function goToPay() { if (up._payIdx >= 0) { show(up._payIdx); mountPay(); } else { upCheckout(); } }
+      // Legacy hosted redirect: still used by the one-tap wallet badges (immediate Apple/Google Pay).
       function upCheckout(btn) {
         window.jbEv && window.jbEv('checkout');
         var y = up.querySelector('input[name=up_plan]:checked');
@@ -2134,8 +2201,8 @@
       up.querySelectorAll('[data-up-next]').forEach(function (b) {
         b.addEventListener('click', function () {
           var step = b.closest('.up-step');
-          // With Stripe live, the plan step goes straight to real checkout, not the preview order steps.
-          if (STRIPE && step && step.getAttribute('data-up') === 'plans') { upCheckout(b); return; }
+          // With Stripe live, the plan step goes to our embedded pay screen, not the preview order steps.
+          if (STRIPE && step && step.getAttribute('data-up') === 'plans') { goToPay(); return; }
           show(ui + 1);
         });
       });
@@ -2187,6 +2254,7 @@
       // When Stripe is live, skip the marketing "ad" preamble and open straight on the
       // plan picker, so buying is one screen then pay, not a slideshow.
       up._plansIdx = steps.findIndex(function (s) { return s.getAttribute('data-up') === 'plans'; });
+      up._payIdx = steps.findIndex(function (s) { return s.getAttribute('data-up') === 'pay'; });
     }
     up.hidden = false; up.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
     var _start = (typeof STRIPE !== 'undefined' && STRIPE && up._plansIdx > 0) ? up._plansIdx : 0;
