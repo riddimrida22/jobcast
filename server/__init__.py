@@ -216,12 +216,44 @@ def create_app() -> Flask:
             error = "Incorrect username or password. Please try again."
         return render_template("login.html", error=error, next=nxt)
 
+    def _effective_entitlement():
+        """Entitlement for the job the visitor is CURRENTLY on (session['jb_soc']).
+        - an active SUBSCRIPTION (jb_sub) = open access to every job;
+        - a verified STUDENT (jb_tier == 'student') = the free student tier, any job;
+        - a ONE-TIME purchase unlocks only the job it bought (jb_jobs[soc]), so a new job is a
+          new payment;
+        - everyone else is 'free' -> the paywall.
+        Returning this as `entitlement` makes every existing template gate per-job with no rewrite."""
+        sub = session.get("jb_sub")
+        if sub:
+            return sub
+        if session.get("jb_tier") == "student":
+            return "student"
+        cur = session.get("jb_soc")
+        jobs = session.get("jb_jobs") or {}
+        if cur and isinstance(jobs, dict) and cur in jobs:
+            return jobs[cur]
+        return "free"
+
+    def _apply_entitlement(tier, period, soc):
+        """Grant access from a completed checkout. A SUBSCRIPTION (monthly/yearly) opens every
+        job; a ONE-TIME purchase unlocks only the job it bought. Unknown period is treated as
+        one-time (cash-flow-safe); such a buyer can still restore or re-check that job."""
+        session.permanent = True
+        if period in ("monthly", "yearly"):
+            session["jb_sub"] = tier
+        else:
+            jobs = dict(session.get("jb_jobs") or {})
+            if soc:
+                jobs[soc] = tier
+            session["jb_jobs"] = jobs
+
     @app.context_processor
     def _inject():
         from . import payments as pay
         return {"noindex": noindex, "stripe_enabled": pay.configured(),
                 "stripe_pk": pay.publishable_key(),
-                "entitlement": session.get("jb_tier", "free"),
+                "entitlement": _effective_entitlement(),
                 # Ad-platform tags (Meta Pixel, Google Ads). Dormant until the IDs are set as
                 # env vars, so nothing loads or changes on the site until an ad account exists.
                 "meta_pixel_id": os.environ.get("JOBCAST_META_PIXEL_ID", ""),
@@ -299,7 +331,7 @@ def create_app() -> Flask:
         flow (score -> paywall) is visible again. Clears server session + client
         storage, then bounces home. Unlinked on purpose; only affects the caller's
         own session, never anyone else's."""
-        for _k in ("jb_tier", "jb_soc"):
+        for _k in ("jb_tier", "jb_soc", "jb_jobs", "jb_sub"):
             session.pop(_k, None)
         return Response(
             "<!doctype html><meta charset=utf-8><title>Reset to free</title>"
@@ -824,6 +856,9 @@ def create_app() -> Flask:
         period = (body.get("period") or "monthly").strip()
         if tier not in ("tier1", "tier2", "tier3") or period not in ("monthly", "yearly", "once"):
             return jsonify({"ok": False, "error": "bad_request"}), 400
+        # The job this purchase is for. A one-time buy unlocks ONLY this job; we take it from the
+        # paywall (body) and fall back to the job in session, so a new job needs its own payment.
+        soc = (body.get("soc") or session.get("jb_soc") or "").strip()
         base = request.host_url.rstrip("/")
         # One currency, chosen from the user's country pick (US->usd, UK->gbp, CA->cad), so the
         # checkout shows a single currency and no chooser.
@@ -842,7 +877,8 @@ def create_app() -> Flask:
             promo_code=(body.get("code") or None),
             currency=cur,
             ui_mode="embedded" if want_embedded else "hosted",
-            return_url=success if want_embedded else None)
+            return_url=success if want_embedded else None,
+            soc=soc or None)
         if err or not sess:
             return jsonify({"ok": False, "error": err or "stripe_error"}), 400
         if want_embedded:
@@ -885,10 +921,16 @@ def create_app() -> Flask:
         sid = request.args.get("session_id")
         tier = None
         sess = None
+        g_soc = None
+        g_period = None
         if sid and pay.configured():
             # 1) The webhook may already have recorded this unlock server-side - race-free,
             #    so trust it first and skip the fragile live lookup entirely.
-            tier = pay.grant_for(sid)
+            rec = pay.grant_record_for(sid)
+            if rec:
+                tier = rec.get("tier")
+                g_soc = rec.get("soc")
+                g_period = rec.get("period")
             # 2) Otherwise the return redirect (especially Apple Pay) can beat Stripe
             #    finalizing the Checkout Session, so the first retrieve may show it
             #    not-yet-complete. Retry briefly so a genuine payment is never shown as
@@ -900,10 +942,14 @@ def create_app() -> Flask:
                     if tier or sess is None:  # resolved, or a hard retrieve failure
                         break
                     time.sleep(0.5)
+                if tier and sess is not None:
+                    g_soc, g_period = pay.meta_from_session(sess)
             if tier:
-                pay.record_grant(sid, tier)  # persist so any later reload unlocks instantly
-                session["jb_tier"] = tier
-                session.permanent = True
+                # The job this purchase unlocks: the checkout's own metadata first, else the job
+                # still in session. A one-time buy unlocks ONLY this job.
+                buy_soc = g_soc or session.get("jb_soc")
+                pay.record_grant(sid, tier, soc=buy_soc, period=g_period)  # persist for later reloads
+                _apply_entitlement(tier, g_period, buy_soc)
                 if sess is None:  # granted from the webhook store; fetch details best-effort
                     sess = pay.retrieve_session(sid)
                 details = pay._get(sess, "customer_details") or {}
@@ -1004,7 +1050,8 @@ def create_app() -> Flask:
             # success page reads it first, so access unlocks even if the redirect was slow,
             # lost, or closed before Stripe finished.
             gtier = pay.tier_from_session(obj)
-            pay.record_grant(pay._get(obj, "id"), gtier)
+            g_soc, g_period = pay.meta_from_session(obj)
+            pay.record_grant(pay._get(obj, "id"), gtier, soc=g_soc, period=g_period)
             pay.record_subscription({
                 "event": etype,
                 "email": details.get("email") if hasattr(details, "get") else None,
@@ -1302,7 +1349,12 @@ def create_app() -> Flask:
             if not tier:
                 msg, ok = "No paid tier to grant for that session.", False
             else:
-                pay.record_grant(sid, tier)  # persist so the link unlocks instantly
+                # Preserve the job + period from the original grant so the restore link re-applies
+                # the SAME access (one-time = that job only; subscription = open).
+                _rec = pay.grant_record_for(sid)
+                pay.record_grant(sid, tier,
+                                 soc=(_rec.get("soc") if _rec else None),
+                                 period=(_rec.get("period") if _rec else None))  # persist for the link
                 if email:
                     link = request.host_url.rstrip("/") + "/billing/success?session_id=" + sid
                     sent_ok, _i = emailer.send(
