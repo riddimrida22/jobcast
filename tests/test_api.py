@@ -312,3 +312,35 @@ def test_students_free_page(client):
 def test_students_free_rejects_non_edu(client):
     r = client.post("/students/free/request", data={"email": "a@gmail.com"})
     assert r.status_code == 200           # re-renders with an error, grants nothing
+
+
+def _soc_for(client, title):
+    j = client.post("/v1/assess", json={"title": title}).get_json()
+    return (j.get("occupation") or {}).get("soc") if j and j.get("ok") else None
+
+
+def test_paywall_is_per_job(client, monkeypatch):
+    """A one-time purchase unlocks only the job it bought; a new job needs a new payment.
+    A subscription opens every job. (Protects cash flow.)"""
+    monkeypatch.setattr("server.payments.configured", lambda: True)
+    monkeypatch.setattr("server.payments.publishable_key", lambda: "pk_test_x")
+    soc = _soc_for(client, "software developer")
+    other = _soc_for(client, "lawyer")
+    assert soc and other and soc != other
+
+    def plan_with(updates):
+        with client.session_transaction() as s:
+            s.clear()
+            s["jb_soc"] = soc
+            s.update(updates)
+        html = client.get("/plan").get_data(as_text=True)
+        return ('data-paid="1"' in html), ('class="free-offer' in html)
+
+    paid, offer = plan_with({})                              # free
+    assert (not paid) and offer
+    paid, offer = plan_with({"jb_jobs": {soc: "tier2"}})     # bought THIS job
+    assert paid and (not offer)
+    paid, offer = plan_with({"jb_jobs": {other: "tier2"}})   # bought a DIFFERENT job
+    assert (not paid) and offer
+    paid, offer = plan_with({"jb_sub": "tier2"})             # subscription
+    assert paid and (not offer)

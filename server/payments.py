@@ -85,7 +85,8 @@ def promo_code_id(code):
 
 
 def create_checkout_session(tier, period, success_url, cancel_url, email=None, ref=None,
-                            promo_code=None, currency="usd"):
+                            promo_code=None, currency="usd", ui_mode="hosted", return_url=None,
+                            soc=None):
     """Return (session, None) on success or (None, error_code). The price is set inline
     (price_data from PRICE_CENTS), so it can be changed in code with no Stripe dashboard
     step. Entitlement is carried by metadata, not the price id.
@@ -98,7 +99,14 @@ def create_checkout_session(tier, period, success_url, cancel_url, email=None, r
     currency: the ISO code (usd/gbp/cad) chosen from the user's country, so the checkout shows
     ONE currency with no chooser. The same PRICE_CENTS figure is presented in that currency
     (e.g. 499 -> $4.99 / GBP4.99 / CA$4.99); change PRICE_CENTS per-currency later if true local
-    pricing is wanted. A percent-off promo (JOBBREAK) applies in any currency."""
+    pricing is wanted. A percent-off promo (JOBBREAK) applies in any currency.
+
+    ui_mode: "hosted" (default) builds a redirect Checkout Session carrying success_url/cancel_url
+    and returns a session with a `url`. "embedded" builds a Session that mounts inside our own
+    page (Stripe's embedded Checkout widget) and returns a session with a `client_secret`; it takes
+    a single `return_url` (where Stripe sends the top window once payment completes) instead of
+    success_url/cancel_url. Everything else - mode, price, metadata, promo - is identical, so the
+    webhook + /billing/success path is shared."""
     cents = PRICE_CENTS.get((tier, period))
     if not cents:
         return None, "price_not_configured"
@@ -118,12 +126,20 @@ def create_checkout_session(tier, period, success_url, cancel_url, email=None, r
         kwargs = dict(
             mode="payment" if onetime else "subscription",
             line_items=[{"price_data": price_data, "quantity": 1}],
-            success_url=success_url,
-            cancel_url=cancel_url,
             customer_email=email or None,
+            # soc ties a ONE-TIME purchase to the specific job it unlocks (per-job access, so a
+            # new job is a new payment). Subscriptions carry it too but grant open access regardless.
             metadata={"tier": tier, "period": period,
+                      **({"soc": soc} if soc else {}),
                       **({"ref": ref} if ref else {})},
         )
+        if ui_mode == "embedded":
+            # Mounted on our own page; one return_url, no success/cancel redirect pair.
+            kwargs["ui_mode"] = "embedded"
+            kwargs["return_url"] = return_url
+        else:
+            kwargs["success_url"] = success_url
+            kwargs["cancel_url"] = cancel_url
         pid = promo_code_id(promo_code)
         if pid:
             kwargs["discounts"] = [{"promotion_code": pid}]
@@ -292,19 +308,25 @@ def tier_from_session(session):
 GRANTS_FILE = _data_dir() / "grants.jsonl"
 
 
-def record_grant(session_id, tier):
+def record_grant(session_id, tier, soc=None, period=None):
     if not session_id or not tier:
         return
     try:
         GRANTS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        rec = {"sid": session_id, "tier": tier, "ts": int(time.time())}
+        if soc:
+            rec["soc"] = soc
+        if period:
+            rec["period"] = period
         with open(GRANTS_FILE, "a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"sid": session_id, "tier": tier, "ts": int(time.time())}) + "\n")
+            fh.write(json.dumps(rec) + "\n")
     except Exception:
         pass
 
 
-def grant_for(session_id):
-    """The tier recorded for this checkout session, or None. Last write wins."""
+def grant_record_for(session_id):
+    """The full grant recorded for this checkout session: {tier, soc, period} or None.
+    Last write wins. Carries the job (soc) so a one-time purchase unlocks only that job."""
     if not session_id or not GRANTS_FILE.exists():
         return None
     found = None
@@ -316,10 +338,24 @@ def grant_for(session_id):
                 except Exception:
                     continue
                 if rec.get("sid") == session_id and rec.get("tier"):
-                    found = rec["tier"]
+                    found = rec
     except Exception:
         return None
     return found
+
+
+def grant_for(session_id):
+    """The tier recorded for this checkout session, or None. Last write wins."""
+    rec = grant_record_for(session_id)
+    return rec.get("tier") if rec else None
+
+
+def meta_from_session(session):
+    """(soc, period) carried in a checkout session's metadata, or (None, None)."""
+    md = _get(session, "metadata") or {}
+    if not hasattr(md, "get"):
+        return None, None
+    return md.get("soc"), md.get("period")
 
 
 def verify_webhook(payload, sig_header):
