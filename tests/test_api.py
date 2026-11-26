@@ -344,3 +344,25 @@ def test_paywall_is_per_job(client, monkeypatch):
     assert (not paid) and offer
     paid, offer = plan_with({"jb_sub": "tier2"})             # subscription
     assert paid and (not offer)
+
+
+def test_paywall_greets_returning_buyer(client, monkeypatch):
+    """A returning one-time buyer landing on a NEW job sees an honest acknowledgment of what
+    they already unlocked, not an identical first-time wall (so the second charge never reads
+    like a bait-and-switch, which would cost us referrals)."""
+    monkeypatch.setattr("server.payments.configured", lambda: True)
+    monkeypatch.setattr("server.payments.publishable_key", lambda: "pk_test_x")
+    soc = _soc_for(client, "software developer")
+    other = _soc_for(client, "lawyer")
+    assert soc and other and soc != other
+
+    def plan_html(updates):
+        with client.session_transaction() as s:
+            s.clear()
+            s["jb_soc"] = soc
+            s.update(updates)
+        return client.get("/plan").get_data(as_text=True)
+
+    assert "up-returning" not in plan_html({})                      # first-time visitor: no note
+    html = plan_html({"jb_jobs": {other: "tier2"}})                 # already bought a DIFFERENT job
+    assert "up-returning" in html and "already unlocked" in html.lower()
