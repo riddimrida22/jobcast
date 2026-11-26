@@ -254,6 +254,10 @@ def create_app() -> Flask:
         return {"noindex": noindex, "stripe_enabled": pay.configured(),
                 "stripe_pk": pay.publishable_key(),
                 "entitlement": _effective_entitlement(),
+                # How many OTHER jobs this visitor has already unlocked one-time. Lets the paywall
+                # greet a returning buyer honestly ("you've unlocked N, this is a different one")
+                # instead of looking identical to a first-time wall, which can feel like a con.
+                "prior_unlocks": len(session.get("jb_jobs") or {}),
                 # Ad-platform tags (Meta Pixel, Google Ads). Dormant until the IDs are set as
                 # env vars, so nothing loads or changes on the site until an ad account exists.
                 "meta_pixel_id": os.environ.get("JOBCAST_META_PIXEL_ID", ""),

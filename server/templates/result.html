@@ -128,6 +128,11 @@
     <div class="up-buy">
       <h2 class="up-q">{{ t('up.pl.q') }}</h2>
       <p class="up-sub">{{ t('up.pl.sub') }}</p>
+      {% if prior_unlocks %}
+      {# Returning one-time buyer on a NEW job: say so plainly so the second charge never feels
+         like a con, and point the obvious next step (a subscription) for someone checking many jobs. #}
+      <p class="up-returning" role="note" style="margin:0 0 14px;padding:10px 14px;border-radius:12px;background:rgba(25,211,224,.09);border:1px solid rgba(25,211,224,.28);font-size:13.5px;line-height:1.5;color:var(--ink)">&#10003; {{ t('up.pl.returning.a', 'You already unlocked') }} <b>{{ prior_unlocks }}</b> {{ t('up.pl.returning.job', 'job') if prior_unlocks == 1 else t('up.pl.returning.jobs', 'jobs') }}. {{ t('up.pl.returning.b', 'This is a different one. Unlock it below, or subscribe to see them all.') }}</p>
+      {% endif %}
       <div class="up-plans">
         <label class="up-plan feat"><input type="radio" name="up_plan" value="once" checked><span class="up-pn">{{ t('up.pl.once') }}</span><span class="up-price">$4.99</span><span class="up-save">{{ t('up.pl.once.sub') }}</span></label>
         <label class="up-plan up-plan-more"><input type="radio" name="up_plan" value="yearly"><span class="up-pn">{{ t('up.pl.yearly') }}</span><span class="up-price">$12<small>/yr</small></span><span class="up-save">{{ t('up.pl.yearly.save') }}</span></label>
