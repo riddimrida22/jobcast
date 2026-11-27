@@ -118,12 +118,13 @@
     <aside class="up-info" aria-hidden="true">
       <h3 class="up-info-h">{{ t('up.info.h', 'What you unlock') }}</h3>
       <ul class="up-benefits">
-        <li>{{ t('up.info.1', 'The safer career you already qualify for, matched to your skills') }}</li>
+        <li>{{ t('up.info.1', 'A lower-exposure career direction matched to the skills you already have') }}</li>
         <li>{{ t('up.info.2', 'Your AI and robotics timeline, year by year') }}</li>
         <li>{{ t('up.info.3', 'A step-by-step plan for what to do next') }}</li>
         <li>{{ t('up.info.4', 'We watch your job and email you when the outlook shifts') }}</li>
       </ul>
       <p class="up-promo">{{ t('up.info.promo', 'Instant access, no account needed. Cancel anytime.') }}</p>
+      <p class="up-promo" style="opacity:.7">{{ t('up.info.legal', 'Guidance only - not a job offer or guarantee of employment.') }}</p>
     </aside>
     <div class="up-buy">
       <h2 class="up-q">{{ t('up.pl.q') }}</h2>
@@ -457,7 +458,7 @@
         <span class="sh-tile-ic" aria-hidden="true">&#128736;&#65039;</span>
         <div class="sh-tile-body">
           <div class="sh-tile-h">Add your skills</div>
-          <div class="sh-tile-what">Pinpoints the safer career you already qualify for (in &ldquo;What to do&rdquo;).</div>
+          <div class="sh-tile-what">Pinpoints a lower-exposure career direction your skills fit (in &ldquo;What to do&rdquo;).</div>
         </div>
         <button type="button" class="sh-add" data-field="skills">Add</button>
       </div>
@@ -1025,9 +1026,9 @@
   <div id="green-option" class="green-opt" data-paid="{{ '1' if paid else '0' }}">
     <div id="go-intro">
       <span class="go-ey">It's not all doom and gloom</span>
-      <h3 class="go-h">The skills you already have transfer to an AI-safe career</h3>
-      <p class="go-sub">Tell us what you're good at. We match <b>your</b> skills against the data to find a lower-risk career you can realistically move into &mdash; and show exactly how much of it you already qualify for, the one or two skills to add, and how far your risk drops. Not a web search: your skills, computed.</p>
-      <button type="button" id="go-start" class="go-cta">{{ 'Add my skills' if paid else 'Unlock my safer career' }} &#8250;</button>
+      <h3 class="go-h">The skills you already have point toward a lower-exposure career direction</h3>
+      <p class="go-sub">Tell us what you're good at. We match <b>your</b> skills against the data to find a lower-exposure career direction you could realistically work toward &mdash; and show how many of its core skills you already have, the one or two to add, and how far your risk drops. Not a web search: your skills, computed.</p>
+      <button type="button" id="go-start" class="go-cta">{{ 'Add my skills' if paid else 'Show my safer direction' }} &#8250;</button>
       {% if not paid %}<div class="go-lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Part of JobBreak Monitor &mdash; one-time $4.99</div>{% endif %}
     </div>
     <div id="go-loading" class="go-reveal" hidden aria-live="polite">
@@ -1042,7 +1043,7 @@
     <div class="skm-card">
       <button type="button" class="skm-x" id="skm-x" aria-label="Close">&times;</button>
       <h3 class="skm-h">What are you good at?</h3>
-      <p class="skm-sub">Here are the core skills in your role today. Keep the ones you have, drop any you don't, and add anything else. We use these to find the safer career you already qualify for.</p>
+      <p class="skm-sub">Here are the core skills in your role today. Keep the ones you have, drop any you don't, and add anything else. We use these to find a lower-exposure career direction your skills fit.</p>
       <div class="skm-list" id="skm-list">
         {% for t in r.tasks %}
         <label class="skm-item"><input type="checkbox" class="skm-ck" value="{{ t.name }}" checked><span class="skm-tn">{{ t.name }}</span></label>
@@ -1052,7 +1053,7 @@
         <label for="skm-extra">Add other skills you have (comma separated)</label>
         <input type="text" id="skm-extra" placeholder="e.g. project management, Excel, customer service, scheduling">
       </div>
-      <button type="button" class="go-cta" id="skm-go" style="width:100%;justify-content:center">Show my safer career &#8250;</button>
+      <button type="button" class="go-cta" id="skm-go" style="width:100%;justify-content:center">Show my safer direction &#8250;</button>
     </div>
   </div>
   <script id="green-flags" type="application/json">{{ {"start": (start_skills|default(false)), "paid": paid} | tojson }}</script>
@@ -1238,11 +1239,11 @@
       } else if (d.soft_only) {
         html += '<p class="gt-soft-intro">No dramatically safer role matches your skills, but here is the closest related role at lower risk &mdash; a realistic step down in exposure:</p>';
       } else {
-        html += '<p class="gt-hope">It’s not all doom and gloom &mdash; the skills you already have <b>transfer</b>. Here is the AI-safe career they unlock:</p>';
+        html += '<p class="gt-hope">It’s not all doom and gloom &mdash; the skills you already have <b>transfer</b>. Here is the safer career direction they point to:</p>';
       }
       html += leadCard(ts[0], sym);
       if (ts.length > 1) html += '<div class="gt-more">' + ts.slice(1).map(function (t) { return miniCard(t, sym); }).join('') + '</div>';
-      html += '<p class="gt-method">Matches are computed from O*NET related-occupation and core-task data crossed with this model\'s automation-exposure scores &mdash; from your skills, not estimated by an AI. Figures are ranges for planning, not a guarantee.</p>';
+      html += '<p class="gt-method">Matches are computed from O*NET related-occupation and core-task data crossed with this model\'s automation-exposure scores &mdash; from your skills, not estimated by an AI. Figures are ranges for planning. This is informational career guidance, not a job offer, placement, or guarantee of employment.</p>';
       results.innerHTML = html; pop();
     }
     // Lead the paid experience with the safer-move match itself, computed from the role's own
@@ -1659,7 +1660,7 @@
 <div class="free-offer card" style="text-align:center;padding:30px 22px;max-width:580px;margin:16px auto 0">
   <div style="font-size:12.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin-bottom:8px">{{ t('fo.eyebrow', 'Your full breakdown is ready') }}</div>
   <h2 style="margin:0 0 8px;font-size:23px;line-height:1.15">{{ t('fo.h', 'See what to do about it') }}</h2>
-  <p class="muted" style="margin:0 auto 20px;max-width:470px;line-height:1.55">{{ t('fo.sub', 'Unlock your AI-researched breakdown and your safer move - the career you already qualify for at lower risk, with the timeline and the step-by-step plan.') }} {{ t('fo.price', 'One-time $4.99.') }}</p>
+  <p class="muted" style="margin:0 auto 20px;max-width:470px;line-height:1.55">{{ t('fo.sub', 'Unlock your AI-researched breakdown and your safer direction - the lower-exposure career type your skills point to, with the timeline and the step-by-step plan.') }} {{ t('fo.price', 'One-time $4.99.') }}</p>
   <button type="button" class="fo-cta" onclick="if(window.jbOpenPaywall){window.jbOpenPaywall();}" style="background:var(--accent);color:#2a1708;border:none;border-radius:999px;padding:15px 34px;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 8px 24px rgba(243,163,95,.32)">{{ t('fo.cta', 'See what to do') }} &rsaquo;</button>
   <div style="margin-top:14px"><a href="#" onclick="event.preventDefault(); var u=location.href; if(navigator.share){navigator.share({title:document.title,url:u}).catch(function(){});}else if(navigator.clipboard){navigator.clipboard.writeText(u); this.textContent='Link copied';}" style="color:var(--muted);font-size:13px;text-decoration:none">{{ t('fo.share', 'Share my result') }}</a></div>
 </div>
